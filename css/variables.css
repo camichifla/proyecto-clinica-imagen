@@ -1,0 +1,23 @@
+:root {
+    /* Identidad Corporativa */
+    --primary-color: #0c4a6e;    /* Azul clínico formal */
+    --accent-color: #0ea5e9;     /* Azul brillante para elementos interactivos */
+    --dark-neutral: #1f2937;     /* Texto principal legible */
+    --light-neutral: #f8fafc;    /* Fondo limpio de consultorio */
+    --surface: #ffffff;
+    --surface-soft: #eef2ff;
+    --border: #d1d5db;
+    --shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+
+    /* Colores de Estado de la cita */
+    --status-pending: #eab308;   /* Amarillo/Alerta para Cita Pendiente */
+    --status-success: #22c55e;    /* Verde para Cita Confirmada */
+    --status-danger: #ef4444;    /* Rojo para Citas Canceladas u Órdenes Vencidas */
+    --status-muted: #64748b;
+    
+    /* Layout */
+    --max-width: 1300px;
+    --radius: 18px;
+    --radius-sm: 10px;
+    --transition-fast: 180ms ease-in-out;
+}

@@ -1,0 +1,15 @@
+:root {
+    /* Identidad Corporativa */
+    --primary-color: #0c4a6e;    /* Azul clínico formal */
+    --accent-color: #0ea5e9;     /* Azul brillante para elementos interactivos */
+    --dark-neutral: #1f2937;     /* Texto principal legible */
+    --light-neutral: #f8fafc;    /* Fondo limpio de consultorio */
+
+    /* Colores de Estado del Negocio */
+    --status-pending: #eab308;   /* Amarillo/Alerta para Cita Pendiente */
+    --status-success: #22c55e;   /* Verde para Cita Confirmada */
+    --status-danger: #ef4444;    /* Rojo para Citas Canceladas u Órdenes Vencidas */
+    
+    /* Layout */
+    --max-width: 1300px;
+}

@@ -1,0 +1,15 @@
+{
+  "es": {
+    "bienvenida": "Clinica Imagen",
+    "subtitulo": "Bienvenido! Agenda tu cita en línea de forma rápida y accede a tus resultados de forma rapida y sencilla."
+  },
+  "en": {
+    "bienvenida": "Clinica Imagen",
+    "subtitulo": "Welcome to my website."
+  },
+
+  "pt": {
+    "bienvenida": "Clinica Imagen",
+    "subtitulo": "Bem-vindo ao meu site."
+  }
+}

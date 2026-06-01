@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!--Página principal del sitio "Clínica Imagen".
+        Contiene selector de idioma, encabezado de navegación,
+        secciones principales y pie de página.
+        Los textos con atributo `data-key` son reemplazados por `app.js`
+        usando el archivo `idiomas.json` para soporte multi-idioma.
+    -->
+    <meta charset="UTF-8">
+    <title>Clinica imagen</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica Imagen </title>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="page-home">
+    <!-- Selector de idioma: al cambiarlo `app.js` carga las traducciones -->
+    <select id="selector-idioma">
+        <option value="es">Español</option>
+        <option value="en">English</option>
+        <option value="pt">Português</option>
+
+        </select>
+    <header class="main-header">
+        <div class="container header-flex">
+            <div class="logo">Clínica Imagen</div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html" class="active">Inicio</a></li>
+                    <li><a href="#sucursales">Sucursales</a></li>
+                    <li><a href="paciente-dashboard.html" class="btn-nav">Portal Paciente</a></li>
+                    <li><a href="admin-citas.html" class="btn-nav outline">Panel Interno</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!--
+        Encabezado principal: incluye logo y navegación.
+        - Enlaces como `paciente-dashboard.html` y `admin-citas.html`
+          llevan a las secciones de usuario y administración.
+    -->
+
+    <main class="container">
+        <section class="hero">
+            <p class="hero-note">Tu sonrisa es tu mejor carta de presentación; nosotros nos encargamos de que brille. Agendate o registrate para tener una cita con nosotros.</p>
+            <a href="paciente-dashboard.html" class="btn-primary">Solicitar Cita / Registrarse</a>
+        </section>
+
+        <section class="services-section">
+            <!-- Sección de servicios/estudios disponibles -->
+            <h2>Comprometidos con la excelencia en tu salud dental.</h2>
+            <div class="grid-services">
+                <div class="card-service">
+                    <h3>Acceso Particular y Referenciado</h3>
+                    <p>Puedes agendar estos estudios directamente de forma particular:</p>
+                    <ul>
+                        <li><strong>Placas Dentales:</strong> Diagnóstico básico estructural.</li>
+                        <li><strong>Radiografías Panorámicas:</strong> Vista completa maxilofacial.</li>
+                    </ul>
+                </div>
+                <div class="card-service destacado">
+                    <h3>Exclusivo con Orden Odontológica</h3>
+                    <p>Estudios avanzados para especialistas referenciantes:</p>
+                    <ul>
+                        <li>Tomografías Dentales de alta resolución.</li>
+                        <li>Modelos 3D (DAM / DOE).</li>
+                        <li>Alineadores para Ortodoncia y guías quirúrgicas.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <p>&copy; 2026 Clínica Imagen. Gestión de Recursos y Citas Médicas.</p>
+    </footer>
+
+    <!-- Se incluye el script principal que gestiona idioma y DOM -->
+    <script src="app.js"></script>
+</body>
+</html>

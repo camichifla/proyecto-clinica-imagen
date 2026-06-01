@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <!--Página principal del sitio "Clínica Imagen".
-        Contiene selector de idioma, encabezado de navegación,
-        secciones principales y pie de página.
-        Los textos con atributo `data-key` son reemplazados por `app.js`
-        usando el archivo `idiomas.json` para soporte multi-idioma.
+    <!--
+        Página principal del sitio "Clínica Imagen".
+        - Usa `app.js` para cambiar el idioma y controlar la visibilidad de secciones.
+        - Los textos con atributo `data-key` se traducen desde `idiomas.json`.
+        - Incluye pantalla de selección de acceso, modales de registro/login y contenido principal.
     -->
     <meta charset="UTF-8">
-    <title>Clinica imagen</title>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clínica Imagen </title>
+    <title>Clínica Imagen</title>
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/styles.css">
@@ -22,62 +20,158 @@
         <option value="es">Español</option>
         <option value="en">English</option>
         <option value="pt">Português</option>
+    </select>
 
-        </select>
-    <header class="main-header">
-        <div class="container header-flex">
-            <div class="logo">Clínica Imagen</div>
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="index.html" class="active">Inicio</a></li>
-                    <li><a href="#sucursales">Sucursales</a></li>
-                    <li><a href="paciente-dashboard.html" class="btn-nav">Portal Paciente</a></li>
-                    <li><a href="admin-citas.html" class="btn-nav outline">Panel Interno</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
-    <!--
-        Encabezado principal: incluye logo y navegación.
-        - Enlaces como `paciente-dashboard.html` y `admin-citas.html`
-          llevan a las secciones de usuario y administración.
-    -->
-
-    <main class="container">
-        <section class="hero">
-            <p class="hero-note">Tu sonrisa es tu mejor carta de presentación; nosotros nos encargamos de que brille. Agendate o registrate para tener una cita con nosotros.</p>
-            <a href="paciente-dashboard.html" class="btn-primary">Solicitar Cita / Registrarse</a>
-        </section>
-
-        <section class="services-section">
-            <!-- Sección de servicios/estudios disponibles -->
-            <h2>Comprometidos con la excelencia en tu salud dental.</h2>
-            <div class="grid-services">
-                <div class="card-service">
-                    <h3>Acceso Particular y Referenciado</h3>
-                    <p>Puedes agendar estos estudios directamente de forma particular:</p>
-                    <ul>
-                        <li><strong>Placas Dentales:</strong> Diagnóstico básico estructural.</li>
-                        <li><strong>Radiografías Panorámicas:</strong> Vista completa maxilofacial.</li>
-                    </ul>
-                </div>
-                <div class="card-service destacado">
-                    <h3>Exclusivo con Orden Odontológica</h3>
-                    <p>Estudios avanzados para especialistas referenciantes:</p>
-                    <ul>
-                        <li>Tomografías Dentales de alta resolución.</li>
-                        <li>Modelos 3D (DAM / DOE).</li>
-                        <li>Alineadores para Ortodoncia y guías quirúrgicas.</li>
-                    </ul>
-                </div>
+    <!-- Pantalla de selección inicial de tipo de usuario (Socios / Empleados) -->
+    <div id="login-screen" class="login-container">
+        <div class="login-content">
+            <div class="login-header">
+                <h1 class="clinic-title">Clínica Imagen</h1>
             </div>
-        </section>
-    </main>
+            
+            <!-- Botones para elegir el tipo de acceso -->
+            <div class="login-buttons">
+                <button id="btn-socios" class="btn-login btn-socios">
+                    <span class="btn-text" data-key="btn-socios">Socios</span>
+                </button>
+                <button id="btn-empleados" class="btn-login btn-empleados">
+                    <span class="btn-text" data-key="btn-empleados">Empleados</span>
+                </button>
+            </div>
 
-    <footer class="main-footer">
-        <p>&copy; 2026 Clínica Imagen. Gestión de Recursos y Citas Médicas.</p>
-    </footer>
+            <p class="login-note" data-key="login-note">Selecciona tu tipo de acceso para continuar</p>
+            
+            <div class="login-divider">
+                <span data-key="login-o">O</span>
+            </div>
+            
+            <!-- Enlace para abrir el modal de registro -->
+            <button id="btn-register" class="btn-register">
+                <span class="btn-text" data-key="btn-register">Registrarse</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Registro -->
+    <div id="register-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 data-key="register-title">Registrarse</h2>
+                <button class="modal-close" id="close-register">&times;</button>
+            </div>
+            
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="register-rol" data-key="register-rol-label">¿Qué tipo de usuario eres?</label>
+                    <select id="register-rol" name="rol" required>
+                        <option value="">Selecciona una opción</option>
+                        <option value="Socio" data-key="register-rol-socio">Socio</option>
+                        <option value="Empleado" data-key="register-rol-empleado">Empleado</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-ci" data-key="register-ci-label">Número de Cédula</label>
+                    <input type="text" id="register-ci" name="cedula" placeholder="12345678" required>
+                    <span class="error-tooltip" id="register-ci-error"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-password" data-key="register-password-label">Contraseña</label>
+                    <input type="password" id="register-password" name="password" placeholder="••••••" required>
+                    <span class="error-tooltip" id="register-password-error"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="register-password-confirm" data-key="register-confirm-label">Confirmar Contraseña</label>
+                    <input type="password" id="register-password-confirm" name="password_confirm" placeholder="••••••" required>
+                    <span class="error-tooltip" id="register-confirm-error"></span>
+                </div>
+                
+                <button type="submit" class="btn-primary btn-full" data-key="btn-register-submit">Registrarse</button>
+                <span class="modal-message" id="register-message"></span>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Login -->
+    <div id="login-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="login-modal-title">Iniciar Sesión - Socio</h2>
+                <button class="modal-close" id="close-login">&times;</button>
+            </div>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-ci" data-key="login-ci-label">Número de Cédula</label>
+                    <input type="text" id="login-ci" name="cedula" placeholder="12345678" required>
+                    <span class="error-tooltip" id="login-ci-error"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password" data-key="login-password-label">Contraseña</label>
+                    <input type="password" id="login-password" name="password" placeholder="••••••" required>
+                    <span class="error-tooltip" id="login-password-error"></span>
+                </div>
+                
+                <button type="submit" class="btn-primary btn-full" data-key="btn-login-submit">Iniciar Sesión</button>
+                <span class="modal-message" id="login-message"></span>
+            </form>
+        </div>
+    </div>
+
+    <!-- Contenedor para el contenido principal, visible tras iniciar sesión o registrarse -->
+    <div id="main-content" class="hidden">
+        <header class="main-header">
+            <div class="container header-flex">
+                <div class="logo">Clínica Imagen</div>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html" class="active">Inicio</a></li>
+                        <li><a href="#sucursales">Sucursales</a></li>
+                        <li><a href="paciente-dashboard.html" class="btn-nav">Portal Paciente</a></li>
+                        <li><a href="admin-citas.html" class="btn-nav outline">Panel Interno</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <main class="container">
+            <section class="hero">
+                <p class="hero-note">Tu sonrisa es tu mejor carta de presentación; nosotros nos encargamos de que brille. Agendate o registrate para tener una cita con nosotros.</p>
+                <a href="paciente-dashboard.html" class="btn-primary">Solicitar Cita / Registrarse</a>
+            </section>
+
+            <section class="services-section">
+                <!-- Sección de servicios/estudios disponibles -->
+                <h2>Comprometidos con la excelencia en tu salud dental.</h2>
+                <div class="grid-services">
+                    <div class="card-service">
+                        <h3>Acceso Particular y Referenciado</h3>
+                        <p>Puedes agendar estos estudios directamente de forma particular:</p>
+                        <ul>
+                            <li><strong>Placas Dentales:</strong> Diagnóstico básico estructural.</li>
+                            <li><strong>Radiografías Panorámicas:</strong> Vista completa maxilofacial.</li>
+                        </ul>
+                    </div>
+                    <div class="card-service destacado">
+                        <h3>Exclusivo con Orden Odontológica</h3>
+                        <p>Estudios avanzados para especialistas referenciantes:</p>
+                        <ul>
+                            <li>Tomografías Dentales de alta resolución.</li>
+                            <li>Modelos 3D (DAM / DOE).</li>
+                            <li>Alineadores para Ortodoncia y guías quirúrgicas.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="main-footer">
+            <p>&copy; 2026 Clínica Imagen. Gestión de Recursos y Citas Médicas.</p>
+        </footer>
+    </div>
 
     <!-- Se incluye el script principal que gestiona idioma y DOM -->
     <script src="app.js"></script>

@@ -1,15 +1,66 @@
 {
   "es": {
     "bienvenida": "Clinica Imagen",
-    "subtitulo": "Bienvenido! Agenda tu cita en línea de forma rápida y accede a tus resultados de forma rapida y sencilla."
+    "subtitulo": "Bienvenido! Agenda tu cita en línea de forma rápida y accede a tus resultados de forma rapida y sencilla.",
+    "login-subtitle": "Sistema de Gestión de Citas",
+    "btn-socios": "Socios",
+    "btn-empleados": "Empleados",
+    "login-note": "Selecciona tu tipo de acceso para continuar",
+    "login-o": "O",
+    "btn-register": "Registrarse",
+    "register-title": "Crear Cuenta",
+    "register-rol-label": "¿Qué tipo de usuario eres?",
+    "register-rol-socio": "Socio",
+    "register-rol-empleado": "Empleado",
+    "register-ci-label": "Número de Cédula",
+    "register-password-label": "Contraseña",
+    "register-confirm-label": "Confirmar Contraseña",
+    "btn-register-submit": "Registrarse",
+    "login-ci-label": "Número de Cédula",
+    "login-password-label": "Contraseña",
+    "btn-login-submit": "Iniciar Sesión"
   },
   "en": {
     "bienvenida": "Clinica Imagen",
-    "subtitulo": "Welcome to my website."
+    "subtitulo": "Welcome to my website.",
+    "login-subtitle": "Appointment Management System",
+    "btn-socios": "Partners",
+    "btn-empleados": "Employees",
+    "login-note": "Select your access type to continue",
+    "login-o": "Or",
+    "btn-register": "Sign Up",
+    "register-title": "Create Account",
+    "register-rol-label": "What type of user are you?",
+    "register-rol-socio": "Partner",
+    "register-rol-empleado": "Employee",
+    "register-ci-label": "ID Number",
+    "register-password-label": "Password",
+    "register-confirm-label": "Confirm Password",
+    "btn-register-submit": "Sign Up",
+    "login-ci-label": "ID Number",
+    "login-password-label": "Password",
+    "btn-login-submit": "Login"
   },
 
   "pt": {
     "bienvenida": "Clinica Imagen",
-    "subtitulo": "Bem-vindo ao meu site."
+    "subtitulo": "Bem-vindo ao meu site.",
+    "login-subtitle": "Sistema de Gestão de Consultas",
+    "btn-socios": "Sócios",
+    "btn-empleados": "Funcionários",
+    "login-note": "Selecione seu tipo de acesso para continuar",
+    "login-o": "Ou",
+    "btn-register": "Cadastre-se",
+    "register-title": "Criar Conta",
+    "register-rol-label": "Que tipo de usuário você é?",
+    "register-rol-socio": "Sócio",
+    "register-rol-empleado": "Funcionário",
+    "register-ci-label": "Número de Identidade",
+    "register-password-label": "Senha",
+    "register-confirm-label": "Confirmar Senha",
+    "btn-register-submit": "Cadastre-se",
+    "login-ci-label": "Número de Identidade",
+    "login-password-label": "Senha",
+    "btn-login-submit": "Entrar"
   }
 }

@@ -285,7 +285,9 @@ button:hover,
 
 /* Página principal */
 .hero {
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(15, 23, 42, 0.03));
+    background-image:url(../images/dientes.png);
+    background-repeat: no-repeat;
+    background-position: center;
     border-radius: var(--radius);
     padding: 4rem 3rem;
     margin: 2rem auto 1.75rem;

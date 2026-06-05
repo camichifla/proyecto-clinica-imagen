@@ -61,7 +61,7 @@ const loginForm = document.getElementById('login-form');
 let currentUserRole = null;
 
 // ============================================
-// FUNCIONES AUXILIARES
+// FUNCIONES AUXILIARES CON SEGURIDAD
 // ============================================
 
 function closeLoginScreen() {
@@ -82,8 +82,15 @@ function clearMessage(messageElement) {
     messageElement.className = 'modal-message';
 }
 
+/**
+ * Muestra un mensaje de forma segura usando textContent (no innerHTML)
+ * Escapa caracteres HTML especiales
+ */
 function showMessage(messageElement, message, type = 'error') {
-    messageElement.textContent = message;
+    // Sanitizar el mensaje para evitar XSS
+    const mensajeSanitizado = typeof message === 'string' ? message : '';
+    
+    messageElement.textContent = mensajeSanitizado;
     messageElement.className = `modal-message ${type}`;
 }
 
@@ -99,7 +106,13 @@ function isLocalFileProtocol() {
 }
 
 function getApiUrl(action) {
-    return `auth.php?action=${action}`;
+    // Validar el action contra una whitelist
+    const accionesValidas = ['register', 'login'];
+    if (!accionesValidas.includes(action)) {
+        console.error('Acción no válida:', action);
+        return '';
+    }
+    return `auth.php?action=${encodeURIComponent(action)}`;
 }
 
 function ensureHttpServer(messageEl) {
@@ -140,18 +153,21 @@ if (registerForm) {
         clearMessage(messageEl);
         let hasErrors = false;
         
-        if (!rol) {
-            showMessage(messageEl, 'Debes seleccionar un tipo de usuario', 'error');
+        // Validar rol con whitelist
+        if (!validarRol(rol)) {
+            showMessage(messageEl, 'Debes seleccionar un tipo de usuario válido', 'error');
             hasErrors = true;
         }
         
-        if (!cedula || cedula.length === 0) {
-            document.getElementById('register-ci-error').textContent = 'La cédula es requerida';
+        // Validar cédula
+        if (!validarCedula(cedula)) {
+            document.getElementById('register-ci-error').textContent = 'La cédula debe contener solo números (1-20 dígitos)';
             hasErrors = true;
         }
         
-        if (!password || password.length < 6) {
-            document.getElementById('register-password-error').textContent = 'La contraseña debe tener al menos 6 caracteres';
+        // Validar contraseña
+        if (!validarPassword(password)) {
+            document.getElementById('register-password-error').textContent = 'La contraseña debe tener entre 6 y 128 caracteres';
             hasErrors = true;
         }
         
@@ -180,7 +196,7 @@ if (registerForm) {
             
             if (!response.ok) {
                 const text = await response.text();
-                showMessage(messageEl, `Error de conexión: ${response.status} ${text}`.trim(), 'error');
+                showMessage(messageEl, `Error de conexión: ${response.status}`, 'error');
                 return;
             }
             
@@ -246,12 +262,14 @@ if (loginForm) {
         clearMessage(messageEl);
         let hasErrors = false;
         
-        if (!cedula || cedula.length === 0) {
-            document.getElementById('login-ci-error').textContent = 'La cédula es requerida';
+        // Validar cédula
+        if (!validarCedula(cedula)) {
+            document.getElementById('login-ci-error').textContent = 'La cédula debe contener solo números (1-20 dígitos)';
             hasErrors = true;
         }
         
-        if (!password || password.length === 0) {
+        // Validar contraseña
+        if (!validarPassword(password)) {
             document.getElementById('login-password-error').textContent = 'La contraseña es requerida';
             hasErrors = true;
         }
@@ -276,7 +294,7 @@ if (loginForm) {
             
             if (!response.ok) {
                 const text = await response.text();
-                showMessage(messageEl, `Error de conexión: ${response.status} ${text}`.trim(), 'error');
+                showMessage(messageEl, `Error de conexión: ${response.status}`, 'error');
                 return;
             }
             
@@ -285,8 +303,16 @@ if (loginForm) {
             if (data.success) {
                 showMessage(messageEl, data.message, 'success');
                 
-                // Guardar datos del usuario
-                localStorage.setItem('user', JSON.stringify(data.user));
+                // Guardar datos del usuario de forma segura
+                if (data.user && typeof data.user === 'object') {
+                    // Sanitizar datos antes de guardar
+                    const usuarioSanitizado = {
+                        id: parseInt(data.user.id, 10) || 0,
+                        rol: String(data.user.rol || ''),
+                        cedula: String(data.user.cedula || '')
+                    };
+                    guardarEnStorage('user', usuarioSanitizado);
+                }
                 
                 // Cerrar modal y pantalla de login
                 setTimeout(() => {

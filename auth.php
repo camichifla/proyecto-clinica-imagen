@@ -1,12 +1,48 @@
 <?php
+// ========================================
+// HEADERS DE SEGURIDAD
+// ========================================
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('X-XSS-Protection: 1; mode=block');
+header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\'');
+
 // CORS headers
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+header('Access-Control-Allow-Origin: http://localhost');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Credentials: true');
 header('Content-Type: application/json; charset=utf-8');
 
 require_once 'config:Database.php';
 require_once 'config:db_config.php';
+
+// ========================================
+// FUNCIONES DE SEGURIDAD
+// ========================================
+
+/**
+ * Valida un rol contra una lista whitelist
+ */
+function esRolValido($rol) {
+    $rolesValidos = ['Socio', 'Empleado', 'Paciente', 'Recepcionista', 'Doctor'];
+    return in_array($rol, $rolesValidos, true);
+}
+
+/**
+ * Valida formato de cédula: solo dígitos, máximo 20
+ */
+function validarFormatoCedula($cedula) {
+    return preg_match('/^\d{1,20}$/', $cedula) === 1;
+}
+
+/**
+ * Escapa HTML para evitar XSS
+ */
+function escaparHTML($texto) {
+    return htmlspecialchars($texto, ENT_QUOTES, 'UTF-8');
+}
 
 // Obtener método y acción
 $method = $_SERVER['REQUEST_METHOD'];
@@ -38,54 +74,66 @@ if ($method === 'POST') {
  */
 function registrarUsuario($data) {
     try {
-        // Validar datos
-        if (empty($data['cedula']) || empty($data['password']) || empty($data['rol'])) {
+        // Validar que los datos existan y sean del tipo correcto
+        if (!is_array($data) || empty($data['cedula']) || empty($data['password']) || empty($data['rol'])) {
+            http_response_code(400);
             echo json_encode(['success' => false, 'message' => 'Faltan datos requeridos']);
             return;
         }
         
         $cedula = trim($data['cedula']);
         $password = $data['password'];
-        $rol = trim($data['rol']); // 'Socio' o 'Empleado'
+        $rol = trim($data['rol']);
         
-        // Validar cedula (formato básico)
-        if (!preg_match('/^\d{1,20}$/', $cedula)) {
+        // Validar formato de cédula
+        if (!validarFormatoCedula($cedula)) {
+            http_response_code(400);
             echo json_encode(['success' => false, 'message' => 'Número de cédula inválido']);
             return;
         }
         
-        // Validar contraseña (mínimo 6 caracteres)
-        if (strlen($password) < 6) {
-            echo json_encode(['success' => false, 'message' => 'La contraseña debe tener al menos 6 caracteres']);
+        // Validar que el rol sea válido (whitelist)
+        if (!esRolValido($rol)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Rol no válido']);
+            return;
+        }
+        
+        // Validar contraseña (mínimo 6 caracteres, máximo 128)
+        if (strlen($password) < 6 || strlen($password) > 128) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'La contraseña debe tener entre 6 y 128 caracteres']);
             return;
         }
         
         $conn = Database::getInstance();
         
-        // Verificar si la cédula ya existe
+        // Verificar si la cédula ya existe (prepared statement contra SQL injection)
         $query = 'SELECT id FROM usuarios WHERE cedula = ?';
         $stmt = $conn->prepare($query);
         $stmt->execute([$cedula]);
         
         if ($stmt->rowCount() > 0) {
+            http_response_code(409);
             echo json_encode(['success' => false, 'message' => 'Esta cédula ya está registrada']);
             return;
         }
         
-        // Obtener el rol_id basado en el nombre del rol
+        // Obtener el rol_id basado en el nombre del rol (whitelist validada)
         $queryRole = 'SELECT id FROM roles WHERE nombre_rol = ?';
         $stmtRole = $conn->prepare($queryRole);
         $stmtRole->execute([$rol]);
         $roleResult = $stmtRole->fetch();
         
         if (!$roleResult) {
+            http_response_code(400);
             echo json_encode(['success' => false, 'message' => 'Rol no válido']);
             return;
         }
         
         $rol_id = $roleResult['id'];
         
-        // Hashear la contraseña
+        // Hashear la contraseña con BCRYPT
         $passwordHash = password_hash($password, PASSWORD_BCRYPT);
         
         // Insertar nuevo usuario
@@ -101,15 +149,18 @@ function registrarUsuario($data) {
             $rol_id
         ]);
         
+        // Devolver datos escapados para XSS
+        http_response_code(201);
         echo json_encode([
             'success' => true,
             'message' => 'Registro exitoso. Por favor, inicia sesión.',
-            'cedula' => $cedula,
-            'rol' => $rol
+            'cedula' => escaparHTML($cedula),
+            'rol' => escaparHTML($rol)
         ]);
         
     } catch (Exception $e) {
         error_log($e->getMessage());
+        http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Error al registrar']);
     }
 }
@@ -119,19 +170,34 @@ function registrarUsuario($data) {
  */
 function autenticarUsuario($data) {
     try {
-        // Validar datos
-        if (empty($data['cedula']) || empty($data['password']) || empty($data['rolEsperado'])) {
+        // Validar que los datos existan
+        if (!is_array($data) || empty($data['cedula']) || empty($data['password']) || empty($data['rolEsperado'])) {
+            http_response_code(400);
             echo json_encode(['success' => false, 'message' => 'Faltan datos requeridos']);
             return;
         }
         
         $cedula = trim($data['cedula']);
         $password = $data['password'];
-        $rolEsperado = trim($data['rolEsperado']); // 'Socio' o 'Empleado'
+        $rolEsperado = trim($data['rolEsperado']);
+        
+        // Validar formato de cédula
+        if (!validarFormatoCedula($cedula)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Número de cédula inválido']);
+            return;
+        }
+        
+        // Validar que el rol esperado sea válido (whitelist)
+        if (!esRolValido($rolEsperado)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Rol no válido']);
+            return;
+        }
         
         $conn = Database::getInstance();
         
-        // Buscar usuario por cédula con su rol
+        // Buscar usuario por cédula con su rol (prepared statement contra SQL injection)
         $query = 'SELECT u.id, u.password, u.rol_id, r.nombre_rol 
                  FROM usuarios u
                  JOIN roles r ON u.rol_id = r.id
@@ -142,38 +208,44 @@ function autenticarUsuario($data) {
         $usuario = $stmt->fetch();
         
         if (!$usuario) {
-            echo json_encode(['success' => false, 'message' => 'Cédula no encontrada']);
+            // No revelar si la cédula existe o no (seguridad)
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Credenciales inválidas']);
             return;
         }
         
         // Verificar contraseña
         if (!password_verify($password, $usuario['password'])) {
-            echo json_encode(['success' => false, 'message' => 'Contraseña incorrecta']);
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Credenciales inválidas']);
             return;
         }
         
         // Verificar que el rol coincida
         if ($usuario['nombre_rol'] !== $rolEsperado) {
+            http_response_code(403);
             echo json_encode([
                 'success' => false,
-                'message' => 'Datos errados. El rol de esta cédula es: ' . $usuario['nombre_rol']
+                'message' => 'Rol incorrecto'
             ]);
             return;
         }
         
-        // Login exitoso
+        // Login exitoso - devolver datos escapados
+        http_response_code(200);
         echo json_encode([
             'success' => true,
             'message' => 'Login exitoso',
             'user' => [
-                'id' => $usuario['id'],
-                'rol' => $usuario['nombre_rol'],
-                'cedula' => $cedula
+                'id' => intval($usuario['id']),
+                'rol' => escaparHTML($usuario['nombre_rol']),
+                'cedula' => escaparHTML($cedula)
             ]
         ]);
         
     } catch (Exception $e) {
         error_log($e->getMessage());
+        http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Error al autenticar']);
     }
 }

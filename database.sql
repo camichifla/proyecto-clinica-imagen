@@ -21,19 +21,14 @@ INSERT INTO roles (nombre_rol) VALUES
 -- ==========================================
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    cedula VARCHAR(20) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    rol_id INT NOT NULL,
-    -- Campos NULL porque el registro inicial web es simplificado (CI + Pass + Rol)
-    nombre VARCHAR(50) NULL,
-    apellido VARCHAR(50) NULL,
-    email VARCHAR(100) NULL UNIQUE,
-    telefono VARCHAR(20) NULL,
-    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (rol_id) REFERENCES roles(id) ON DELETE RESTRICT,
-    INDEX idx_cedula (cedula) -- Optimiza el Login de la app
-);
-
+    cedula CHAR(8) NOT NULL UNIQUE,
+    nombre VARCHAR(50) NOT NULL,
+    apellido VARCHAR(50) NOT NULL,
+    contra VARCHAR(255) NOT NULL,
+    direccion VARCHAR(255) NOT NULL,
+    telefono VARCHAR(20) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    role ENUM('client','employee') NOT NULL DEFAULT 'client'
 -- ==========================================
 -- 3. TABLA DE ODONTÓLOGOS REFERENCIANTES (Externos)
 -- ==========================================

@@ -1,15 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
+ 
 <head>
-        <!--    Panel interno para el personal de la clínica (recepción/técnico)
-                donde pueden buscar pacientes, revisar y validar solicitudes de turnos,
-                y gestionar entradas del historial clínico.
-
-                - Este es un mockup estático: en producción los datos (pacientes, solicitudes,
-                    historiales) deben cargarse desde el backend y requerir autenticación.
-                - Los botones de acción (`Confirmar`, `Modificar`) deben llamar a endpoints
-                    seguros en el servidor que actualicen estado y registren auditoría.
-        -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración - Clínica Imagen</title>
@@ -17,67 +9,64 @@
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
+ 
 <body>
-    <!-- Encabezado del módulo interno: muestra rol y sucursal del usuario -->
-    <header class="main-header admin-bar">
+    <header class="main-header shadow">
         <div class="container header-flex">
-            <div class="logo">Clínica Imagen <span class="badge-admin">Módulo Interno</span></div>
+            <div class="logo">
+                <a href="main.html"><img src="./images/logo.png"></a>
+                <span class="badge-admin">Módulo Interno</span>
+            </div>
             <nav class="main-nav">
-                <!-- Mostrar el rol y sucursal del usuario autenticado -->
                 <span>Rol: Recepción / Técnico (Sucursal Central)</span>
             </nav>
         </div>
     </header>
-
+ 
     <main class="container admin-grid">
-        <!-- Sección de búsqueda rápida por cédula para cargar historial del paciente -->
         <section class="search-bar-section">
             <form class="search-form">
                 <label for="cedula-search">Buscar Historial Clínico por Cédula de Identidad:</label>
                 <div class="search-group">
-                    <!-- Input de búsqueda: validar formato en frontend y backend -->
                     <input type="text" id="cedula-search" placeholder="Ej: 12345678" required>
-                    <!-- Al enviar, el frontend debería pedir al backend los datos del paciente -->
                     <button type="submit" class="btn-primary">Buscar Paciente</button>
                 </div>
             </form>
         </section>
-
-        <!-- Bandeja de solicitudes pendientes: cada tarjeta representa una solicitud -->
+ 
         <section class="admin-panel-block">
             <h2>Bandeja de Solicitudes Pendientes (Dashboard)</h2>
             <div class="card-solicitud">
                 <div class="solicitud-info">
-                    <!-- Información básica de la solicitud; debe incluir IDs para llamadas API -->
                     <p><strong>Paciente:</strong> Juan Pérez</p>
                     <p><strong>Estudio solicitado:</strong> Consulta para Tomografía (Referenciado por Dr. Rodríguez)</p>
                     <p><strong>Horario propuesto:</strong> 04/06/2026 a las 14:30 hs</p>
                 </div>
                 <div class="solicitud-actions">
-                    <!-- Acciones: confirmar (aceptar y reservar), o modificar/cancelar -->
                     <button class="btn-success">Confirmar y Validar Cita</button>
                     <button class="btn-danger">Modificar / Cancelar</button>
                 </div>
             </div>
         </section>
-
-        <!-- Sección para visualizar y añadir entradas al historial clínico del paciente -->
+ 
         <section class="admin-panel-block">
             <h2>Historial Clínico Activo: Juan Pérez</h2>
             <div class="clinical-history-box">
                 <div class="history-entry">
                     <h5>15/11/2025 - Evolución de Tratamiento</h5>
-                    <p><em>Nota del Técnico:</em> Se observa correcta osificación en el área de la pieza 21 tras comparar radiografía panorámica actual con la de hace 6 meses.</p>
+                    <p><em>Nota del Técnico:</em> Se observa correcta osificación en el área de la pieza 21 tras
+                        comparar radiografía panorámica actual con la de hace 6 meses.</p>
                 </div>
-                
-                <!-- Formulario para añadir observaciones: debe enviar datos al servidor con seguridad -->
+ 
                 <form class="entry-form">
                     <label for="nuevas-obs">Añadir nuevas observaciones del estudio actual:</label>
-                    <textarea id="nuevas-obs" rows="3" placeholder="Escriba aquí el progreso del tratamiento o plan a seguir..."></textarea>
+                    <textarea id="nuevas-obs" rows="3"
+                        placeholder="Escriba aquí el progreso del tratamiento o plan a seguir..."></textarea>
                     <button type="submit" class="btn-small">Guardar Entrada en Historial</button>
                 </form>
             </div>
         </section>
     </main>
 </body>
+ 
 </html>

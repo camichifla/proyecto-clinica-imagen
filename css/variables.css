@@ -1,20 +1,49 @@
 :root {
-    /* Identidad Corporativa */
-    --primary-color: #0c4a6e;    /* Azul clínico formal */
-    --accent-color: #0ea5e9;     /* Azul brillante para elementos interactivos */
-    --dark-neutral: #1f2937;     /* Texto principal legible */
-    --light-neutral: #f8fafc;    /* Fondo limpio de consultorio */
-    --surface: #ffffff;
-    --surface-soft: #eef2ff;
-    --border: #d1d5db;
-    --shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+    /* Brand */
+    --primary-color: #0c4a6e;
+    --accent-color: #0ea5e9;
+    --accent-light: #38bdf8;
 
-    /* Colores de Estado de la cita */
-    --status-pending: #eab308;   /* Amarillo/Alerta para Cita Pendiente */
-    --status-success: #22c55e;    /* Verde para Cita Confirmada */
-    --status-danger: #ef4444;    /* Rojo para Citas Canceladas u Órdenes Vencidas */
+    /* Neutrals */
+    --dark-neutral: #1f2937;
+    --light-neutral: #f8fafc;
+    --surface: #ffffff;
+    --surface-soft: #f8fafc;
+
+    /* Borders */
+    --border: #d1d5db;
+    --border-light: #e2e8f0;
+    --border-subtle: #ececee;
+
+    /* Text */
+    --text-secondary: #475569;
+    --text-subtle: #94a3b8;
+
+    /* Shadows & ink tints */
+    --ink-ghost: #f3f3f4;
+    --ink-subtle: #ececee;
+    --ink-soft: #dbdcdf;
+    --shadow: 0 18px 45px #0f172acc;
+
+    /* Ink overlay (true transparency — modal backdrop) */
+    --ink-overlay: #0f172a80;
+
+    /* Overlays on primary-color background */
+    --overlay-light-subtle: #ffffff1f;
+    --overlay-light-soft: #ffffff38;
+
+    /* Accent tint */
+    --accent-tint: #e2f4fc;
+
+    /* Status */
+    --status-success: #22c55e;
+    --status-success-tint: #e9f9ef;
+    --status-pending: #eab308;
+    --status-pending-tint: #fbf1d3;
+    --status-pending-text: #92400e;
+    --status-danger: #ef4444;
+    --status-danger-tint: #fdecec;
     --status-muted: #64748b;
-    
     /* Layout */
     --max-width: 1300px;
     --radius: 18px;

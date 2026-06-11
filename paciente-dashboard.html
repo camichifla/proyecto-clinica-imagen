@@ -1,21 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
+ 
 <head>
-    <!--
-        Archivo: paciente-dashboard.html
-        Propósito: Portal del paciente con vista de citas, estudios
-        ejecutados y referencia de orden médica.
-
-        Estructura principal:
-        - `header`: navegación y usuario activo.
-        - `main`:
-          - `aside.sidebar-referencia`: información de la orden médica/referencia.
-          - `section.main-panel`: panel principal con subsecciones (citas, estudios).
-
-        Nota: Los datos mostrados aquí son estáticos de ejemplo. En la
-        versión final deberían cargarse dinámicamente desde el backend
-        (por ejemplo mediante fetch/AJAX) y respetar controles de sesión.
-    -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal del Paciente - Clínica Imagen</title>
@@ -23,39 +9,34 @@
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/styles.css">
 </head>
+ 
 <body>
-    <!-- Encabezado principal: logo, identificador del paciente y logout -->
     <header class="main-header shadow">
         <div class="container header-flex">
-            <div class="logo">Clínica Imagen <span class="badge-portal">Portal Paciente</span></div>
+            <div class="logo">
+                <a href="main.html"><img src="./images/logo.png"></a>
+                <span class="badge-portal">Portal Paciente</span>
+            </div>
             <nav class="main-nav">
-                <!-- Mostrar nombre del paciente o resumen de sesión -->
                 <span class="user-name">Hola, Juan Pérez (C.I: 1.234.567-8)</span>
-                <!-- Botón de cierre de sesión: debe invalidar sesión en backend -->
                 <a href="index.html" class="btn-logout">Cerrar Sesión</a>
             </nav>
         </div>
     </header>
-
+ 
     <main class="container dashboard-layout">
-        <!-- Barra lateral con referencia/orden médica -->
         <aside class="sidebar-referencia">
             <div class="card-odontologo">
                 <h3><span class="dot-active"></span> Orden Médica Activa</h3>
-                <!-- Detalle del profesional que generó la orden -->
                 <p><strong>Profesional:</strong> Dr. Carlos Rodríguez (Ortodoncista)</p>
-                <!-- Estudio autorizado en la orden (puede condicionar opciones) -->
                 <p><strong>Estudio Autorizado:</strong> Tomografía Dental + Modelado 3D (DAM)</p>
-                <!-- Estado de la orden: afecta si el paciente puede agendar -->
                 <p class="text-muted">Estado: Listo para agendar</p>
             </div>
         </aside>
-
-        <!-- Panel principal: listado de citas y estudios realizados -->
+ 
         <section class="main-panel">
             <div class="panel-section">
                 <h2>Mis Citas Programadas</h2>
-                <!-- Tabla responsiva para mostrar citas; idealmente poblada dinámicamente -->
                 <div class="table-responsive">
                     <table class="data-table">
                         <thead>
@@ -67,31 +48,26 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Cada fila representa una cita. Sustituir contenido estático por datos reales -->
                             <tr>
                                 <td>Consulta de Estudio (Tomografía)</td>
                                 <td>Sucursal Central</td>
                                 <td>04/06/2026 - 14:30 hs</td>
-                                <!-- Los badges de estado ayudan a identificar rápidamente el estado del turno -->
                                 <td><span class="status-badge pendiente">Pendiente de Validación</span></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
-
+ 
             <div class="panel-section">
                 <h2>Mis Estudios Ejecutados</h2>
-                <!-- Grid con tarjetas de estudios pasados; cada tarjeta puede enlazar al visor -->
                 <div class="grid-estudios">
                     <div class="card-estudio">
                         <h4>Tomografía Dental Axial</h4>
                         <p class="text-muted">Fecha: 15/05/2026 | Técnico: Tec. Alana Gómez</p>
-                        <!-- Placeholder para el visor integrado de imagenología -->
                         <div class="visor-simulado">
                             <p>[ Visor Imagenología Integrado ]</p>
                         </div>
-                        <!-- Acciones disponibles: ver en visor o descargar informe -->
                         <div class="actions-estudio">
                             <button class="btn-small">Ver en Visor</button>
                             <a href="#" class="btn-small outline">Descargar Informe PDF</a>
@@ -102,4 +78,5 @@
         </section>
     </main>
 </body>
+ 
 </html>

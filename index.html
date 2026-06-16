@@ -1,20 +1,77 @@
 <!DOCTYPE html>
-<html lang="">
-
+<html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inicio de Sesion - Clínica Imagen</title>
-  <link rel="stylesheet" href="css/normalize.css">
-  <link rel="stylesheet" href="css/variables.css">
-  <link rel="stylesheet" href="css/styles.css">
-  <title></title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica Imagen</title>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
-
 <body>
-  <header></header>
-  <main></main>
-  <footer></footer>
-</body>
 
+    <!-- ── Encabezado principal ──────────────────────────── -->
+    <header class="main-header shadow">
+        <div class="container header-flex">
+            <div class="logo">
+                <img src="./images/logo.png" alt="Clínica Imagen">
+            </div>
+            <nav class="main-nav" aria-label="Navegación principal">
+                <ul>
+                    <li><a href="#sucursales">Sucursales</a></li>
+                    <li><a href="paciente-dashboard.php" class="btn-nav">Portal Paciente</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ── Contenido principal ───────────────────────────── -->
+    <main class="container">
+
+        <!-- Hero -->
+        <section class="hero">
+            <p class="hero-note">
+                Tu sonrisa es tu mejor carta de presentación; nosotros nos encargamos de que brille.
+                Agendáte o registráte para tener una cita con nosotros.
+            </p>
+            <a href="login.php" class="btn-primary">Solicitar Cita / Registrarse</a>
+        </section>
+
+        <!-- Servicios -->
+        <section class="services-section" id="sucursales">
+            <h2>Comprometidos con la excelencia en tu salud dental.</h2>
+            <div class="grid-services">
+
+                <div class="card-service">
+                    <h3>Acceso Particular y Referenciado</h3>
+                    <p>Podés agendar estos estudios directamente de forma particular:</p>
+                    <ul>
+                        <li><strong>Placas Dentales:</strong> Diagnóstico básico estructural.</li>
+                        <li><strong>Radiografías Panorámicas:</strong> Vista completa maxilofacial.</li>
+                    </ul>
+                </div>
+
+                <div class="card-service destacado">
+                    <h3>Exclusivo con Orden Odontológica</h3>
+                    <p>Estudios avanzados para especialistas referenciantes:</p>
+                    <ul>
+                        <li>Tomografías Dentales de alta resolución.</li>
+                        <li>Modelos 3D (DAM / DOE).</li>
+                        <li>Alineadores para Ortodoncia y guías quirúrgicas.</li>
+                    </ul>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ── Pie de página ─────────────────────────────────── -->
+    <footer class="main-footer">
+        <p>&copy; 2026 Clínica Imagen. Gestión de Recursos y Citas Médicas.</p>
+    </footer>
+
+    <script src="security.js"></script>
+    <script src="app.js"></script>
+</body>
 </html>

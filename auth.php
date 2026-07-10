@@ -34,3 +34,4 @@ function requireRole(string $role, string $redirect = '/login.php'): void {
 function hasRole(string ...$roles): bool {
     return isLoggedIn() && in_array(getUserType(), $roles, true);
 }
+

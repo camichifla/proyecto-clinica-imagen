@@ -2,6 +2,59 @@
 requireRole('patient');
 ?>
 
+<?php
+// 1. Primero incluimos tu archivo de funciones (cambia 'funciones.php' por el nombre real de tu archivo)
+require_once 'auth.php'; 
+
+$usuario = false;
+
+// 2. Usamos tu función nativa para ver si está logueado
+if (isLoggedIn()) {
+    $host = 'localhost';
+    $db   = 'users_db';  
+    $user = 'root';      
+    $pass = '';          
+    $charset = 'utf8mb4';
+
+    $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+
+    try {
+        $pdo = new PDO($dsn, $user, $pass);
+        
+        // Usamos tu función getUserId() que ya te devuelve la CI como entero
+        $id_usuario = getUserId(); 
+        
+        $stmt = $pdo->prepare('SELECT name, surname, CI FROM users WHERE CI = ?');
+        $stmt->execute([$id_usuario]);
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    } catch (\PDOException $e) {
+         die("Error de conexión: " . $e->getMessage());
+    }
+}
+?>
+
+<header class="main-header shadow">
+    <div class="container header-flex">
+        <div class="logo">
+            <a href="index.php">
+                <img src="./images/logo.png" alt="Clínica Imagen">
+            </a>
+            <span class="badge-portal">Portal Paciente</span>
+        </div>
+        <nav class="main-nav" aria-label="Opciones de sesión">
+            <span class="user-name">
+                <?php if ($usuario): ?>
+                    Hola, <?php echo htmlspecialchars($usuario['name'] . ' ' . $usuario['surname']); ?> (C.I: <?php echo htmlspecialchars($usuario['CI']); ?>)
+                <?php else: ?>
+                    Invitado (Inicia sesión)
+                <?php endif; ?>
+            </span>
+            <a href="logout.php" class="btn-logout">Cerrar Sesión</a>
+        </nav>
+    </div>
+</header>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -13,23 +66,6 @@ requireRole('patient');
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-
-    <!-- ── Encabezado ────────────────────────────────────── -->
-    <header class="main-header shadow">
-        <div class="container header-flex">
-            <div class="logo">
-                <a href="index.html">
-                    <img src="./images/logo.png" alt="Clínica Imagen">
-                </a>
-                <span class="badge-portal">Portal Paciente</span>
-            </div>
-            <nav class="main-nav" aria-label="Opciones de sesión">
-                <!-- Nombre e identificación del paciente activo -->
-                <span class="user-name">Hola, Juan Pérez (C.I: 1.234.567-8)</span>
-                <a href="index.html" class="btn-logout">Cerrar Sesión</a>
-            </nav>
-        </div>
-    </header>
 
     <!-- ── Dashboard del paciente ────────────────────────── -->
     <main class="container dashboard-layout">

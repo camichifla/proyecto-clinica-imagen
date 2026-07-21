@@ -1,0 +1,116 @@
+/* ══════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════ */
+
+.main-header {
+    background: linear-gradient(135deg, #1D3557 0%, #457B9D 100%);;
+    border-bottom: 1px solid var(--border-subtle);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.header-flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 0;
+}
+
+
+/* ══════════════════════════════════════════════
+   NAV / BADGES
+══════════════════════════════════════════════ */
+
+.badge-portal,
+.badge-admin {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    background: var(--accent-color);
+    color: var(--surface);
+    font-size: 0.78rem;
+    margin-left: 0.75rem;
+}
+
+.main-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+}
+
+.user-name {
+    color: var(--surface);
+    font-weight: bold;
+}
+
+.main-nav ul {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.main-nav li {
+    margin: 0;
+}
+
+.main-nav a,
+.btn-nav,
+.btn-logout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.85rem 1.1rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    color: var(--dark-neutral);
+    background: var(--accent-tint);
+    transition:
+        transform      var(--transition-fast),
+        background     var(--transition-fast),
+        border-color   var(--transition-fast),
+        color          var(--transition-fast);
+}
+
+.main-nav a:hover,
+.btn-nav:hover {
+    transform: translateY(-1px);
+    background: var(--accent-color);
+    color: var(--surface);
+}
+
+.btn-logout {
+    background: var(--status-danger-tint);
+    color: var(--status-danger);
+}
+
+.btn-logout:hover {
+    transform: translateY(-1px);
+    background: var(--status-danger);
+    color: var(--surface);
+}
+
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
+
+@media (max-width: 760px) {
+
+    .header-flex,
+    .main-nav {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-flex {
+        gap: 0.85rem;
+    }
+}

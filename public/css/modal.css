@@ -1,0 +1,23 @@
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ink-overlay);
+    backdrop-filter: blur(4px);
+    padding: 1.5rem;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    width: min(100%, 450px);
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: 0 25px 50px var(--ink-soft);
+    padding: 2rem;
+}

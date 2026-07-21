@@ -1,0 +1,46 @@
+.form-group {
+    display: grid;
+    gap: 0.55rem;
+}
+
+input[type="text"],
+input[type="datetime-local"],
+select,
+textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.95rem 1rem;
+    background: var(--surface);
+    transition:
+        border-color var(--transition-fast),
+        box-shadow   var(--transition-fast);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 4px var(--accent-tint);
+}
+
+/* Mensaje de error inline bajo un campo. */
+.error-tooltip {
+    display: block;
+    color: var(--status-danger);
+    font-size: 0.85rem;
+    min-height: 1rem;
+    margin-top: -0.4rem;
+}
+
+/* Bloque de error de autenticación / registro (login y otros formularios). */
+.error-message {
+    padding: 0.75rem;
+    background: var(--status-danger-tint);
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    color: var(--status-danger);
+    text-align: center;
+    margin-bottom: 1.25rem;
+}

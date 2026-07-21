@@ -1,0 +1,92 @@
+body.login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: var(--surface);
+    color: var(--dark-neutral);
+}
+
+div.login {
+    margin: 0 15px;
+}
+
+.form-box {
+    width: 100%;
+    max-width: 450px;
+    padding: 30px;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 0 10px var(--ink-soft);
+    display: none;
+}
+
+.form-box.active {
+    display: block;
+}
+
+h2.login {
+    font-size: 2.125rem;
+    text-align: center;
+    margin-bottom: 1.25rem;
+}
+
+input[type="text"].login,
+input[type="email"].login,
+input[type="tel"].login,
+input[type="password"].login {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--surface-soft);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    outline: none;
+    font-size: 1rem;
+    color: var(--dark-neutral);
+    margin-bottom: 1.25rem;
+    box-sizing: border-box;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+input[type="text"].login:focus,
+input[type="email"].login:focus,
+input[type="tel"].login:focus,
+input[type="password"].login:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 4px var(--accent-tint);
+}
+
+button[name="login"],
+button[name="register"] {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--accent-color);
+    color: var(--surface);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    transition: filter var(--transition-fast);
+}
+
+button[name="login"]:hover,
+button[name="register"]:hover {
+    filter: brightness(1.08);
+}
+
+.form-box p {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.form-box p a {
+    color: var(--accent-color);
+}
+
+.form-box p a:hover {
+    text-decoration: underline;
+}

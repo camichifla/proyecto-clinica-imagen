@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica Imagen</title>
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+</head>
+
+<body>
+
+    <!-- ── Encabezado principal ──────────────────────────── -->
+    <header class="main-header shadow">
+        <div class="container header-flex">
+            <div class="logo">
+                <img src="./images/logo.png" alt="Clínica Imagen">
+            </div>
+            <nav class="main-nav" aria-label="Navegación principal">
+                <ul>
+                    <li><a href="#sucursales">Sucursales</a></li>
+                    <li><a href="paciente-dashboard.php" class="btn-nav">Portal Paciente</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ── Contenido principal ───────────────────────────── -->
+    <main class="container">
+
+        <!-- Hero -->
+        <section class="hero">
+            <p class="hero-note">
+                Tu sonrisa es tu mejor carta de presentación; nosotros nos encargamos de que brille.
+                Agendáte o registráte para tener una cita con nosotros.
+            </p>
+            <a href="login.html" class="btn-primary">Solicitar Cita / Registrarse</a>
+        </section>
+
+        <!-- Servicios -->
+        <section class="services-section" id="sucursales">
+            <h2>Comprometidos con la excelencia en tu salud dental.</h2>
+            <div class="grid-services">
+
+                <div class="card-service">
+                    <h3>Acceso Particular y Referenciado</h3>
+                    <p>Podés agendar estos estudios directamente de forma particular:</p>
+                    <ul>
+                        <li><strong>Placas Dentales:</strong> Diagnóstico básico estructural.</li>
+                        <li><strong>Radiografías Panorámicas:</strong> Vista completa maxilofacial.</li>
+                    </ul>
+                </div>
+
+                <div class="card-service destacado">
+                    <h3>Exclusivo con Orden Odontológica</h3>
+                    <p>Estudios avanzados para especialistas referenciantes:</p>
+                    <ul>
+                        <li>Tomografías Dentales de alta resolución.</li>
+                        <li>Modelos 3D (DAM / DOE).</li>
+                        <li>Alineadores para Ortodoncia y guías quirúrgicas.</li>
+                    </ul>
+                </div>
+
+            </div>
+        </section>
+        
+        <section class="consultorios-section" id="consultorios">
+            <div class="container">
+
+                <!-- Header -->
+                <div class="section-header">
+                    <h2 class="section-title">Consultorios</h2>
+                </div>
+
+                <!-- Search & Filters -->
+                <div class="search-bar">
+                    <div class="search-input-wrapper">
+                        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.3-4.3"></path>
+                        </svg>
+                        <input type="text" id="clinicSearch" placeholder="Buscar por sucursal, ciudad o dirección..."
+                            autocomplete="off">
+                    </div>
+                </div>
+
+                <!-- Content Grid: Map + List -->
+                <div class="consultorios-grid">
+
+                    <!-- Map -->
+                    <div class="map-container">
+                        <div id="map"></div>
+                        <div class="map-overlay">
+                            <span class="map-badge">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                11 sucursales
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Clinic List -->
+                    <div class="clinics-list-container">
+                        <div class="clinics-header">
+                            <h3>Sucursales</h3>
+                            <span class="results-count" id="resultsCount">Mostrando todas</span>
+                        </div>
+                        <div class="clinics-list" id="clinicsList">
+                            <!-- Items injected by JS -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ── Pie de página ─────────────────────────────────── -->
+    <footer>
+    </footer>
+
+    <script src="scripts/consultoriosmap.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</body>
+
+</html>

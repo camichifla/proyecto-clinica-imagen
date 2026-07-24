@@ -40,7 +40,7 @@ function isActiveForm(string $formName, string $activeForm): string {
     <div class="login">
 
         <div class="form-box <?= isActiveForm('login', $activeForm) ?>" id="login-form">
-            <form action="loginrequest.php" method="post">
+            <form action="/clinica-imagen/api/loginrequest.php" method="post">
                 <h2 class="login">Iniciar Sesión</h2>
 
                 <?= showError($errors['login']) ?>
@@ -56,8 +56,7 @@ function isActiveForm(string $formName, string $activeForm): string {
         </div>
 
         <div class="form-box <?= isActiveForm('register', $activeForm) ?>" id="register-form">
-            <form action="loginrequest.php" method="post">
-                <h2 class="login">Registrarse</h2>
+        <form action="/clinica-imagen/api/loginrequest.php" method="post">                <h2 class="login">Registrarse</h2>
 
                 <?= showError($errors['register']) ?>
 
@@ -82,7 +81,7 @@ function isActiveForm(string $formName, string $activeForm): string {
 
     </div>
 
-    <script src="scripts/login.js"></script>
+    <script src="js/login.js"></script>
 </body>
 
 </html>

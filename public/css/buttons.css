@@ -1,0 +1,52 @@
+/* buttons.css
+   Botones de acción reutilizables. */
+
+.btn-primary,
+.btn-success,
+.btn-danger,
+.btn-small {
+    border: none;
+    border-radius: 999px;
+    color: var(--surface);
+    font-weight: 600;
+    transition:
+        transform var(--transition-fast),
+        filter    var(--transition-fast),
+        opacity   var(--transition-fast);
+}
+
+.btn-primary {
+    background: var(--accent-color);
+    padding: 0.95rem 1.45rem;
+}
+
+.btn-success {
+    background: var(--status-success);
+    padding: 0.85rem 1.25rem;
+}
+
+.btn-danger {
+    background: var(--status-danger);
+    padding: 0.85rem 1.25rem;
+}
+
+.btn-small {
+    background: var(--primary-color);
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+}
+
+button:hover,
+.btn-primary:hover,
+.btn-success:hover,
+.btn-danger:hover,
+.btn-small:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}
+
+.outline {
+    background: transparent;
+    color: var(--dark-neutral);
+    border: 1px solid var(--border-subtle);
+}

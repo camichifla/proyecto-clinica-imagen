@@ -21,8 +21,8 @@ if (isset($_POST['register'])) {
         $stmt->close();
         $_SESSION['register_error'] = 'El email ya está registrado.';
         $_SESSION['active_form']    = 'register';
-        header("Location: login.php");
-        exit();
+        header("Location: /clinica-imagen/public/login.php");
+    exit;
     }
 
     $stmt->close();
@@ -36,7 +36,7 @@ if (isset($_POST['register'])) {
     $stmt->execute();
     $stmt->close();
 
-    header("Location: login.php");
+    header("Location: /clinica-imagen/public/login.php");
     exit();
 }
 
@@ -65,9 +65,9 @@ if (isset($_POST['login'])) {
 
             // Redirigir según el rol del usuario.
             if ($user['role'] === 'admin') {
-                header("Location: admin-citas.php");
+                header("Location: /clinica-imagen/public/admin-citas.php");
             } else {
-                header("Location: paciente-dashboard.php");
+                header("Location: /clinica-imagen/public/paciente-dashboard.php");
             }
             exit();
         }
@@ -78,6 +78,6 @@ if (isset($_POST['login'])) {
     // Credenciales incorrectas
     $_SESSION['login_error'] = 'Email o contraseña incorrectos.';
     $_SESSION['active_form'] = 'login';
-    header("Location: login.php");
+    header("Location: /clinica-imagen/public/login.php");
     exit();
 }

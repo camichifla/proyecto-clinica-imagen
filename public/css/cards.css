@@ -1,0 +1,39 @@
+/* cards.css
+   Base compartida para todas las tarjetas del sitio. */
+
+.card-service,
+.card-estudio,
+.card-solicitud,
+.clinical-history-box,
+.card-odontologo {
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 18px 35px var(--ink-ghost);
+    padding: 1.5rem;
+}
+
+.card-service h3,
+.card-estudio h4,
+.card-solicitud h3,
+.history-entry h5 {
+    margin-bottom: 0.75rem;
+}
+
+.card-service p,
+.card-estudio p,
+.card-odontologo p,
+.solicitud-info p {
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+@media (max-width: 760px) {
+
+    .card-service,
+    .card-estudio,
+    .clinical-history-box,
+    .card-solicitud {
+        padding: 1.25rem;
+    }
+}

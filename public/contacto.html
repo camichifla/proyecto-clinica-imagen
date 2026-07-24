@@ -3,13 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clínica Imagen</title>
+    <title>Contacto | Clínica Imagen</title>
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* Corrección puntual: alinea el input de correo con el resto de los campos */
+        .contact-form input,
+        .contact-form textarea {
+            box-sizing: border-box;
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        /* Quita el estilo nativo de validación que el navegador
+           le agrega solo a input[type="email"] (el "anillo" oscuro) */
+        .contact-form input:invalid,
+        .contact-form input:required {
+            box-shadow: none;
+            outline: none;
+        }
+    </style>
 </head>
 <body>
-
+ 
     <!-- ── Encabezado principal ──────────────────────────── -->
     <header class="main-header shadow">
         <div class="container header-flex">
@@ -19,58 +36,54 @@
             <nav class="main-nav" aria-label="Navegación principal">
                 <ul>
                     <li><a href="#sucursales">Sucursales</a></li>
+                    <li><a href="contacto.html">Contacto</a></li>
                     <li><a href="paciente-dashboard.php" class="btn-nav">Portal Paciente</a></li>
                 </ul>
             </nav>
         </div>
     </header>
-
+ 
     <!-- ── Contenido principal ───────────────────────────── -->
     <main class="container">
-
-        <!-- Hero -->
-        <section class="hero">
-            <p class="hero-note">
-                Tu sonrisa es tu mejor carta de presentación; nosotros nos encargamos de que brille.
-                Agendáte o registráte para tener una cita con nosotros.
-            </p>
-            <a href="login.php" class="btn-primary">Solicitar Cita / Registrarse</a>
-        </section>
-
-        <!-- Servicios -->
-        <section class="services-section" id="sucursales">
-            <h2>Comprometidos con la excelencia en tu salud dental.</h2>
-            <div class="grid-services">
-
-                <div class="card-service">
-                    <h3>Acceso Particular y Referenciado</h3>
-                    <p>Podés agendar estos estudios directamente de forma particular:</p>
-                    <ul>
-                        <li><strong>Placas Dentales:</strong> Diagnóstico básico estructural.</li>
-                        <li><strong>Radiografías Panorámicas:</strong> Vista completa maxilofacial.</li>
-                    </ul>
+ 
+        <!-- Formulario de contacto -->
+        <section class="contact-section">
+            <h1 class="contact-title">¡Ponete en contacto con nosotros!</h1>
+ 
+            <form class="contact-form" action="#" method="POST">
+ 
+                <div class="form-group">
+                    <label for="nombre">Nombre Y Apellido <span class="required">*</span></label>
+                    <input type="text" id="nombre" name="nombre" required>
                 </div>
 
-                <div class="card-service destacado">
-                    <h3>Exclusivo con Orden Odontológica</h3>
-                    <p>Estudios avanzados para especialistas referenciantes:</p>
-                    <ul>
-                        <li>Tomografías Dentales de alta resolución.</li>
-                        <li>Modelos 3D (DAM / DOE).</li>
-                        <li>Alineadores para Ortodoncia y guías quirúrgicas.</li>
-                    </ul>
+                <div class="form-group">
+                    <label for="telefono">Numero de Telefono <span class="required">*</span></label>
+                    <input type="text" id="telefono" name="telefono" required>
                 </div>
-
-            </div>
+ 
+                <div class="form-group">
+                    <label for="email">Correo electrónico <span class="required">*</span></label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+ 
+                <div class="form-group">
+                    <label for="mensaje">Comentario o mensaje <span class="required">*</span></label>
+                    <textarea id="mensaje" name="mensaje" rows="6" required></textarea>
+                </div>
+ 
+                <button type="submit" class="btn-primary">Enviar</button>
+ 
+            </form>
         </section>
-
+ 
     </main>
-
+ 
     <!-- ── Pie de página ─────────────────────────────────── -->
 <footer class="main-footer">
     <div class="container footer-list-container">
-
-        <ul class="footer-list">
+ 
+        <ul class="footer-list" id="sucursales">
             <li class="list-title">Sucursales</li>
             <li><a href="https://maps.app.goo.gl/Hs8fENGdQhUNZLXh9" target="_blank">📍 Sucursal Durazno</a></li>
             <li><a href="https://maps.app.goo.gl/z5RTd5b2NiPYsKHbA" target="_blank">📍 Sucursal Libertad</a></li>
@@ -84,7 +97,7 @@
             <li><a href="https://maps.app.goo.gl/VtvuWtE1hwzvojFC9" target="_blank">📍 Sucursal Atlantida</a></li>
             <li><a href="https://maps.app.goo.gl/mninTMBWsAgZ7R1g7" target="_blank">📍 Sucursal Lagomar</a></li>
         </ul>
-
+ 
         <ul class="footer-list">
             <li class="list-title">Contacto</li>
             <li>📞 092 745 398</li>
@@ -99,7 +112,7 @@
             <li>📞 2602 6631 // 092 745 398</li>
             <li>📞 2602 6631 // 092 745 398</li>
         </ul>
-
+ 
         <ul class="footer-list">
             <li class="list-title">Horarios</li>
             <li>🗓️ Lunes y miércoles 11:00 a 19:00hs.<br>Martes, jueves y viernes de 08:00 12:00 y de 14:00 a 18:00hs.<br>Sábados 09:00 a 13:00hs.</li>
@@ -117,7 +130,7 @@
         
     </div>
 </footer>
-
+ 
     <script src="security.js"></script>
     <script src="app.js"></script>
 </body>

@@ -1,10 +1,12 @@
-<?php require_once 'auth.php';
+
+
+<?php
+require_once __DIR__ . '/../api/auth.php';
 requireRole('patient');
 ?>
 
 <?php
-// 1. Primero incluimos tu archivo de funciones (cambia 'funciones.php' por el nombre real de tu archivo)
-require_once 'auth.php'; 
+ 
 
 $usuario = false;
 
@@ -37,8 +39,8 @@ if (isLoggedIn()) {
 <header class="main-header shadow">
     <div class="container header-flex">
         <div class="logo">
-            <a href="index.php">
-                <img src="./images/logo.png" alt="Clínica Imagen">
+            <a href="/clinica-imagen/public/">
+            <img src="./images/logo.png" alt="Clínica Imagen">
             </a>
             <span class="badge-portal">Portal Paciente</span>
         </div>

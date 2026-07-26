@@ -58,7 +58,7 @@ async function handleAjaxSubmit(event) {
         }
 
         if (data.ok) {
-            window.location.href = data.redirect || '/public/login.html';
+            window.location.href = data.redirect || 'login.html';
             return;
         }
 

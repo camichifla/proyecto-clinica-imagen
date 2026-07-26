@@ -95,7 +95,7 @@ if (isset($_POST['login'])) {
 
             $stmt->close();
 
-            $redirect = $user['role'] === 'admin' ? '../api/admin-citas.php' : '../api/paciente-dashboard.php';
+            $redirect = $user['role'] === 'admin' ? 'admin-citas.php' : 'paciente-dashboard.php';
             respond(true, 'Inicio de sesión correcto.', ['redirect' => $redirect]);
         }
     }

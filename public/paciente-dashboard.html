@@ -1,4 +1,29 @@
+<?php
+require_once '../api/auth.php';
+requireRole('patient');
 
+$usuario = false;
+
+if (isLoggedIn()) {
+    $host = 'localhost';
+    $db   = 'users_db';
+    $user = 'root';
+    $pass = '';
+    $charset = 'utf8mb4';
+    $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+
+    try {
+        $pdo = new PDO($dsn, $user, $pass);
+        $id_usuario = getUserId();
+
+        $stmt = $pdo->prepare('SELECT name, surname, CI FROM users WHERE CI = ?');
+        $stmt->execute([$id_usuario]);
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (\PDOException $e) {
+        die("Error de conexión: " . $e->getMessage());
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>

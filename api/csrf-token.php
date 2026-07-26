@@ -1,15 +1,9 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-header('Content-Type: application/json; charset=utf-8');
+session_start();
 
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-echo json_encode([
-    'csrf_token' => $_SESSION['csrf_token']
-]);
-exit;
+header('Content-Type: application/json; charset=utf-8');
+echo json_encode(['csrf_token' => $_SESSION['csrf_token']]);

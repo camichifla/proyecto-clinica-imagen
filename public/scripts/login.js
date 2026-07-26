@@ -32,14 +32,23 @@ async function handleAjaxSubmit(event) {
     setFormLoading(form, true);
 
     try {
+        // Buscamos el botón que disparó el submit; si event.submitter
+        // viene null (pasa al enviar con Enter en algunos navegadores),
+        // usamos el botón de submit del formulario como respaldo.
+        const submitter = event.submitter || form.querySelector('button[type="submit"]');
+        const formData = new FormData(form);
+
+        if (submitter && submitter.name) {
+            formData.append(submitter.name, submitter.value || '1');
+        }
+
         const response = await fetch(form.action, {
             method: 'POST',
-            body: new FormData(form),
+            body: formData,
             credentials: 'same-origin',
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
         });
 
-        // Si la respuesta no es JSON (ej: sesión caída, error 500), no reventar en silencio.
         let data;
         try {
             data = await response.json();
@@ -49,7 +58,7 @@ async function handleAjaxSubmit(event) {
         }
 
         if (data.ok) {
-            window.location.href = data.redirect || 'login.php';
+            window.location.href = data.redirect || 'login.html';
             return;
         }
 
@@ -61,23 +70,8 @@ async function handleAjaxSubmit(event) {
     }
 }
 
-async function loadCsrfToken() {
-    try {
-        const response = await fetch('csrf-token.php', { credentials: 'same-origin' });
-        const data = await response.json();
-        document.querySelectorAll('[data-csrf-field]').forEach(field => {
-            field.value = data.csrf_token;
-        });
-    } catch (err) {
-        // Si falla, los forms quedan sin token y el backend los va a rechazar con
-        // un mensaje claro en vez de fallar en silencio.
-        console.error('No se pudo obtener el token de seguridad.', err);
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    loadCsrfToken();
-    document.querySelectorAll('form[data-ajax-form]').forEach(form => {
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[data-ajax-form]').forEach(form => {
         form.addEventListener('submit', handleAjaxSubmit);
     });
 });

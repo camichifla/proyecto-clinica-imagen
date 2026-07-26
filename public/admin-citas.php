@@ -1,5 +1,5 @@
 <?php
-require_once 'auth.php';
+require_once '../api/auth.php';
 requireRole('admin');
 ?>
 
@@ -28,7 +28,7 @@ requireRole('admin');
             </nav>
         </div>
     </header>
-    <main class="container admin-grid">
+    <main classgit remote add origin https://github.com/tu-usuario/tu-repo.git="container admin-grid">
 
         <!-- Búsqueda de historial clínico por cédula -->
         <section class="search-bar-section" aria-label="Búsqueda de paciente">

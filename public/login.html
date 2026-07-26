@@ -15,12 +15,10 @@
     <div class="login">
 
         <div class="form-box active" id="login-form">
-            <form action="loginrequest.php" method="post" data-ajax-form>
+            <form action="../api/loginrequest.php" method="post" data-ajax-form>
                 <h2 class="login">Iniciar Sesión</h2>
 
                 <p class="error-message hidden" data-error-slot></p>
-
-                <input type="hidden" name="csrf_token" data-csrf-field value="">
 
                 <input class="login" type="email" name="email" placeholder="Email" required autocomplete="email">
                 <input class="login" type="password" name="password" placeholder="Contraseña" required
@@ -33,12 +31,10 @@
         </div>
 
         <div class="form-box" id="register-form">
-            <form action="loginrequest.php" method="post" data-ajax-form>
+            <form action="../api/loginrequest.php" method="post" data-ajax-form>
                 <h2 class="login">Registrarse</h2>
 
                 <p class="error-message hidden" data-error-slot></p>
-
-                <input type="hidden" name="csrf_token" data-csrf-field value="">
 
                 <input class="login" type="text" name="name" placeholder="Nombre" required autocomplete="given-name">
                 <input class="login" type="text" name="surname" placeholder="Apellido" required

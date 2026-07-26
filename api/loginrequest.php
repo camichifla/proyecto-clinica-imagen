@@ -4,12 +4,6 @@ require_once 'config.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-/**
- * Responde en JSON y corta la ejecución.
- * $ok       -> true/false
- * $message  -> texto para mostrar al usuario
- * $extra    -> datos adicionales (ej: redirect, campo con error)
- */
 function respond(bool $ok, string $message = '', array $extra = []): void {
     echo json_encode(array_merge([
         'ok'      => $ok,
@@ -17,16 +11,6 @@ function respond(bool $ok, string $message = '', array $extra = []): void {
     ], $extra));
     exit;
 }
-
-// ── Verificación CSRF ──────────────────────────────────────────
-$csrfToken = $_POST['csrf_token'] ?? '';
-if (!isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrfToken)) {
-    http_response_code(403);
-    respond(false, 'Token de seguridad inválido. Recargá la página e intentá de nuevo.');
-}
-
-// mysqli en modo excepción (para capturar condiciones de carrera en claves duplicadas)
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 // ── Registro ───────────────────────────────────────────────────
 if (isset($_POST['register'])) {
@@ -54,7 +38,6 @@ if (isset($_POST['register'])) {
     $password = password_hash($rawPass, PASSWORD_DEFAULT);
 
     try {
-        // Verificar si el email o la CI ya están registrados.
         $stmt = $conn->prepare("SELECT CI FROM users WHERE CI = ? OR email = ?");
         $stmt->bind_param("is", $CI, $email);
         $stmt->execute();
@@ -75,11 +58,10 @@ if (isset($_POST['register'])) {
         $stmt->close();
 
         respond(true, 'Cuenta creada correctamente. Ya podés iniciar sesión.', [
-            'redirect' => 'login.php',
+            'redirect' => 'login.html',
         ]);
 
     } catch (mysqli_sql_exception $e) {
-        // Código 1062 = entrada duplicada (carrera entre dos registros simultáneos).
         if ($e->getCode() === 1062) {
             respond(false, 'La cédula o el email ya están registrados.');
         }
@@ -105,7 +87,6 @@ if (isset($_POST['login'])) {
         $user = $result->fetch_assoc();
 
         if (password_verify($password, $user['password'])) {
-            // Regenerar el ID de sesión al autenticar (previene session fixation).
             session_regenerate_id(true);
 
             $_SESSION['CI']    = $user['CI'];
@@ -123,6 +104,5 @@ if (isset($_POST['login'])) {
     respond(false, 'Email o contraseña incorrectos.');
 }
 
-// Ninguna acción reconocida.
 http_response_code(400);
 respond(false, 'Solicitud inválida.');

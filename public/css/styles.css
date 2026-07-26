@@ -1,8 +1,3 @@
-/* styles.css
-   Punto de entrada. Importa variables y normalize primero,
-   luego los módulos de estilos en orden de dependencia.
-   Los colores NUNCA deben ser valores literales; usar las variables de variables.css. */
-
 @import url("./variables.css");
 @import url("./normalize.css");
 
@@ -15,6 +10,7 @@
 
 @import url("./login.css");
 @import url("./home.css");
+@import url("./consultorios.css");
 @import url("./dashboard.css");
 @import url("./admin.css");
 @import url("./footer.css");

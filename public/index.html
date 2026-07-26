@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,9 @@
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 </head>
+
 <body>
 
     <!-- ── Encabezado principal ──────────────────────────── -->
@@ -19,8 +22,8 @@
             <nav class="main-nav" aria-label="Navegación principal">
                 <ul>
                     <li><a href="#sucursales">Sucursales</a></li>
-                    <li><a href="paciente-dashboard.php" class="btn-nav">Portal Paciente</a></li>
-                    <li><a href="contacto.html">Contacto</a></li>
+                    <li><a href="../api/paciente-dashboard.php" class="btn-nav">Portal Paciente</a></li>
+                    <li><a href="contacto.html" class="btn-nav">Contacto</a></li>
                 </ul>
             </nav>
         </div>
@@ -35,7 +38,7 @@
                 Tu sonrisa es tu mejor carta de presentación; nosotros nos encargamos de que brille.
                 Agendáte o registráte para tener una cita con nosotros.
             </p>
-            <a href="login.php" class="btn-primary">Solicitar Cita / Registrarse</a>
+            <a href="login.html" class="btn-primary">Solicitar Cita / Registrarse</a>
         </section>
 
         <!-- Servicios -->
@@ -64,62 +67,68 @@
 
             </div>
         </section>
+        
+        <section class="consultorios-section" id="consultorios">
+            <div class="container">
 
+                <!-- Header -->
+                <div class="section-header">
+                    <h2 class="section-title">Consultorios</h2>
+                </div>
+
+                <!-- Search & Filters -->
+                <div class="search-bar">
+                    <div class="search-input-wrapper">
+                        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.3-4.3"></path>
+                        </svg>
+                        <input type="text" id="clinicSearch" placeholder="Buscar por sucursal, ciudad o dirección..."
+                            autocomplete="off">
+                    </div>
+                </div>
+
+                <!-- Content Grid: Map + List -->
+                <div class="consultorios-grid">
+
+                    <!-- Map -->
+                    <div class="map-container">
+                        <div id="map"></div>
+                        <div class="map-overlay">
+                            <span class="map-badge">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                11 sucursales
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Clinic List -->
+                    <div class="clinics-list-container">
+                        <div class="clinics-header">
+                            <h3>Sucursales</h3>
+                            <span class="results-count" id="resultsCount">Mostrando todas</span>
+                        </div>
+                        <div class="clinics-list" id="clinicsList">
+                            <!-- Items injected by JS -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- ── Pie de página ─────────────────────────────────── -->
-<footer class="main-footer">
-    <div class="container footer-list-container">
+    <footer>
+    </footer>
 
-        <ul class="footer-list">
-            <li class="list-title">Sucursales</li>
-            <li><a href="https://maps.app.goo.gl/Hs8fENGdQhUNZLXh9" target="_blank">📍 Sucursal Durazno</a></li>
-            <li><a href="https://maps.app.goo.gl/z5RTd5b2NiPYsKHbA" target="_blank">📍 Sucursal Libertad</a></li>
-            <li><a href="https://maps.app.goo.gl/DGaumeRoRCeVHhRPA" target="_blank">📍 Sucursal Colonia</a></li>
-            <li><a href="https://maps.app.goo.gl/pYzemSh7WzL3RRDm9" target="_blank">📍 Sucursal Las Piedras</a></li>
-            <li><a href="https://maps.app.goo.gl/vqLdTqvB77YAw3aT7" target="_blank">📍 Sucursal Punta del Este</a></li>
-            <li><a href="https://maps.app.goo.gl/yiPLvrLg9kh8pGju8" target="_blank">📍 Sucursal Caudillos</a></li>
-            <li><a href="https://maps.app.goo.gl/pTEMZnt3dpCCjphw5" target="_blank">📍 Sucursal Nuevo Centro</a></li>
-            <li><a href="https://maps.app.goo.gl/PHCvRUpuRBQCA74u5" target="_blank">📍 Sucursal Montevideo Shopping</a></li>
-            <li><a href="https://maps.app.goo.gl/LMcu1mo9W2grx6V28" target="_blank">📍 Sucursal Barra de Carrasco</a></li>
-            <li><a href="https://maps.app.goo.gl/VtvuWtE1hwzvojFC9" target="_blank">📍 Sucursal Atlantida</a></li>
-            <li><a href="https://maps.app.goo.gl/mninTMBWsAgZ7R1g7" target="_blank">📍 Sucursal Lagomar</a></li>
-        </ul>
-
-        <ul class="footer-list">
-            <li class="list-title">Contacto</li>
-            <li>📞 092 745 398</li>
-            <li>📞 092 390 847</li>
-            <li>📞 092 745 398</li>
-            <li>📞 098 786 833</li>
-            <li>📞 092 745 398</li>
-            <li>📞 2602 6631 // 092 745 398</li>
-            <li>📞 2602 6631 // 092 745 398</li>    
-            <li>📞 2602 6631 // 092 745 398</li>
-            <li>📞 2602 6631 // 092 745 398</li>
-            <li>📞 2602 6631 // 092 745 398</li>
-            <li>📞 2602 6631 // 092 745 398</li>
-        </ul>
-
-        <ul class="footer-list">
-            <li class="list-title">Horarios</li>
-            <li>🗓️ Lunes y miércoles 11:00 a 19:00hs.<br>Martes, jueves y viernes de 08:00 12:00 y de 14:00 a 18:00hs.<br>Sábados 09:00 a 13:00hs.</li>
-            <li>🗓️ Lunes de 14:00 a 18:30hs.<br>Martes y viernes de 9:00 a 13:00hs.<br>Miércoles de 9:00 a 12:00 - 14:00 a 18:30hs.<br>Jueves de 17:00 a 19:00hs</li>
-            <li>🗓️ Lunes a miércoles 08:00 a 20:00hs<br>Jueves y viernes 08:00 a 16:00hs<br>Sábados 09:00 a 13:00hs.</li>
-            <li>🗓️ Lunes a viernes de 8:30 a 12:30hs. - 15 a 19 hs.<br>Sábados de 08 a 14hs.</li>
-            <li>🗓️ Lunes a viernes 08:00 a 20:00hs.<br>Sábados 09:00 a 13:00hs.</li>
-            <li>🗓️ Lunes a viernes de 8 a 20 hs.<br>Sábados de 9 a 14 hs.</li>
-            <li>🗓️ Lunes a viernes de 8 a 20 hs.<br>Sábados de 9 a 14 hs.</li>
-            <li>🗓️ Lunes 8 a 14hs<br>Martes, jueves y viernes de 8 a 16hs.</li>
-            <li>🗓️ Lunes 8 a 14hs<br>Martes, jueves y viernes de 8 a 16hs.</li>
-            <li>🗓️ Lunes a viernes de 8 a 20 hs.<br>Sábados de 9 a 14 hs.</li>
-            <li>🗓️ Lunes a viernes de 8 a 20 hs.<br>Sábados de 8 a 13 hs.</li>
-        </ul>
-        
-    </div>
-</footer>
-
-    <script src="security.js"></script>
-    <script src="app.js"></script>
+    <script src="scripts/consultoriosmap.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </body>
+
 </html>

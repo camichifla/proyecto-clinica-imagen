@@ -15,14 +15,14 @@ function getUserId(): ?int {
     return isset($_SESSION['CI']) ? (int)$_SESSION['CI'] : null;
 }
 
-function requireLogin(string $redirect = '/login.php'): void {
+function requireLogin(string $redirect = '../public/login.html'): void {
     if (!isLoggedIn()) {
         header('Location: ' . $redirect . '?error=session_required');
         exit;
     }
 }
 
-function requireRole(string $role, string $redirect = '/login.php'): void {
+function requireRole(string $role, string $redirect = '../public/login.html'): void {
     requireLogin($redirect);
     if (getUserType() !== $role) {
         http_response_code(403);

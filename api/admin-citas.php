@@ -1,5 +1,5 @@
 <?php
-require_once 'auth.php';
+require_once '../api/auth.php';
 requireRole('admin');
 ?>
 
@@ -9,17 +9,17 @@ requireRole('admin');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración — Clínica Imagen</title>
-    <link rel="stylesheet" href="css/normalize.css">
-    <link rel="stylesheet" href="css/variables.css">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="../public/css/normalize.css">
+    <link rel="stylesheet" href="../public/css/variables.css">
+    <link rel="stylesheet" href="../public/css/styles.css">
 </head>
 <body>
 
     <header class="main-header shadow">
         <div class="container header-flex">
             <div class="logo">
-                <a href="index.html">
-                    <img src="./images/logo.png" alt="Clínica Imagen">
+                <a href="../public/index.html">
+                    <img src="../public/images/logo.png" alt="Clínica Imagen">
                 </a>
                 <span class="badge-admin">Módulo Interno</span>
             </div>
@@ -28,7 +28,7 @@ requireRole('admin');
             </nav>
         </div>
     </header>
-    <main class="container admin-grid">
+    <main classgit remote add origin https://github.com/tu-usuario/tu-repo.git="container admin-grid">
 
         <!-- Búsqueda de historial clínico por cédula -->
         <section class="search-bar-section" aria-label="Búsqueda de paciente">

@@ -38,6 +38,23 @@ CREATE TABLE `users` (
   `role` enum('patient','admin') NOT NULL DEFAULT 'patient'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
+CREATE TABLE consultas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL,
+    telefono VARCHAR(20),
+    consulta VARCHAR(200) NOT NULL,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    fecha_respuesta DATETIME,
+    ip_address VARCHAR(45),
+    estado ENUM('nuevo', 'leido', 'respondido', 'archivado') DEFAULT 'nuevo',
+    respuesta LONGTEXT,
+    INDEX idx_email (email),
+    INDEX idx_estado (estado),
+    INDEX idx_fecha (fecha_creacion)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 --
 -- Indexes for dumped tables
 --

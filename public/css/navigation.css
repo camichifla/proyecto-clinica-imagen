@@ -1,14 +1,9 @@
-/* navigation.css
-   Header, badges y navegación principal. */
-
-
 /* ══════════════════════════════════════════════
    HEADER
 ══════════════════════════════════════════════ */
 
 .main-header {
-    background: var(--primary-color);
-    /* Usar --border-subtle, no --shadow (que es un box-shadow completo, no un color). */
+    background: linear-gradient(135deg, #1D3557 0%, #457B9D 100%);;
     border-bottom: 1px solid var(--border-subtle);
     position: sticky;
     top: 0;
@@ -41,10 +36,6 @@
     margin-left: 0.75rem;
 }
 
-/* NOTA: el .user-name anidado dentro de .main-nav en el archivo original
-   era CSS anidado sin soporte nativo (no es Sass/Less), así que la
-   mayoría de navegadores lo ignoraban por completo. Se separa en dos
-   reglas planas de nivel superior. */
 .main-nav {
     display: flex;
     align-items: center;
@@ -123,3 +114,5 @@
         gap: 0.85rem;
     }
 }
+
+

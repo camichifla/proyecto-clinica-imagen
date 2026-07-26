@@ -1,7 +1,3 @@
-/* home.css
-   Página de inicio: hero, servicios y footer simple. */
-
-
 /* ══════════════════════════════════════════════
    HOME — HERO
 ══════════════════════════════════════════════ */
@@ -24,8 +20,6 @@
     color: var(--light-neutral);
 }
 
-/* Texto degradado animable del hero.
-   NOTA: text-shadow no funciona con background-clip:text, se omite. */
 .hero-note {
     max-width: 42rem;
     margin: 1.2rem auto 1.8rem;
@@ -47,11 +41,6 @@
     -webkit-background-clip: text;
     background-clip: text;
 }
-
-
-/* ══════════════════════════════════════════════
-   HOME — SERVICIOS
-══════════════════════════════════════════════ */
 
 .services-section {
     margin-bottom: 3rem;
@@ -78,7 +67,6 @@
     margin-bottom: 0.5rem;
 }
 
-/* Card resaltada con borde accent (servicios avanzados). */
 .destacado {
     border-color: var(--accent-color);
 }

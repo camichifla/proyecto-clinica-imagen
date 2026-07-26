@@ -1,0 +1,96 @@
+<?php
+require_once '../api/paciente_dashboard.php';
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal del Paciente — Clínica Imagen</title>
+    <link rel="stylesheet" href="../public/css/normalize.css">
+    <link rel="stylesheet" href="../public/css/variables.css">
+    <link rel="stylesheet" href="../public/css/styles.css">
+</head>
+<body>
+
+    <header class="main-header shadow">
+        <div class="container header-flex">
+            <div class="logo">
+                <a href="../public/index.html">
+                    <img src="../public/images/logo.png" alt="Clínica Imagen">
+                </a>
+                <span class="badge-portal">Portal Paciente</span>
+            </div>
+            <nav class="main-nav" aria-label="Opciones de sesión">
+                <span class="user-name">
+                    <?php if ($usuario): ?>
+                        Hola, <?php echo htmlspecialchars($usuario['name'] . ' ' . $usuario['surname']); ?> (C.I: <?php echo htmlspecialchars($usuario['CI']); ?>)
+                    <?php else: ?>
+                        Invitado (Inicia sesión)
+                    <?php endif; ?>
+                </span>
+                <a href="../api/logout.php" class="btn-logout">Cerrar Sesión</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container dashboard-layout">
+        <aside class="sidebar-referencia" aria-label="Orden médica activa">
+            <div class="card-odontologo">
+                <h3><span class="dot-active" aria-hidden="true"></span> Orden Médica Activa</h3>
+                <p><strong>Profesional:</strong> Dr. Carlos Rodríguez (Ortodoncista)</p>
+                <p><strong>Estudio Autorizado:</strong> Tomografía Dental + Modelado 3D (DAM)</p>
+                <p class="text-muted">Estado: Listo para agendar</p>
+            </div>
+        </aside>
+
+        <section class="main-panel">
+            <div class="panel-section">
+                <h2>Mis Citas Programadas</h2>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Estudio</th>
+                                <th scope="col">Sucursal</th>
+                                <th scope="col">Fecha y Hora</th>
+                                <th scope="col">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Consulta de Estudio (Tomografía)</td>
+                                <td>Sucursal Central</td>
+                                <td>04/06/2026 — 14:30 hs</td>
+                                <td>
+                                    <span class="status-badge pendiente">Pendiente de Validación</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h2>Mis Estudios Ejecutados</h2>
+                <div class="grid-estudios">
+                    <div class="card-estudio">
+                        <h4>Tomografía Dental Axial</h4>
+                        <p class="text-muted">Fecha: 15/05/2026 | Técnico: Tec. Alana Gómez</p>
+
+                        <div class="visor-simulado" aria-label="Visor de imagenología">
+                            <p>[ Visor Imagenología Integrado ]</p>
+                        </div>
+
+                        <div class="actions-estudio">
+                            <button class="btn-small">Ver en Visor</button>
+                            <a href="#" class="btn-small outline">Descargar Informe PDF</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+</body>
+</html>

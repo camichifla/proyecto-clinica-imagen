@@ -1,0 +1,105 @@
+.main-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.btn-logout,
+.btn-primary,
+.btn-small,
+.btn-danger {
+    min-width: 140px;
+}
+
+.btn-cancelar-cita {
+    background: var(--status-danger);
+    color: var(--surface);
+    min-width: auto;
+    padding: 0.6rem 0.9rem;
+    border: none;
+}
+
+.btn-cancelar-cita:hover {
+    background: #dc2626;
+}
+
+.modal {
+    padding: 0.75rem;
+}
+
+.agenda-modal-content {
+    max-width: 520px;
+    width: min(100%, 520px);
+}
+
+.agenda-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.agenda-header h2 {
+    margin: 0;
+    font-size: 1.35rem;
+}
+
+.agenda-form {
+    display: grid;
+    gap: 1.2rem;
+}
+
+.agenda-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+}
+
+.agenda-actions .btn-danger {
+    background: var(--status-danger);
+}
+
+#agendaToggle {
+    background: var(--accent-tint);
+    color: var(--primary-color);
+    border: 1px solid transparent;
+}
+
+#agendaToggle:hover,
+#agendaToggle:focus-visible {
+    background: var(--accent-color);
+    color: var(--surface);
+}
+
+.agenda-error-text {
+    color: var(--status-danger);
+    font-size: 0.95rem;
+    min-height: 1.2rem;
+}
+
+.dot-inactive {
+    width: 0.75rem;
+    height: 0.75rem;
+    background: var(--status-danger);
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.55rem;
+}
+
+.status-badge.confirmada {
+    background: var(--status-success-tint);
+    color: var(--status-success);
+}
+
+@media (max-width: 760px) {
+    .main-nav {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .agenda-actions {
+        justify-content: stretch;
+    }
+}

@@ -66,6 +66,40 @@ ALTER TABLE `users`
   ADD UNIQUE KEY `CI` (`CI`),
   ADD UNIQUE KEY `email` (`email`),
   ADD UNIQUE KEY `email_2` (`email`);
+
+CREATE TABLE `agenda` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `paciente_ci` int(11) unsigned NOT NULL,
+  `estudio` varchar(150) NOT NULL,
+  `medico` varchar(150) NOT NULL,
+  `sucursal` varchar(150) NOT NULL,
+  `fecha_hora` datetime NOT NULL,
+  `estado` enum('pendiente','confirmada','cancelada') NOT NULL DEFAULT 'pendiente',
+  `creado_en` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_paciente_ci` (`paciente_ci`),
+  KEY `idx_estado` (`estado`),
+  KEY `idx_fecha_hora` (`fecha_hora`),
+  CONSTRAINT `fk_agenda_paciente` FOREIGN KEY (`paciente_ci`) REFERENCES `users` (`CI`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `citas_canceladas` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `cita_id` int(11) unsigned NOT NULL,
+  `paciente_ci` int(11) unsigned NOT NULL,
+  `estudio` varchar(150) NOT NULL,
+  `medico` varchar(150) NOT NULL,
+  `sucursal` varchar(150) NOT NULL,
+  `fecha_hora` datetime NOT NULL,
+  `estado_anterior` enum('pendiente','confirmada','cancelada') NOT NULL DEFAULT 'pendiente',
+  `motivo_cancelacion` varchar(100) NOT NULL DEFAULT 'cancelada_por_paciente',
+  `cancelada_en` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_paciente_ci` (`paciente_ci`),
+  KEY `idx_cita_id` (`cita_id`),
+  KEY `idx_cancelada_en` (`cancelada_en`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

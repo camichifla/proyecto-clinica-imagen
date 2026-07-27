@@ -2,13 +2,25 @@
 session_start();
 require_once 'config.php';
 
-header('Content-Type: application/json; charset=utf-8');
+$isAjax = strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'xmlhttprequest';
+if ($isAjax) {
+    header('Content-Type: application/json; charset=utf-8');
+}
 
-function respond(bool $ok, string $message = '', array $extra = []): void {
-    echo json_encode(array_merge([
-        'ok'      => $ok,
-        'message' => $message,
-    ], $extra));
+function respond(bool $ok, string $message = '', array $extra = [], bool $isAjax = true): void {
+    if ($isAjax) {
+        echo json_encode(array_merge([
+            'ok'      => $ok,
+            'message' => $message,
+        ], $extra));
+        exit;
+    }
+
+    if ($ok) {
+        header('Location: ' . ($extra['redirect'] ?? '/clinica-imagen/api/paciente-dashboard.php'));
+    } else {
+        header('Location: /clinica-imagen/public/login.html?error=' . urlencode($message));
+    }
     exit;
 }
 
@@ -95,14 +107,18 @@ if (isset($_POST['login'])) {
 
             $stmt->close();
 
-            $redirect = $user['role'] === 'admin' ? '../api/admin-citas.php' : '../api/paciente-dashboard.php';
-            respond(true, 'Inicio de sesión correcto.', ['redirect' => $redirect]);
+            $redirect = $user['role'] === 'admin'
+                ? '/clinica-imagen/api/admin-citas.php'
+                : '/clinica-imagen/api/paciente-dashboard.php';
+            respond(true, 'Inicio de sesión correcto.', ['redirect' => $redirect], $isAjax);
         }
     }
 
     $stmt->close();
-    respond(false, 'Email o contraseña incorrectos.');
+    respond(false, 'Email o contraseña incorrectos.', [], $isAjax);
 }
 
-http_response_code(400);
-respond(false, 'Solicitud inválida.');
+if ($isAjax) {
+    http_response_code(400);
+}
+respond(false, 'Solicitud inválida.', [], $isAjax);

@@ -45,7 +45,7 @@ async function handleAjaxSubmit(event) {
         const response = await fetch(form.action, {
             method: 'POST',
             body: formData,
-            credentials: 'same-origin',
+            credentials: 'include',
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
         });
 

@@ -28,7 +28,7 @@ requireRole('admin');
             </nav>
         </div>
     </header>
-    <main classgit remote add origin https://github.com/tu-usuario/tu-repo.git="container admin-grid">
+    <main class="admin-grid">
 
         <!-- Búsqueda de historial clínico por cédula -->
         <section class="search-bar-section" aria-label="Búsqueda de paciente">

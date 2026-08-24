@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mensajes de Contacto</title>
+    <link rel="stylesheet" href="/clinica-imagen/public/css/styles.css">
+    <link rel="stylesheet" href="/clinica-imagen/public/css/ver_mensajes.css">
+    <script src="/clinica-imagen/public/scripts/global.js" defer></script>
+    <script src="/clinica-imagen/public/scripts/ver_mensajes.js" defer></script>
+</head>
+<body>
+    <header class="main-header shadow">
+        <div class="container header-flex">
+            <div class="logo"><img src="/clinica-imagen/public/images/logo.png" alt="Clínica Imagen"><span class="badge-admin">Módulo Interno</span></div>
+            <nav class="main-nav"><span id="roleLabel">Rol: (sesión)</span></nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1>📧 Gestión de Mensajes de Contacto</h1>
+        <div class="stats" id="statsBox"></div>
+        <div class="tabla-responsive" id="messagesContainer"></div>
+    </main>
+
+    <div id="modalMensaje" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModal()">&times;</span>
+            <h2 id="modalAsunto"></h2>
+            <div class="modal-field"><strong>De:</strong><p id="modalNombre"></p></div>
+            <div class="modal-field"><strong>Email:</strong><p id="modalEmail"></p></div>
+            <div class="modal-field"><strong>Teléfono:</strong><p id="modalTelefono"></p></div>
+            <div class="modal-field"><strong>Fecha:</strong><p id="modalFecha"></p></div>
+            <div class="modal-field"><strong>Mensaje:</strong><p id="modalMensaje" style="white-space: pre-wrap;"></p></div>
+            <div class="modal-field"><strong>IP Address:</strong><p id="modalIP"></p></div>
+        </div>
+    </div>
+
+</body>
+</html>

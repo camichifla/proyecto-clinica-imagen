@@ -1,27 +1,6 @@
 <?php
 header('Content-Type: application/json');
-
-// 1. Configuración de la base de datos
-$db_host     = 'localhost';
-$db_usuario  = 'root';
-$db_password = '';
-$db_nombre   = 'users_db';
-
-// Crear conexión
-$conexion = new mysqli($db_host, $db_usuario, $db_password, $db_nombre);
-
-// Verificar conexión
-if ($conexion->connect_error) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Error de conexión a la base de datos: ' . $conexion->connect_error
-    ]);
-    exit();
-}
-
-// Establecer charset a UTF-8
-$conexion->set_charset("utf8mb4");
+require_once __DIR__ . '/config.php';
 
 // Verificar que sea una solicitud POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -80,36 +59,16 @@ if (!empty($errores)) {
 $sql = "INSERT INTO consultas (nombre, email, telefono, consulta, fecha_creacion, ip_address, estado) 
         VALUES (?, ?, ?, ?, NOW(), ?, 'nuevo')";
 
-$stmt = $conexion->prepare($sql);
-
-if (!$stmt) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Error al preparar la consulta: ' . $conexion->error
-    ]);
-    exit();
-}
+$stmt = $conn->prepare($sql);
 
 // Obtener IP del usuario
 $ip = $_SERVER['REMOTE_ADDR'] ?? 'Desconocida';
 
-// Vincular 5 parámetros ("sssss"): nombre, email, telefono, consulta, ip
-$stmt->bind_param(
-    'sssss',
-    $nombre,
-    $email,
-    $telefono,
-    $consulta,
-    $ip
-);
-
-// Ejecutar consulta
-if ($stmt->execute()) {
+if ($stmt->execute([$nombre, $email, $telefono, $consulta, $ip])) {
     echo json_encode([
         'success' => true,
         'message' => 'Tu consulta ha sido enviada correctamente. Nos pondremos en contacto pronto.',
-        'id'      => $stmt->insert_id
+        'id'      => $conn->lastInsertId()
     ]);
 } else {
     http_response_code(500);
@@ -119,6 +78,4 @@ if ($stmt->execute()) {
     ]);
 }
 
-$stmt->close();
-$conexion->close();
 ?>

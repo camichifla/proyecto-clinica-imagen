@@ -100,6 +100,19 @@ CREATE TABLE `citas_canceladas` (
   KEY `idx_cancelada_en` (`cancelada_en`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Tabla adicional: historial de pacientes (observaciones y evoluciones)
+CREATE TABLE IF NOT EXISTS `historial` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `paciente_ci` INT UNSIGNED NOT NULL,
+  `tipo` ENUM('observacion','evolucion') NOT NULL DEFAULT 'observacion',
+  `nota` TEXT NOT NULL,
+  `tecnico` VARCHAR(150) NOT NULL,
+  `creado_en` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_paciente` (`paciente_ci`),
+  CONSTRAINT `fk_historial_paciente` FOREIGN KEY (`paciente_ci`) REFERENCES `users` (`CI`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

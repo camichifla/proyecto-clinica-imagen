@@ -51,30 +51,24 @@ if (isset($_POST['register'])) {
 
     try {
         $stmt = $conn->prepare("SELECT CI FROM users WHERE CI = ? OR email = ?");
-        $stmt->bind_param("is", $CI, $email);
-        $stmt->execute();
-        $stmt->store_result();
+        $stmt->execute([$CI, $email]);
 
-        if ($stmt->num_rows > 0) {
-            $stmt->close();
+        if ($stmt->fetchColumn() !== false) {
             respond(false, 'La cédula o el email ya están registrados.');
         }
-        $stmt->close();
 
         $stmt = $conn->prepare(
             "INSERT INTO users (name, surname, CI, address, phone, email, password, role)
              VALUES (?, ?, ?, ?, ?, ?, ?, 'patient')"
         );
-        $stmt->bind_param("ssissss", $name, $surname, $CI, $address, $phone, $email, $password);
-        $stmt->execute();
-        $stmt->close();
+        $stmt->execute([$name, $surname, $CI, $address, $phone, $email, $password]);
 
         respond(true, 'Cuenta creada correctamente. Ya podés iniciar sesión.', [
             'redirect' => 'login.html',
         ]);
 
-    } catch (mysqli_sql_exception $e) {
-        if ($e->getCode() === 1062) {
+    } catch (PDOException $e) {
+        if (($e->errorInfo[1] ?? null) === 1062) {
             respond(false, 'La cédula o el email ya están registrados.');
         }
         respond(false, 'Ocurrió un error al registrar la cuenta. Intentá de nuevo.');
@@ -91,12 +85,10 @@ if (isset($_POST['login'])) {
     }
 
     $stmt = $conn->prepare("SELECT CI, email, password, role FROM users WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
 
-    if ($result->num_rows > 0) {
-        $user = $result->fetch_assoc();
+    if ($user) {
 
         if (password_verify($password, $user['password'])) {
             session_regenerate_id(true);
@@ -105,8 +97,6 @@ if (isset($_POST['login'])) {
             $_SESSION['email'] = $user['email'];
             $_SESSION['role']  = $user['role'];
 
-            $stmt->close();
-
             $redirect = $user['role'] === 'admin'
                 ? '/clinica-imagen/api/admin-citas.php'
                 : '/clinica-imagen/api/paciente-dashboard.php';
@@ -114,7 +104,6 @@ if (isset($_POST['login'])) {
         }
     }
 
-    $stmt->close();
     respond(false, 'Email o contraseña incorrectos.', [], $isAjax);
 }
 

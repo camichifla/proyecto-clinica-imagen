@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>Admin — Bandeja de Citas</title>
+    <link rel="stylesheet" href="/clinica-imagen/public/css/styles.css">
+    <link rel="stylesheet" href="/clinica-imagen/public/css/admin.css">
+</head>
+<body>
+    <header class="main-header shadow">
+        <div class="container header-flex">
+            <div class="logo">
+                <a href="/clinica-imagen/public/index.html"><img src="/clinica-imagen/public/images/logo.png" alt="Clínica Imagen"></a>
+                <span class="badge-admin">Módulo Interno</span>
+            </div>
+            <nav class="main-nav" aria-label="Información de sesión"><span id="roleLabel">Rol: (sesión)</span></nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="admin-grid">
+            <div>
+                <section class="search-bar-section" aria-label="Búsqueda de paciente">
+                    <form id="searchForm" class="search-form">
+                        <label for="cedula-search" class="panel-title">Buscar Historial Clínico por Cédula de Identidad</label>
+                        <div class="search-group">
+                            <input type="text" id="cedula-search" name="ci" placeholder="Ej: 12345678" required autocomplete="off" inputmode="numeric">
+                            <button type="submit" class="btn-primary">Buscar Paciente</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="admin-panel-block">
+                    <h2>Bandeja de Solicitudes Pendientes</h2>
+                    <div id="pendingList"><p>Cargando solicitudes...</p></div>
+                </section>
+            </div>
+
+            <div>
+                <section class="admin-panel-block">
+                    <h2 id="historyTitle">Historial Clínico</h2>
+                    <div id="clinicalHistory" class="clinical-history-box"><p>Seleccione un paciente para ver el historial.</p></div>
+                    <form id="historyForm" class="entry-form" style="display:none; margin-top:12px;">
+                        <label for="tipo">Tipo:</label>
+                        <select id="tipo" name="tipo"><option value="observacion">Observación</option><option value="evolucion">Evolución</option></select>
+                        <label for="nota">Nota / Observación:</label>
+                        <textarea id="nota" name="nota" rows="3" placeholder="Escriba aquí..."></textarea>
+                        <input type="hidden" id="paciente_ci" name="paciente_ci" value="">
+                        <button type="submit" class="btn-small">Guardar Entrada en Historial</button>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer></footer>
+    <script src="/clinica-imagen/public/scripts/admin-citas.js" defer></script>
+    <script src="/clinica-imagen/public/scripts/global.js" defer></script>
+</body>
+</html>

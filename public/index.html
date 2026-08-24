@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/home.css?v=20260824-2">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 </head>
 
@@ -67,13 +68,74 @@
 
             </div>
         </section>
+
+        <section class="opinions-section" aria-labelledby="opinions-title">
+            <div class="opinions-header">
+                <p class="section-kicker">Experiencias reales</p>
+                <h2 id="opinions-title">Lo que dicen nuestros pacientes</h2>
+                <p>La confianza también se construye escuchando a quienes ya nos eligieron.</p>
+            </div>
+
+            <div class="opinions-carousel" data-carousel>
+                <div class="opinion-card is-active" data-slide>
+                    <img class="opinion-avatar" src="./images/dientes.png" alt="Ilustración de sonrisa de Sofía Martínez">
+                    <div class="opinion-content">
+                        <div class="opinion-stars" aria-label="5 de 5 estrellas">★★★★★</div>
+                        <blockquote>“Me explicaron cada paso con mucha paciencia y el resultado de mi estudio llegó rapidísimo.”</blockquote>
+                        <cite>Sofía Martínez</cite>
+                        <span>Paciente de Montevideo</span>
+                    </div>
+                    <div class="opinion-controls">
+                        <button class="carousel-button" type="button" data-prev aria-label="Opinión anterior">←</button>
+                        <span class="opinion-position" aria-live="polite">1 / 3</span>
+                        <button class="carousel-button" type="button" data-next aria-label="Opinión siguiente">→</button>
+                    </div>
+                </div>
+
+                <div class="opinion-card" data-slide hidden>
+                    <img class="opinion-avatar" src="./images/dientes.png" alt="Ilustración de sonrisa de Martín Pereira">
+                    <div class="opinion-content">
+                        <div class="opinion-stars" aria-label="5 de 5 estrellas">★★★★★</div>
+                        <blockquote>“La atención fue cálida desde que agendé hasta que recibí el informe. Todo muy claro.”</blockquote>
+                        <cite>Martín Pereira</cite>
+                        <span>Paciente de Canelones</span>
+                    </div>
+                    <div class="opinion-controls">
+                        <button class="carousel-button" type="button" data-prev aria-label="Opinión anterior">←</button>
+                        <span class="opinion-position" aria-live="polite">2 / 3</span>
+                        <button class="carousel-button" type="button" data-next aria-label="Opinión siguiente">→</button>
+                    </div>
+                </div>
+
+                <div class="opinion-card" data-slide hidden>
+                    <img class="opinion-avatar" src="./images/dientes.png" alt="Ilustración de sonrisa de Valentina Rodríguez">
+                    <div class="opinion-content">
+                        <div class="opinion-stars" aria-label="4 de 5 estrellas">★★★★☆</div>
+                        <blockquote>“Pude encontrar una sucursal cerca y reservar sin complicaciones. Muy recomendable.”</blockquote>
+                        <cite>Valentina Rodríguez</cite>
+                        <span>Paciente de Maldonado</span>
+                    </div>
+                    <div class="opinion-controls">
+                        <button class="carousel-button" type="button" data-prev aria-label="Opinión anterior">←</button>
+                        <span class="opinion-position" aria-live="polite">3 / 3</span>
+                        <button class="carousel-button" type="button" data-next aria-label="Opinión siguiente">→</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="carousel-dots" aria-label="Seleccionar opinión">
+                <button class="carousel-dot is-active" type="button" data-slide-to="0" aria-label="Ver opinión 1" aria-current="true"></button>
+                <button class="carousel-dot" type="button" data-slide-to="1" aria-label="Ver opinión 2"></button>
+                <button class="carousel-dot" type="button" data-slide-to="2" aria-label="Ver opinión 3"></button>
+            </div>
+        </section>
         
         <section class="consultorios-section" id="consultorios">
             <div class="container">
 
                 <!-- Header -->
                 <div class="section-header">
-                    <h2 class="section-title">Consultorios</h2>
+                    <h2 class="section-title">Sucursales</h2>
                 </div>
 
                 <!-- Search & Filters -->
@@ -128,6 +190,7 @@
     </footer>
 
     <script src="scripts/consultoriosmap.js"></script>
+    <script src="scripts/opiniones.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </body>
 

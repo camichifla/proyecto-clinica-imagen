@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const agendaClose = document.getElementById('agendaClose');
     const agendaCancel = document.getElementById('agendaCancel');
     const agendaForm = document.getElementById('agendaForm');
+    let occupiedHours = []; // lista de HH:MM ocupadas para la sucursal+fecha seleccionada
 
     document.querySelectorAll('.btn-cancelar-cita').forEach(function (button) {
         button.addEventListener('click', async function () {
@@ -55,6 +56,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
+    // Solicita al servidor las horas ocupadas para la sucursal y fecha dada (YYYY-MM-DD)
+    async function fetchOccupiedHours(sucursal, date) {
+        occupiedHours = [];
+        if (!sucursal || !date) return;
+        try {
+            const url = `/clinica-imagen/api/ajax/get_occupied_slots.php?sucursal=${encodeURIComponent(sucursal)}&date=${encodeURIComponent(date)}`;
+            const res = await fetch(url);
+            const json = await res.json();
+            if (json.success && Array.isArray(json.occupied)) occupiedHours = json.occupied;
+        } catch (err) {
+            console.error('No se pudieron cargar horas ocupadas', err);
+            occupiedHours = [];
+        }
+    }
+
     agendaToggle.addEventListener('click', function () {
         toggleModal(true);
     });
@@ -67,6 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
         toggleModal(false);
     });
 
+    // Antes de enviar, validamos que la hora seleccionada no esté ocupada
     agendaForm.addEventListener('submit', async function (event) {
         event.preventDefault();
 
@@ -94,10 +111,20 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        // Extraemos fecha y hora en formato YYYY-MM-DD y HH:MM
+        const fechaISO = fechaHora.split('T')[0];
+        const horaHHMM = fechaHora.split('T')[1] ? fechaHora.split('T')[1].slice(0,5) : '';
+        // Si no cargamos las horas ocupadas aún, pedimos al servidor
+        await fetchOccupiedHours(sucursal, fechaISO);
+        if (occupiedHours.includes(horaHHMM)) {
+            agendaError.textContent = 'La hora seleccionada ya está ocupada en esa sucursal. Por favor elige otra.';
+            return;
+        }
+
         const formData = new FormData(agendaForm);
 
         try {
-            const response = await fetch('guardar_agenda.php', {
+            const response = await fetch('/clinica-imagen/api/guardar_agenda.php', {
                 method: 'POST',
                 body: formData,
             });
@@ -122,4 +149,18 @@ document.addEventListener('DOMContentLoaded', function () {
             toggleModal(false);
         }
     });
+
+    // Re-fetch occupied hours cuando cambie sucursal o fecha (si se usa date/datetime-local)
+    const sucursalInput = document.getElementById('selectSucursal');
+    const fechaInput = document.getElementById('selectFechaHora');
+    if (sucursalInput && fechaInput) {
+        sucursalInput.addEventListener('change', async () => {
+            const fechaISO = (fechaInput.value || '').split('T')[0];
+            await fetchOccupiedHours(sucursalInput.value, fechaISO);
+        });
+        fechaInput.addEventListener('change', async () => {
+            const fechaISO = (fechaInput.value || '').split('T')[0];
+            await fetchOccupiedHours(sucursalInput.value, fechaISO);
+        });
+    }
 });

@@ -1,13 +1,41 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="0;url=/clinica-imagen/api/paciente-dashboard.php">
-    <title>Redirigiendo al Portal del Paciente</title>
-    <script>window.location.href = '/clinica-imagen/api/paciente-dashboard.php';</script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Portal Paciente</title>
+    <link rel="stylesheet" href="/clinica-imagen/public/css/styles.css">
+    <link rel="stylesheet" href="/clinica-imagen/public/css/agenda.css">
+    <script src="/clinica-imagen/public/scripts/global.js" defer></script>
+    <script src="/clinica-imagen/public/scripts/paciente-dashboard.js" defer></script>
+    <script src="/clinica-imagen/public/scripts/paciente-agenda.js" defer></script>
 </head>
 <body>
-    <p>Redirigiendo al Portal del Paciente... <a href="/clinica-imagen/api/paciente-dashboard.php">haz clic aquí</a> si no se redirige automáticamente.</p>
+    <header class="main-header shadow">
+        <div class="container header-flex">
+            <div class="logo"><a href="/clinica-imagen/public/index.html"><img src="/clinica-imagen/public/images/logo.png" alt="Clínica Imagen"></a><span class="badge-portal">Portal Paciente</span></div>
+            <nav class="main-nav"><span id="userGreeting">Hola, paciente</span><a href="/clinica-imagen/api/logout.php" class="btn-logout">Cerrar Sesión</a><button id="agendaToggle" class="btn-primary" type="button">Agenda</button></nav>
+        </div>
+    </header>
+    <main class="container dashboard-layout">
+        <aside class="sidebar-referencia" aria-label="Orden médica activa"><div class="card-odontologo" id="ordenActiva"><p>Cargando información...</p></div></aside>
+        <section class="main-panel">
+            <div class="panel-section"><h2>Mis Citas Programadas</h2><div class="table-responsive" id="citasTable"><p>Cargando citas...</p></div></div>
+            <div class="panel-section"><h2>Mis Estudios Ejecutados</h2><div class="grid-estudios" id="estudiosList"><div class="card-estudio"><h4>Tomografía Dental Axial</h4><p class="text-muted">Fecha: 15/05/2026 | Técnico: Tec. Alana Gómez</p><div class="visor-simulado" aria-label="Visor de imagenología"><p>[ Visor Imagenología Integrado ]</p></div><div class="actions-estudio"><button class="btn-small" type="button">Ver en Visor</button><a href="#" class="btn-small outline">Descargar Informe PDF</a></div></div></div></div>
+        </section>
+    </main>
+    <div id="agendaModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="agendaTitle">
+        <div class="modal-content agenda-modal-content">
+            <div class="agenda-header"><div><h2 id="agendaTitle">Crear cita</h2><p class="text-muted">Selecciona estudio, médico, sucursal y día.</p></div><button id="agendaClose" class="btn-small outline" type="button">Cerrar</button></div>
+            <form id="agendaForm" class="agenda-form">
+                <div class="form-group"><label for="selectEstudio">Seleccionar Estudio</label><select id="selectEstudio" name="estudio" required><option value="">Elige un estudio</option><option value="Tomografía Dental">Tomografía Dental</option><option value="Rayos X Panorámico">Rayos X Panorámico</option><option value="Resonancia Magnética Facial">Resonancia Magnética Facial</option></select></div>
+                <div class="form-group"><label for="selectMedico">Seleccionar Médico</label><select id="selectMedico" name="medico" required><option value="">Elige un médico</option><option value="Dr. Javier Rouss">Dr. Javier Rouss</option><option value="Dra. Carla Méndez">Dra. Carla Méndez</option><option value="Dr. Matías Ferrari">Dr. Matías Ferrari</option></select></div>
+                <div class="form-group"><label for="selectSucursal">Seleccionar Sucursal</label><select id="selectSucursal" name="sucursal" required><option value="">Elige una sucursal</option><option value="Sucursal Durazno">Sucursal Durazno</option><option value="Sucursal Libertad">Sucursal Libertad</option><option value="Sucursal Colonia">Sucursal Colonia</option><option value="Sucursal Las Piedras">Sucursal Las Piedras</option><option value="Sucursal Punta del Este">Sucursal Punta del Este</option><option value="Sucursal Caudillos">Sucursal Caudillos</option><option value="Sucursal Nuevo Centro">Sucursal Nuevo Centro</option><option value="Sucursal Montevideo Shopping">Sucursal Montevideo Shopping</option><option value="Sucursal Barra de Carrasco">Sucursal Barra de Carrasco</option><option value="Sucursal Atlantida">Sucursal Atlantida</option><option value="Sucursal Lagomar">Sucursal Lagomar</option></select></div>
+                <div class="form-group"><label for="selectFechaHora">Fecha y Hora</label><input id="selectFechaHora" name="fecha_hora" type="datetime-local" required></div>
+                <div class="agenda-error-text" id="agendaError"></div><div class="agenda-actions"><button type="submit" class="btn-primary">Guardar cita</button><button id="agendaCancel" type="button" class="btn-danger">Cancelar</button></div>
+            </form>
+        </div>
+    </div>
+    <footer></footer>
 </body>
 </html>

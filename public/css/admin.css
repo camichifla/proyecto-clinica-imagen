@@ -5,6 +5,15 @@
     display: grid;
     gap: 1.5rem;
     margin: 2rem auto 3rem;
+    /* Dos columnas en pantallas grandes para distribuir contenido */
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+}
+
+.panel-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.6rem;
+    color: var(--text-muted);
 }
 
 .search-bar-section,
@@ -85,6 +94,11 @@
     .solicitud-actions {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    /* En pantallas pequeñas usamos una sola columna */
+    .admin-grid {
+        grid-template-columns: 1fr;
     }
 
     .admin-panel-block,

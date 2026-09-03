@@ -24,7 +24,8 @@ function requireLogin(string $redirect = '../public/login.html'): void {
 
 function requireRole(string $role, string $redirect = '../public/login.html'): void {
     requireLogin($redirect);
-    if (getUserType() !== $role) {
+    $allowedRoles = $role === 'admin' ? ['admin', 'professional'] : [$role];
+    if (!in_array(getUserType(), $allowedRoles, true)) {
         http_response_code(403);
         header('Location: ' . $redirect . '?error=access_denied');
         exit;

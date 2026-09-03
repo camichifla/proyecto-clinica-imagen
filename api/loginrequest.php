@@ -50,7 +50,17 @@ if (isset($_POST['register'])) {
     $password = password_hash($rawPass, PASSWORD_DEFAULT);
 
     try {
-        $stmt = $conn->prepare("SELECT CI FROM users WHERE CI = ? OR email = ?");
+        $stmt = $conn->prepare(
+            "SELECT CI FROM (
+                SELECT CI, email FROM users
+                UNION ALL
+                SELECT CI, email FROM Administradores
+                UNION ALL
+                SELECT CI, email FROM Profesionales
+            ) AS all_users
+            WHERE CI = ? OR email = ?
+            LIMIT 1"
+        );
         $stmt->execute([$CI, $email]);
 
         if ($stmt->fetchColumn() !== false) {
@@ -84,8 +94,24 @@ if (isset($_POST['login'])) {
         respond(false, 'Ingresá email y contraseña.');
     }
 
-    $stmt = $conn->prepare("SELECT CI, email, password, role FROM users WHERE email = ?");
-    $stmt->execute([$email]);
+    $stmt = $conn->prepare(
+        "SELECT CI, name, surname, email, password, role FROM (
+            SELECT CI, name, surname, email, password, 'admin' AS role, 1 AS priority
+            FROM Administradores
+            WHERE email = ?
+            UNION ALL
+            SELECT CI, name, surname, email, password, 'professional' AS role, 2 AS priority
+            FROM Profesionales
+            WHERE email = ?
+            UNION ALL
+            SELECT CI, name, surname, email, password, role, 3 AS priority
+            FROM users
+            WHERE email = ?
+        ) AS login_users
+        ORDER BY priority
+        LIMIT 1"
+    );
+    $stmt->execute([$email, $email, $email]);
     $user = $stmt->fetch();
 
     if ($user) {
@@ -94,10 +120,12 @@ if (isset($_POST['login'])) {
             session_regenerate_id(true);
 
             $_SESSION['CI']    = $user['CI'];
+            $_SESSION['name']  = $user['name'];
+            $_SESSION['surname'] = $user['surname'];
             $_SESSION['email'] = $user['email'];
             $_SESSION['role']  = $user['role'];
 
-            $redirect = $user['role'] === 'admin'
+            $redirect = in_array($user['role'], ['admin', 'professional'], true)
                 ? '/clinica-imagen/api/admin-citas.php'
                 : '/clinica-imagen/api/paciente-dashboard.php';
             respond(true, 'Inicio de sesión correcto.', ['redirect' => $redirect], $isAjax);

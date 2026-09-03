@@ -38,6 +38,18 @@ CREATE TABLE `users` (
   `role` enum('patient','admin') NOT NULL DEFAULT 'patient'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
+ALTER TABLE `users`
+  MODIFY `role` enum('patient','admin','professional') NOT NULL DEFAULT 'patient';
+
+CREATE TABLE IF NOT EXISTS `Administradores` LIKE `users`;
+CREATE TABLE IF NOT EXISTS `Profesionales` LIKE `users`;
+
+ALTER TABLE `Administradores`
+  MODIFY `role` enum('patient','admin','professional') NOT NULL DEFAULT 'admin';
+
+ALTER TABLE `Profesionales`
+  MODIFY `role` enum('patient','admin','professional') NOT NULL DEFAULT 'professional';
+
 CREATE TABLE consultas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,

@@ -71,6 +71,30 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Marca en rojo el input de fecha/hora si la hora elegida ya está ocupada
+    function markOccupiedState(fechaHoraInput, agendaError) {
+        if (!fechaHoraInput.value) {
+            fechaHoraInput.classList.remove('input-ocupado');
+            return false;
+        }
+
+        const horaHHMM = fechaHoraInput.value.split('T')[1]
+            ? fechaHoraInput.value.split('T')[1].slice(0, 5)
+            : '';
+
+        const ocupado = occupiedHours.includes(horaHHMM);
+
+        fechaHoraInput.classList.toggle('input-ocupado', ocupado);
+
+        if (agendaError) {
+            agendaError.textContent = ocupado
+                ? 'La hora seleccionada ya está ocupada en esa sucursal. Por favor elige otra.'
+                : '';
+        }
+
+        return ocupado;
+    }
+
     agendaToggle.addEventListener('click', function () {
         toggleModal(true);
     });
@@ -92,6 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const sucursal = agendaForm.sucursal.value.trim();
         const fechaHora = agendaForm.fecha_hora.value.trim();
         const agendaError = document.getElementById('agendaError');
+        const fechaHoraInput = document.getElementById('selectFechaHora') || agendaForm.fecha_hora;
 
         agendaError.textContent = '';
 
@@ -113,11 +138,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Extraemos fecha y hora en formato YYYY-MM-DD y HH:MM
         const fechaISO = fechaHora.split('T')[0];
-        const horaHHMM = fechaHora.split('T')[1] ? fechaHora.split('T')[1].slice(0,5) : '';
+
         // Si no cargamos las horas ocupadas aún, pedimos al servidor
         await fetchOccupiedHours(sucursal, fechaISO);
-        if (occupiedHours.includes(horaHHMM)) {
-            agendaError.textContent = 'La hora seleccionada ya está ocupada en esa sucursal. Por favor elige otra.';
+
+        if (markOccupiedState(fechaHoraInput, agendaError)) {
             return;
         }
 
@@ -153,14 +178,24 @@ document.addEventListener('DOMContentLoaded', function () {
     // Re-fetch occupied hours cuando cambie sucursal o fecha (si se usa date/datetime-local)
     const sucursalInput = document.getElementById('selectSucursal');
     const fechaInput = document.getElementById('selectFechaHora');
+    const agendaErrorEl = document.getElementById('agendaError');
+
     if (sucursalInput && fechaInput) {
         sucursalInput.addEventListener('change', async () => {
             const fechaISO = (fechaInput.value || '').split('T')[0];
             await fetchOccupiedHours(sucursalInput.value, fechaISO);
+            markOccupiedState(fechaInput, agendaErrorEl);
         });
+
         fechaInput.addEventListener('change', async () => {
             const fechaISO = (fechaInput.value || '').split('T')[0];
             await fetchOccupiedHours(sucursalInput.value, fechaISO);
+            markOccupiedState(fechaInput, agendaErrorEl);
+        });
+
+        // Revisa también mientras el usuario ajusta la hora manualmente (sin disparar 'change')
+        fechaInput.addEventListener('input', () => {
+            markOccupiedState(fechaInput, agendaErrorEl);
         });
     }
 });

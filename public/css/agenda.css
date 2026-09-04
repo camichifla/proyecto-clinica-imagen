@@ -103,3 +103,9 @@
         justify-content: stretch;
     }
 }
+
+.input-ocupado {
+    border-color: #dc2626 !important;
+    background-color: #fef2f2;
+    color: #b91c1c;
+}

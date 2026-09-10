@@ -15,7 +15,7 @@
                 <a href="/clinica-imagen/public/index.html"><img src="/clinica-imagen/public/images/logo.png" alt="Clínica Imagen"></a>
                 <span class="badge-admin">Módulo Interno</span>
             </div>
-            <nav class="main-nav" aria-label="Información de sesión"><span id="roleLabel">Rol: (sesión)</span></nav>
+            <nav class="main-nav" aria-label="Información de sesión"><span id="welcomeLabel">Bienvenido</span><a href="/clinica-imagen/api/logout.php" class="btn-logout">Cerrar Sesión</a></nav>
         </div>
     </header>
 
@@ -24,7 +24,7 @@
             <div>
                 <section class="search-bar-section" aria-label="Búsqueda de paciente">
                     <form id="searchForm" class="search-form">
-                        <label for="cedula-search" class="panel-title">Buscar Historial Clínico por Cédula de Identidad</label>
+                        <label for="cedula-search" class="panel-title">Buscar paciente por CI</label>
                         <div class="search-group">
                             <input type="text" id="cedula-search" name="ci" placeholder="Ej: 12345678" required autocomplete="off" inputmode="numeric">
                             <button type="submit" class="btn-primary">Buscar Paciente</button>
@@ -34,14 +34,13 @@
 
                 <section class="admin-panel-block">
                     <h2>Bandeja de Solicitudes Pendientes</h2>
-                    <div id="pendingList"><p>Cargando solicitudes...</p></div>
+                    <div id="pendingList" class="pending-list-box"><p>Cargando solicitudes...</p></div>
                 </section>
             </div>
 
             <div>
                 <section class="admin-panel-block">
-                    <h2 id="historyTitle">Historial Clínico</h2>
-                    <div id="clinicalHistory" class="clinical-history-box"><p>Seleccione un paciente para ver el historial.</p></div>
+                    <h2>Registrar historial</h2>
                     <form id="historyForm" class="entry-form" style="display:none; margin-top:12px;">
                         <label for="tipo">Tipo:</label>
                         <select id="tipo" name="tipo"><option value="observacion">Observación</option><option value="evolucion">Evolución</option></select>
@@ -50,13 +49,42 @@
                         <input type="hidden" id="paciente_ci" name="paciente_ci" value="">
                         <button type="submit" class="btn-small">Guardar Entrada en Historial</button>
                     </form>
+                    <h2 id="historyTitle">Historial Clínico</h2>
+                    <div id="clinicalHistory" class="clinical-history-box"><p>Seleccione un paciente para ver el historial.</p></div>
+                    <div id="patientRequests" class="patient-requests"></div>
+                    <a id="downloadHistory" class="btn-small" href="#" download style="display:none; margin-top:12px;">Descargar historial en PDF</a>
                 </section>
             </div>
         </div>
     </main>
+    <div id="validateModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="validateTitle">
+        <div class="modal-content agenda-modal-content">
+            <h2 id="validateTitle">Validar y enviar a profesional</h2>
+            <form id="validateForm" class="agenda-form">
+                <input id="validateCitaId" type="hidden">
+                <div class="form-group"><label for="validateSucursal">Sucursal</label><select id="validateSucursal" required><option value="">Elige una sucursal</option><option>Sucursal Durazno</option><option>Sucursal Libertad</option><option>Sucursal Colonia</option><option>Sucursal Las Piedras</option><option>Sucursal Punta del Este</option><option>Sucursal Caudillos</option><option>Sucursal Nuevo Centro</option><option>Sucursal Montevideo Shopping</option><option>Sucursal Barra de Carrasco</option><option>Sucursal Atlantida</option><option>Sucursal Lagomar</option></select></div>
+                <div class="form-group"><label for="validateDate">Fecha</label><input id="validateDate" type="date" required></div>
+                <div class="form-group"><span class="form-label">Hora disponible</span><div id="validateSlots" class="time-slots"><p class="text-muted">Elige sucursal y fecha.</p></div><input id="validateDateTime" type="hidden" required></div>
+                <div class="agenda-error-text" id="validateError"></div>
+                <div class="agenda-actions"><button type="submit" class="btn-success">Validar solicitud</button><button id="validateCancel" type="button" class="btn-small outline">Volver</button></div>
+            </form>
+        </div>
+    </div>
+    <div id="adminCancelModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="adminCancelTitle">
+        <div class="modal-content agenda-modal-content">
+            <h2 id="adminCancelTitle">Denegar solicitud</h2>
+            <form id="adminCancelForm" class="agenda-form">
+                <input id="adminCancelCitaId" type="hidden">
+                <div class="form-group"><label for="adminCancelReason">Motivo de cancelacion</label><textarea id="adminCancelReason" rows="4" maxlength="500" required></textarea></div>
+                <div class="agenda-error-text" id="adminCancelError"></div>
+                <div class="agenda-actions"><button type="submit" class="btn-danger">Confirmar cancelacion</button><button id="adminCancelClose" type="button" class="btn-small outline">Volver</button></div>
+            </form>
+        </div>
+    </div>
 
     <footer></footer>
-    <script src="/clinica-imagen/public/scripts/admin-citas.js" defer></script>
+    <script src="/clinica-imagen/public/scripts/admin-citas.js?v=20260908-2" defer></script>
+    <script src="/clinica-imagen/public/scripts/session-user.js" defer></script>
     <script src="/clinica-imagen/public/scripts/global.js" defer></script>
 </body>
 </html>

@@ -15,23 +15,18 @@ if (!isLoggedIn() || getUserType() !== 'patient') {
 }
 
 $estudio = trim($_POST['estudio'] ?? '');
-$medico = trim($_POST['medico'] ?? '');
-$sucursal = trim($_POST['sucursal'] ?? '');
-$fechaHora = trim($_POST['fecha_hora'] ?? '');
+$medico = trim($_POST['medico'] ?? '') ?: 'Por asignar';
+$sucursal = trim($_POST['sucursal'] ?? '') ?: 'Por asignar';
+$fechaHora = trim($_POST['fecha_hora'] ?? '') ?: date('Y-m-d\TH:i', strtotime('+1 day'));
 
 $errores = [];
 
 if ($estudio === '') {
     $errores[] = 'Selecciona un estudio';
 }
-if ($medico === '') {
-    $errores[] = 'Selecciona un médico';
-}
-if ($sucursal === '') {
-    $errores[] = 'Selecciona una sucursal';
-}
-if ($fechaHora === '') {
-    $errores[] = 'Selecciona fecha y hora';
+$fechaProvided = isset($_POST['fecha_hora']) && trim($_POST['fecha_hora']) !== '';
+if (!$fechaProvided) {
+    $fecha = new DateTime('+1 day');
 } elseif (!DateTime::createFromFormat('Y-m-d\TH:i', $fechaHora)) {
     $errores[] = 'Fecha y hora inválidas';
 } else {
@@ -39,6 +34,10 @@ if ($fechaHora === '') {
     $ahora = new DateTime('now');
     if ($fecha <= $ahora) {
         $errores[] = 'Fecha y hora deben ser posteriores al momento actual';
+    }
+    $minutesFromOpening = ((int)$fecha->format('H') * 60 + (int)$fecha->format('i')) - (8 * 60);
+    if ($minutesFromOpening < 0 || $minutesFromOpening % 45 !== 0) {
+        $errores[] = 'La hora debe pertenecer a un intervalo de 45 minutos';
     }
 }
 

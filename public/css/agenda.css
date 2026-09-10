@@ -79,6 +79,58 @@
     min-height: 1.2rem;
 }
 
+.agenda-success-text {
+    color: var(--status-success);
+    font-size: 0.95rem;
+    min-height: 1.2rem;
+}
+
+.form-label {
+    font-weight: 600;
+}
+
+.time-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+    gap: 0.55rem;
+    max-height: 230px;
+    overflow-y: auto;
+    padding: 0.25rem;
+}
+
+.time-slot {
+    display: grid;
+    gap: 0.15rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.55rem 0.35rem;
+    color: var(--dark-neutral);
+    background: var(--surface);
+    font-weight: 700;
+}
+
+.time-slot span {
+    font-size: 0.72rem;
+    font-weight: 500;
+}
+
+.time-slot.available {
+    border-color: var(--status-success);
+    background: var(--status-success-tint);
+}
+
+.time-slot.occupied {
+    border-color: var(--status-danger);
+    background: var(--status-danger-tint);
+    color: var(--status-danger);
+    cursor: not-allowed;
+}
+
+.time-slot.selected {
+    outline: 3px solid var(--accent-color);
+    outline-offset: 1px;
+}
+
 .dot-inactive {
     width: 0.75rem;
     height: 0.75rem;
@@ -91,6 +143,17 @@
 .status-badge.confirmada {
     background: var(--status-success-tint);
     color: var(--status-success);
+}
+
+.status-badge.cancelada {
+    background: var(--status-danger-tint);
+    color: var(--status-danger);
+}
+
+.cancellation-reason {
+    margin: 0.45rem 0 0;
+    color: var(--status-danger);
+    font-size: 0.9rem;
 }
 
 @media (max-width: 760px) {

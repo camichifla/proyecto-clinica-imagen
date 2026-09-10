@@ -14,25 +14,33 @@
     <header class="main-header shadow">
         <div class="container header-flex">
             <div class="logo"><a href="/clinica-imagen/public/index.html"><img src="/clinica-imagen/public/images/logo.png" alt="Clínica Imagen"></a><span class="badge-portal">Portal Paciente</span></div>
-            <nav class="main-nav"><span id="userGreeting">Hola, paciente</span><a href="/clinica-imagen/api/logout.php" class="btn-logout">Cerrar Sesión</a><button id="agendaToggle" class="btn-primary" type="button">Agenda</button></nav>
+            <nav class="main-nav"><span id="userGreeting">Hola, paciente</span><a href="/clinica-imagen/api/logout.php" class="btn-logout">Cerrar Sesión</a><button id="agendaToggle" class="btn-primary" type="button">Solicitar Estudio</button></nav>
         </div>
     </header>
     <main class="container dashboard-layout">
         <aside class="sidebar-referencia" aria-label="Orden médica activa"><div class="card-odontologo" id="ordenActiva"><p>Cargando información...</p></div></aside>
         <section class="main-panel">
             <div class="panel-section"><h2>Mis Citas Programadas</h2><div class="table-responsive" id="citasTable"><p>Cargando citas...</p></div></div>
-            <div class="panel-section"><h2>Mis Estudios Ejecutados</h2><div class="grid-estudios" id="estudiosList"><div class="card-estudio"><h4>Tomografía Dental Axial</h4><p class="text-muted">Fecha: 15/05/2026 | Técnico: Tec. Alana Gómez</p><div class="visor-simulado" aria-label="Visor de imagenología"><p>[ Visor Imagenología Integrado ]</p></div><div class="actions-estudio"><button class="btn-small" type="button">Ver en Visor</button><a href="#" class="btn-small outline">Descargar Informe PDF</a></div></div></div></div>
+            <div class="panel-section"><h2>Mis Estudios Ejecutados</h2><div class="grid-estudios" id="estudiosList"><p class="text-muted">Cargando estudios...</p></div></div>
         </section>
     </main>
     <div id="agendaModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="agendaTitle">
         <div class="modal-content agenda-modal-content">
-            <div class="agenda-header"><div><h2 id="agendaTitle">Crear cita</h2><p class="text-muted">Selecciona estudio, médico, sucursal y día.</p></div><button id="agendaClose" class="btn-small outline" type="button">Cerrar</button></div>
+            <div class="agenda-header"><div><h2 id="agendaTitle">Solicitar Estudio</h2></div></div>
             <form id="agendaForm" class="agenda-form">
-                <div class="form-group"><label for="selectEstudio">Seleccionar Estudio</label><select id="selectEstudio" name="estudio" required><option value="">Elige un estudio</option><option value="Tomografía Dental">Tomografía Dental</option><option value="Rayos X Panorámico">Rayos X Panorámico</option><option value="Resonancia Magnética Facial">Resonancia Magnética Facial</option></select></div>
-                <div class="form-group"><label for="selectMedico">Seleccionar Médico</label><select id="selectMedico" name="medico" required><option value="">Elige un médico</option><option value="Dr. Javier Rouss">Dr. Javier Rouss</option><option value="Dra. Carla Méndez">Dra. Carla Méndez</option><option value="Dr. Matías Ferrari">Dr. Matías Ferrari</option></select></div>
-                <div class="form-group"><label for="selectSucursal">Seleccionar Sucursal</label><select id="selectSucursal" name="sucursal" required><option value="">Elige una sucursal</option><option value="Sucursal Durazno">Sucursal Durazno</option><option value="Sucursal Libertad">Sucursal Libertad</option><option value="Sucursal Colonia">Sucursal Colonia</option><option value="Sucursal Las Piedras">Sucursal Las Piedras</option><option value="Sucursal Punta del Este">Sucursal Punta del Este</option><option value="Sucursal Caudillos">Sucursal Caudillos</option><option value="Sucursal Nuevo Centro">Sucursal Nuevo Centro</option><option value="Sucursal Montevideo Shopping">Sucursal Montevideo Shopping</option><option value="Sucursal Barra de Carrasco">Sucursal Barra de Carrasco</option><option value="Sucursal Atlantida">Sucursal Atlantida</option><option value="Sucursal Lagomar">Sucursal Lagomar</option></select></div>
-                <div class="form-group"><label for="selectFechaHora">Fecha y Hora</label><input id="selectFechaHora" name="fecha_hora" type="datetime-local" required></div>
-                <div class="agenda-error-text" id="agendaError"></div><div class="agenda-actions"><button type="submit" class="btn-primary">Guardar cita</button><button id="agendaCancel" type="button" class="btn-danger">Cancelar</button></div>
+                <div class="form-group"><label for="selectEstudio">Estudio</label><select id="selectEstudio" name="estudio" required><option value="">Elige un estudio</option><option value="Tomografía Dental">Tomografía Dental</option><option value="Rayos X Panorámico">Rayos X Panorámico</option><option value="Resonancia Magnética Facial">Resonancia Magnética Facial</option></select></div>
+                <div class="agenda-error-text" id="agendaError"></div><div class="agenda-success-text" id="agendaSuccess" role="status" aria-live="polite"></div><div class="agenda-actions"><button type="submit" class="btn-primary">Enviar Solicitud</button><button id="agendaCancel" type="button" class="btn-danger">Cancelar</button><button id="agendaClose" type="button" class="btn-small outline">Cerrar</button></div>
+            </form>
+        </div>
+    </div>
+    <div id="cancelModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cancelTitle">
+        <div class="modal-content agenda-modal-content">
+            <h2 id="cancelTitle">Cancelar solicitud</h2>
+            <form id="patientCancelForm" class="agenda-form">
+                <input id="cancelCitaId" type="hidden">
+                <div class="form-group"><label for="patientCancelReason">Motivo de cancelacion</label><textarea id="patientCancelReason" rows="4" maxlength="500" required></textarea></div>
+                <div class="agenda-error-text" id="cancelError"></div>
+                <div class="agenda-actions"><button type="submit" class="btn-danger">Confirmar cancelacion</button><button id="cancelClose" type="button" class="btn-small outline">Volver</button></div>
             </form>
         </div>
     </div>

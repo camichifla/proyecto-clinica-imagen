@@ -4,47 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const agendaClose = document.getElementById('agendaClose');
     const agendaCancel = document.getElementById('agendaCancel');
     const agendaForm = document.getElementById('agendaForm');
-    let occupiedHours = []; // lista de HH:MM ocupadas para la sucursal+fecha seleccionada
-
-    document.querySelectorAll('.btn-cancelar-cita').forEach(function (button) {
-        button.addEventListener('click', async function () {
-            const citaId = this.dataset.citaId;
-            if (!citaId) {
-                return;
-            }
-
-            const confirmar = window.confirm('¿Deseas cancelar esta cita?');
-            if (!confirmar) {
-                return;
-            }
-
-            const textoOriginal = this.textContent;
-            this.disabled = true;
-            this.textContent = 'Cancelando...';
-
-            try {
-                const response = await fetch('cancelar_cita.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ cita_id: Number(citaId) }),
-                });
-
-                const data = await response.json();
-
-                if (!response.ok || !data.success) {
-                    throw new Error(data.message || 'No se pudo cancelar la cita.');
-                }
-
-                window.location.reload();
-            } catch (error) {
-                this.disabled = false;
-                this.textContent = textoOriginal;
-                window.alert(error.message || 'No se pudo cancelar la cita.');
-            }
-        });
-    });
+    let occupiedHours = [];
 
     const toggleModal = (visible) => {
         agendaModal.classList.toggle('hidden', !visible);
@@ -99,9 +59,11 @@ document.addEventListener('DOMContentLoaded', function () {
         toggleModal(true);
     });
 
-    agendaClose.addEventListener('click', function () {
-        toggleModal(false);
-    });
+    if (agendaClose) {
+        agendaClose.addEventListener('click', function () {
+            toggleModal(false);
+        });
+    }
 
     agendaCancel.addEventListener('click', function () {
         toggleModal(false);
@@ -111,38 +73,15 @@ document.addEventListener('DOMContentLoaded', function () {
     agendaForm.addEventListener('submit', async function (event) {
         event.preventDefault();
 
-        const estudio = agendaForm.estudio.value.trim();
-        const medico = agendaForm.medico.value.trim();
-        const sucursal = agendaForm.sucursal.value.trim();
-        const fechaHora = agendaForm.fecha_hora.value.trim();
+        const estudio = agendaForm.estudio ? agendaForm.estudio.value.trim() : '';
         const agendaError = document.getElementById('agendaError');
-        const fechaHoraInput = document.getElementById('selectFechaHora') || agendaForm.fecha_hora;
+        const agendaSuccess = document.getElementById('agendaSuccess');
 
         agendaError.textContent = '';
+        agendaSuccess.textContent = '';
 
-        if (!estudio || !medico || !sucursal || !fechaHora) {
-            agendaError.textContent = 'Todos los campos son obligatorios.';
-            return;
-        }
-
-        const fechaSeleccionada = new Date(fechaHora);
-        if (Number.isNaN(fechaSeleccionada.getTime())) {
-            agendaError.textContent = 'La fecha y hora no son válidas.';
-            return;
-        }
-
-        if (fechaSeleccionada <= new Date()) {
-            agendaError.textContent = 'La fecha y hora deben ser posteriores al momento actual.';
-            return;
-        }
-
-        // Extraemos fecha y hora en formato YYYY-MM-DD y HH:MM
-        const fechaISO = fechaHora.split('T')[0];
-
-        // Si no cargamos las horas ocupadas aún, pedimos al servidor
-        await fetchOccupiedHours(sucursal, fechaISO);
-
-        if (markOccupiedState(fechaHoraInput, agendaError)) {
+        if (!estudio) {
+            agendaError.textContent = 'Selecciona un estudio.';
             return;
         }
 
@@ -161,8 +100,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            toggleModal(false);
-            window.location.reload();
+            agendaSuccess.textContent = 'Gracias por solicitar un estudio con nosotros, a la brevedad se confirmara la solicitud.';
+            agendaForm.reset();
         } catch (error) {
             agendaError.textContent = 'Error de conexión. Intenta nuevamente.';
             console.error(error);
@@ -175,27 +114,30 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Re-fetch occupied hours cuando cambie sucursal o fecha (si se usa date/datetime-local)
-    const sucursalInput = document.getElementById('selectSucursal');
-    const fechaInput = document.getElementById('selectFechaHora');
-    const agendaErrorEl = document.getElementById('agendaError');
-
-    if (sucursalInput && fechaInput) {
-        sucursalInput.addEventListener('change', async () => {
-            const fechaISO = (fechaInput.value || '').split('T')[0];
-            await fetchOccupiedHours(sucursalInput.value, fechaISO);
-            markOccupiedState(fechaInput, agendaErrorEl);
-        });
-
-        fechaInput.addEventListener('change', async () => {
-            const fechaISO = (fechaInput.value || '').split('T')[0];
-            await fetchOccupiedHours(sucursalInput.value, fechaISO);
-            markOccupiedState(fechaInput, agendaErrorEl);
-        });
-
-        // Revisa también mientras el usuario ajusta la hora manualmente (sin disparar 'change')
-        fechaInput.addEventListener('input', () => {
-            markOccupiedState(fechaInput, agendaErrorEl);
-        });
-    }
 });
+
+function buildTimeSlots() {
+    const slots = [];
+    for (let minutes = 8 * 60; minutes <= 19 * 60 + 15; minutes += 45) {
+        const hours = String(Math.floor(minutes / 60)).padStart(2, '0');
+        const mins = String(minutes % 60).padStart(2, '0');
+        slots.push(`${hours}:${mins}`);
+    }
+    return slots;
+}
+
+function renderTimeSlots(containerId, inputId, date, occupied) {
+    const container = document.getElementById(containerId);
+    const input = document.getElementById(inputId);
+    container.innerHTML = buildTimeSlots().map((time) => {
+        const isOccupied = occupied.includes(time);
+        return `<button type="button" class="time-slot ${isOccupied ? 'occupied' : 'available'}" ${isOccupied ? 'disabled' : ''} data-time="${time}">${time}<span>${isOccupied ? 'Ocupado' : 'Libre'}</span></button>`;
+    }).join('');
+    container.querySelectorAll('.time-slot.available').forEach((button) => {
+        button.addEventListener('click', () => {
+            container.querySelectorAll('.time-slot.selected').forEach((selected) => selected.classList.remove('selected'));
+            button.classList.add('selected');
+            input.value = `${date}T${button.dataset.time}`;
+        });
+    });
+}

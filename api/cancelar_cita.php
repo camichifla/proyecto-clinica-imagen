@@ -16,10 +16,17 @@ if (!isLoggedIn() || getUserType() !== 'patient') {
 
 $input = json_decode(file_get_contents('php://input'), true) ?: [];
 $citaId = isset($input['cita_id']) ? (int) $input['cita_id'] : 0;
+$motivo = trim((string)($input['motivo_cancelacion'] ?? ''));
 
 if ($citaId <= 0) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'No se recibió una cita válida para cancelar.']);
+    exit;
+}
+
+if ($motivo === '' || mb_strlen($motivo) > 500) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Escribe un motivo de cancelación de hasta 500 caracteres.']);
     exit;
 }
 
@@ -45,7 +52,8 @@ try {
         sucursal VARCHAR(150) NOT NULL,
         fecha_hora DATETIME NOT NULL,
         estado_anterior ENUM('pendiente','confirmada','cancelada') NOT NULL DEFAULT 'pendiente',
-        motivo_cancelacion VARCHAR(100) NOT NULL DEFAULT 'cancelada_por_paciente',
+        motivo_cancelacion VARCHAR(500) NOT NULL DEFAULT 'cancelada_por_paciente',
+        cancelada_por VARCHAR(30) NOT NULL DEFAULT 'paciente',
         cancelada_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (id),
         KEY idx_paciente_ci (paciente_ci),
@@ -75,7 +83,7 @@ try {
         exit;
     }
 
-    $insert = $pdo->prepare("INSERT INTO citas_canceladas (cita_id, paciente_ci, estudio, medico, sucursal, fecha_hora, estado_anterior, motivo_cancelacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $insert = $pdo->prepare("INSERT INTO citas_canceladas (cita_id, paciente_ci, estudio, medico, sucursal, fecha_hora, estado_anterior, motivo_cancelacion, cancelada_por) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $insert->execute([
         $cita['id'],
         $cita['paciente_ci'],
@@ -84,7 +92,8 @@ try {
         $cita['sucursal'],
         $cita['fecha_hora'],
         $cita['estado'],
-        'cancelada_por_paciente',
+        $motivo,
+        'paciente',
     ]);
 
     $pdo->commit();

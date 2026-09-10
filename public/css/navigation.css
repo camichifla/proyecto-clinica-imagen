@@ -48,6 +48,12 @@
     font-weight: bold;
 }
 
+#userGreeting,
+#welcomeLabel {
+    color: var(--surface);
+    font-weight: 600;
+}
+
 .main-nav ul {
     display: flex;
     align-items: center;

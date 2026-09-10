@@ -125,9 +125,11 @@ if (isset($_POST['login'])) {
             $_SESSION['email'] = $user['email'];
             $_SESSION['role']  = $user['role'];
 
-            $redirect = in_array($user['role'], ['admin', 'professional'], true)
-                ? '/clinica-imagen/api/admin-citas.php'
-                : '/clinica-imagen/api/paciente-dashboard.php';
+            $redirect = $user['role'] === 'professional'
+                ? '/clinica-imagen/api/profesional-dashboard.php'
+                : ($user['role'] === 'admin'
+                    ? '/clinica-imagen/api/admin-citas.php'
+                    : '/clinica-imagen/api/paciente-dashboard.php');
             respond(true, 'Inicio de sesión correcto.', ['redirect' => $redirect], $isAjax);
         }
     }

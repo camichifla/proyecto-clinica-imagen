@@ -104,7 +104,8 @@ CREATE TABLE `citas_canceladas` (
   `sucursal` varchar(150) NOT NULL,
   `fecha_hora` datetime NOT NULL,
   `estado_anterior` enum('pendiente','confirmada','cancelada') NOT NULL DEFAULT 'pendiente',
-  `motivo_cancelacion` varchar(100) NOT NULL DEFAULT 'cancelada_por_paciente',
+  `motivo_cancelacion` varchar(500) NOT NULL DEFAULT 'cancelada_por_paciente',
+  `cancelada_por` varchar(30) NOT NULL DEFAULT 'paciente',
   `cancelada_en` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_paciente_ci` (`paciente_ci`),
@@ -123,6 +124,20 @@ CREATE TABLE IF NOT EXISTS `historial` (
   PRIMARY KEY (`id`),
   KEY `idx_paciente` (`paciente_ci`),
   CONSTRAINT `fk_historial_paciente` FOREIGN KEY (`paciente_ci`) REFERENCES `users` (`CI`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `estudios` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `paciente_ci` INT UNSIGNED NOT NULL,
+  `estudio` VARCHAR(150) NOT NULL,
+  `tecnico` VARCHAR(150) NOT NULL,
+  `fecha_estudio` DATETIME NOT NULL,
+  `archivo_visor` VARCHAR(255) DEFAULT NULL,
+  `archivo_pdf` VARCHAR(255) DEFAULT NULL,
+  `creado_en` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_estudios_paciente` (`paciente_ci`),
+  CONSTRAINT `fk_estudios_paciente` FOREIGN KEY (`paciente_ci`) REFERENCES `users` (`CI`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 COMMIT;

@@ -1,0 +1,25 @@
+/* Estilos propios del Portal profesional. */
+
+.professional-grid {
+    margin-top: 2rem;
+}
+
+#professionalGreeting {
+    color: #FFFFFF;
+    font-weight: 600;
+}
+
+.professional-grid .admin-panel-block,
+.professional-grid .search-bar-section {
+    border-top: 3px solid var(--accent-color);
+}
+
+#professionalDownloadHistory {
+    display: inline-flex;
+    margin-top: 0.75rem;
+}
+
+#professionalDownloadHistory[hidden],
+#professionalHistoryForm[hidden] {
+    display: none;
+}

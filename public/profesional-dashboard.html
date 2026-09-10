@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>Portal Profesional - Clinica Imagen</title>
+    <link rel="stylesheet" href="/clinica-imagen/public/css/styles.css">
+    <link rel="stylesheet" href="/clinica-imagen/public/css/admin.css">
+    <link rel="stylesheet" href="/clinica-imagen/public/css/profesional.css">
+</head>
+<body>
+    <header class="main-header shadow">
+        <div class="container header-flex">
+            <div class="logo">
+                <a href="/clinica-imagen/public/index.html"><img src="/clinica-imagen/public/images/logo.png" alt="Clinica Imagen"></a>
+                <span class="badge-admin">Portal profesional</span>
+            </div>
+            <nav class="main-nav" aria-label="Informacion de sesion">
+                <span id="professionalGreeting">Bienvenido</span>
+                <a href="/clinica-imagen/api/logout.php" class="btn-logout">Cerrar Sesion</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="admin-grid professional-grid">
+            <div>
+                <section class="search-bar-section" aria-label="Busqueda de paciente">
+                    <form id="professionalSearchForm" class="search-form">
+                        <label for="professionalPatientCi" class="panel-title">Buscar paciente por CI</label>
+                        <div class="search-group">
+                            <input type="text" id="professionalPatientCi" placeholder="Ej: 12345678" required autocomplete="off" inputmode="numeric">
+                            <button type="submit" class="btn-primary">Buscar Paciente</button>
+                        </div>
+                    </form>
+                </section>
+                <section class="admin-panel-block">
+                    <h2>Bandeja de estudios pendientes</h2>
+                    <div id="professionalPendingList" class="pending-list-box"><p>Cargando solicitudes...</p></div>
+                </section>
+            </div>
+
+            <div>
+                <section class="admin-panel-block">
+                    <h2>Historial</h2>
+                    <form id="professionalHistoryForm" class="entry-form" hidden>
+                        <label for="professionalHistoryType">Tipo:</label>
+                        <select id="professionalHistoryType" name="tipo"><option value="observacion">Observacion</option><option value="evolucion">Evolucion</option></select>
+                        <label for="professionalHistoryNote">Nota / Observacion:</label>
+                        <textarea id="professionalHistoryNote" name="nota" rows="3" placeholder="Escriba aqui..." required></textarea>
+                        <input type="hidden" id="professionalPatientHidden" name="paciente_ci">
+                        <button type="submit" class="btn-small">Guardar Entrada en Historial</button>
+                    </form>
+                    <form id="professionalStudyForm" class="entry-form" enctype="multipart/form-data" hidden>
+                        <h3>Registrar estudio realizado</h3>
+                        <label for="professionalStudyName">Estudio:</label>
+                        <input id="professionalStudyName" name="estudio" type="text" required>
+                        <label for="professionalStudyTechnician">Técnico:</label>
+                        <input id="professionalStudyTechnician" name="tecnico" type="text" required>
+                        <label for="professionalStudyDate">Fecha del estudio:</label>
+                        <input id="professionalStudyDate" name="fecha_estudio" type="datetime-local" required>
+                        <label for="professionalStudyViewer">Imagen para el visor (opcional):</label>
+                        <input id="professionalStudyViewer" name="archivo_visor" type="file" accept="image/jpeg,image/png,image/webp">
+                        <label for="professionalStudyPdf">Informe PDF (opcional):</label>
+                        <input id="professionalStudyPdf" name="archivo_pdf" type="file" accept="application/pdf">
+                        <input type="hidden" id="professionalStudyPatient" name="paciente_ci">
+                        <button type="submit" class="btn-small">Guardar estudio</button>
+                    </form>
+                    <h2 id="professionalHistoryTitle">Historial Clínico</h2>
+                    <div id="professionalClinicalHistory" class="clinical-history-box"><p>Seleccione un paciente para ver el historial.</p></div>
+                    <div id="professionalPatientRequests" class="patient-requests"></div>
+                    <a id="professionalDownloadHistory" class="btn-small" href="#" download hidden>Descargar historial en PDF</a>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer></footer>
+    <script src="/clinica-imagen/public/scripts/profesional-dashboard.js?v=20260908-2" defer></script>
+</body>
+</html>

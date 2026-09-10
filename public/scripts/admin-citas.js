@@ -136,7 +136,121 @@ function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, (character) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[character]));
 }
 
+const userRoleLabels = {patient: 'Paciente', professional: 'Profesional', admin: 'Administrador'};
+
+async function requestUserManagement(payload) {
+    const response = await fetch('/clinica-imagen/api/ajax/manage_users.php', {
+        method: 'POST', credentials: 'include', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!data.success && !data.message && response.redirected) throw new Error('La sesión expiró. Volvé a iniciar sesión.');
+    if (!response.ok || !data.success) {
+        const error = new Error(data.message || 'No se pudo completar la operación.');
+        error.code = data.code || '';
+        throw error;
+    }
+    return data;
+}
+
+function renderManagedUser(user) {
+    const result = document.getElementById('managedUserResult');
+    result.hidden = false;
+    result.innerHTML = `
+        <p><strong>${escapeHtml(user.name)} ${escapeHtml(user.surname)}</strong></p>
+        <p>CI: ${escapeHtml(user.ci)} · ${escapeHtml(userRoleLabels[user.role] || user.role)}</p>
+        <form id="editUserForm" class="user-form">
+            <input type="hidden" name="ci" value="${escapeHtml(user.ci)}">
+            <input type="hidden" name="role" value="${escapeHtml(user.role)}">
+            <div class="user-form-grid">
+                <label>Nombre<input name="name" value="${escapeHtml(user.name)}" required></label>
+                <label>Apellido<input name="surname" value="${escapeHtml(user.surname)}" required></label>
+                <label>Dirección<input name="address" value="${escapeHtml(user.address)}" required></label>
+                <label>Teléfono<input name="phone" value="${escapeHtml(user.phone)}" required></label>
+                <label class="user-form-wide">Email<input name="email" type="email" value="${escapeHtml(user.email)}" required></label>
+                <label class="user-form-wide">Nueva contraseña (opcional)<input name="password" type="password" minlength="6"></label>
+            </div>
+            <div class="user-result-actions"><button type="submit" class="btn-primary">Guardar cambios</button><button type="button" id="deleteUserButton" class="btn-danger">Borrar usuario</button></div>
+            <p id="editUserMessage" class="form-message" role="status"></p>
+        </form>`;
+    document.getElementById('editUserForm').addEventListener('submit', saveManagedUser);
+    document.getElementById('deleteUserButton').addEventListener('click', () => deleteManagedUser(user.ci));
+}
+
+async function searchManagedUser(event) {
+    event.preventDefault();
+    const ci = document.getElementById('manageUserCi').value.trim();
+    const result = document.getElementById('managedUserResult');
+    result.hidden = false;
+    result.innerHTML = '<p>Buscando usuario...</p>';
+    try {
+        const response = await fetch(`/clinica-imagen/api/ajax/manage_users.php?action=get&ci=${encodeURIComponent(ci)}`, {credentials: 'include'});
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.success) throw new Error(data.message || 'No se pudo buscar el usuario.');
+        renderManagedUser(data.user);
+    } catch (error) { result.innerHTML = `<p class="form-message error">${escapeHtml(error.message || 'No se pudo buscar el usuario.')}</p>`; }
+}
+
+async function saveManagedUser(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const message = document.getElementById('editUserMessage');
+    try {
+        await requestUserManagement({action: 'update', ...Object.fromEntries(new FormData(form))});
+        message.className = 'form-message success';
+        message.textContent = 'Usuario actualizado correctamente.';
+    } catch (error) { message.className = 'form-message error'; message.textContent = error.message; }
+}
+
+async function deleteManagedUser(ci) {
+    if (!window.confirm('¿Querés borrar este usuario? Esta acción no se puede deshacer.')) return;
+    try {
+        await requestUserManagement({action: 'delete', ci});
+        document.getElementById('managedUserResult').innerHTML = '<p class="form-message success">Usuario borrado correctamente.</p>';
+    } catch (error) { document.getElementById('editUserMessage').textContent = error.message; }
+}
+
+async function createManagedUser(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const message = document.getElementById('createUserMessage');
+    try {
+        await requestUserManagement({action: 'create', ...Object.fromEntries(new FormData(form))});
+        form.reset();
+        document.getElementById('adminResetPasswordForm').hidden = true;
+        message.className = 'form-message success';
+        message.textContent = 'Usuario creado correctamente.';
+    } catch (error) {
+        message.className = 'form-message error';
+        message.textContent = error.message;
+        if (error.code === 'ci_exists') showAdminResetForm(form.elements.ci.value.trim());
+    }
+}
+
+function showAdminResetForm(ci) {
+    const form = document.getElementById('adminResetPasswordForm');
+    form.elements.ci.value = ci;
+    form.hidden = false;
+    form.elements.email.focus();
+}
+
+async function resetAdminPassword(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const message = document.getElementById('adminResetMessage');
+    try {
+        await requestUserManagement({action: 'reset_password', ...Object.fromEntries(new FormData(form))});
+        form.reset();
+        form.hidden = true;
+        message.className = 'form-message success';
+        message.textContent = 'Contraseña restablecida correctamente.';
+    } catch (error) { message.className = 'form-message error'; message.textContent = error.message; }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('manageUserSearchForm')?.addEventListener('submit', searchManagedUser);
+    document.getElementById('createUserForm')?.addEventListener('submit', createManagedUser);
+    document.getElementById('adminResetPasswordForm')?.addEventListener('submit', resetAdminPassword);
+
     const validateModal = document.getElementById('validateModal');
     const closeValidation = () => { validateModal.classList.add('hidden'); document.body.style.overflow = ''; };
     document.getElementById('validateCancel').addEventListener('click', closeValidation);

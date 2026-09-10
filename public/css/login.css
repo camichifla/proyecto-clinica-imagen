@@ -90,3 +90,12 @@ button[name="register"]:hover {
 .form-box p a:hover {
     text-decoration: underline;
 }
+
+.success-message {
+    padding: 0.75rem;
+    background: var(--status-success-tint);
+    border-radius: var(--radius-sm);
+    color: var(--status-success);
+    text-align: center;
+    margin-bottom: 1.25rem;
+}

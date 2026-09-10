@@ -47,25 +47,24 @@ if (isset($_POST['register'])) {
         respond(false, 'El email no es válido.');
     }
 
-    $password = password_hash($rawPass, PASSWORD_DEFAULT);
-
     try {
-        $stmt = $conn->prepare(
-            "SELECT CI FROM (
-                SELECT CI, email FROM users
-                UNION ALL
-                SELECT CI, email FROM Administradores
-                UNION ALL
-                SELECT CI, email FROM Profesionales
-            ) AS all_users
-            WHERE CI = ? OR email = ?
-            LIMIT 1"
-        );
-        $stmt->execute([$CI, $email]);
+        $stmt = $conn->prepare("SELECT email FROM (
+            SELECT CI, email FROM users UNION ALL
+            SELECT CI, email FROM Administradores UNION ALL
+            SELECT CI, email FROM Profesionales
+        ) AS all_users WHERE email = ? LIMIT 1");
+        $stmt->execute([$email]);
+        if ($stmt->fetchColumn() !== false) respond(false, 'Ese email ya está registrado. Elegí otro.', ['code' => 'email_exists']);
 
-        if ($stmt->fetchColumn() !== false) {
-            respond(false, 'La cédula o el email ya están registrados.');
-        }
+        $stmt = $conn->prepare("SELECT CI FROM (
+            SELECT CI FROM users UNION ALL
+            SELECT CI FROM Administradores UNION ALL
+            SELECT CI FROM Profesionales
+        ) AS all_users WHERE CI = ? LIMIT 1");
+        $stmt->execute([$CI]);
+        if ($stmt->fetchColumn() !== false) respond(false, 'Esa CI ya está registrada. Podés restablecer su contraseña.', ['code' => 'ci_exists']);
+
+        $password = password_hash($rawPass, PASSWORD_DEFAULT);
 
         $stmt = $conn->prepare(
             "INSERT INTO users (name, surname, CI, address, phone, email, password, role)

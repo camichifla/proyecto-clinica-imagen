@@ -17,6 +17,19 @@ function clearFormError(form) {
     slot.classList.add('hidden');
 }
 
+function showResetPasswordForm(ci = '') {
+    showForm('reset-password-form');
+    const form = document.querySelector('#reset-password-form form');
+    form.elements.ci.value = ci;
+    form.elements.email.focus();
+}
+
+function showResetSuccess(form, message) {
+    const slot = form.querySelector('[data-success-slot]');
+    slot.textContent = message;
+    slot.classList.remove('hidden');
+}
+
 function setFormLoading(form, isLoading) {
     const button = form.querySelector('button[type="submit"]');
     if (!button) return;
@@ -63,6 +76,7 @@ async function handleAjaxSubmit(event) {
         }
 
         showFormError(form, data.message || 'Ocurrió un error. Intentá de nuevo.');
+        if (data.code === 'ci_exists') showResetPasswordForm(form.elements.CI?.value || '');
     } catch (err) {
         showFormError(form, 'No se pudo conectar con el servidor. Revisá tu conexión.');
     } finally {
@@ -74,4 +88,18 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('[data-ajax-form]').forEach(form => {
         form.addEventListener('submit', handleAjaxSubmit);
     });
+    document.querySelector('[data-reset-form]')?.addEventListener('submit', handleResetSubmit);
 });
+
+async function handleResetSubmit(event) {
+    const form = event.currentTarget;
+    event.preventDefault();
+    clearFormError(form);
+    try {
+        const response = await fetch(form.action, {method: 'POST', body: new FormData(form), headers: {'X-Requested-With': 'XMLHttpRequest'}});
+        const data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.message || 'No se pudo restablecer la contraseña.');
+        form.reset();
+        showResetSuccess(form, data.message);
+    } catch (error) { showFormError(form, error.message); }
+}

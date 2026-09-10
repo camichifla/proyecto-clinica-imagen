@@ -55,6 +55,19 @@
             </form>
         </div>
 
+        <div class="form-box" id="reset-password-form">
+            <form action="../api/reset_password.php" method="post" data-reset-form>
+                <h2 class="login">Restablecer contraseña</h2>
+                <p class="error-message hidden" data-error-slot></p>
+                <p class="success-message hidden" data-success-slot></p>
+                <input class="login" type="text" name="ci" placeholder="Cédula de Identidad" required inputmode="numeric">
+                <input class="login" type="email" name="email" placeholder="Email registrado" required autocomplete="email">
+                <input class="login" type="password" name="password" placeholder="Nueva contraseña" minlength="6" required autocomplete="new-password">
+                <button type="submit">Restablecer contraseña</button>
+                <p><a href="#" onclick="showForm('login-form'); return false;">Volver a iniciar sesión</a></p>
+            </form>
+        </div>
+
     </div>
 
     <script src="scripts/login.js"></script>

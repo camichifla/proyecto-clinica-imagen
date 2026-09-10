@@ -6,7 +6,7 @@
     <meta name="robots" content="noindex">
     <title>Admin — Bandeja de Citas</title>
     <link rel="stylesheet" href="/clinica-imagen/public/css/styles.css">
-    <link rel="stylesheet" href="/clinica-imagen/public/css/admin.css">
+    <link rel="stylesheet" href="/clinica-imagen/public/css/admin.css?v=20260910-1">
 </head>
 <body>
     <header class="main-header shadow">
@@ -29,6 +29,43 @@
                             <input type="text" id="cedula-search" name="ci" placeholder="Ej: 12345678" required autocomplete="off" inputmode="numeric">
                             <button type="submit" class="btn-primary">Buscar Paciente</button>
                         </div>
+                    </form>
+                </section>
+
+                <section class="search-bar-section user-box" aria-label="Gestionar usuario">
+                    <form id="manageUserSearchForm" class="search-form">
+                        <label for="manageUserCi" class="panel-title">Gestionar usuario por CI</label>
+                        <div class="search-group">
+                            <input type="text" id="manageUserCi" placeholder="Ej: 12345678" required autocomplete="off" inputmode="numeric">
+                            <button type="submit" class="btn-primary">Buscar Usuario</button>
+                        </div>
+                    </form>
+                    <div id="managedUserResult" class="user-result" hidden></div>
+                </section>
+
+                <section class="search-bar-section user-box" aria-label="Crear usuario">
+                    <form id="createUserForm" class="user-form">
+                        <h2>Crear usuario</h2>
+                        <div class="user-form-grid">
+                            <label>CI<input name="ci" type="text" inputmode="numeric" required></label>
+                            <label>Tipo<select name="role" required><option value="patient">Paciente</option><option value="professional">Profesional</option><option value="admin">Administrador</option></select></label>
+                            <label>Nombre<input name="name" type="text" required></label>
+                            <label>Apellido<input name="surname" type="text" required></label>
+                            <label>Dirección<input name="address" type="text" required></label>
+                            <label>Teléfono<input name="phone" type="tel" required></label>
+                            <label class="user-form-wide">Email<input name="email" type="email" required></label>
+                            <label class="user-form-wide">Contraseña<input name="password" type="password" minlength="6" required></label>
+                        </div>
+                        <button type="submit" class="btn-primary">Crear usuario</button>
+                        <p id="createUserMessage" class="form-message" role="status"></p>
+                    </form>
+                    <form id="adminResetPasswordForm" class="user-form reset-user-form" hidden>
+                        <h3>Restablecer contraseña de CI existente</h3>
+                        <input name="ci" type="hidden">
+                        <label>Email registrado<input name="email" type="email" required></label>
+                        <label>Nueva contraseña<input name="password" type="password" minlength="6" required></label>
+                        <button type="submit" class="btn-small">Restablecer contraseña</button>
+                        <p id="adminResetMessage" class="form-message" role="status"></p>
                     </form>
                 </section>
 
@@ -83,7 +120,7 @@
     </div>
 
     <footer></footer>
-    <script src="/clinica-imagen/public/scripts/admin-citas.js?v=20260908-2" defer></script>
+    <script src="/clinica-imagen/public/scripts/admin-citas.js?v=20260910-1" defer></script>
     <script src="/clinica-imagen/public/scripts/session-user.js" defer></script>
     <script src="/clinica-imagen/public/scripts/global.js" defer></script>
 </body>

@@ -32,6 +32,16 @@ function requireRole(string $role, string $redirect = '../public/login.html'): v
     }
 }
 
+function requireAdminUser(): void {
+    requireLogin();
+    if (getUserType() !== 'admin') {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'message' => 'Solo un administrador puede gestionar usuarios.']);
+        exit;
+    }
+}
+
 function hasRole(string ...$roles): bool {
     return isLoggedIn() && in_array(getUserType(), $roles, true);
 }

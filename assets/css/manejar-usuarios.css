@@ -1,0 +1,152 @@
+/* --- Selects del formulario de alta de personal --- */
+/* Base.css only styles `.campo input`; this page's rol/especializacion
+   <select>s need the same visual treatment for parity with the rest of the
+   form (mirrors assets/css/agendar-cita.css, duplicated per the per-page
+   CSS split convention rather than shared). */
+
+.campo select,
+.selector-combo-boton {
+    padding: 0.7rem 0.9rem;
+    padding-right: 2.2rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.6rem;
+    font-family: inherit;
+    font-size: var(--font-size-base);
+    background-color: var(--surface-alt);
+    color: var(--dark-neutral);
+    transition: border-color var(--transition-fast);
+    /* Misma flecha propia que agendar-cita.css, en vez de la nativa. */
+    appearance: none;
+    -webkit-appearance: none;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--text-secondary) 50%),
+        linear-gradient(135deg, var(--text-secondary) 50%, transparent 50%);
+    background-position:
+        calc(100% - 1.35rem) center,
+        calc(100% - 1rem) center;
+    background-size: 0.35rem 0.35rem, 0.35rem 0.35rem;
+    background-repeat: no-repeat;
+}
+
+.campo select:focus,
+.selector-combo-boton:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.campo select[aria-invalid="true"],
+.selector-combo-boton[aria-invalid="true"] {
+    border-color: var(--accent-secondary);
+}
+
+/* --- Lista de cuentas --- */
+
+.tabla-scroll {
+    overflow-x: auto;
+}
+
+.tabla-datos {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla-datos th,
+.tabla-datos td {
+    text-align: left;
+    padding: var(--space-3);
+    border-bottom: 1px solid var(--border-subtle);
+    vertical-align: middle;
+}
+
+.tabla-datos th {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.estado-badge {
+    display: inline-block;
+    padding: var(--space-1) 0.7rem;
+    border-radius: 999px;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    background: var(--light-neutral);
+    color: var(--dark-neutral);
+}
+
+.estado-si {
+    background: rgba(var(--success-rgb), 0.15);
+    color: var(--color-success);
+}
+
+.estado-no {
+    background: rgba(var(--danger-rgb), 0.12);
+    color: var(--color-danger);
+}
+
+.etiqueta-tu-cuenta {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-style: italic;
+}
+
+.form-toggle-activo {
+    margin: 0;
+}
+
+.btn-secundario {
+    display: inline-block;
+    border: 1px solid var(--accent-secondary);
+    border-radius: 999px;
+    color: var(--accent-secondary);
+    font-weight: var(--font-weight-semibold);
+    background: transparent;
+    padding: var(--space-2) var(--space-4);
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.btn-secundario:hover:not(:disabled) {
+    background: var(--light-neutral);
+}
+
+.btn-secundario:disabled {
+    color: var(--text-muted);
+    border-color: var(--border-subtle);
+    cursor: not-allowed;
+}
+
+@media (width <= 480px) {
+    .tabla-datos thead {
+        display: none;
+    }
+
+    .tabla-datos tr {
+        display: block;
+        margin-bottom: var(--space-4);
+        border-bottom: 2px solid var(--border-subtle);
+    }
+
+    .tabla-datos td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--space-3);
+        border-bottom: none;
+        padding: 0.4rem var(--space-3);
+    }
+
+    .tabla-datos td[data-label]:not([data-label=""])::before {
+        content: attr(data-label);
+        font-weight: var(--font-weight-semibold);
+        color: var(--text-secondary);
+        margin-right: var(--space-3);
+    }
+}
+
+/* .check-grid (especializacion checkbox group) now lives in base.css,
+   shared with agendar-cita-medico.php's order forms — no longer duplicated
+   here. */

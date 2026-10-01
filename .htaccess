@@ -1,0 +1,31 @@
+RewriteEngine On
+
+# Las paginas se movieron a subcarpetas (auth/, citas/, resultados/,
+# alineadores/, usuarios/) pero sus URLs publicas se mantienen igual que
+# antes (ej. /agendar-cita.php) para no romper bookmarks/links existentes.
+RewriteRule ^login\.php$ auth/login.php [L]
+RewriteRule ^logout\.php$ auth/logout.php [L]
+RewriteRule ^register\.php$ auth/register.php [L]
+RewriteRule ^reset-request\.php$ auth/reset-request.php [L]
+RewriteRule ^reset-confirm\.php$ auth/reset-confirm.php [L]
+RewriteRule ^verify\.php$ auth/verify.php [L]
+
+RewriteRule ^agenda\.php$ citas/agenda.php [L]
+RewriteRule ^agendar-cita-medico\.php$ citas/agendar-cita-medico.php [L]
+RewriteRule ^agendar-cita\.php$ citas/agendar-cita.php [L]
+RewriteRule ^solicitudes-cita\.php$ citas/solicitudes-cita.php [L]
+RewriteRule ^ver-agenda\.php$ citas/ver-agenda.php [L]
+
+RewriteRule ^buscar-resultados\.php$ resultados/buscar-resultados.php [L]
+RewriteRule ^cargar-resultados\.php$ resultados/cargar-resultados.php [L]
+RewriteRule ^enviar-resultados\.php$ resultados/enviar-resultados.php [L]
+RewriteRule ^historial-pacientes\.php$ resultados/historial-pacientes.php [L]
+RewriteRule ^resultados\.php$ resultados/resultados.php [L]
+RewriteRule ^ver-resultado-imagen\.php$ resultados/ver-resultado-imagen.php [L]
+RewriteRule ^ver-resultados\.php$ resultados/ver-resultados.php [L]
+
+RewriteRule ^orden-alineadores\.php$ alineadores/orden-alineadores.php [L]
+RewriteRule ^ordenes-alineadores\.php$ alineadores/ordenes-alineadores.php [L]
+
+RewriteRule ^manejar-usuarios\.php$ usuarios/manejar-usuarios.php [L]
+RewriteRule ^modificar-usuario\.php$ usuarios/modificar-usuario.php [L]

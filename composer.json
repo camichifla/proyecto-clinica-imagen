@@ -1,0 +1,9 @@
+{
+    "name": "clinica-imagen/proyecto",
+    "description": "Clinica Imagen — auth foundation (login, registration, role sessions)",
+    "type": "project",
+    "require": {
+        "php": ">=8.0",
+        "phpmailer/phpmailer": "^6.9"
+    }
+}

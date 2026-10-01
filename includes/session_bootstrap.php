@@ -1,0 +1,81 @@
+<?php
+// includes/session_bootstrap.php — overrides XAMPP's insecure session.ini
+// defaults at the application layer only. /opt/lampp/etc/php.ini is never
+// edited; this file makes the app correct regardless of it.
+require_once __DIR__ . '/config.php';
+
+const SESION_TIMEOUT_SEGUNDOS = 1500; // 25 minutes
+
+if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.use_strict_mode', '1'); // XAMPP php.ini ships 0
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'domain'   => '',
+        'secure'   => APP_HTTPS, // config-driven: forcing true over HTTP silently drops the cookie
+        'httponly' => true,      // XAMPP php.ini ships this empty
+        'samesite' => 'Lax',
+    ]);
+    session_start();
+}
+
+if (isset($_SESSION['cuenta_id']) && isset($_SESSION['ultimo_acceso'])
+    && (time() - $_SESSION['ultimo_acceso']) > SESION_TIMEOUT_SEGUNDOS
+) {
+    $_SESSION = [];
+    if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+    }
+    session_destroy();
+    header('Location: ' . APP_URL . '/login.php?expirado=1');
+    exit;
+}
+
+$_SESSION['ultimo_acceso'] = time();
+
+if (empty($_SESSION['csrf'])) {
+    $_SESSION['csrf'] = bin2hex(random_bytes(32));
+}
+
+/**
+ * Returns the CSRF token for the current session, generating one on first use.
+ */
+function csrf_token(): string
+{
+    if (empty($_SESSION['csrf'])) {
+        $_SESSION['csrf'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf'];
+}
+
+/**
+ * Validates a submitted CSRF token against the session's token. Responds
+ * with 403 and exits on mismatch or missing token — never returns false.
+ */
+function csrf_check(?string $token): void
+{
+    if (!is_string($token) || $token === '' || empty($_SESSION['csrf']) || !hash_equals($_SESSION['csrf'], $token)) {
+        http_response_code(403);
+        echo 'Solicitud invalida (token CSRF ausente o incorrecto).';
+        exit;
+    }
+}
+
+/**
+ * Returns the authenticated account's session data, or null if none.
+ *
+ * @return array{cuenta_id:int,rol:string,ref_id:int,nombre:string}|null
+ */
+function usuario_actual(): ?array
+{
+    if (empty($_SESSION['cuenta_id'])) {
+        return null;
+    }
+    return [
+        'cuenta_id' => (int) $_SESSION['cuenta_id'],
+        'rol'       => (string) $_SESSION['rol'],
+        'ref_id'    => (int) $_SESSION['ref_id'],
+        'nombre'    => (string) $_SESSION['nombre'],
+    ];
+}

@@ -1,0 +1,252 @@
+/* --- Agenda: calendario mes/semana --- */
+
+.agenda-controles {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+}
+
+.agenda-toggle {
+    display: inline-flex;
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.agenda-toggle-opcion {
+    padding: var(--space-2) 1.1rem;
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-semibold);
+    text-decoration: none;
+    background: var(--surface-alt);
+}
+
+.agenda-toggle-activa {
+    background: var(--accent-color);
+    color: var(--surface);
+}
+
+.agenda-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.agenda-nav .calendario-nav {
+    position: static;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.agenda-nav-titulo {
+    min-width: 9rem;
+    text-align: center;
+    font-weight: var(--font-weight-bold);
+    color: var(--dark-neutral);
+}
+
+.agenda-hoy {
+    text-decoration: none;
+}
+
+/* --- Vista mes --- */
+
+.agenda-mes-dias-semana {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.4rem;
+    text-align: center;
+    margin-bottom: 0.4rem;
+}
+
+.agenda-mes-dias-semana span {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+}
+
+.agenda-mes-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.4rem;
+}
+
+.agenda-dia-mes {
+    min-height: 6.5rem;
+    padding: 0.4rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.6rem;
+    background: var(--surface-alt);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.agenda-dia-fuera-mes {
+    opacity: 0.45;
+}
+
+.agenda-dia-hoy {
+    border-color: var(--accent-color);
+    border-width: 2px;
+}
+
+.agenda-dia-numero {
+    font-weight: var(--font-weight-bold);
+    color: var(--dark-neutral);
+    text-decoration: none;
+    align-self: flex-start;
+}
+
+.agenda-cita-pill {
+    display: block;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.4rem;
+    background: var(--light-neutral);
+    color: var(--dark-neutral);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.agenda-cita-mas {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: var(--font-weight-semibold);
+}
+
+/* --- Vista semana --- */
+
+.agenda-semana-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.6rem;
+}
+
+.agenda-dia-semana {
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.6rem;
+    background: var(--surface-alt);
+    padding: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-height: 12rem;
+}
+
+.agenda-dia-semana-header {
+    display: flex;
+    flex-direction: column;
+    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+}
+
+.agenda-dia-semana-header strong {
+    font-size: var(--font-size-lg);
+    color: var(--dark-neutral);
+}
+
+.agenda-dia-semana-vacio {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+}
+
+.agenda-cita-card {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    cursor: pointer;
+    padding: var(--space-2) 0.6rem;
+    border-radius: 0.4rem;
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-left: 4px solid var(--border-subtle);
+    font-size: var(--font-size-sm);
+    color: var(--dark-neutral);
+}
+
+.agenda-cita-resumen {
+    display: flex;
+    gap: var(--space-2);
+    align-items: baseline;
+}
+
+.agenda-cita-detalle {
+    display: none;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin-top: 0.4rem;
+}
+
+.agenda-cita-card[aria-expanded="true"] .agenda-cita-detalle {
+    display: flex;
+}
+
+/* --- Estados: colores planos en la pastilla del mes, solo el borde
+   izquierdo tiñe la tarjeta de semana (nada de fondo degradado/translucido). --- */
+
+.agenda-cita-pill.estado-pendiente {
+    background: rgba(var(--accent-rgb), 0.15);
+    color: var(--accent-secondary);
+}
+
+.agenda-cita-pill.estado-confirmada {
+    background: rgba(var(--success-rgb), 0.15);
+    color: var(--color-success);
+}
+
+.agenda-cita-pill.estado-rechazada,
+.agenda-cita-pill.estado-cancelada {
+    background: rgba(var(--danger-rgb), 0.12);
+    color: var(--color-danger);
+}
+
+.agenda-cita-card.estado-pendiente {
+    background: rgba(var(--accent-rgb), 0.15);
+    color: var(--accent-secondary);
+    border-color: rgba(var(--accent-rgb), 0.3);
+    border-left-color: var(--accent-secondary);
+}
+
+.agenda-cita-card.estado-confirmada {
+    background: rgba(var(--success-rgb), 0.15);
+    color: var(--color-success);
+    border-color: rgba(var(--success-rgb), 0.3);
+    border-left-color: var(--color-success);
+}
+
+.agenda-cita-card.estado-rechazada,
+.agenda-cita-card.estado-cancelada {
+    background: rgba(var(--danger-rgb), 0.12);
+    color: var(--color-danger);
+    border-color: rgba(var(--danger-rgb), 0.25);
+    border-left-color: var(--color-danger);
+}
+
+/* --- Responsive: semana y mes se apilan en pantallas chicas --- */
+
+@media (width <= 720px) {
+    .agenda-mes-grid,
+    .agenda-mes-dias-semana {
+        grid-template-columns: repeat(7, minmax(2.2rem, 1fr));
+        font-size: var(--font-size-xs);
+    }
+
+    .agenda-dia-mes {
+        min-height: 4.5rem;
+    }
+
+    .agenda-semana-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,252 @@
+/* --- agendar-cita-medico.php: adjuntar-orden toggle + orden clinica --- */
+/* Reuses base.css's .campo/.seccion-auth for the booking fields (same
+   engine as agendar-cita.php); this file only styles what's new here: the
+   orden toggle, its nested cards, and the FDI tooth-selection grids. */
+
+.seccion-ancha {
+    max-width: var(--max-width);
+}
+
+.campo-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.9rem var(--space-4);
+    background: var(--surface-alt);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.6rem;
+}
+
+.campo-checkbox input {
+    width: 1.15rem;
+    height: 1.15rem;
+    accent-color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+.campo-checkbox label {
+    font-weight: var(--font-weight-semibold);
+    color: var(--dark-neutral);
+    cursor: pointer;
+}
+
+.orden-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    margin-top: var(--space-2);
+}
+
+.orden-card {
+    background: var(--surface-alt);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.9rem;
+    padding: 1.6rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.orden-card.orden-aviso {
+    background: rgba(var(--accent-rgb), 0.08);
+    border-color: var(--accent-color);
+}
+
+.orden-card h3 {
+    margin: 0;
+    color: var(--dark-neutral);
+    font-size: var(--font-size-lg);
+}
+
+/* <details class="orden-card"> replaces the plain div for the 8 real
+   accordion sections of the source order form (agendar-cita-medico.php),
+   collapsed by default like the original — no JS needed. summary takes
+   over the h3's look since <details> renders it as its own list item. */
+.orden-card summary {
+    margin: 0;
+    color: var(--dark-neutral);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    cursor: pointer;
+}
+
+.orden-card[open] summary {
+    margin-bottom: 0.4rem;
+}
+
+.orden-card h4 {
+    margin: 0.4rem 0 0;
+    color: var(--dark-neutral);
+    font-size: var(--font-size-md);
+}
+
+.orden-card p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.orden-card .campo-hint.hint {
+    margin: -0.4rem 0 0;
+}
+
+.orden-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem 1.6rem;
+}
+
+@media (width <= 640px) {
+    .orden-grid-2 {
+        grid-template-columns: 1fr;
+    }
+}
+
+.orden-grid-2 .campo,
+.orden-card .campo {
+    gap: 0.3rem;
+}
+
+.orden-grid-2 > label,
+.orden-card > label,
+.orden-fieldset > label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-weight: var(--font-weight-semibold);
+    color: var(--dark-neutral);
+    font-size: var(--font-size-md);
+}
+
+.orden-fieldset {
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.6rem;
+    padding: var(--space-3) 0.9rem 0.9rem;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.orden-fieldset legend {
+    padding: 0 0.4rem;
+    font-weight: var(--font-weight-semibold);
+    color: var(--dark-neutral);
+    font-size: var(--font-size-sm);
+}
+
+/* .check-grid itself now lives in base.css (shared with
+   manejar-usuarios.php) — only the .radio-row/.orden-fieldset variants
+   specific to this page's order forms stay here. */
+
+.radio-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-6);
+}
+
+.radio-row label,
+.orden-fieldset label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: var(--font-weight-medium);
+    color: var(--dark-neutral);
+    font-size: var(--font-size-md);
+    cursor: pointer;
+}
+
+.radio-row input,
+.orden-fieldset input[type="radio"],
+.orden-fieldset input[type="checkbox"] {
+    width: 1.15rem;
+    height: 1.15rem;
+    accent-color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+.orden-fieldset input[type="checkbox"] {
+    border-radius: 0.3rem;
+}
+
+.teeth-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.teeth-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2);
+}
+
+.teeth-grid label {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 56px;
+    gap: 0.3rem;
+    padding: var(--space-2) 0.2rem;
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.5rem;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--dark-neutral);
+    text-align: center;
+    cursor: pointer;
+}
+
+.teeth-grid.compact label {
+    flex-basis: 46px;
+}
+
+.teeth-grid input {
+    accent-color: var(--accent-color);
+}
+
+.orden-card textarea {
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.6rem;
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    background: var(--surface);
+    resize: vertical;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.orden-card label > input[type="text"],
+.orden-card label > input[type="date"],
+.orden-card label > input[type="email"],
+.orden-card label > textarea {
+    margin-top: 0.3rem;
+}
+
+.orden-card .campo input,
+.orden-card .campo select {
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.6rem;
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    background-color: var(--surface);
+}
+
+.orden-card .campo select {
+    padding-right: 2.2rem;
+    /* Misma flecha propia que agendar-cita.css, en vez de la nativa. */
+    appearance: none;
+    -webkit-appearance: none;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--text-secondary) 50%),
+        linear-gradient(135deg, var(--text-secondary) 50%, transparent 50%);
+    background-position:
+        calc(100% - 1.35rem) center,
+        calc(100% - 1rem) center;
+    background-size: 0.35rem 0.35rem, 0.35rem 0.35rem;
+    background-repeat: no-repeat;
+}

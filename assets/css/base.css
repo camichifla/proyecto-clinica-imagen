@@ -1,0 +1,445 @@
+html {
+    box-sizing: border-box;
+    scroll-behavior: smooth !important;
+}
+
+/* Root-cause fix, not per-element: any author rule that sets `display` on
+   an element (.campo, .orden-panel, etc.) beats the browser's default
+   [hidden] { display: none } — same specificity, but author styles always
+   win over the user-agent stylesheet. Toggling the `hidden` attribute via
+   JS/PHP then silently does nothing. This one rule makes `hidden` win
+   everywhere, instead of adding a one-off [id][hidden] override per
+   element every time this bites (see: modo_paciente panels, orden-panel,
+   the old #campo-especializacion[hidden] patch this replaces). */
+[hidden] {
+    display: none !important;
+}
+
+body{
+    background: var(--background);
+    height: 100%;
+    margin: 0;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    font-family: var(--font-family);
+}
+
+header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-6);
+    background: var(--gradient-brand);
+    color: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.logo img {
+    display: block;
+    height: 4.5rem;
+    width: auto;
+}
+
+.user {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+
+.user img {
+    display: block;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--surface);
+    color: var(--text-secondary);
+    background-color: var(--border-subtle);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 60%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='8' r='4' fill='currentColor'/%3E%3Cpath d='M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7' fill='currentColor'/%3E%3C/svg%3E");
+}
+
+main {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-6);
+}
+
+/* --- Checkbox grid: reused by agendar-cita-medico.php's clinical order
+   forms and manejar-usuarios.php's especializacion field — lives here once
+   instead of duplicated per page. --- */
+
+.check-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: var(--space-3) var(--space-5);
+}
+
+.check-grid.inline {
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+}
+
+.check-grid label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: var(--font-weight-medium);
+    color: var(--dark-neutral);
+    font-size: var(--font-size-md);
+    cursor: pointer;
+}
+
+.check-grid input {
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 0.3rem;
+    accent-color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border-subtle);
+    padding: 1.4rem 0;
+    text-align: center;
+    color: var(--text-secondary);
+    margin-top: var(--space-7);
+}
+
+.btn-primary {
+    display: inline-block;
+    border: none;
+    border-radius: 999px;
+    color: var(--surface);
+    font-weight: var(--font-weight-semibold);
+    background: var(--accent-color);
+    padding: 0.95rem 1.45rem;
+    text-decoration: none;
+    transition:
+        transform var(--transition-fast),
+        filter    var(--transition-fast),
+        opacity   var(--transition-fast);
+}
+
+.btn-primary:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}
+
+/* --- Auth forms (register/login/verify/reset) --- */
+
+.seccion-auth {
+    max-width: 480px;
+    margin: 2.5rem auto;
+    padding: var(--space-7);
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+}
+
+.seccion-auth h1 {
+    margin-top: 0;
+    color: var(--dark-neutral);
+}
+
+.seccion-auth form,
+.seccion-panel form:not([class]),
+.form-buscar-paciente {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.seccion-panel form:not([class]) .btn-primary,
+.form-buscar-paciente .btn-primary {
+    align-self: flex-start;
+    border: none;
+    cursor: pointer;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.campo-fila {
+    display: flex;
+    gap: var(--space-4);
+}
+
+.campo-fila .campo {
+    flex: 1;
+    min-width: 0;
+}
+
+.campo-fila > button {
+    align-self: flex-end;
+}
+
+@media (width <= 480px) {
+    .campo-fila {
+        flex-direction: column;
+    }
+}
+
+.campo label {
+    font-weight: var(--font-weight-semibold);
+    color: var(--dark-neutral);
+}
+
+.campo input {
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.6rem;
+    font-family: inherit;
+    font-size: var(--font-size-base);
+    background: var(--surface-alt);
+    transition: border-color var(--transition-fast);
+}
+
+.campo input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.campo input[aria-invalid="true"] {
+    border-color: var(--accent-secondary);
+}
+
+/* --- Buscador con lista desplegable (paciente, medico): reemplaza el
+   popup nativo de <datalist>, que no se puede estilar, por un listado
+   propio armado en JS (assets/js/buscador-combo.js) con la misma estetica
+   que el resto del sitio. --- */
+
+.buscador-combo {
+    position: relative;
+}
+
+.buscador-combo-lista {
+    position: absolute;
+    top: calc(100% + 0.3rem);
+    left: 0;
+    right: 0;
+    z-index: 60;
+    max-height: 260px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0.4rem;
+    list-style: none;
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.6rem;
+}
+
+.buscador-combo-lista[hidden] {
+    display: none;
+}
+
+.buscador-combo-lista li {
+    padding: 0.55rem 0.7rem;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    font-size: var(--font-size-md);
+    color: var(--dark-neutral);
+}
+
+.buscador-combo-lista li[aria-selected="true"],
+.buscador-combo-lista li:hover {
+    background: var(--light-neutral);
+}
+
+.buscador-combo-vacio {
+    color: var(--text-secondary);
+    cursor: default;
+    pointer-events: none;
+}
+
+/* --- Selector con lista propia (rol, estudio, sede, profesional, hora,
+   cita): mismo <ul class="buscador-combo-lista"> de arriba, pero
+   disparado por un boton en vez de por texto tipeado -no es un buscador,
+   solo reemplaza la lista nativa del <select> por una con el estilo del
+   sitio-. El <select> real (assets/js/selector-combo.js) sigue existiendo
+   oculto como fuente de verdad para el resto del codigo. El aspecto de la
+   caja del boton (borde, flecha, estados) se define junto al de
+   `.campo select` en el CSS de cada pagina, no aca. --- */
+
+select.selector-combo {
+    display: none;
+}
+
+.selector-combo-boton {
+    display: block;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+}
+
+.selector-combo-boton:disabled {
+    cursor: not-allowed;
+}
+
+.selector-combo-placeholder {
+    color: var(--text-muted);
+}
+
+.campo-hint {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.campo-error {
+    color: var(--accent-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    margin: 0.1rem 0 0;
+}
+
+.aviso-exito {
+    color: var(--dark-neutral);
+    background: var(--light-neutral);
+    border-left: 4px solid var(--accent-color);
+    padding: 0.85rem var(--space-4);
+    border-radius: 0.5rem;
+}
+
+.seccion-auth .btn-primary {
+    align-self: flex-start;
+    border: none;
+    cursor: pointer;
+}
+
+/* --- Logged-in header state --- */
+
+.user {
+    gap: var(--space-3);
+}
+
+.user-nombre {
+    color: var(--surface);
+    font-weight: var(--font-weight-semibold);
+}
+
+.form-logout {
+    margin: 0;
+}
+
+.btn-logout {
+    background: transparent;
+    border: 1px solid var(--surface);
+    color: var(--surface);
+    border-radius: 999px;
+    padding: 0.4rem 0.9rem;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: var(--font-weight-semibold);
+    transition: background var(--transition-fast);
+}
+
+.btn-logout:hover {
+    background: rgba(var(--white-rgb), 0.15);
+}
+
+/* --- Role-based dropdown menu --- */
+
+.menu-usuario {
+    position: relative;
+}
+
+.menu-usuario-toggle {
+    display: block;
+    cursor: pointer;
+    list-style: none;
+}
+
+.menu-usuario-toggle::-webkit-details-marker {
+    display: none;
+}
+
+.menu-usuario-toggle::marker {
+    content: "";
+}
+
+.menu-usuario-toggle img {
+    display: block;
+}
+
+.menu-usuario-panel {
+    position: absolute;
+    top: calc(100% + 0.6rem);
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    width: max-content;
+    min-width: 220px;
+    max-width: calc(100vw - 2rem);
+    padding: var(--space-4);
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    z-index: 60;
+}
+
+.menu-usuario-panel .user-nombre {
+    color: var(--dark-neutral);
+    font-weight: var(--font-weight-bold);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.menu-usuario-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.menu-usuario-lista a {
+    display: block;
+    padding: var(--space-2) 0.4rem;
+    color: var(--dark-neutral);
+    text-decoration: none;
+    border-radius: 0.5rem;
+    font-weight: var(--font-weight-medium);
+    transition: background var(--transition-fast);
+}
+
+.menu-usuario-lista a:hover {
+    background: var(--light-neutral);
+}
+
+.menu-usuario-panel .btn-logout {
+    align-self: flex-start;
+    border-color: var(--accent-secondary);
+    color: var(--accent-secondary);
+}
+
+.menu-usuario-panel .btn-logout:hover {
+    background: var(--light-neutral);
+}
+
+/* --- Content pages (citas / resultados): shared card container --- */
+
+.seccion-panel {
+    max-width: var(--max-width);
+    margin: var(--space-7) auto;
+    padding: 1.75rem;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+}
+
+.seccion-panel + .seccion-panel {
+    margin-top: var(--space-6);
+}
+
+.seccion-panel h1,
+.seccion-panel h2 {
+    margin-top: 0;
+    color: var(--dark-neutral);
+}

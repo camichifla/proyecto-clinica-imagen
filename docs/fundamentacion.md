@@ -46,4 +46,4 @@ La rúbrica menciona los roles "administrador" y "recepcionista". En el sistema,
 | `profesional` | Profesional de la clínica: ve su agenda, el historial de pacientes y carga observaciones y resultados |
 | `paciente` | Agenda sus citas y consulta sus resultados |
 
-El menú de cada rol se define en `includes/menu.php`, y cada vista protege su acceso según el rol.
+El menú de cada rol se define en `includes/menu.php`. Las vistas son HTML estático sin lógica de acceso; cada endpoint en `api/` protege su acceso según el rol (`requerir_rol_json()`).

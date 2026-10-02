@@ -1,9 +1,7 @@
 <?php
 // includes/pacientes_medico.php — "pacientes conectados a este medico": los
 // que ya aparecen en alguna de sus ordenes (ordenes.creado_por) o los que un
-// administrador vinculo explicitamente via medico_paciente. Usado por
-// agendar-cita-medico.php, resultados.php y ver-resultado-imagen.php para
-// listar y para re-chequear un paciente_id puntual antes de confiar en el.
+// administrador vinculo explicitamente via medico_paciente.
 
 /**
  * @return array<int,array{id:int,nombre:string,apellido:string,ci:string}>

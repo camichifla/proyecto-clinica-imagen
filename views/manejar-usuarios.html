@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manejar Usuarios - Clinica Imagen</title>
+  <link rel="stylesheet" href="./assets/css/styles.css">
+  <link rel="stylesheet" href="./assets/css/manejar-usuarios.css">
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+    </div>
+    <div class="user">
+      <details class="menu-usuario">
+        <summary class="menu-usuario-toggle" aria-label="Menu de usuario">
+          <img src="" alt="">
+        </summary>
+        <div class="menu-usuario-panel">
+          <span class="user-nombre"></span>
+          <ul class="menu-usuario-lista"></ul>
+          <form method="post" action="logout.php" class="form-logout">
+            <input type="hidden" name="csrf" value="">
+            <button type="submit" class="btn-logout">Cerrar sesion</button>
+          </form>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main>
+    <section class="seccion-panel" id="seccion-cuentas">
+      <h1>Manejar Usuarios</h1>
+
+      <p class="aviso-exito" data-mensaje hidden></p>
+      <p class="aviso-error" data-mensaje-error hidden></p>
+
+      <div id="cuentas-lista"></div>
+    </section>
+
+    <section class="seccion-panel" id="seccion-asignaciones">
+      <h2>Asignar Paciente a Medico</h2>
+
+      <p class="aviso-exito" data-mensaje hidden></p>
+      <p class="aviso-error" data-mensaje-error hidden></p>
+
+      <form class="campo-fila form-asignar-paciente">
+        <div class="campo">
+          <label for="asignar-medico-id-buscar">Medico</label>
+          <input type="text" id="asignar-medico-id-buscar" data-lista="asignar-medico-id-lista" data-buscador-combo="asignar-medico-id"
+                 autocomplete="off" placeholder="Buscar por apellido o nombre">
+          <datalist id="asignar-medico-id-lista"></datalist>
+          <input type="hidden" id="asignar-medico-id" name="medico_id">
+        </div>
+
+        <div class="campo">
+          <label for="asignar-paciente-id-buscar">Paciente</label>
+          <input type="text" id="asignar-paciente-id-buscar" data-lista="asignar-paciente-id-lista" data-buscador-combo="asignar-paciente-id"
+                 autocomplete="off" placeholder="Buscar por apellido, nombre o CI">
+          <datalist id="asignar-paciente-id-lista"></datalist>
+          <input type="hidden" id="asignar-paciente-id" name="paciente_id">
+        </div>
+
+        <button type="submit" class="btn-primary">Asignar</button>
+      </form>
+
+      <div id="asignaciones-lista"></div>
+    </section>
+
+    <section class="seccion-panel" id="seccion-crear-staff">
+      <h2>Crear cuenta de personal</h2>
+
+      <p class="aviso-exito" data-mensaje hidden></p>
+      <p class="campo-error" data-general hidden></p>
+
+      <form method="post" action="api/manejar-usuarios.php" data-api="api/manejar-usuarios.php" id="form-crear-staff" novalidate>
+        <input type="hidden" name="csrf" value="">
+        <input type="hidden" name="accion" value="crear_staff">
+
+        <div class="campo">
+          <label for="rol">Rol</label>
+          <select id="rol" name="rol" class="selector-combo">
+            <option value="">Elegi un rol</option>
+            <option value="medico">Medico</option>
+            <option value="profesional">Profesional</option>
+            <option value="administrador">Administrador</option>
+          </select>
+        </div>
+
+        <div class="campo-fila">
+          <div class="campo">
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" name="nombre">
+          </div>
+          <div class="campo">
+            <label for="apellido">Apellido</label>
+            <input type="text" id="apellido" name="apellido">
+          </div>
+        </div>
+
+        <div class="campo" id="campo-especializacion" hidden>
+          <label id="especializacion-label">Especializacion</label>
+          <div class="check-grid" role="group" aria-labelledby="especializacion-label">
+            <label><input type="checkbox" name="especializacion[]" value="placa"> Placa</label>
+            <label><input type="checkbox" name="especializacion[]" value="radiografia"> Radiografia</label>
+            <label><input type="checkbox" name="especializacion[]" value="alineadores"> Alineadores</label>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="email">Correo</label>
+          <input type="email" id="email" name="email">
+        </div>
+
+        <div class="campo">
+          <label for="contrasena">Contrasena</label>
+          <input type="password" id="contrasena" name="contrasena" value="">
+        </div>
+
+        <button type="submit" class="btn-primary">Crear cuenta</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="assets/js/sesion.js" defer></script>
+  <script src="assets/js/selector-combo.js" defer></script>
+  <script src="assets/js/form-api.js" defer></script>
+  <script src="assets/js/manejar-usuarios.js" defer></script>
+  <script>
+    // Shows/hides especializacion by rol. UX convenience only: the server
+    // re-validates that especializacion is present iff rol === 'profesional'
+    // regardless of what the client sends.
+    (function () {
+      var rolSelect = document.getElementById('rol');
+      var campoEspecializacion = document.getElementById('campo-especializacion');
+      var especializacionCheckboxes = campoEspecializacion
+        ? campoEspecializacion.querySelectorAll('input[name="especializacion[]"]')
+        : [];
+      if (!rolSelect || !campoEspecializacion || !especializacionCheckboxes.length) {
+        return;
+      }
+
+      function aplicar() {
+        var esProfesional = rolSelect.value === 'profesional';
+        campoEspecializacion.hidden = !esProfesional;
+        if (!esProfesional) {
+          Array.prototype.forEach.call(especializacionCheckboxes, function (casilla) {
+            casilla.checked = false;
+          });
+        }
+      }
+
+      rolSelect.addEventListener('change', aplicar);
+      aplicar();
+    })();
+  </script>
+</body>
+
+</html>

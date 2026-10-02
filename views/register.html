@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Registro - Clinica Imagen</title>
+  <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+    </div>
+  </header>
+
+  <main>
+    <section class="seccion-auth">
+      <h1>Crear cuenta de paciente</h1>
+
+      <div data-exito-panel hidden>
+        <p class="aviso-exito">Revisa tu correo (o <code>storage/mail.log</code> en modo de desarrollo) para verificar tu cuenta antes de iniciar sesion.</p>
+        <p><a href="login.html" class="btn-primary">Ir a iniciar sesion</a></p>
+      </div>
+
+      <p class="campo-error" data-general hidden></p>
+
+      <form method="post" action="api/register.php" data-api="api/register.php" data-exito="[data-exito-panel]" novalidate>
+        <input type="hidden" name="csrf" value="">
+
+        <div class="campo-fila">
+          <div class="campo">
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" name="nombre">
+          </div>
+          <div class="campo">
+            <label for="apellido">Apellido</label>
+            <input type="text" id="apellido" name="apellido">
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="ci">Cedula</label>
+          <input type="text" id="ci" name="ci">
+        </div>
+        <div class="campo">
+          <label for="direccion">Direccion</label>
+          <input type="text" id="direccion" name="direccion">
+        </div>
+        <div class="campo">
+          <label for="numero">Telefono</label>
+          <input type="tel" id="numero" name="numero">
+        </div>
+        <div class="campo">
+          <label for="email">Correo</label>
+          <input type="email" id="email" name="email">
+        </div>
+
+        <div class="campo">
+          <label for="contrasena">Contrasena</label>
+          <input type="password" id="contrasena" name="contrasena" value="">
+        </div>
+
+        <button type="submit" class="btn-primary">Registrarme</button>
+      </form>
+
+      <p>¿Ya tenes cuenta? <a href="login.html">Iniciar sesion</a></p>
+    </section>
+  </main>
+
+  <script src="assets/js/sesion-publica.js" defer></script>
+  <script src="assets/js/form-api.js" defer></script>
+</body>
+
+</html>

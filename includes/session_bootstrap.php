@@ -19,6 +19,11 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+function es_peticion_api(): bool
+{
+    return strpos($_SERVER['SCRIPT_NAME'] ?? '', '/api/') !== false;
+}
+
 if (isset($_SESSION['cuenta_id']) && isset($_SESSION['ultimo_acceso'])
     && (time() - $_SESSION['ultimo_acceso']) > SESION_TIMEOUT_SEGUNDOS
 ) {
@@ -28,7 +33,13 @@ if (isset($_SESSION['cuenta_id']) && isset($_SESSION['ultimo_acceso'])
         setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
     }
     session_destroy();
-    header('Location: ' . APP_URL . '/login.php?expirado=1');
+    if (es_peticion_api()) {
+        http_response_code(401);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['error' => 'Sesion expirada.'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    header('Location: ' . APP_URL . '/login.html?expirado=1');
     exit;
 }
 

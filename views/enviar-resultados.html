@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Enviar Resultados - Clinica Imagen</title>
+  <link rel="stylesheet" href="./assets/css/styles.css">
+  <link rel="stylesheet" href="./assets/css/enviar-resultados.css">
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+    </div>
+    <div class="user">
+      <details class="menu-usuario">
+        <summary class="menu-usuario-toggle" aria-label="Menu de usuario">
+          <img src="" alt="">
+        </summary>
+        <div class="menu-usuario-panel">
+          <span class="user-nombre"></span>
+          <ul class="menu-usuario-lista"></ul>
+          <form method="post" action="logout.php" class="form-logout">
+            <input type="hidden" name="csrf" value="">
+            <button type="submit" class="btn-logout">Cerrar sesion</button>
+          </form>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main>
+    <section class="seccion-auth seccion-enviar-resultados">
+      <h1>Enviar Resultados</h1>
+
+      <p class="aviso-exito" data-aviso="ok" hidden></p>
+      <p class="campo-error" data-general hidden></p>
+
+      <form method="post" action="api/enviar-resultados.php" data-api="api/enviar-resultados.php" enctype="multipart/form-data" novalidate>
+        <input type="hidden" name="csrf" value="">
+
+        <div class="campo">
+          <label for="paciente_id_buscar">Paciente</label>
+          <input type="text" id="paciente_id_buscar" data-lista="paciente_id_lista" data-buscador-combo="paciente_id"
+                 data-mensaje-sin-pacientes="Todavia no hay pacientes registrados."
+                 autocomplete="off" placeholder="Buscar por apellido, nombre o CI">
+          <datalist id="paciente_id_lista"></datalist>
+          <input type="hidden" id="paciente_id" name="paciente_id" value="">
+        </div>
+
+        <div class="campo">
+          <label for="cita_id">Cita asociada (opcional)</label>
+          <select id="cita_id" name="cita_id" class="selector-combo" disabled
+                  data-mensaje-sin-citas="Este paciente no tiene citas confirmadas">
+            <option value="">Elegi un paciente primero</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="nombre_estudio">Nombre del estudio</label>
+          <input type="text" id="nombre_estudio" name="nombre_estudio" maxlength="120">
+        </div>
+
+        <div class="campo">
+          <label for="fecha_estudio">Fecha del estudio</label>
+          <input type="date" id="fecha_estudio" name="fecha_estudio">
+        </div>
+
+        <div class="campo">
+          <label for="observaciones">Observaciones (opcional)</label>
+          <textarea id="observaciones" name="observaciones" rows="4"></textarea>
+        </div>
+
+        <div class="campo">
+          <label for="imagenes">Imagenes</label>
+          <input type="file" id="imagenes" name="imagenes[]" accept="image/png,image/jpeg,image/webp" multiple>
+        </div>
+
+        <button type="submit" class="btn-primary">Guardar resultado</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="assets/js/sesion.js" defer></script>
+  <script src="assets/js/form-api.js" defer></script>
+  <script src="assets/js/resultados-upload.js" defer></script>
+</body>
+
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agendar Cita para Paciente - Clinica Imagen</title>
+  <link rel="stylesheet" href="./assets/css/styles.css">
+  <link rel="stylesheet" href="./assets/css/agendar-cita-medico.css">
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+    </div>
+    <div class="user">
+      <details class="menu-usuario">
+        <summary class="menu-usuario-toggle" aria-label="Menu de usuario">
+          <img src="" alt="">
+        </summary>
+        <div class="menu-usuario-panel">
+          <span class="user-nombre"></span>
+          <ul class="menu-usuario-lista"></ul>
+          <form method="post" action="logout.php" class="form-logout">
+            <input type="hidden" name="csrf" value="">
+            <button type="submit" class="btn-logout">Cerrar sesion</button>
+          </form>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main>
+    <section class="seccion-auth seccion-ancha">
+      <h1>Agendar Cita para Paciente</h1>
+
+      <p class="aviso-exito" data-aviso="ok-pendiente" hidden>Cita creada. Se vinculara automaticamente cuando ese email se registre.</p>
+      <p class="aviso-exito" data-aviso="ok" hidden>La cita fue creada correctamente.</p>
+      <p class="campo-error" data-general hidden></p>
+
+      <form method="post" action="api/agendar-cita-medico.php" data-api="api/agendar-cita-medico.php" novalidate>
+        <input type="hidden" name="csrf" value="">
+
+        <div class="campo">
+          <label id="modo-paciente-label">Paciente</label>
+          <div class="radio-row" role="group" aria-labelledby="modo-paciente-label">
+            <label><input type="radio" name="modo_paciente" value="existente" id="modo-paciente-existente" checked> Paciente existente</label>
+            <label><input type="radio" name="modo_paciente" value="nuevo" id="modo-paciente-nuevo"> Paciente nuevo</label>
+          </div>
+        </div>
+
+        <div id="panel-paciente-existente" class="campo">
+          <label for="paciente_id_buscar">Paciente</label>
+          <input type="text" id="paciente_id_buscar" data-lista="paciente_id_lista" data-buscador-combo="paciente_id"
+                 autocomplete="off" placeholder="Buscar por apellido, nombre o CI">
+          <datalist id="paciente_id_lista"></datalist>
+          <input type="hidden" id="paciente_id" name="paciente_id" value="">
+          <p class="campo-hint" data-mensaje-sin-pacientes hidden>Todavia no tenes pacientes conectados. Usa "Paciente nuevo".</p>
+        </div>
+
+        <div id="panel-paciente-nuevo" class="campo" hidden>
+          <div class="campo-fila">
+            <div class="campo">
+              <label for="paciente_nombre_nuevo">Nombre</label>
+              <input type="text" id="paciente_nombre_nuevo" name="paciente_nombre_nuevo">
+            </div>
+            <div class="campo">
+              <label for="paciente_apellido_nuevo">Apellido</label>
+              <input type="text" id="paciente_apellido_nuevo" name="paciente_apellido_nuevo">
+            </div>
+          </div>
+          <div class="campo">
+            <label for="paciente_email_nuevo">Email</label>
+            <input type="email" id="paciente_email_nuevo" name="paciente_email_nuevo">
+            <p class="campo-hint">Si el paciente todavia no tiene cuenta, la cita queda pendiente y se vincula sola cuando se registre con este email.</p>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="estudio">Estudio</label>
+          <select id="estudio" name="estudio" class="selector-combo">
+            <option value="">Elegi un estudio</option>
+            <option value="placa">Placa</option>
+            <option value="radiografia">Radiografia</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="sucursal">Sede</label>
+          <select id="sucursal" name="sucursal_id" class="selector-combo">
+            <option value="">Elegi una sede</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="profesional_id">Profesional</label>
+          <select id="profesional_id" name="profesional_id" class="selector-combo">
+            <option value="">Elegi un profesional</option>
+          </select>
+          <p class="campo-error" data-mensaje-sin-profesionales hidden>Todavia no hay profesionales cargados.</p>
+        </div>
+
+        <div class="campo">
+          <label id="fecha-label">Fecha</label>
+          <div class="selector-fecha" data-min="" data-max="">
+            <button type="button" id="fecha-boton" class="selector-fecha-boton"
+                    aria-haspopup="dialog" aria-expanded="false"
+                    aria-labelledby="fecha-label">
+              <span class="selector-fecha-texto">Elegi una fecha</span>
+            </button>
+            <input type="hidden" id="fecha" name="fecha" value="">
+            <div class="calendario" id="calendario" role="dialog" aria-label="Elegir fecha" hidden>
+              <div class="calendario-header">
+                <button type="button" class="calendario-nav" data-dir="-1" aria-label="Mes anterior">‹</button>
+                <span class="calendario-mes-actual"></span>
+                <button type="button" class="calendario-nav" data-dir="1" aria-label="Mes siguiente">›</button>
+              </div>
+              <div class="calendario-dias-semana"></div>
+              <div class="calendario-grid"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="hora">Hora</label>
+          <select id="hora" name="hora" class="selector-combo" disabled>
+            <option value="">Elegi sede y fecha primero</option>
+          </select>
+        </div>
+
+        <div id="orden-campos">
+          <input type="hidden" id="tipo_orden" name="tipo_orden" value="">
+
+          <div id="orden-panel-estudio" class="orden-panel" hidden>
+
+            <div class="orden-card orden-aviso">
+              <h3>AVISO IMPORTANTE</h3>
+              <p>Todos los estudios indicados en esta orden requieren coordinacion previa.</p>
+              <p>Es necesario venir a la clinica sin nada de metal del cuello hacia arriba.</p>
+              <p>Los presupuestos dados por telefono se confirman con la presentacion de este formulario.</p>
+            </div>
+
+            <details class="orden-card">
+              <summary>Radiografías Intrabucales</summary>
+              <label>Indicar region de interes</label>
+              <div class="teeth-grid" id="teeth-radio-intra"></div>
+              <div class="check-grid inline">
+                <label><input type="checkbox" name="radio_intra_tipo[]" value="Con conductimetría"> Con conductimetría</label>
+                <label><input type="checkbox" name="radio_intra_tipo[]" value="Periapical"> Periapical</label>
+                <label><input type="checkbox" name="radio_intra_tipo[]" value="Relevamiento periapical completo"> Relevamiento periapical completo</label>
+                <label><input type="checkbox" name="radio_intra_tipo[]" value="Bitewing"> Bitewing</label>
+                <label><input type="checkbox" name="radio_intra_tipo[]" value="Oclusal"> Oclusal</label>
+              </div>
+            </details>
+
+            <details class="orden-card">
+              <summary>Otros estudios extraorales</summary>
+              <div class="check-grid">
+                <label><input type="checkbox" name="otros_estudios_extraorales[]" value="ATM"> ATM</label>
+                <label><input type="checkbox" name="otros_estudios_extraorales[]" value="Sub mentón Vertex"> Sub mentón Vertex</label>
+                <label><input type="checkbox" name="otros_estudios_extraorales[]" value="Mano y puño"> Mano y puño</label>
+              </div>
+            </details>
+
+            <details class="orden-card">
+              <summary>Documentación para ortodoncia</summary>
+
+              <h4>Radiografías extraorales</h4>
+              <div class="orden-grid-2">
+                <fieldset class="orden-fieldset orden-textogrupo">
+                  <label><input type="checkbox" class="orden-check-texto" name="radio_extraoral[]" value="Panorámica (OPT)">Panorámica (OPT)</label>
+                  <label>Indicacion <input type="text" name="opt_indicacion"></label>
+                </fieldset>
+                <fieldset class="orden-fieldset orden-grupo">
+                  <label><input type="checkbox" class="orden-padre" name="radio_extraoral[]" value="Telerradiografía Perfil">Telerradiografía Perfil</label>
+                  <label><input type="checkbox" class="orden-hijo" name="telerradio_perfil_tipo[]" value="Plano de Frankfort">Plano de Frankfort</label>
+                  <label><input type="checkbox" class="orden-hijo" name="telerradio_perfil_tipo[]" value="Horizontal verdadero">Horizontal verdadero</label>
+                  <label><input type="checkbox" class="orden-hijo" name="telerradio_perfil_tipo[]" value="Labios en reposo">Labios en reposo</label>
+                  <label><input type="checkbox" class="orden-hijo" name="telerradio_perfil_tipo[]" value="Labios en contacto">Labios en contacto</label>
+                </fieldset>
+                <fieldset class="orden-fieldset orden-grupo">
+                  <label><input type="checkbox" class="orden-padre" name="radio_extraoral[]" value="Telerradiografía Frontal">Telerradiografía Frontal</label>
+                  <label><input type="checkbox" class="orden-hijo" name="telerradio_frontal_analisis" value="Con analisis">Con analisis</label>
+                </fieldset>
+              </div>
+
+              <h4>Estudios cefalométricos computarizados</h4>
+              <div class="check-grid">
+                <label><input type="checkbox" name="estudio_cefalo_compu[]" value="Ricketts"> Ricketts</label>
+                <label><input type="checkbox" name="estudio_cefalo_compu[]" value="Ricketts Resumido"> Ricketts Resumido</label>
+                <label><input type="checkbox" name="estudio_cefalo_compu[]" value="Mcnamara"> Mcnamara</label>
+                <label><input type="checkbox" name="estudio_cefalo_compu[]" value="Fundación Gnathos"> Fundación Gnathos</label>
+                <label><input type="checkbox" name="estudio_cefalo_compu[]" value="Roth Jarabak"> Roth Jarabak</label>
+                <label><input type="checkbox" name="estudio_cefalo_compu[]" value="Bjork Jarabak"> Bjork Jarabak</label>
+                <label><input type="checkbox" name="estudio_cefalo_compu[]" value="Trevis"> Trevis</label>
+                <label><input type="checkbox" name="estudio_cefalo_compu[]" value="Steiner Tweed"> Steiner Tweed</label>
+                <label><input type="checkbox" name="estudio_cefalo_compu[]" value="VTO"> VTO</label>
+              </div>
+              <label>Otros <input type="text" name="estudio_cefalo_compu_otros"></label>
+
+              <h4>Fotografías</h4>
+              <div class="check-grid"><label><input type="checkbox" name="fotografias[]" value="Todas las fotografías">Todas las fotografías</label></div>
+              <div class="orden-grid-2">
+                <fieldset class="orden-fieldset">
+                  <legend>Fotografias faciales</legend>
+                  <label><input type="checkbox" name="fotografias[]" value="Rostro frente">Rostro frente</label>
+                  <label><input type="checkbox" name="fotografias[]" value="Perfil">Perfil</label>
+                  <label><input type="checkbox" name="fotografias[]" value="Rostro sonrisa ">Rostro sonrisa </label>
+                  <label><input type="checkbox" name="fotografias[]" value="3/4 perfil">3/4 perfil</label>
+                </fieldset>
+                <fieldset class="orden-fieldset">
+                  <legend>Fotografias bucales</legend>
+                  <label><input type="checkbox" name="fotografias[]" value="2 oclusales ">2 oclusales </label>
+                  <label><input type="checkbox" name="fotografias[]" value="2 llaves de oclusión ">2 llaves de oclusión </label>
+                  <label><input type="checkbox" name="fotografias[]" value="2 overjet/overbite ">2 overjet/overbite </label>
+                  <label><input type="checkbox" name="fotografias[]" value="1 anterior en inoclusión">1 anterior en inoclusión</label>
+                  <label><input type="checkbox" name="fotografias[]" value="1 oclusión frente">1 oclusión frente</label>
+                </fieldset>
+              </div>
+              <div class="check-grid"><label><input type="checkbox" name="fotografias[]" value="con contacto oclusales">con contacto oclusales</label></div>
+              <fieldset class="orden-fieldset orden-textogrupo">
+                <label><input type="checkbox" class="orden-check-texto" name="fotografias[]" value="foto en dinámica">foto en dinámica</label>
+                <label>Indique su interes <input type="text" name="fotografia_interes"></label>
+              </fieldset>
+
+              <h4>Modelos digitales (con visualizador 3D)</h4>
+              <div class="orden-grid-2">
+                <fieldset class="orden-fieldset">
+                  <legend>Modelo digital</legend>
+                  <label><input type="checkbox" name="modelos_digitales[]" value="Ortodoncia">Ortodoncia</label>
+                  <label><input type="checkbox" name="modelos_digitales[]" value="Ortopedia">Ortopedia</label>
+                  <label><input type="checkbox" name="modelos_digitales[]" value="Diagnóstico bolton">Diagnóstico bolton</label>
+                  <label><input type="checkbox" name="modelos_digitales[]" value="Diagnóstico Moyers">Diagnóstico Moyers</label>
+                  <label><input type="checkbox" name="modelos_digitales[]" value="Diagnóstico Medidas dentarias">Diagnóstico Medidas dentarias</label>
+                </fieldset>
+                <fieldset class="orden-fieldset">
+                  <legend>Modelo impreso</legend>
+                  <label><input type="checkbox" name="modelos_digitales[]" value="Impresión de modelos zocalados">Impresión de modelos zocalados</label>
+                  <label><input type="checkbox" name="modelos_digitales[]" value="Impresión de modelos de trabajo">Impresión de modelos de trabajo</label>
+                  <label><input type="checkbox" name="modelos_digitales[]" value="Mordida constructiva">Mordida constructiva</label>
+                  <label><input type="checkbox" name="modelos_digitales[]" value="Duplicado en yeso">Duplicado en yeso</label>
+                  <label><input type="checkbox" name="modelos_digitales[]" value="Modelos articulados con bisagra posterior">Modelos articulados con bisagra posterior</label>
+                </fieldset>
+              </div>
+
+              <h4>Ortodoncia invisible (alineadores)</h4>
+              <label>Marca o sistema <input type="text" name="ortodoncia_marca"></label>
+              <div class="check-grid inline">
+                <label><input type="checkbox" name="ortodoncia_tipo[]" value="Bimaxilar"> Bimaxilar</label>
+                <label><input type="checkbox" name="ortodoncia_tipo[]" value="Maxilar"> Maxilar</label>
+                <label><input type="checkbox" name="ortodoncia_tipo[]" value="Mandíbula"> Mandíbula</label>
+              </div>
+              <label>Informacion clinica <textarea name="ortodoncia_info_clinica" rows="3"></textarea></label>
+            </details>
+
+            <details class="orden-card">
+              <summary>Tomografía Computarizada Volumétrica CONE BEAM</summary>
+              <label>Indicar region de interes</label>
+              <div class="check-grid inline">
+                <label><input type="checkbox" name="tomo_cone_beam[]" value="Maxilar completo">Maxilar completo</label>
+                <label><input type="checkbox" name="tomo_cone_beam[]" value="Mandíbula completa">Mandíbula completa</label>
+              </div>
+              <div class="teeth-grid compact" id="teeth-tomo-cone-beam"></div>
+              <div class="check-grid inline">
+                <label><input type="checkbox" name="tomo_cone_beam_tipo[]" value="Hemiarco"> Hemiarco</label>
+                <label><input type="checkbox" name="tomo_cone_beam_tipo[]" value="1 a 3 piezas"> 1 a 3 piezas</label>
+                <label><input type="checkbox" name="tomo_cone_beam_tipo[]" value="Sin separación de tejidos blandos"> Sin separación de tejidos blandos</label>
+              </div>
+              <label>Elementos sueltos <input type="text" name="tomo_elementos_sueltos"></label>
+
+              <h4>Indique estudio para</h4>
+              <div class="check-grid inline">
+                <label><input type="checkbox" name="tomo_tipo_estudio[]" value="Implante"> Implante</label>
+                <label><input type="checkbox" name="tomo_tipo_estudio[]" value="Endodoncia"> Endodoncia</label>
+                <label><input type="checkbox" name="tomo_tipo_estudio[]" value="Cirugía"> Cirugía</label>
+                <label><input type="checkbox" name="tomo_tipo_estudio[]" value="Ortodoncia"> Ortodoncia</label>
+                <label><input type="checkbox" name="tomo_tipo_estudio[]" value="Periodoncia"> Periodoncia</label>
+                <label><input type="checkbox" name="tomo_tipo_estudio[]" value="ATM"> ATM</label>
+              </div>
+              <label>Interes del estudio <textarea name="interes_estudio_tomo" rows="3"></textarea></label>
+            </details>
+
+            <details class="orden-card">
+              <summary>CIRUGÍA GUIADA PARA IMPLANTES</summary>
+              <div class="check-grid inline">
+                <label><input type="checkbox" name="guia_implantes_servicio[]" value="Tomografía"> Tomografía</label>
+                <label><input type="checkbox" name="guia_implantes_servicio[]" value="Escaneo"> Escaneo</label>
+                <label><input type="checkbox" name="guia_implantes_servicio[]" value="Planeamiento"> Planeamiento</label>
+              </div>
+              <div class="orden-grid-2">
+                <fieldset class="orden-fieldset orden-textogrupo">
+                  <label><input type="checkbox" class="orden-check-texto" name="guia_implante_tipo[]" value="Guía de precisión">Guía de precisión</label>
+                  <label>Marca de implante <input type="text" name="implante_marca"></label>
+                </fieldset>
+                <fieldset class="orden-fieldset">
+                  <label><input type="checkbox" name="guia_implante_tipo[]" value="Guía de fresa iniciadora">Guía de fresa iniciadora</label>
+                </fieldset>
+              </div>
+              <div class="orden-grid-2">
+                <label>Indique la ubicacion del implante a colocar <input type="text" name="implante_ubicacion"></label>
+                <label>Fecha probable de cirugia <input type="date" name="implante_fecha_cirugia"></label>
+              </div>
+            </details>
+
+            <details class="orden-card">
+              <summary>REALIDAD VIRTUAL M3DMIX</summary>
+              <div class="check-grid">
+                <label><input type="checkbox" name="realidad_virtual_m3dmix[]" value="Tercer molar"> Tercer molar</label>
+                <label><input type="checkbox" name="realidad_virtual_m3dmix[]" value="Patología"> Patología</label>
+                <label><input type="checkbox" name="realidad_virtual_m3dmix[]" value="Nervio mandibular"> Nervio mandibular</label>
+                <label><input type="checkbox" name="realidad_virtual_m3dmix[]" value="Maxilares e implantes"> Maxilares e implantes</label>
+              </div>
+            </details>
+
+            <details class="orden-card">
+              <summary>Ecografías</summary>
+              <div class="check-grid inline">
+                <label><input type="checkbox" name="ecografias[]" value="ATM"> ATM</label>
+                <label><input type="checkbox" name="ecografias[]" value="Partes blandas"> Partes blandas</label>
+              </div>
+              <label>Indicar interes del estudio <input type="text" name="eco_interes"></label>
+            </details>
+
+            <details class="orden-card">
+              <summary>Otros servicios</summary>
+
+              <fieldset class="orden-fieldset orden-textogrupo">
+                <label><input type="checkbox" class="orden-check-texto" name="otros_servicios[]" value="Sólo escaneo">Sólo escaneo</label>
+                <label>Indicar interes del estudio <input type="text" name="solo_escaneo_interes"></label>
+              </fieldset>
+
+              <div class="check-grid">
+                <label><input type="checkbox" name="otros_servicios[]" value="Placa neuromiorelajante/DOE">Placa neuromiorelajante/DOE</label>
+                <label><input type="checkbox" name="otros_servicios[]" value="DAM">DAM</label>
+                <label><input type="checkbox" name="otros_servicios[]" value="Diseño sonrisa e impresión en resina mockup">Diseño sonrisa e impresión en resina mockup</label>
+              </div>
+
+              <fieldset class="orden-fieldset orden-grupo">
+                <label><input type="checkbox" class="orden-padre" name="otros_servicios[]" value="Escaneo final de ortodoncia + placas de contención.">Escaneo final de ortodoncia + placas de contención.</label>
+                <div class="check-grid inline">
+                  <label><input type="checkbox" name="contencion_arcada[]" value="SUPERIOR"> SUPERIOR</label>
+                  <label><input type="checkbox" name="contencion_arcada[]" value="INFERIOR"> INFERIOR</label>
+                </div>
+                <div class="check-grid inline">
+                  <label><input type="checkbox" name="contencion_grosor[]" value="0.75mm"> 0.75mm</label>
+                  <label><input type="checkbox" name="contencion_grosor[]" value="1mm"> 1mm</label>
+                  <label><input type="checkbox" name="contencion_grosor[]" value="1.5mm"> 1.5mm</label>
+                </div>
+                <div class="check-grid inline">
+                  <label><input type="checkbox" name="contencion_forma[]" value="RECTO"> RECTO</label>
+                  <label><input type="checkbox" name="contencion_forma[]" value="FESTONEADO"> FESTONEADO</label>
+                </div>
+              </fieldset>
+
+              <fieldset class="orden-fieldset orden-grupo">
+                <label><input type="checkbox" class="orden-padre" name="otros_servicios[]" value="Placas de blanqueamiento">Placas de blanqueamiento</label>
+                <div class="check-grid inline">
+                  <label><input type="checkbox" name="blanqueamiento_arcada[]" value="SUPERIOR"> SUPERIOR</label>
+                  <label><input type="checkbox" name="blanqueamiento_arcada[]" value="INFERIOR"> INFERIOR</label>
+                </div>
+              </fieldset>
+
+              <div class="check-grid">
+                <label><input type="checkbox" name="otros_servicios[]" value="Perioguide para cirugía gingival">Perioguide para cirugía gingival</label>
+                <label><input type="checkbox" name="otros_servicios[]" value="Planeamiento cirugía ortognática">Planeamiento cirugía ortognática</label>
+                <label><input type="checkbox" name="otros_servicios[]" value="Endoguide">Endoguide</label>
+              </div>
+
+              <fieldset class="orden-fieldset orden-textogrupo">
+                <label><input type="checkbox" class="orden-check-texto" name="otros_servicios[]" value="Protector bucal">Protector bucal</label>
+                <label>Color <input type="text" name="protector_bucal_color"></label>
+              </fieldset>
+            </details>
+
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary">Solicitar cita</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="assets/js/sesion.js" defer></script>
+  <script src="assets/js/form-api.js" defer></script>
+  <script src="assets/js/agendar-cita-medico.js" defer></script>
+</body>
+
+</html>

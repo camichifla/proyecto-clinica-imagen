@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Iniciar sesion - Clinica Imagen</title>
+  <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+    </div>
+  </header>
+
+  <main>
+    <section class="seccion-auth">
+      <h1>Iniciar sesion</h1>
+
+      <p class="campo-error" data-aviso="expirado" hidden>Tu sesion expiro por inactividad. Inicia sesion nuevamente.</p>
+      <p class="aviso-exito" data-aviso="verificado" hidden>Cuenta verificada. Ya podes iniciar sesion.</p>
+      <p class="campo-error" data-general hidden></p>
+      <p data-aviso="reenviar" hidden><a href="verify.html">Reenviar enlace de verificacion</a></p>
+
+      <form method="post" action="api/login.php" data-api="api/login.php" novalidate>
+        <input type="hidden" name="csrf" value="">
+        <div class="campo">
+          <label for="email">Correo</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+        <div class="campo">
+          <label for="password">Contrasena</label>
+          <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn-primary">Ingresar</button>
+      </form>
+
+      <p><a href="reset-request.html">¿Olvidaste tu contrasena?</a></p>
+      <p>¿No tenes cuenta? <a href="register.html">Registrate</a></p>
+    </section>
+  </main>
+
+  <script src="assets/js/sesion-publica.js" defer></script>
+  <script src="assets/js/form-api.js" defer></script>
+  <script defer>
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URL(window.location.href).searchParams;
+      if (params.has('expirado')) {
+        document.querySelector('[data-aviso="expirado"]').hidden = false;
+      }
+      if (params.has('verificado')) {
+        document.querySelector('[data-aviso="verificado"]').hidden = false;
+      }
+
+      document.querySelector('form[data-api]').addEventListener('form-api:respuesta', (evento) => {
+        const error = evento.detail.error || '';
+        document.querySelector('[data-aviso="reenviar"]').hidden = !error.includes('verificar');
+      });
+    });
+  </script>
+</body>
+
+</html>

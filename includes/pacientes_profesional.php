@@ -1,9 +1,6 @@
 <?php
 // includes/pacientes_profesional.php — "pacientes con los que este
-// profesional tiene una relacion de atencion real (al menos una cita)",
-// usado por historial-pacientes.php y cargar-resultados.php tanto para
-// listar como para re-chequear un paciente_id puntual antes de confiar
-// en el.
+// profesional tiene una relacion de atencion real (al menos una cita)".
 
 /**
  * @return array<int,array{id:int,nombre:string,apellido:string,ci:string}>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Historial de Pacientes - Clinica Imagen</title>
+  <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+    </div>
+    <div class="user">
+      <details class="menu-usuario">
+        <summary class="menu-usuario-toggle" aria-label="Menu de usuario">
+          <img src="" alt="">
+        </summary>
+        <div class="menu-usuario-panel">
+          <span class="user-nombre"></span>
+          <ul class="menu-usuario-lista"></ul>
+          <form method="post" action="logout.php" class="form-logout">
+            <input type="hidden" name="csrf" value="">
+            <button type="submit" class="btn-logout">Cerrar sesion</button>
+          </form>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main>
+    <section class="seccion-panel">
+      <h1>Historial de Pacientes</h1>
+
+      <form method="get" action="historial-pacientes.html" class="form-buscar-paciente">
+        <div class="campo">
+          <label for="paciente_id_buscar">Paciente</label>
+          <input type="text" id="paciente_id_buscar" data-lista="paciente_id_lista" data-buscador-combo="paciente_id"
+                 data-mensaje-sin-pacientes="Todavia no tenes pacientes con citas asignadas."
+                 autocomplete="off" placeholder="Buscar por apellido, nombre o CI">
+          <datalist id="paciente_id_lista"></datalist>
+          <input type="hidden" id="paciente_id" name="paciente_id" value="">
+        </div>
+
+        <button type="submit" class="btn-primary" id="btn-buscar" disabled>Buscar</button>
+      </form>
+    </section>
+
+    <div id="resultados-busqueda"></div>
+
+    <dialog id="visor-imagen" class="visor-imagen">
+      <button type="button" class="visor-imagen-cerrar" aria-label="Cerrar">&times;</button>
+      <img src="" alt="">
+    </dialog>
+  </main>
+
+  <script src="assets/js/sesion.js" defer></script>
+  <script src="assets/js/selector-paciente-buscar.js" defer></script>
+  <script src="assets/js/resultados-paciente.js" defer></script>
+  <script src="assets/js/visor-imagenes.js" defer></script>
+</body>
+
+</html>

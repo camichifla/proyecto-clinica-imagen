@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verificar cuenta - Clinica Imagen</title>
+  <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+    </div>
+  </header>
+
+  <main>
+    <section class="seccion-auth">
+      <h1>Verificacion de cuenta</h1>
+
+      <div data-exito-panel hidden>
+        <p class="aviso-exito">Si la cuenta existe y aun no fue verificada, te enviamos un nuevo enlace (revisa tu correo o <code>storage/mail.log</code>).</p>
+        <p><a href="login.html">Volver a iniciar sesion</a></p>
+      </div>
+
+      <div data-token-invalido hidden>
+        <p class="campo-error">El enlace de verificacion es invalido o vencio.</p>
+
+        <p>Solicita un nuevo enlace:</p>
+        <p class="campo-error" data-general hidden></p>
+        <form method="post" action="api/verify.php" data-api="api/verify.php" data-exito="[data-exito-panel]" novalidate>
+          <input type="hidden" name="csrf" value="">
+          <input type="hidden" name="accion" value="reenviar">
+          <div class="campo">
+            <label for="email">Correo</label>
+            <input type="email" id="email" name="email" required>
+          </div>
+          <button type="submit" class="btn-primary">Reenviar enlace</button>
+        </form>
+      </div>
+
+      <p data-default>Usa el enlace enviado a tu correo para verificar tu cuenta.</p>
+    </section>
+  </main>
+
+  <script src="assets/js/sesion-publica.js" defer></script>
+  <script src="assets/js/form-api.js" defer></script>
+  <script defer>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = new URL(window.location.href).searchParams.get('token');
+      if (!token) {
+        return; // estado por defecto: el mensaje [data-default] ya esta visible
+      }
+
+      document.querySelector('[data-default]').hidden = true;
+
+      let respuesta;
+      try {
+        respuesta = await fetch(`api/verify.php?token=${encodeURIComponent(token)}`);
+      } catch {
+        document.querySelector('[data-token-invalido]').hidden = false;
+        return;
+      }
+
+      const data = await respuesta.json();
+      if (data.ok && data.redirect) {
+        window.location.href = data.redirect;
+        return;
+      }
+
+      document.querySelector('[data-token-invalido]').hidden = false;
+    });
+  </script>
+</body>
+
+</html>

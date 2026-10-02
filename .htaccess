@@ -1,31 +1,53 @@
 RewriteEngine On
 
-# Las paginas se movieron a subcarpetas (auth/, citas/, resultados/,
-# alineadores/, usuarios/) pero sus URLs publicas se mantienen igual que
-# antes (ej. /agendar-cita.php) para no romper bookmarks/links existentes.
-RewriteRule ^login\.php$ auth/login.php [L]
 RewriteRule ^logout\.php$ auth/logout.php [L]
-RewriteRule ^register\.php$ auth/register.php [L]
-RewriteRule ^reset-request\.php$ auth/reset-request.php [L]
-RewriteRule ^reset-confirm\.php$ auth/reset-confirm.php [L]
-RewriteRule ^verify\.php$ auth/verify.php [L]
 
-RewriteRule ^agenda\.php$ citas/agenda.php [L]
-RewriteRule ^agendar-cita-medico\.php$ citas/agendar-cita-medico.php [L]
-RewriteRule ^agendar-cita\.php$ citas/agendar-cita.php [L]
-RewriteRule ^solicitudes-cita\.php$ citas/solicitudes-cita.php [L]
-RewriteRule ^ver-agenda\.php$ citas/ver-agenda.php [L]
+RewriteRule ^$ views/index.html [L]
+RewriteRule ^index\.html$ views/index.html [L]
+RewriteRule ^login\.html$ views/login.html [L]
+RewriteRule ^register\.html$ views/register.html [L]
+RewriteRule ^reset-request\.html$ views/reset-request.html [L]
+RewriteRule ^reset-confirm\.html$ views/reset-confirm.html [L]
+RewriteRule ^verify\.html$ views/verify.html [L]
 
-RewriteRule ^buscar-resultados\.php$ resultados/buscar-resultados.php [L]
-RewriteRule ^cargar-resultados\.php$ resultados/cargar-resultados.php [L]
-RewriteRule ^enviar-resultados\.php$ resultados/enviar-resultados.php [L]
-RewriteRule ^historial-pacientes\.php$ resultados/historial-pacientes.php [L]
-RewriteRule ^resultados\.php$ resultados/resultados.php [L]
+RewriteRule ^index\.php$ /index.html [R=301,L,QSA]
+RewriteRule ^login\.php$ /login.html [R=301,L,QSA]
+RewriteRule ^register\.php$ /register.html [R=301,L,QSA]
+RewriteRule ^reset-request\.php$ /reset-request.html [R=301,L,QSA]
+RewriteRule ^reset-confirm\.php$ /reset-confirm.html [R=301,L,QSA]
+RewriteRule ^verify\.php$ /verify.html [R=301,L,QSA]
+
+RewriteRule ^agenda\.html$ views/agenda.html [L]
+RewriteRule ^ver-agenda\.html$ views/ver-agenda.html [L]
+RewriteRule ^solicitudes-cita\.html$ views/solicitudes-cita.html [L]
+RewriteRule ^agendar-cita\.html$ views/agendar-cita.html [L]
+RewriteRule ^agendar-cita-medico\.html$ views/agendar-cita-medico.html [L]
+
+RewriteRule ^agenda\.php$ /agenda.html [R=301,L,QSA]
+RewriteRule ^ver-agenda\.php$ /ver-agenda.html [R=301,L,QSA]
+RewriteRule ^solicitudes-cita\.php$ /solicitudes-cita.html [R=301,L,QSA]
+RewriteRule ^agendar-cita\.php$ /agendar-cita.html [R=301,L,QSA]
+RewriteRule ^agendar-cita-medico\.php$ /agendar-cita-medico.html [R=301,L,QSA]
+
+RewriteRule ^buscar-resultados\.html$ views/buscar-resultados.html [L]
+RewriteRule ^resultados\.html$ views/resultados.html [L]
+RewriteRule ^historial-pacientes\.html$ views/historial-pacientes.html [L]
+RewriteRule ^ver-resultados\.html$ views/ver-resultados.html [L]
+RewriteRule ^cargar-resultados\.html$ views/cargar-resultados.html [L]
+RewriteRule ^enviar-resultados\.html$ views/enviar-resultados.html [L]
+RewriteRule ^manejar-usuarios\.html$ views/manejar-usuarios.html [L]
+RewriteRule ^modificar-usuario\.html$ views/modificar-usuario.html [L]
+
+RewriteRule ^buscar-resultados\.php$ /buscar-resultados.html [R=301,L,QSA]
+RewriteRule ^historial-pacientes\.php$ /historial-pacientes.html [R=301,L,QSA]
+RewriteRule ^resultados\.php$ /resultados.html [R=301,L,QSA]
+RewriteRule ^ver-resultados\.php$ /ver-resultados.html [R=301,L,QSA]
+RewriteRule ^cargar-resultados\.php$ /cargar-resultados.html [R=301,L,QSA]
+RewriteRule ^enviar-resultados\.php$ /enviar-resultados.html [R=301,L,QSA]
+RewriteRule ^manejar-usuarios\.php$ /manejar-usuarios.html [R=301,L,QSA]
+RewriteRule ^modificar-usuario\.php$ /modificar-usuario.html [R=301,L,QSA]
+
 RewriteRule ^ver-resultado-imagen\.php$ resultados/ver-resultado-imagen.php [L]
-RewriteRule ^ver-resultados\.php$ resultados/ver-resultados.php [L]
 
 RewriteRule ^orden-alineadores\.php$ alineadores/orden-alineadores.php [L]
 RewriteRule ^ordenes-alineadores\.php$ alineadores/ordenes-alineadores.php [L]
-
-RewriteRule ^manejar-usuarios\.php$ usuarios/manejar-usuarios.php [L]
-RewriteRule ^modificar-usuario\.php$ usuarios/modificar-usuario.php [L]

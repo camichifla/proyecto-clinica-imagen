@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agendar Cita - Clinica Imagen</title>
+  <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+    </div>
+    <div class="user">
+      <details class="menu-usuario">
+        <summary class="menu-usuario-toggle" aria-label="Menu de usuario">
+          <img src="" alt="">
+        </summary>
+        <div class="menu-usuario-panel">
+          <span class="user-nombre"></span>
+          <ul class="menu-usuario-lista"></ul>
+          <form method="post" action="logout.php" class="form-logout">
+            <input type="hidden" name="csrf" value="">
+            <button type="submit" class="btn-logout">Cerrar sesion</button>
+          </form>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main>
+    <div class="layout-agendar-citas">
+      <section class="seccion-auth">
+        <h1>Agendar Cita</h1>
+
+        <p class="aviso-exito" data-aviso="ok" hidden>Tu solicitud de cita fue enviada. Te avisaremos cuando sea confirmada.</p>
+        <p class="aviso-exito" data-aviso="cancelado" hidden>La cita fue cancelada.</p>
+        <p class="aviso-exito" data-aviso="reprogramado" hidden>La cita fue reprogramada.</p>
+        <p class="campo-error" data-aviso="error-reprogramar" hidden>Esa cita ya no se puede reprogramar (cambio de estado o no te pertenece).</p>
+        <p class="campo-error" data-general hidden></p>
+
+        <form method="post" action="api/agendar-cita.php" data-api="api/agendar-cita.php" novalidate>
+          <input type="hidden" name="csrf" value="">
+          <input type="hidden" name="accion" id="form-accion" value="crear">
+          <input type="hidden" name="cita_id" id="form-cita-id" value="">
+
+          <div class="campo">
+            <label for="estudio">Estudio</label>
+            <select id="estudio" name="estudio" class="selector-combo">
+              <option value="">Elegi un estudio</option>
+              <option value="placa">Placa</option>
+              <option value="radiografia">Radiografia</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="sucursal">Sede</label>
+            <select id="sucursal" name="sucursal_id" class="selector-combo">
+              <option value="">Elegi una sede</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="profesional_id">Profesional</label>
+            <select id="profesional_id" name="profesional_id" class="selector-combo">
+              <option value="">Elegi un profesional</option>
+            </select>
+            <p class="campo-error" data-mensaje-sin-profesionales hidden>Todavia no hay profesionales cargados.</p>
+          </div>
+
+          <div class="campo">
+            <label id="fecha-label">Fecha</label>
+            <div class="selector-fecha" data-min="" data-max="">
+              <button type="button" id="fecha-boton" class="selector-fecha-boton"
+                      aria-haspopup="dialog" aria-expanded="false"
+                      aria-labelledby="fecha-label">
+                <span class="selector-fecha-texto">Elegi una fecha</span>
+              </button>
+              <input type="hidden" id="fecha" name="fecha" value="">
+              <div class="calendario" id="calendario" role="dialog" aria-label="Elegir fecha" hidden>
+                <div class="calendario-header">
+                  <button type="button" class="calendario-nav" data-dir="-1" aria-label="Mes anterior">‹</button>
+                  <span class="calendario-mes-actual"></span>
+                  <button type="button" class="calendario-nav" data-dir="1" aria-label="Mes siguiente">›</button>
+                </div>
+                <div class="calendario-dias-semana"></div>
+                <div class="calendario-grid"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="campo">
+            <label for="hora">Hora</label>
+            <select id="hora" name="hora" class="selector-combo" disabled>
+              <option value="">Elegi sede y fecha primero</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-primary" id="btn-agendar-submit">Solicitar cita</button>
+        </form>
+      </section>
+
+      <section class="seccion-panel">
+        <h2>Mis Citas</h2>
+        <div id="mis-citas"></div>
+      </section>
+    </div>
+  </main>
+
+  <script src="assets/js/sesion.js" defer></script>
+  <script src="assets/js/form-api.js" defer></script>
+  <script src="assets/js/agendar-cita.js" defer></script>
+</body>
+
+</html>

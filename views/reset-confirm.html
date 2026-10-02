@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Restablecer contrasena - Clinica Imagen</title>
+  <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+    </div>
+  </header>
+
+  <main>
+    <section class="seccion-auth">
+      <h1>Restablecer contrasena</h1>
+
+      <div data-token-invalido hidden>
+        <p class="campo-error">El enlace de restablecimiento es invalido o vencio.</p>
+        <p><a href="reset-request.html">Solicitar un nuevo enlace</a></p>
+      </div>
+
+      <p class="campo-error" data-general hidden></p>
+
+      <form method="post" action="api/reset-confirm.php" data-api="api/reset-confirm.php" novalidate hidden>
+        <input type="hidden" name="csrf" value="">
+        <input type="hidden" name="token" value="">
+        <div class="campo">
+          <label for="contrasena">Nueva contrasena</label>
+          <input type="password" id="contrasena" name="contrasena" required>
+        </div>
+        <button type="submit" class="btn-primary">Actualizar contrasena</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="assets/js/sesion-publica.js" defer></script>
+  <script src="assets/js/form-api.js" defer></script>
+  <script defer>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const token = new URL(window.location.href).searchParams.get('token') || '';
+      const form = document.querySelector('form[data-api]');
+      const panelInvalido = document.querySelector('[data-token-invalido]');
+
+      if (!token) {
+        panelInvalido.hidden = false;
+        return;
+      }
+
+      let respuesta;
+      try {
+        respuesta = await fetch(`api/reset-confirm.php?token=${encodeURIComponent(token)}`);
+      } catch {
+        panelInvalido.hidden = false;
+        return;
+      }
+
+      if (!respuesta.ok) {
+        panelInvalido.hidden = false;
+        return;
+      }
+
+      form.querySelector('input[name="token"]').value = token;
+      form.hidden = false;
+    });
+  </script>
+</body>
+
+</html>

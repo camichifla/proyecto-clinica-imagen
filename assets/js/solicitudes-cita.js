@@ -14,30 +14,16 @@
         el.hidden = false;
     }
 
-    function celda(etiqueta, texto) {
-        const td = document.createElement('td');
-        td.dataset.label = etiqueta;
-        td.textContent = texto;
-        return td;
-    }
-
     async function procesar(cita, accion, fila, notasAdmin, csrf) {
         const body = new URLSearchParams({ csrf, accion, cita_id: String(cita.id) });
         if (notasAdmin !== undefined) {
             body.set('notas_admin', notasAdmin);
         }
-        let respuesta;
-        try {
-            respuesta = await fetch('api/solicitudes-cita.php', { method: 'POST', body });
-        } catch {
+        const data = await apiJson('api/solicitudes-cita.php', { method: 'POST', body });
+        if (!data) {
             mostrarMensaje('No se pudo conectar. Intenta nuevamente.', true);
             return;
         }
-        if (respuesta.status === 401 || respuesta.redirected) {
-            window.location.href = 'login.html';
-            return;
-        }
-        const data = await respuesta.json();
         if (!data.ok) {
             mostrarMensaje(data.error || 'Ocurrio un error inesperado.', true);
             return;
@@ -112,29 +98,11 @@
             renderVacio();
             return;
         }
-        const scroll = document.createElement('div');
-        scroll.className = 'tabla-scroll';
-        const tabla = document.createElement('table');
-        tabla.className = 'tabla-datos';
-
-        const thead = document.createElement('thead');
-        const trHead = document.createElement('tr');
-        ['Fecha y hora solicitada', 'Paciente', 'Estudio', 'Sede', 'Profesional', 'Acciones'].forEach((texto) => {
-            const th = document.createElement('th');
-            th.scope = 'col';
-            th.textContent = texto;
-            trHead.appendChild(th);
-        });
-        thead.appendChild(trHead);
-        tabla.appendChild(thead);
-
-        const tbody = document.createElement('tbody');
-        data.citas.forEach((cita) => tbody.appendChild(renderFila(cita, data.notasAdminMax, csrf)));
-        tabla.appendChild(tbody);
-
-        scroll.appendChild(tabla);
         lista.innerHTML = '';
-        lista.appendChild(scroll);
+        lista.appendChild(tabla(
+            ['Fecha y hora solicitada', 'Paciente', 'Estudio', 'Sede', 'Profesional', 'Acciones'],
+            data.citas.map((cita) => renderFila(cita, data.notasAdminMax, csrf))
+        ));
     }
 
     async function init() {
@@ -142,17 +110,10 @@
         if (!sesion) {
             return;
         }
-        let respuesta;
-        try {
-            respuesta = await fetch('api/solicitudes-cita.php');
-        } catch {
+        const data = await apiJson('api/solicitudes-cita.php');
+        if (!data) {
             return;
         }
-        if (respuesta.status === 401 || respuesta.status === 403 || respuesta.redirected) {
-            window.location.href = 'login.html';
-            return;
-        }
-        const data = await respuesta.json();
         renderTabla(data, sesion.csrf);
     }
 

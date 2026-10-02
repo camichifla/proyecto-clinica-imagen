@@ -7,15 +7,6 @@
         return;
     }
 
-    function cargarScript(src) {
-        return new Promise((resolve) => {
-            const script = document.createElement('script');
-            script.src = src;
-            script.onload = resolve;
-            document.body.appendChild(script);
-        });
-    }
-
     function mostrarAviso() {
         const params = new URL(window.location.href).searchParams;
         if (params.get('ok') === 'pendiente') {
@@ -25,53 +16,16 @@
         }
     }
 
-    function poblarSucursales(sucursalesOrden) {
-        sucursalesOrden.forEach((sucursal) => {
-            const opcion = document.createElement('option');
-            opcion.value = String(sucursal.id);
-            opcion.textContent = sucursal.direccion ? sucursal.nombre + ' — ' + sucursal.direccion : sucursal.nombre;
-            selectSucursal.appendChild(opcion);
-        });
-    }
-
-    const ETIQUETAS_ESTUDIO = { placa: 'Placa', radiografia: 'Radiografia' };
-
-    function poblarProfesionales(profesionales) {
-        profesionales.forEach((profesional) => {
-            const opcion = document.createElement('option');
-            opcion.value = String(profesional.id);
-            opcion.dataset.especializaciones = JSON.stringify(profesional.especializaciones);
-            const etiquetas = profesional.especializaciones.map((e) => ETIQUETAS_ESTUDIO[e] || e).join(', ');
-            opcion.textContent = profesional.apellido + ', ' + profesional.nombre + ' — ' + etiquetas;
-            selectProfesional.appendChild(opcion);
-        });
-        if (!profesionales.length) {
-            document.querySelector('[data-mensaje-sin-profesionales]').hidden = false;
-        }
-    }
-
     function poblarPacientesConectados(pacientes) {
-        const datalist = document.getElementById('paciente_id_lista');
-        pacientes.forEach((paciente) => {
-            const opcion = document.createElement('option');
-            opcion.dataset.id = paciente.id;
-            opcion.value = `${paciente.apellido}, ${paciente.nombre} (CI ${paciente.ci})`;
-            datalist.appendChild(opcion);
-        });
+        poblarPacientes(document.getElementById('paciente_id_lista'), pacientes);
         if (!pacientes.length) {
             document.querySelector('[data-mensaje-sin-pacientes]').hidden = false;
         }
     }
 
-    const DIENTES_COMPLETO = [
-        '55', '54', '53', '52', '51', '61', '62', '63', '64', '65',
-        '18', '17', '16', '15', '14', '13', '12', '11', '21', '22', '23', '24', '25', '26', '27', '28',
-        '48', '47', '46', '45', '44', '43', '42', '41', '31', '32', '33', '34', '35', '36', '37', '38',
-        '85', '84', '83', '82', '81', '71', '72', '73', '74', '75',
-    ];
     const DIENTES_FILAS_LARGOS = [10, 16, 16, 10];
 
-    function renderGridDientes(contenedor, name) {
+    function renderGridDientes(contenedor, name, dientes) {
         if (!contenedor) {
             return;
         }
@@ -79,7 +33,7 @@
         DIENTES_FILAS_LARGOS.forEach((largo) => {
             const fila = document.createElement('div');
             fila.className = 'teeth-row';
-            DIENTES_COMPLETO.slice(offset, offset + largo).forEach((diente) => {
+            dientes.slice(offset, offset + largo).forEach((diente) => {
                 const label = document.createElement('label');
                 const input = document.createElement('input');
                 input.type = 'checkbox';
@@ -113,15 +67,12 @@
 
     function initToggleTipoOrden() {
         const estudioSelect = document.getElementById('estudio');
-        const tipoOrdenOculto = document.getElementById('tipo_orden');
         const panelEstudio = document.getElementById('orden-panel-estudio');
-        if (!estudioSelect || !tipoOrdenOculto || !panelEstudio) {
+        if (!estudioSelect || !panelEstudio) {
             return;
         }
         function aplicar() {
-            const hayEstudio = estudioSelect.value !== '';
-            tipoOrdenOculto.value = hayEstudio ? 'estudio' : '';
-            panelEstudio.hidden = !hayEstudio;
+            panelEstudio.hidden = estudioSelect.value === '';
         }
         estudioSelect.addEventListener('change', aplicar);
         aplicar();
@@ -163,26 +114,19 @@
             return;
         }
 
-        let respuesta;
-        try {
-            respuesta = await fetch('api/agendar-cita-medico.php');
-        } catch {
+        const data = await apiJson('api/agendar-cita-medico.php');
+        if (!data) {
             return;
         }
-        if (respuesta.status === 401 || respuesta.status === 403 || respuesta.redirected) {
-            window.location.href = 'login.html';
-            return;
-        }
-        const data = await respuesta.json();
 
         contenedorFecha.dataset.min = data.fechaMin;
         contenedorFecha.dataset.max = data.fechaMax;
 
-        poblarSucursales(data.sucursalesOrden);
-        poblarProfesionales(data.profesionales);
+        poblarSucursales(selectSucursal, data.sucursalesOrden);
+        poblarProfesionales(selectProfesional, data.profesionales);
         poblarPacientesConectados(data.pacientesConectados);
-        renderGridDientes(document.getElementById('teeth-radio-intra'), 'radio_intra');
-        renderGridDientes(document.getElementById('teeth-tomo-cone-beam'), 'tomo_cone_beam');
+        renderGridDientes(document.getElementById('teeth-radio-intra'), 'radio_intra', data.dientes);
+        renderGridDientes(document.getElementById('teeth-tomo-cone-beam'), 'tomo_cone_beam', data.dientes);
 
         initToggleModoPaciente();
         initToggleTipoOrden();
@@ -191,9 +135,7 @@
         window.SUCURSALES = data.sucursales;
         window.HORA_ELEGIDA = '';
 
-        await cargarScript('assets/js/agendado-cascada.js');
-        await cargarScript('assets/js/selector-combo.js');
-        await cargarScript('assets/js/buscador-combo.js');
+        await cargarScripts('assets/js/agendado-cascada.js', 'assets/js/selector-combo.js', 'assets/js/buscador-combo.js');
     }
 
     init();

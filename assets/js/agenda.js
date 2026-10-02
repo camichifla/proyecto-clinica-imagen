@@ -193,17 +193,10 @@
         if (sucursalId) {
             params.set('sucursal_id', sucursalId);
         }
-        let respuesta;
-        try {
-            respuesta = await fetch('api/agenda.php?' + params.toString());
-        } catch {
+        const data = await apiJson('api/agenda.php?' + params.toString());
+        if (!data) {
             return;
         }
-        if (respuesta.status === 401 || respuesta.status === 403 || respuesta.redirected) {
-            window.location.href = 'login.html';
-            return;
-        }
-        const data = await respuesta.json();
         render(data);
         if (agregarHistorial) {
             history.pushState(null, '', urlAgenda(data.vista, data.fecha, data.sucursalId));

@@ -30,25 +30,17 @@
     });
 
     async function init() {
-        let respuesta;
-        try {
-            respuesta = await fetch('api/modificar-usuario.php');
-        } catch {
+        const data = await apiJson('api/modificar-usuario.php');
+        if (!data) {
             return;
         }
-        if (respuesta.status === 401 || respuesta.status === 403 || respuesta.redirected) {
-            window.location.href = 'login.html';
-            return;
-        }
-        if (respuesta.status === 404) {
+        if (!data.campos) {
             form.hidden = true;
             const p = document.createElement('p');
             p.textContent = 'Esta seccion esta en construccion.';
             form.insertAdjacentElement('beforebegin', p);
             return;
         }
-
-        const data = await respuesta.json();
 
         const fila = document.createElement('div');
         fila.className = 'campo-fila';

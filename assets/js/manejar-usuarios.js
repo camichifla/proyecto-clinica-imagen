@@ -15,13 +15,6 @@
     let csrf = '';
     let buscadorComboCargado = false;
 
-    function celda(etiqueta, texto) {
-        const td = document.createElement('td');
-        td.dataset.label = etiqueta;
-        td.textContent = texto;
-        return td;
-    }
-
     function badge(si) {
         const span = document.createElement('span');
         span.className = 'estado-badge ' + (si ? 'estado-si' : 'estado-no');
@@ -41,17 +34,8 @@
 
     async function accionFila(campos) {
         const body = new URLSearchParams({ csrf, ...campos });
-        let respuesta;
-        try {
-            respuesta = await fetch('api/manejar-usuarios.php', { method: 'POST', body });
-        } catch {
-            return { ok: false, error: 'No se pudo conectar. Intenta nuevamente.' };
-        }
-        if (respuesta.status === 401 || respuesta.redirected) {
-            window.location.href = 'login.html';
-            return { ok: false };
-        }
-        return respuesta.json();
+        return (await apiJson('api/manejar-usuarios.php', { method: 'POST', body }))
+            || { ok: false, error: 'No se pudo conectar. Intenta nuevamente.' };
     }
 
     function renderCuentas(data) {
@@ -63,23 +47,7 @@
             return;
         }
 
-        const scroll = document.createElement('div');
-        scroll.className = 'tabla-scroll';
-        const tabla = document.createElement('table');
-        tabla.className = 'tabla-datos';
-        const thead = document.createElement('thead');
-        const trHead = document.createElement('tr');
-        ['Nombre', 'Email', 'Rol', 'Verificado', 'Activo', ''].forEach((texto) => {
-            const th = document.createElement('th');
-            th.scope = 'col';
-            th.textContent = texto;
-            trHead.appendChild(th);
-        });
-        thead.appendChild(trHead);
-        tabla.appendChild(thead);
-
-        const tbody = document.createElement('tbody');
-        data.cuentas.forEach((cuenta) => {
+        const filas = data.cuentas.map((cuenta) => {
             const tr = document.createElement('tr');
             tr.appendChild(celda('Nombre', `${cuenta.apellido} ${cuenta.nombre}`.trim()));
             tr.appendChild(celda('Email', cuenta.email));
@@ -123,27 +91,15 @@
                 tdAcciones.appendChild(boton);
             }
             tr.appendChild(tdAcciones);
-            tbody.appendChild(tr);
+            return tr;
         });
-        tabla.appendChild(tbody);
-        scroll.appendChild(tabla);
-        tablaCuentasContenedor.appendChild(scroll);
-    }
-
-    function poblarDatalist(datalist, filas, etiquetaFn) {
-        datalist.innerHTML = '';
-        filas.forEach((fila) => {
-            const opcion = document.createElement('option');
-            opcion.dataset.id = fila.id;
-            opcion.value = etiquetaFn(fila);
-            datalist.appendChild(opcion);
-        });
+        tablaCuentasContenedor.appendChild(tabla(['Nombre', 'Email', 'Rol', 'Verificado', 'Activo', ''], filas));
     }
 
     function renderAsignaciones(data) {
         if (!buscadorComboCargado) {
             poblarDatalist(datalistMedicos, data.medicos, (m) => `${m.apellido}, ${m.nombre}`);
-            poblarDatalist(datalistPacientes, data.pacientes, (p) => `${p.apellido}, ${p.nombre} (CI ${p.ci})`);
+            poblarPacientes(datalistPacientes, data.pacientes);
         }
 
         asignacionesContenedor.innerHTML = '';
@@ -154,23 +110,7 @@
             return;
         }
 
-        const scroll = document.createElement('div');
-        scroll.className = 'tabla-scroll';
-        const tabla = document.createElement('table');
-        tabla.className = 'tabla-datos';
-        const thead = document.createElement('thead');
-        const trHead = document.createElement('tr');
-        ['Medico', 'Paciente', ''].forEach((texto) => {
-            const th = document.createElement('th');
-            th.scope = 'col';
-            th.textContent = texto;
-            trHead.appendChild(th);
-        });
-        thead.appendChild(trHead);
-        tabla.appendChild(thead);
-
-        const tbody = document.createElement('tbody');
-        data.asignaciones.forEach((asignacion) => {
+        const filas = data.asignaciones.map((asignacion) => {
             const tr = document.createElement('tr');
             tr.appendChild(celda('Medico', `${asignacion.medico_apellido}, ${asignacion.medico_nombre}`));
             tr.appendChild(celda('Paciente', `${asignacion.paciente_apellido}, ${asignacion.paciente_nombre}`));
@@ -196,34 +136,16 @@
             });
             tdAcciones.appendChild(boton);
             tr.appendChild(tdAcciones);
-            tbody.appendChild(tr);
+            return tr;
         });
-        tabla.appendChild(tbody);
-        scroll.appendChild(tabla);
-        asignacionesContenedor.appendChild(scroll);
-    }
-
-    function cargarScript(src) {
-        return new Promise((resolve) => {
-            const script = document.createElement('script');
-            script.src = src;
-            script.onload = resolve;
-            document.body.appendChild(script);
-        });
+        asignacionesContenedor.appendChild(tabla(['Medico', 'Paciente', ''], filas));
     }
 
     async function cargarDatos() {
-        let respuesta;
-        try {
-            respuesta = await fetch('api/manejar-usuarios.php');
-        } catch {
+        const data = await apiJson('api/manejar-usuarios.php');
+        if (!data) {
             return;
         }
-        if (respuesta.status === 401 || respuesta.status === 403 || respuesta.redirected) {
-            window.location.href = 'login.html';
-            return;
-        }
-        const data = await respuesta.json();
         renderCuentas(data);
         renderAsignaciones(data);
 

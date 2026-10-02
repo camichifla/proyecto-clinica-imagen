@@ -11,15 +11,6 @@
     const formCitaId = document.getElementById('form-cita-id');
     const btnSubmit = document.getElementById('btn-agendar-submit');
 
-    function cargarScript(src) {
-        return new Promise((resolve) => {
-            const script = document.createElement('script');
-            script.src = src;
-            script.onload = resolve;
-            document.body.appendChild(script);
-        });
-    }
-
     function mostrarAviso() {
         const params = new URL(window.location.href).searchParams;
         if (params.has('ok')) {
@@ -33,66 +24,17 @@
         }
     }
 
-    function poblarSucursales(sucursalesOrden, seleccionada) {
-        sucursalesOrden.forEach((sucursal) => {
-            const opcion = document.createElement('option');
-            opcion.value = String(sucursal.id);
-            opcion.textContent = sucursal.direccion ? sucursal.nombre + ' — ' + sucursal.direccion : sucursal.nombre;
-            if (String(sucursal.id) === seleccionada) {
-                opcion.selected = true;
-            }
-            selectSucursal.appendChild(opcion);
-        });
-    }
-
-    const ETIQUETAS_ESTUDIO = { placa: 'Placa', radiografia: 'Radiografia' };
-
-    function poblarProfesionales(profesionales, seleccionado) {
-        profesionales.forEach((profesional) => {
-            const opcion = document.createElement('option');
-            opcion.value = String(profesional.id);
-            opcion.dataset.especializaciones = JSON.stringify(profesional.especializaciones);
-            const etiquetas = profesional.especializaciones.map((e) => ETIQUETAS_ESTUDIO[e] || e).join(', ');
-            opcion.textContent = profesional.apellido + ', ' + profesional.nombre + ' — ' + etiquetas;
-            if (String(profesional.id) === seleccionado) {
-                opcion.selected = true;
-            }
-            selectProfesional.appendChild(opcion);
-        });
-        if (!profesionales.length) {
-            document.querySelector('[data-mensaje-sin-profesionales]').hidden = false;
-        }
-    }
-
-    function pad(n) {
-        return String(n).padStart(2, '0');
-    }
-
     function aVisible(iso) {
         const [anio, mes, dia] = iso.split('-');
         return dia + '/' + mes + '/' + anio;
     }
 
-    function celda(etiqueta, texto) {
-        const td = document.createElement('td');
-        td.dataset.label = etiqueta;
-        td.textContent = texto;
-        return td;
-    }
-
     async function cancelarCita(cita, csrf, notasAdmin) {
         const body = new URLSearchParams({ csrf, accion: 'cancelar', cita_id: String(cita.id), notas_admin: notasAdmin });
-        let respuesta;
-        try {
-            respuesta = await fetch('api/agendar-cita.php', { method: 'POST', body });
-        } catch {
+        const data = await apiJson('api/agendar-cita.php', { method: 'POST', body });
+        if (!data) {
             return;
         }
-        if (respuesta.status === 401 || respuesta.redirected) {
-            window.location.href = 'login.html';
-            return;
-        }
-        const data = await respuesta.json();
         if (data.redirect) {
             window.location.href = data.redirect;
         }
@@ -153,28 +95,10 @@
             misCitas.appendChild(p);
             return;
         }
-        const scroll = document.createElement('div');
-        scroll.className = 'tabla-scroll';
-        const tabla = document.createElement('table');
-        tabla.className = 'tabla-datos';
-
-        const thead = document.createElement('thead');
-        const trHead = document.createElement('tr');
-        ['Fecha y hora de la cita', 'Sede', 'Estudio', 'Estado', ''].forEach((texto) => {
-            const th = document.createElement('th');
-            th.scope = 'col';
-            th.textContent = texto;
-            trHead.appendChild(th);
-        });
-        thead.appendChild(trHead);
-        tabla.appendChild(thead);
-
-        const tbody = document.createElement('tbody');
-        citas.forEach((cita) => tbody.appendChild(renderFilaCita(cita, notasAdminMax, csrf)));
-        tabla.appendChild(tbody);
-
-        scroll.appendChild(tabla);
-        misCitas.appendChild(scroll);
+        misCitas.appendChild(tabla(
+            ['Fecha y hora de la cita', 'Sede', 'Estudio', 'Estado', ''],
+            citas.map((cita) => renderFilaCita(cita, notasAdminMax, csrf))
+        ));
     }
 
     async function init() {
@@ -187,24 +111,17 @@
 
         const editarId = new URL(window.location.href).searchParams.get('editar');
         const qs = editarId ? '?editar=' + encodeURIComponent(editarId) : '';
-        let respuesta;
-        try {
-            respuesta = await fetch('api/agendar-cita.php' + qs);
-        } catch {
+        const data = await apiJson('api/agendar-cita.php' + qs);
+        if (!data) {
             return;
         }
-        if (respuesta.status === 401 || respuesta.status === 403 || respuesta.redirected) {
-            window.location.href = 'login.html';
-            return;
-        }
-        const data = await respuesta.json();
 
         contenedorFecha.dataset.min = data.fechaMin;
         contenedorFecha.dataset.max = data.fechaMax;
 
         const editar = data.editar;
-        poblarSucursales(data.sucursalesOrden, editar ? editar.sucursalId : '');
-        poblarProfesionales(data.profesionales, editar ? editar.profesionalId : '');
+        poblarSucursales(selectSucursal, data.sucursalesOrden, editar ? editar.sucursalId : '');
+        poblarProfesionales(selectProfesional, data.profesionales, editar ? editar.profesionalId : '');
 
         if (editar) {
             formAccion.value = 'reprogramar';
@@ -220,8 +137,7 @@
         window.SUCURSALES = data.sucursales;
         window.HORA_ELEGIDA = editar ? editar.hora : '';
 
-        await cargarScript('assets/js/agendado-cascada.js');
-        await cargarScript('assets/js/selector-combo.js');
+        await cargarScripts('assets/js/agendado-cascada.js', 'assets/js/selector-combo.js');
     }
 
     init();

@@ -140,3 +140,129 @@ function guardar_resultado_con_imagenes(
         throw $e;
     }
 }
+
+/**
+ * Validates a POST of the "cargar resultado" form, saves it and echoes the
+ * JSON response. Shared by cargar-resultados.php (profesional) and
+ * enviar-resultados.php (administrador). The caller does the csrf_check.
+ *
+ * @param callable(int):bool $pacienteValido  whether the caller may use this paciente
+ * @param ?int               $profesionalId   when set, the cita must belong to this profesional too
+ */
+function procesar_post_resultado(array $usuario, callable $pacienteValido, ?int $profesionalId, string $redirectBase): void
+{
+    $fechaMaxEstudio = (new DateTimeImmutable('today'))->format('Y-m-d');
+
+    $pacienteIdPost = (string) ($_POST['paciente_id'] ?? '');
+    $citaIdPost     = (string) ($_POST['cita_id'] ?? '');
+    $nombreEstudio  = trim((string) ($_POST['nombre_estudio'] ?? ''));
+    $fechaEstudio   = (string) ($_POST['fecha_estudio'] ?? '');
+    $observaciones  = trim((string) ($_POST['observaciones'] ?? ''));
+
+    $errores = [];
+
+    $pacienteId = filter_var($pacienteIdPost, FILTER_VALIDATE_INT);
+    if (!$pacienteId) {
+        $errores['paciente_id'] = 'Elegi un paciente.';
+    } elseif (!$pacienteValido($pacienteId)) {
+        $errores['paciente_id'] = 'Elegi un paciente valido.';
+        $pacienteId = null;
+    }
+
+    $citaId = null;
+    if ($citaIdPost !== '') {
+        $citaIdCandidato = filter_var($citaIdPost, FILTER_VALIDATE_INT);
+        if (!$citaIdCandidato) {
+            $errores['cita_id'] = 'Cita invalida.';
+        } elseif (!$pacienteId) {
+            $errores['cita_id'] = 'Elegi un paciente valido primero.';
+        } else {
+            $sql    = "SELECT id FROM citas WHERE id = ? AND paciente_id = ? AND estado = 'confirmada'";
+            $params = [$citaIdCandidato, $pacienteId];
+            if ($profesionalId !== null) {
+                $sql     .= ' AND profesional_id = ?';
+                $params[] = $profesionalId;
+            }
+            $stmt = db()->prepare($sql);
+            $stmt->execute($params);
+            if (!$stmt->fetch()) {
+                $errores['cita_id'] = 'La cita elegida no pertenece a este paciente o no esta confirmada.';
+            } else {
+                $citaId = $citaIdCandidato;
+            }
+        }
+    }
+
+    if ($nombreEstudio === '') {
+        $errores['nombre_estudio'] = 'El nombre del estudio es obligatorio.';
+    } elseif (mb_strlen($nombreEstudio) > 120) {
+        $errores['nombre_estudio'] = 'El nombre del estudio no puede superar 120 caracteres.';
+    }
+
+    if ($fechaEstudio === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fechaEstudio)) {
+        $errores['fecha_estudio'] = 'Elegi una fecha valida.';
+    } else {
+        [$anioEstudio, $mesEstudio, $diaEstudio] = array_map('intval', explode('-', $fechaEstudio));
+        if (!checkdate($mesEstudio, $diaEstudio, $anioEstudio)) {
+            $errores['fecha_estudio'] = 'Elegi una fecha valida.';
+        } elseif ($fechaEstudio > $fechaMaxEstudio) {
+            $errores['fecha_estudio'] = 'La fecha del estudio no puede ser futura.';
+        }
+    }
+
+    $archivosValidados = [];
+    $archivos = normalizar_archivos($_FILES['imagenes'] ?? null);
+    if (!$archivos) {
+        $errores['imagenes'] = 'Subi al menos una imagen.';
+    } else {
+        foreach ($archivos as $archivo) {
+            $extension   = null;
+            $errorImagen = validar_imagen($archivo, $extension);
+            if ($errorImagen !== null) {
+                $errores['imagenes'] = $errorImagen;
+                break;
+            }
+            $archivo['extension'] = $extension;
+            $archivosValidados[]  = $archivo;
+        }
+    }
+
+    if ($errores) {
+        echo json_encode(['ok' => false, 'errores' => $errores], JSON_UNESCAPED_UNICODE);
+        return;
+    }
+
+    try {
+        $resultadoId = guardar_resultado_con_imagenes(
+            $pacienteId,
+            $citaId,
+            $nombreEstudio,
+            $fechaEstudio,
+            $observaciones !== '' ? $observaciones : null,
+            $usuario['cuenta_id'],
+            $archivosValidados
+        );
+        echo json_encode(['ok' => true, 'redirect' => $redirectBase . '?ok=' . $resultadoId], JSON_UNESCAPED_UNICODE);
+    } catch (Throwable $e) {
+        echo json_encode(['ok' => false, 'errores' => ['general' => 'No se pudo guardar el resultado. Intenta nuevamente.']], JSON_UNESCAPED_UNICODE);
+    }
+}
+
+/**
+ * Groups confirmed-cita rows (id, paciente_id, fecha_hora_solicitada, estudio)
+ * into the [paciente_id => [{id,label}]] map the upload forms consume.
+ */
+function citas_por_paciente(array $filas): array
+{
+    $porPaciente = [];
+    foreach ($filas as $cita) {
+        $fecha    = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $cita['fecha_hora_solicitada']);
+        $etiqueta = ($fecha ? $fecha->format('d/m/Y H:i') : $cita['fecha_hora_solicitada'])
+            . ' - ' . (ESTUDIOS[$cita['estudio']] ?? $cita['estudio']);
+        $porPaciente[(string) $cita['paciente_id']][] = [
+            'id'    => (int) $cita['id'],
+            'label' => $etiqueta,
+        ];
+    }
+    return $porPaciente;
+}

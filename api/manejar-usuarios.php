@@ -18,12 +18,6 @@ const ESPECIALIZACIONES = [
     'alineadores' => 'Alineadores',
 ];
 
-const TABLA_POR_ROL = [
-    'medico'        => 'medicos',
-    'profesional'   => 'profesionales',
-    'administrador' => 'administradores',
-];
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check($_POST['csrf'] ?? null);
     $accion = $_POST['accion'] ?? '';
@@ -172,12 +166,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $db->beginTransaction();
 
-            if ($valores['rol'] === 'profesional') {
-                $stmt = $db->prepare('INSERT INTO profesionales (nombre, apellido) VALUES (?, ?)');
-            } else {
-                $tabla = TABLA_POR_ROL[$valores['rol']];
-                $stmt  = $db->prepare("INSERT INTO {$tabla} (nombre, apellido) VALUES (?, ?)");
-            }
+            $tabla = TABLA_POR_ROL[$valores['rol']];
+            $stmt  = $db->prepare("INSERT INTO {$tabla} (nombre, apellido) VALUES (?, ?)");
             $stmt->execute([$valores['nombre'], $valores['apellido']]);
             $refId = (int) $db->lastInsertId();
 

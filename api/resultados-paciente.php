@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../includes/session_bootstrap.php';
 require_once __DIR__ . '/../includes/auth_guard.php';
 require_once __DIR__ . '/../includes/db.php';
-require_once __DIR__ . '/../includes/resultados_render.php';
+require_once __DIR__ . '/../includes/resultados.php';
 require_once __DIR__ . '/../includes/estudios.php';
 require_once __DIR__ . '/../includes/pacientes_medico.php';
 require_once __DIR__ . '/../includes/pacientes_profesional.php';
@@ -47,23 +47,6 @@ if (!$paciente) {
 
 [$resultados, $imagenesPorResultado] = obtener_resultados_de_paciente(db(), (int) $paciente['id']);
 
-$resultadosJson = array_map(static function (array $resultado) use ($imagenesPorResultado): array {
-    $imagenes = $imagenesPorResultado[(int) $resultado['id']] ?? [];
-    return [
-        'id'             => (int) $resultado['id'],
-        'nombre_estudio' => $resultado['nombre_estudio'],
-        'fecha_estudio'  => $resultado['fecha_estudio'],
-        'observaciones'  => $resultado['observaciones'],
-        'imagenes'       => array_map(static function (array $imagen): array {
-            return [
-                'id'              => (int) $imagen['id'],
-                'url'             => 'ver-resultado-imagen.php?id=' . (int) $imagen['id'],
-                'nombre_original' => $imagen['nombre_original'],
-            ];
-        }, $imagenes),
-    ];
-}, $resultados);
-
 $respuesta = [
     'paciente'   => [
         'id'       => (int) $paciente['id'],
@@ -71,7 +54,7 @@ $respuesta = [
         'apellido' => $paciente['apellido'],
         'ci'       => $paciente['ci'],
     ],
-    'resultados' => $resultadosJson,
+    'resultados' => resultados_json($resultados, $imagenesPorResultado),
 ];
 
 if ($usuario['rol'] === 'profesional') {

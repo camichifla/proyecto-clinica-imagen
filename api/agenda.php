@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../includes/session_bootstrap.php';
 require_once __DIR__ . '/../includes/auth_guard.php';
 require_once __DIR__ . '/../includes/db.php';
-require_once __DIR__ . '/../includes/agenda_render.php';
+require_once __DIR__ . '/../includes/agenda.php';
 
 $usuario = requerir_rol_json(['administrador', 'profesional']);
 

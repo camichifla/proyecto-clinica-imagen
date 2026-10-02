@@ -283,16 +283,18 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="./assets/js/mapa-sucursales.js"></script>
-  <script src="assets/js/sesion-publica.js" defer></script>
-  <script defer>
-    document.getElementById('anio-actual').textContent = new Date().getFullYear();
-    window.sesionPublica.then((sesion) => {
-      if (sesion && sesion.logueado) {
-        const nombreHero = document.querySelector('.user-nombre-hero');
-        if (nombreHero) {
-          nombreHero.textContent = sesion.nombre;
+  <script src="assets/js/sesion.js" data-modo="publico" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('anio-actual').textContent = new Date().getFullYear();
+      window.sesionPublica.then((sesion) => {
+        if (sesion && sesion.logueado) {
+          const nombreHero = document.querySelector('.user-nombre-hero');
+          if (nombreHero) {
+            nombreHero.textContent = sesion.nombre;
+          }
         }
-      }
+      });
     });
   </script>
 </body>

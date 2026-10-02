@@ -2,24 +2,9 @@
 require_once __DIR__ . '/../includes/session_bootstrap.php';
 require_once __DIR__ . '/../includes/db.php';
 
-header('Content-Type: application/json; charset=utf-8');
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['ok' => false, 'error' => 'Metodo no permitido.'], JSON_UNESCAPED_UNICODE);
-    exit;
-}
-
-csrf_check($_POST['csrf'] ?? null);
+require_post_json();
 
 const DUMMY_HASH = '$2y$10$frrN.cZWEHqFbIH6xRp4R.WkE5mQDxy4sE35jd6QagOhrVYweahrS';
-
-const RUTAS_POST_LOGIN = [
-    'paciente'       => 'index.html',
-    'medico'         => 'index.html',
-    'profesional'    => 'index.html',
-    'administrador'  => 'index.html',
-];
 
 $email    = trim((string) ($_POST['email'] ?? ''));
 $password = (string) ($_POST['password'] ?? '');
@@ -41,7 +26,7 @@ if (!$cuenta) {
 }
 
 if ($error !== null) {
-    http_response_code(401);
+    http_response_code(422);
     echo json_encode(['ok' => false, 'error' => $error], JSON_UNESCAPED_UNICODE);
     exit;
 }
@@ -54,12 +39,7 @@ if (password_needs_rehash($cuenta['password_hash'], PASSWORD_BCRYPT)) {
 }
 
 $nombre = $email;
-$tablaPerfil = [
-    'paciente'      => 'pacientes',
-    'medico'        => 'medicos',
-    'profesional'   => 'profesionales',
-    'administrador' => 'administradores',
-][$cuenta['rol']] ?? null;
+$tablaPerfil = TABLA_POR_ROL[$cuenta['rol']] ?? null;
 if ($tablaPerfil !== null) {
     $perfil = db()->prepare("SELECT nombre FROM {$tablaPerfil} WHERE id = ?");
     $perfil->execute([$cuenta['ref_id']]);
@@ -76,5 +56,4 @@ $_SESSION['nombre']        = $nombre;
 $_SESSION['ultimo_acceso'] = time();
 $_SESSION['csrf']          = bin2hex(random_bytes(32));
 
-$destino = RUTAS_POST_LOGIN[$cuenta['rol']] ?? 'index.html';
-echo json_encode(['ok' => true, 'redirect' => $destino], JSON_UNESCAPED_UNICODE);
+echo json_encode(['ok' => true, 'redirect' => 'index.html'], JSON_UNESCAPED_UNICODE);

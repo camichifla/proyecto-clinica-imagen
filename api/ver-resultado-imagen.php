@@ -3,8 +3,11 @@
 // deny-all storage/resultados/ directory after verifying ownership. Never
 // exposes storage/ directly; this is the only path to that image content.
 require_once __DIR__ . '/../includes/session_bootstrap.php';
-require_once __DIR__ . '/../includes/auth_guard.php';
-$usuario = requerir_rol(['paciente', 'medico', 'profesional', 'administrador']);
+$usuario = usuario_actual();
+if ($usuario === null || !in_array($usuario['rol'], ['paciente', 'medico', 'profesional', 'administrador'], true)) {
+    header('Location: ' . APP_URL . '/login.html');
+    exit;
+}
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/pacientes_medico.php';
 

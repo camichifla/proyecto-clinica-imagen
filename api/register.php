@@ -4,20 +4,10 @@ require_once __DIR__ . '/../includes/validation.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/mailer.php';
 
-header('Content-Type: application/json; charset=utf-8');
+require_post_json();
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['ok' => false, 'error' => 'Metodo no permitido.'], JSON_UNESCAPED_UNICODE);
-    exit;
-}
-
-csrf_check($_POST['csrf'] ?? null);
-
-$valores = ['nombre' => '', 'apellido' => '', 'ci' => '', 'direccion' => '', 'numero' => '', 'email' => ''];
-foreach ($valores as $campo => $_valor) {
-    $valores[$campo] = trim((string) ($_POST[$campo] ?? ''));
-}
+$campos  = ['nombre', 'apellido', 'ci', 'direccion', 'numero', 'email'];
+$valores = array_map(static fn (string $campo): string => trim((string) ($_POST[$campo] ?? '')), array_combine($campos, $campos));
 
 $errores = validar(REGLAS_PACIENTE, $_POST);
 

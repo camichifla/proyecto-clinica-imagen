@@ -2,6 +2,14 @@
 // includes/db.php — single lazily-built PDO connection.
 require_once __DIR__ . '/config.php';
 
+// Profile table per cuentas.rol (cuentas.ref_id points at its id).
+const TABLA_POR_ROL = [
+    'paciente'      => 'pacientes',
+    'medico'        => 'medicos',
+    'profesional'   => 'profesionales',
+    'administrador' => 'administradores',
+];
+
 function db(): PDO
 {
     static $pdo = null;

@@ -1,6 +1,12 @@
 RewriteEngine On
 
-RewriteRule ^logout\.php$ auth/logout.php [L]
+# BASE = URL prefix of this directory ("/" at the web root, "/proyecto/" in a subfolder).
+RewriteCond %{REQUEST_URI}::$1 ^(.*?/)(.*)::\2$
+RewriteRule ^(.*)$ - [E=BASE:%1]
+
+RewriteRule ^logout\.php$ api/logout.php [L]
+
+RewriteRule ^(index|login|register|reset-request|reset-confirm|verify|agenda|ver-agenda|solicitudes-cita|agendar-cita|agendar-cita-medico|buscar-resultados|historial-pacientes|resultados|ver-resultados|cargar-resultados|enviar-resultados|manejar-usuarios|modificar-usuario)\.php$ %{ENV:BASE}$1.html [R=301,L,QSA]
 
 RewriteRule ^$ views/index.html [L]
 RewriteRule ^index\.html$ views/index.html [L]
@@ -10,24 +16,11 @@ RewriteRule ^reset-request\.html$ views/reset-request.html [L]
 RewriteRule ^reset-confirm\.html$ views/reset-confirm.html [L]
 RewriteRule ^verify\.html$ views/verify.html [L]
 
-RewriteRule ^index\.php$ /index.html [R=301,L,QSA]
-RewriteRule ^login\.php$ /login.html [R=301,L,QSA]
-RewriteRule ^register\.php$ /register.html [R=301,L,QSA]
-RewriteRule ^reset-request\.php$ /reset-request.html [R=301,L,QSA]
-RewriteRule ^reset-confirm\.php$ /reset-confirm.html [R=301,L,QSA]
-RewriteRule ^verify\.php$ /verify.html [R=301,L,QSA]
-
 RewriteRule ^agenda\.html$ views/agenda.html [L]
 RewriteRule ^ver-agenda\.html$ views/ver-agenda.html [L]
 RewriteRule ^solicitudes-cita\.html$ views/solicitudes-cita.html [L]
 RewriteRule ^agendar-cita\.html$ views/agendar-cita.html [L]
 RewriteRule ^agendar-cita-medico\.html$ views/agendar-cita-medico.html [L]
-
-RewriteRule ^agenda\.php$ /agenda.html [R=301,L,QSA]
-RewriteRule ^ver-agenda\.php$ /ver-agenda.html [R=301,L,QSA]
-RewriteRule ^solicitudes-cita\.php$ /solicitudes-cita.html [R=301,L,QSA]
-RewriteRule ^agendar-cita\.php$ /agendar-cita.html [R=301,L,QSA]
-RewriteRule ^agendar-cita-medico\.php$ /agendar-cita-medico.html [R=301,L,QSA]
 
 RewriteRule ^buscar-resultados\.html$ views/buscar-resultados.html [L]
 RewriteRule ^resultados\.html$ views/resultados.html [L]
@@ -38,16 +31,4 @@ RewriteRule ^enviar-resultados\.html$ views/enviar-resultados.html [L]
 RewriteRule ^manejar-usuarios\.html$ views/manejar-usuarios.html [L]
 RewriteRule ^modificar-usuario\.html$ views/modificar-usuario.html [L]
 
-RewriteRule ^buscar-resultados\.php$ /buscar-resultados.html [R=301,L,QSA]
-RewriteRule ^historial-pacientes\.php$ /historial-pacientes.html [R=301,L,QSA]
-RewriteRule ^resultados\.php$ /resultados.html [R=301,L,QSA]
-RewriteRule ^ver-resultados\.php$ /ver-resultados.html [R=301,L,QSA]
-RewriteRule ^cargar-resultados\.php$ /cargar-resultados.html [R=301,L,QSA]
-RewriteRule ^enviar-resultados\.php$ /enviar-resultados.html [R=301,L,QSA]
-RewriteRule ^manejar-usuarios\.php$ /manejar-usuarios.html [R=301,L,QSA]
-RewriteRule ^modificar-usuario\.php$ /modificar-usuario.html [R=301,L,QSA]
-
-RewriteRule ^ver-resultado-imagen\.php$ resultados/ver-resultado-imagen.php [L]
-
-RewriteRule ^orden-alineadores\.php$ alineadores/orden-alineadores.php [L]
-RewriteRule ^ordenes-alineadores\.php$ alineadores/ordenes-alineadores.php [L]
+RewriteRule ^ver-resultado-imagen\.php$ api/ver-resultado-imagen.php [L]

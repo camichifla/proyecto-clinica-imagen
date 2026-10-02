@@ -2,12 +2,12 @@
 require_once __DIR__ . '/../includes/session_bootstrap.php';
 require_once __DIR__ . '/../includes/auth_guard.php';
 require_once __DIR__ . '/../includes/db.php';
-require_once __DIR__ . '/../includes/agenda_render.php';
+require_once __DIR__ . '/../includes/agenda.php';
 require_once __DIR__ . '/../includes/mailer.php';
 
 $usuario = requerir_rol_json(['administrador']);
 
-const NOTAS_ADMIN_MAX = 255;
+const MENSAJE_SOLICITUD_NO_PROCESADA = 'No se pudo procesar la solicitud (puede que ya haya sido resuelta).';
 
 function email_notificacion_cita(?int $pacienteId, ?string $emailPendiente): ?string
 {
@@ -26,7 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $accion = $_POST['accion'] ?? '';
     $citaId = filter_input(INPUT_POST, 'cita_id', FILTER_VALIDATE_INT);
 
-    if ($accion === 'confirmar' && $citaId) {
+    if (in_array($accion, ['confirmar', 'rechazar'], true) && $citaId) {
+        $confirmar = $accion === 'confirmar';
+        $notas     = $confirmar ? '' : mb_substr(trim((string) ($_POST['notas_admin'] ?? '')), 0, NOTAS_ADMIN_MAX);
 
         $datosCita = db()->prepare(
             'SELECT paciente_id, email_pendiente, fecha_hora_solicitada FROM citas WHERE id = ?'
@@ -34,62 +36,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $datosCita->execute([$citaId]);
         $cita = $datosCita->fetch();
 
-        $stmt = db()->prepare(
-            "UPDATE citas
-                SET estado = 'confirmada', fecha_hora_confirmada = fecha_hora_solicitada
-              WHERE id = ? AND estado = 'pendiente'"
-        );
-        $stmt->execute([$citaId]);
+        if ($confirmar) {
+            $stmt = db()->prepare(
+                "UPDATE citas
+                    SET estado = 'confirmada', fecha_hora_confirmada = fecha_hora_solicitada
+                  WHERE id = ? AND estado = 'pendiente'"
+            );
+            $stmt->execute([$citaId]);
+        } else {
+            $stmt = db()->prepare(
+                "UPDATE citas
+                    SET estado = 'rechazada', notas_admin = ?
+                  WHERE id = ? AND estado = 'pendiente'"
+            );
+            $stmt->execute([$notas !== '' ? $notas : null, $citaId]);
+        }
 
         if ($stmt->rowCount() > 0 && $cita) {
             $email = email_notificacion_cita($cita['paciente_id'], $cita['email_pendiente']);
             if ($email !== null) {
-                enviar_notificacion_cita($email, 'confirmada', $cita['fecha_hora_solicitada']);
+                enviar_notificacion_cita($email, $confirmar ? 'confirmada' : 'rechazada', $cita['fecha_hora_solicitada'], $notas);
             }
-            echo json_encode(['ok' => true, 'mensaje' => 'La cita fue confirmada.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => true, 'mensaje' => 'La cita fue ' . ($confirmar ? 'confirmada.' : 'rechazada.')], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
         http_response_code(409);
-        echo json_encode(['ok' => false, 'error' => 'No se pudo procesar la solicitud (puede que ya haya sido resuelta).'], JSON_UNESCAPED_UNICODE);
-        exit;
-    }
-
-    if ($accion === 'rechazar' && $citaId) {
-        $notas = trim((string) ($_POST['notas_admin'] ?? ''));
-        if (mb_strlen($notas) > NOTAS_ADMIN_MAX) {
-            $notas = mb_substr($notas, 0, NOTAS_ADMIN_MAX);
-        }
-
-        $datosCita = db()->prepare(
-            'SELECT paciente_id, email_pendiente, fecha_hora_solicitada FROM citas WHERE id = ?'
-        );
-        $datosCita->execute([$citaId]);
-        $cita = $datosCita->fetch();
-
-        $stmt = db()->prepare(
-            "UPDATE citas
-                SET estado = 'rechazada', notas_admin = ?
-              WHERE id = ? AND estado = 'pendiente'"
-        );
-        $stmt->execute([$notas !== '' ? $notas : null, $citaId]);
-
-        if ($stmt->rowCount() > 0 && $cita) {
-            $email = email_notificacion_cita($cita['paciente_id'], $cita['email_pendiente']);
-            if ($email !== null) {
-                enviar_notificacion_cita($email, 'rechazada', $cita['fecha_hora_solicitada'], $notas);
-            }
-            echo json_encode(['ok' => true, 'mensaje' => 'La cita fue rechazada.'], JSON_UNESCAPED_UNICODE);
-            exit;
-        }
-
-        http_response_code(409);
-        echo json_encode(['ok' => false, 'error' => 'No se pudo procesar la solicitud (puede que ya haya sido resuelta).'], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['ok' => false, 'error' => MENSAJE_SOLICITUD_NO_PROCESADA], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
     http_response_code(400);
-    echo json_encode(['ok' => false, 'error' => 'No se pudo procesar la solicitud (puede que ya haya sido resuelta).'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => false, 'error' => MENSAJE_SOLICITUD_NO_PROCESADA], JSON_UNESCAPED_UNICODE);
     exit;
 }
 

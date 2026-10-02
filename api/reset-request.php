@@ -3,15 +3,7 @@ require_once __DIR__ . '/../includes/session_bootstrap.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/mailer.php';
 
-header('Content-Type: application/json; charset=utf-8');
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['ok' => false, 'error' => 'Metodo no permitido.'], JSON_UNESCAPED_UNICODE);
-    exit;
-}
-
-csrf_check($_POST['csrf'] ?? null);
+require_post_json();
 
 $email = trim((string) ($_POST['email'] ?? ''));
 if ($email !== '') {

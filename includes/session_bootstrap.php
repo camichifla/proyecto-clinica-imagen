@@ -19,11 +19,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-function es_peticion_api(): bool
-{
-    return strpos($_SERVER['SCRIPT_NAME'] ?? '', '/api/') !== false;
-}
-
 if (isset($_SESSION['cuenta_id']) && isset($_SESSION['ultimo_acceso'])
     && (time() - $_SESSION['ultimo_acceso']) > SESION_TIMEOUT_SEGUNDOS
 ) {
@@ -33,10 +28,10 @@ if (isset($_SESSION['cuenta_id']) && isset($_SESSION['ultimo_acceso'])
         setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
     }
     session_destroy();
-    if (es_peticion_api()) {
+    if (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/api/') !== false) {
         http_response_code(401);
         header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(['error' => 'Sesion expirada.'], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['error' => 'Sesion expirada.', 'expirado' => true], JSON_UNESCAPED_UNICODE);
         exit;
     }
     header('Location: ' . APP_URL . '/login.html?expirado=1');
@@ -44,10 +39,6 @@ if (isset($_SESSION['cuenta_id']) && isset($_SESSION['ultimo_acceso'])
 }
 
 $_SESSION['ultimo_acceso'] = time();
-
-if (empty($_SESSION['csrf'])) {
-    $_SESSION['csrf'] = bin2hex(random_bytes(32));
-}
 
 /**
  * Returns the CSRF token for the current session, generating one on first use.
@@ -66,11 +57,33 @@ function csrf_token(): string
  */
 function csrf_check(?string $token): void
 {
-    if (!is_string($token) || $token === '' || empty($_SESSION['csrf']) || !hash_equals($_SESSION['csrf'], $token)) {
-        http_response_code(403);
-        echo 'Solicitud invalida (token CSRF ausente o incorrecto).';
+    if (!is_string($token) || $token === '' || !hash_equals(csrf_token(), $token)) {
+        // PHP drops $_POST entirely when the body exceeds post_max_size.
+        $excedido = empty($_POST) && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0;
+        http_response_code($excedido ? 413 : 403);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['ok' => false, 'error' => $excedido
+            ? 'Los archivos superan el tamano maximo permitido.'
+            : 'La sesion cambio. Recarga la pagina e intenta nuevamente.'], JSON_UNESCAPED_UNICODE);
         exit;
     }
+}
+
+/**
+ * Prologue for JSON POST-only endpoints: JSON content type, 405 on any other
+ * method, CSRF check.
+ */
+function require_post_json(): void
+{
+    header('Content-Type: application/json; charset=utf-8');
+
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['ok' => false, 'error' => 'Metodo no permitido.'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    csrf_check($_POST['csrf'] ?? null);
 }
 
 /**

@@ -16,6 +16,8 @@ const ESTUDIOS = ESTUDIOS_BASE + [
     'alineadores' => 'Alineadores',
 ];
 
+const NOTAS_ADMIN_MAX = 255;
+
 const ESTADOS_CITA = [
     'pendiente'  => 'Pendiente',
     'confirmada' => 'Confirmada',

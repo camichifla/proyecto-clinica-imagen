@@ -8,16 +8,11 @@ require_once __DIR__ . '/../includes/validar_reserva.php';
 
 $usuario = requerir_rol_json(['paciente']);
 
-const RANGO_MESES    = 3;
-const NOTAS_ADMIN_MAX = 255;
+[$fechaMin, $fechaMax] = rango_reserva();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check($_POST['csrf'] ?? null);
     $accion = $_POST['accion'] ?? '';
-
-    $hoy      = new DateTimeImmutable('today');
-    $fechaMin = $hoy->format('Y-m-d');
-    $fechaMax = $hoy->modify('+' . RANGO_MESES . ' months')->format('Y-m-d');
 
     if ($accion === 'cancelar') {
         $citaId = filter_input(INPUT_POST, 'cita_id', FILTER_VALIDATE_INT);
@@ -105,58 +100,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-$hoy      = new DateTimeImmutable('today');
-$fechaMin = $hoy->format('Y-m-d');
-$fechaMax = $hoy->modify('+' . RANGO_MESES . ' months')->format('Y-m-d');
-
-$profesionalesFilas = db()->query('SELECT id, nombre, apellido FROM profesionales ORDER BY apellido, nombre')->fetchAll();
-
-$profesionalEspecializacionFilas = db()->query('SELECT profesional_id, especializacion FROM profesional_especializacion')->fetchAll();
-$especializacionesPorProfesional = [];
-foreach ($profesionalEspecializacionFilas as $fila) {
-    $especializacionesPorProfesional[(int) $fila['profesional_id']][] = $fila['especializacion'];
-}
-
-$profesionales = array_map(static function (array $p) use ($especializacionesPorProfesional): array {
-    return [
-        'id'               => (int) $p['id'],
-        'nombre'           => $p['nombre'],
-        'apellido'         => $p['apellido'],
-        'especializaciones' => $especializacionesPorProfesional[(int) $p['id']] ?? [],
-    ];
-}, $profesionalesFilas);
-
-$sucursalesFilas = db()->query('SELECT id, nombre, direccion FROM sucursales ORDER BY nombre')->fetchAll();
-$horariosFilas   = db()->query(
-    "SELECT sucursal_id, dia_semana,
-            TIME_FORMAT(hora_apertura, '%H:%i') AS apertura,
-            TIME_FORMAT(hora_cierre,   '%H:%i') AS cierre
-       FROM sucursal_horarios
-      ORDER BY sucursal_id, dia_semana, hora_apertura"
-)->fetchAll();
-$estudioFilas             = db()->query('SELECT sucursal_id, estudio FROM sucursal_estudio')->fetchAll();
-$profesionalSucursalFilas = db()->query('SELECT sucursal_id, profesional_id FROM profesional_sucursal')->fetchAll();
-
-$sucursales = [];
-foreach ($sucursalesFilas as $sucursal) {
-    $sucursales[(string) $sucursal['id']] = [
-        'nombre'        => $sucursal['nombre'],
-        'direccion'     => $sucursal['direccion'],
-        'estudios'      => [],
-        'horarios'      => [],
-        'profesionales' => [],
-    ];
-}
-foreach ($horariosFilas as $turno) {
-    $sucursales[(string) $turno['sucursal_id']]['horarios'][(string) $turno['dia_semana']][] = [$turno['apertura'], $turno['cierre']];
-}
-foreach ($estudioFilas as $restriccion) {
-    $sucursales[(string) $restriccion['sucursal_id']]['estudios'][] = $restriccion['estudio'];
-}
-foreach ($profesionalSucursalFilas as $asignacion) {
-    $sucursales[(string) $asignacion['sucursal_id']]['profesionales'][] = (int) $asignacion['profesional_id'];
-}
-
 $editar = null;
 $editarId = filter_input(INPUT_GET, 'editar', FILTER_VALIDATE_INT);
 if ($editarId) {
@@ -200,12 +143,9 @@ $citas = array_map(static function (array $cita): array {
 }, $stmt->fetchAll());
 
 echo json_encode([
-    'fechaMin'       => $fechaMin,
-    'fechaMax'       => $fechaMax,
-    'notasAdminMax'  => NOTAS_ADMIN_MAX,
-    'sucursalesOrden' => array_map(static fn (array $s): array => ['id' => (int) $s['id'], 'nombre' => $s['nombre'], 'direccion' => $s['direccion']], $sucursalesFilas),
-    'sucursales'     => $sucursales,
-    'profesionales'  => $profesionales,
-    'citas'          => $citas,
-    'editar'         => $editar,
-], JSON_UNESCAPED_UNICODE);
+    'fechaMin'      => $fechaMin,
+    'fechaMax'      => $fechaMax,
+    'notasAdminMax' => NOTAS_ADMIN_MAX,
+    'citas'         => $citas,
+    'editar'        => $editar,
+] + catalogo_reserva(), JSON_UNESCAPED_UNICODE);

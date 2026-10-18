@@ -1,6 +1,8 @@
 // Sesion del usuario. Por defecto exige login (redirige a login.html y expone
 // window.sesionLista). Con data-modo="publico" en el <script> no redirige,
 // alterna los elementos [data-sesion] y expone window.sesionPublica.
+// En modo no publico, si la vista actual no figura en el menu del rol,
+// redirige a index.html (el control real sigue en la API).
 (() => {
     const publico = document.currentScript.dataset.modo === 'publico';
 
@@ -29,6 +31,14 @@
         }
 
         const sesion = await respuesta.json();
+
+        if (!publico) {
+            const actual = window.location.pathname.split('/').pop();
+            if (actual && !sesion.menu.some((item) => item.href === actual)) {
+                window.location.replace('index.html');
+                return null;
+            }
+        }
 
         document.querySelectorAll('input[name="csrf"]').forEach((input) => {
             input.value = sesion.csrf;

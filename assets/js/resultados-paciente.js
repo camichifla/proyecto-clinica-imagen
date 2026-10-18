@@ -44,6 +44,76 @@
         destino.appendChild(tabla(['Fecha y hora solicitada', 'Sede', 'Estudio', 'Estado', 'Confirmacion', 'Notas'], filas));
     }
 
+    const ROLES = { medico: 'Medico', profesional: 'Profesional' };
+
+    function renderNotas(destino, notas, pacienteId) {
+        const h3 = document.createElement('h3');
+        h3.textContent = 'Historia clinica';
+        destino.appendChild(h3);
+
+        const form = document.createElement('form');
+        form.className = 'form-nota';
+        const campo = document.createElement('div');
+        campo.className = 'campo';
+        const label = document.createElement('label');
+        label.htmlFor = 'nota-texto';
+        label.textContent = 'Nueva nota (no se puede editar ni borrar)';
+        const area = document.createElement('textarea');
+        area.id = 'nota-texto';
+        area.name = 'texto';
+        area.rows = 3;
+        area.maxLength = 2000;
+        campo.append(label, area);
+        const error = document.createElement('p');
+        error.className = 'campo-error';
+        error.hidden = true;
+        const boton = document.createElement('button');
+        boton.type = 'submit';
+        boton.className = 'btn-primary';
+        boton.textContent = 'Agregar nota';
+        form.append(campo, error, boton);
+        form.addEventListener('submit', async (evento) => {
+            evento.preventDefault();
+            const sesion = await window.sesionLista;
+            error.hidden = true;
+            boton.disabled = true;
+            const data = await apiJson('api/notas-clinicas.php', {
+                method: 'POST',
+                body: new URLSearchParams({ csrf: sesion.csrf, paciente_id: pacienteId, texto: area.value }),
+            });
+            boton.disabled = false;
+            if (data && data.ok) {
+                buscarResultados(pacienteId);
+                return;
+            }
+            error.textContent = (data && ((data.errores && data.errores.texto) || data.error)) || 'No se pudo guardar la nota.';
+            error.hidden = false;
+        });
+        destino.appendChild(form);
+
+        if (!notas.length) {
+            const p = document.createElement('p');
+            p.textContent = 'Todavia no hay notas para este paciente.';
+            destino.appendChild(p);
+            return;
+        }
+        const lista = document.createElement('div');
+        lista.className = 'lista-notas';
+        notas.forEach((nota) => {
+            const item = document.createElement('article');
+            item.className = 'nota-clinica';
+            const meta = document.createElement('p');
+            meta.className = 'nota-clinica-meta';
+            meta.textContent = `${nota.creado_en} - ${nota.autor} (${ROLES[nota.rol] || nota.rol})`;
+            const texto = document.createElement('p');
+            texto.className = 'nota-clinica-texto';
+            texto.textContent = nota.texto;
+            item.append(meta, texto);
+            lista.appendChild(item);
+        });
+        destino.appendChild(lista);
+    }
+
     function renderResultadosBusqueda(data, encontrado) {
         contenedor.innerHTML = '';
 
@@ -66,6 +136,11 @@
 
         if (data.citas) {
             renderCitas(section, data.citas);
+        }
+        if (data.notas) {
+            renderNotas(section, data.notas, data.paciente.id);
+        }
+        if (data.citas || data.notas) {
             const h3 = document.createElement('h3');
             h3.textContent = 'Resultados';
             section.appendChild(h3);
@@ -108,7 +183,24 @@
         }
     });
 
+    // El rol cambia el titulo y el mensaje de lista vacia; la lista de pacientes
+    // y los datos que se ven los decide la API.
+    const TEXTOS_ROL = {
+        administrador: { titulo: 'Buscar Resultados' },
+        profesional: { titulo: 'Historial de Pacientes', sinPacientes: 'Todavia no tenes pacientes con citas asignadas.' },
+    };
+
     async function init() {
+        const sesion = await window.sesionLista;
+        const textos = (sesion && TEXTOS_ROL[sesion.rol]) || null;
+        if (textos) {
+            document.getElementById('titulo-vista').textContent = textos.titulo;
+            document.title = textos.titulo + ' - Clinica Imagen';
+            if (textos.sinPacientes) {
+                inputBuscar.dataset.mensajeSinPacientes = textos.sinPacientes;
+            }
+        }
+
         const data = await apiJson('api/pacientes.php');
         if (!data) {
             cargarScript('assets/js/buscador-combo.js');

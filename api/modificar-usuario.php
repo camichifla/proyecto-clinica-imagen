@@ -4,13 +4,14 @@ require_once __DIR__ . '/../includes/auth_guard.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/validation.php';
 
-$usuario = requerir_rol_json(['paciente', 'medico', 'profesional', 'administrador']);
+$usuario = requerir_rol_json(['paciente', 'medico', 'profesional', 'administrador', 'recepcionista']);
 
 const CAMPOS_POR_ROL = [
     'paciente'      => ['nombre' => 'text', 'apellido' => 'text', 'direccion' => 'text', 'numero' => 'tel'],
     'medico'        => ['nombre' => 'text', 'apellido' => 'text'],
     'profesional'   => ['nombre' => 'text', 'apellido' => 'text'],
     'administrador' => ['nombre' => 'text', 'apellido' => 'text'],
+    'recepcionista' => ['nombre' => 'text', 'apellido' => 'text'],
 ];
 
 $campos = CAMPOS_POR_ROL[$usuario['rol']] ?? null;
@@ -41,6 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $asignaciones = implode(', ', array_map(static fn ($campo) => "{$campo} = ?", array_keys($valores)));
     $stmt = db()->prepare("UPDATE {$tabla} SET {$asignaciones} WHERE id = ?");
     $stmt->execute([...array_values($valores), $usuario['ref_id']]);
+
+    registrar_evento('perfil_cambio', 'cuenta=' . $usuario['cuenta_id']);
 
     echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);
     exit;

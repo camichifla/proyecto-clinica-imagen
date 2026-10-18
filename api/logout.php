@@ -1,14 +1,16 @@
 <?php
 require_once __DIR__ . '/../includes/session_bootstrap.php';
+require_once __DIR__ . '/../includes/db.php';
 
-// POST-only: logout is a form submission, not a plain link, so it cannot
-// be triggered by an <img> tag or a bare GET request.
+// POST-only: a GET must not log out (an <img> tag could trigger it).
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: index.html');
     exit;
 }
 
 csrf_check($_POST['csrf'] ?? null);
+
+registrar_evento('logout');
 
 $_SESSION = [];
 

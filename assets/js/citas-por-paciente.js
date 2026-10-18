@@ -1,8 +1,6 @@
 // Filtrado UX-only del <select> de citas segun el paciente elegido.
-// Consume los datos CITAS_POR_PACIENTE / CITA_ELEGIDA (JSON generado server-side,
-// distinto por pagina) y el mensaje MENSAJE_SIN_CITAS (declarado inline antes de
-// este script), ambos definidos por cada pagina que lo incluye. El servidor
-// siempre re-valida paciente/profesional/estado independientemente de esto.
+// Consume CITAS_POR_PACIENTE / CITA_ELEGIDA / MENSAJE_SIN_CITAS, declarados por cada pagina antes de este script.
+// El servidor siempre re-valida paciente/profesional/estado.
 (function () {
   var pacienteSelect = document.getElementById('paciente_id');
   var citaSelect      = document.getElementById('cita_id');

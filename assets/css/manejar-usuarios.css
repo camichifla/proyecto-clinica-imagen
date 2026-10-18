@@ -1,8 +1,3 @@
-/* --- Selects del formulario de alta de personal --- */
-/* Base.css only styles `.campo input`; this page's rol/especializacion
-   <select>s need the same visual treatment for parity with the rest of the
-   form (mirrors assets/css/agendar-cita.css, duplicated per the per-page
-   CSS split convention rather than shared). */
 
 .campo select,
 .selector-combo-boton {
@@ -15,7 +10,6 @@
     background-color: var(--surface-alt);
     color: var(--dark-neutral);
     transition: border-color var(--transition-fast);
-    /* Misma flecha propia que agendar-cita.css, en vez de la nativa. */
     appearance: none;
     -webkit-appearance: none;
     background-image:
@@ -30,7 +24,6 @@
 
 .campo select:focus,
 .selector-combo-boton:focus {
-    outline: none;
     border-color: var(--accent-color);
 }
 
@@ -38,8 +31,6 @@
 .selector-combo-boton[aria-invalid="true"] {
     border-color: var(--accent-secondary);
 }
-
-/* --- Lista de cuentas --- */
 
 .tabla-scroll {
     overflow-x: auto;
@@ -147,6 +138,3 @@
     }
 }
 
-/* .check-grid (especializacion checkbox group) now lives in base.css,
-   shared with agendar-cita-medico.php's order forms — no longer duplicated
-   here. */

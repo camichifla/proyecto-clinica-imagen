@@ -1,17 +1,37 @@
 (function () {
-    const clinics = [
-        { id: 1, name: "Clinica Imagen - Centro", address: "Av. 18 de Julio 1234, Montevideo", phone: "+598 2900 1111", hours: "Lun a Vie 8:00 - 19:00", lat: -34.9058, lng: -56.1913 },
-        { id: 2, name: "Clinica Imagen - Pocitos", address: "Av. Brasil 2456, Montevideo", phone: "+598 2900 2222", hours: "Lun a Sab 9:00 - 18:00", lat: -34.9137, lng: -56.1548 },
-        { id: 3, name: "Clinica Imagen - Carrasco", address: "Av. Arocena 1890, Montevideo", phone: "+598 2900 3333", hours: "Lun a Vie 8:30 - 17:30", lat: -34.8896, lng: -56.0567 },
-        { id: 4, name: "Clinica Imagen - Cordon", address: "Bvar. Artigas 987, Montevideo", phone: "+598 2900 4444", hours: "Lun a Vie 8:00 - 20:00", lat: -34.9016, lng: -56.1721 },
-        { id: 5, name: "Clinica Imagen - Malvin", address: "Av. Rivera 5432, Montevideo", phone: "+598 2900 5555", hours: "Lun a Vie 9:00 - 18:00", lat: -34.9052, lng: -56.1247 },
-        { id: 6, name: "Clinica Imagen - Union", address: "Av. 8 de Octubre 3200, Montevideo", phone: "+598 2900 6666", hours: "Lun a Vie 8:00 - 17:00", lat: -34.8756, lng: -56.1489 },
-        { id: 7, name: "Clinica Imagen - Buceo", address: "Av. Luis A. de Herrera 1120, Montevideo", phone: "+598 2900 7777", hours: "Lun a Sab 9:00 - 19:00", lat: -34.9086, lng: -56.1329 },
-        { id: 8, name: "Clinica Imagen - Prado", address: "Av. Agraciada 3456, Montevideo", phone: "+598 2900 8888", hours: "Lun a Vie 8:00 - 18:00", lat: -34.8776, lng: -56.1892 },
-        { id: 9, name: "Clinica Imagen - Punta Carretas", address: "Ellauri 678, Montevideo", phone: "+598 2900 9999", hours: "Lun a Vie 9:00 - 18:30", lat: -34.9198, lng: -56.1592 },
-        { id: 10, name: "Clinica Imagen - Aguada", address: "Av. Gral. San Martin 2100, Montevideo", phone: "+598 2900 1010", hours: "Lun a Vie 8:00 - 17:30", lat: -34.8977, lng: -56.1811 },
-        { id: 11, name: "Clinica Imagen - La Blanqueada", address: "Av. 8 de Octubre 2456, Montevideo", phone: "+598 2900 1111", hours: "Lun a Vie 8:30 - 18:00", lat: -34.8867, lng: -56.1583 },
-    ];
+    let clinics = [];
+
+    const DIAS = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
+
+    // Escapa texto de la base antes de armarlo como HTML.
+    function esc(texto) {
+        const div = document.createElement("div");
+        div.textContent = texto == null ? "" : String(texto);
+        return div.innerHTML;
+    }
+
+    // [[dia, apertura, cierre], ...] -> "Lun a Vie 08:00-20:00 · Sab 08:00-13:00"
+    function horariosTexto(horarios) {
+        const porDia = {};
+        horarios.forEach(([dia, apertura, cierre]) => {
+            porDia[dia] = (porDia[dia] ? porDia[dia] + " / " : "") + apertura + "-" + cierre;
+        });
+        const grupos = [];
+        for (let dia = 1; dia <= 7; dia++) {
+            if (!porDia[dia]) {
+                continue;
+            }
+            const ultimo = grupos[grupos.length - 1];
+            if (ultimo && ultimo.hasta === dia - 1 && ultimo.texto === porDia[dia]) {
+                ultimo.hasta = dia;
+            } else {
+                grupos.push({ desde: dia, hasta: dia, texto: porDia[dia] });
+            }
+        }
+        return grupos
+            .map((g) => (g.desde === g.hasta ? DIAS[g.desde - 1] : DIAS[g.desde - 1] + " a " + DIAS[g.hasta - 1]) + " " + g.texto)
+            .join(" · ");
+    }
 
     const map = L.map("map", { zoomControl: false }).setView([-34.9011, -56.1645], 12);
     L.control.zoom({ position: "topright" }).addTo(map);
@@ -30,21 +50,26 @@
 
     const markers = new Map();
 
-    clinics.forEach((clinic) => {
-        const marker = L.marker([clinic.lat, clinic.lng], { icon: markerIcon }).addTo(map);
-        marker.bindPopup(popupTemplate(clinic));
-        marker.on("click", () => setActiveClinic(clinic.id));
-        markers.set(clinic.id, marker);
-    });
+    function addMarkers() {
+        clinics.forEach((clinic) => {
+            if (clinic.latitud === null || clinic.longitud === null) {
+                return; // listed, not pinned
+            }
+            const marker = L.marker([clinic.latitud, clinic.longitud], { icon: markerIcon }).addTo(map);
+            marker.bindPopup(popupTemplate(clinic));
+            marker.on("click", () => setActiveClinic(clinic.id));
+            markers.set(clinic.id, marker);
+        });
+    }
 
     function popupTemplate(clinic) {
         return `
             <div class="popup-clinic">
-                <h4>${clinic.name}</h4>
-                <p>${clinic.address}</p>
+                <h4>${esc(clinic.nombre)}</h4>
+                <p>${esc(clinic.direccion)}</p>
                 <div class="popup-meta">
-                    <span>${clinic.phone}</span>
-                    <span>${clinic.hours}</span>
+                    ${clinic.equipamiento ? `<span>${esc(clinic.equipamiento)}</span>` : ""}
+                    <span>${esc(horariosTexto(clinic.horarios))}</span>
                 </div>
             </div>
         `;
@@ -54,23 +79,18 @@
         return `
             <div class="clinic-card" data-id="${clinic.id}">
                 <div class="clinic-card-header">
-                    <span class="clinic-name">${clinic.name}</span>
+                    <span class="clinic-name">${esc(clinic.nombre)}</span>
                 </div>
                 <div class="clinic-address">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
                         <circle cx="12" cy="10" r="3"></circle>
                     </svg>
-                    ${clinic.address}
+                    ${esc(clinic.direccion)}
                 </div>
+                ${clinic.equipamiento ? `<div class="clinic-address">${esc(clinic.equipamiento)}</div>` : ""}
                 <div class="clinic-footer">
-                    <span class="clinic-phone">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.79.63 2.65a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.43-1.27a2 2 0 0 1 2.11-.45c.86.3 1.75.51 2.65.63A2 2 0 0 1 22 16.92z"></path>
-                        </svg>
-                        ${clinic.phone}
-                    </span>
-                    <span class="clinic-hours">${clinic.hours}</span>
+                    <span class="clinic-hours">${esc(horariosTexto(clinic.horarios))}</span>
                 </div>
             </div>
         `;
@@ -105,8 +125,10 @@
                 const id = Number(card.dataset.id);
                 setActiveClinic(id);
                 const marker = markers.get(id);
-                map.panTo(marker.getLatLng());
-                marker.openPopup();
+                if (marker) {
+                    map.panTo(marker.getLatLng());
+                    marker.openPopup();
+                }
             });
         });
     }
@@ -120,11 +142,21 @@
     searchEl.addEventListener("input", () => {
         const query = searchEl.value.trim().toLowerCase();
         const filtered = clinics.filter((clinic) =>
-            clinic.name.toLowerCase().includes(query) ||
-            clinic.address.toLowerCase().includes(query)
+            clinic.nombre.toLowerCase().includes(query) ||
+            (clinic.direccion || "").toLowerCase().includes(query)
         );
         renderList(filtered);
     });
 
-    renderList(clinics);
+    fetch("api/sucursales-publicas.php")
+        .then((respuesta) => respuesta.json())
+        .then((data) => {
+            clinics = data.sucursales;
+            document.getElementById("mapCount").textContent = clinics.length;
+            addMarkers();
+            renderList(clinics);
+        })
+        .catch(() => {
+            listEl.textContent = "No se pudieron cargar las sucursales.";
+        });
 })();

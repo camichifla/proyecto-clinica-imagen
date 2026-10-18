@@ -5,11 +5,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cargar Resultados - Clinica Imagen</title>
+  <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
   <link rel="stylesheet" href="./assets/css/styles.css">
-  <link rel="stylesheet" href="./assets/css/enviar-resultados.css">
+  <link rel="stylesheet" href="./assets/css/cargar-resultados.css">
 </head>
 
 <body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
   <header>
     <div class="logo">
       <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
@@ -17,7 +19,7 @@
     <div class="user">
       <details class="menu-usuario">
         <summary class="menu-usuario-toggle" aria-label="Menu de usuario">
-          <img src="" alt="">
+          <span class="avatar" aria-hidden="true"></span>
         </summary>
         <div class="menu-usuario-panel">
           <span class="user-nombre"></span>
@@ -31,9 +33,9 @@
     </div>
   </header>
 
-  <main>
-    <section class="seccion-auth seccion-enviar-resultados">
-      <h1>Cargar Observaciones y Resultados</h1>
+  <main id="contenido">
+    <section class="seccion-auth seccion-cargar-resultados">
+      <h1 id="titulo-vista">Cargar Resultados</h1>
 
       <p class="aviso-exito" data-aviso="ok" hidden></p>
       <p class="campo-error" data-general hidden></p>
@@ -44,7 +46,7 @@
         <div class="campo">
           <label for="paciente_id_buscar">Paciente</label>
           <input type="text" id="paciente_id_buscar" data-lista="paciente_id_lista" data-buscador-combo="paciente_id"
-                 data-mensaje-sin-pacientes="Todavia no tenes pacientes con citas asignadas."
+                 data-mensaje-sin-pacientes="Todavia no hay pacientes registrados."
                  autocomplete="off" placeholder="Buscar por apellido, nombre o CI">
           <datalist id="paciente_id_lista"></datalist>
           <input type="hidden" id="paciente_id" name="paciente_id" value="">
@@ -53,7 +55,7 @@
         <div class="campo">
           <label for="cita_id">Cita asociada (opcional)</label>
           <select id="cita_id" name="cita_id" class="selector-combo" disabled
-                  data-mensaje-sin-citas="Este paciente no tiene citas confirmadas con vos">
+                  data-mensaje-sin-citas="Este paciente no tiene citas confirmadas">
             <option value="">Elegi un paciente primero</option>
           </select>
         </div>
@@ -74,14 +76,28 @@
         </div>
 
         <div class="campo">
-          <label for="imagenes">Imagenes</label>
+          <label for="imagenes">Imagenes (opcional si subis un informe)</label>
           <input type="file" id="imagenes" name="imagenes[]" accept="image/png,image/jpeg,image/webp" multiple>
+        </div>
+
+        <div class="campo">
+          <label for="informe">Informe PDF (opcional)</label>
+          <input type="file" id="informe" name="informe" accept="application/pdf">
         </div>
 
         <button type="submit" class="btn-primary">Guardar resultado</button>
       </form>
     </section>
   </main>
+
+  <footer>
+    <nav aria-label="Pie de pagina">
+      <a href="index.html">Inicio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+    <p>&copy; Clinica Imagen</p>
+  </footer>
 
   <script src="assets/js/sesion.js" defer></script>
   <script src="assets/js/form-api.js" defer></script>

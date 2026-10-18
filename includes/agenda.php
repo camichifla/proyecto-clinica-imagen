@@ -14,12 +14,7 @@ function nombre_mes(DateTime $fecha): string
     return NOMBRES_MES[(int) $fecha->format('n')] . ' ' . $fecha->format('Y');
 }
 
-/**
- * Computes the visible grid range (full ISO weeks for month view, the
- * single ISO week for week view) plus the prev/next reference dates.
- *
- * @return array{rangoInicio: DateTime, rangoFin: DateTime, inicioMes: ?DateTime, fechaAnterior: string, fechaSiguiente: string}
- */
+/** @return array{rangoInicio: DateTime, rangoFin: DateTime, inicioMes: ?DateTime, fechaAnterior: string, fechaSiguiente: string} */
 function calcular_rango_agenda(string $vista, DateTime $fechaRef): array
 {
     if ($vista === 'mes') {
@@ -54,10 +49,7 @@ function calcular_rango_agenda(string $vista, DateTime $fechaRef): array
     ];
 }
 
-/**
- * @param array<int,array<string,mixed>> $citas
- * @return array<string,array<int,array<string,mixed>>> keyed by 'Y-m-d'
- */
+/** @return array<string,array<int,array<string,mixed>>> keyed by 'Y-m-d' */
 function agrupar_citas_por_dia(array $citas): array
 {
     $citasPorDia = [];
@@ -68,11 +60,8 @@ function agrupar_citas_por_dia(array $citas): array
 }
 
 /**
- * Display label for the cita's patient. A cita booked by a medico for an
- * email with no matching cuentas row lands here with paciente_id NULL and
- * email_pendiente set (see agendar-cita-medico.php) — never concatenate
- * the null paciente_nombre/paciente_apellido in that case (PHP 8 deprecation
- * notice, and there's nothing to show anyway).
+ * Patient label. A cita booked by a medico for an email with no cuentas row has paciente_id NULL and
+ * email_pendiente set: never concatenate the null name fields.
  */
 function cita_nombre_paciente(array $cita): string
 {
@@ -86,4 +75,31 @@ function cita_nombre_paciente(array $cita): string
         return 'Pendiente: ' . $email;
     }
     return $cita['paciente_apellido'] . ', ' . $cita['paciente_nombre'];
+}
+
+// SELECT compartido por agenda, panel y turnos: la cita + lo necesario para
+// cita_agenda_json() (paciente, profesional, sede). Cada caller agrega su WHERE.
+const SQL_CITAS_CON_ETIQUETAS =
+    'SELECT c.*,
+            p.nombre  AS paciente_nombre,  p.apellido  AS paciente_apellido,
+            pr.nombre AS profesional_nombre, pr.apellido AS profesional_apellido,
+            s.nombre  AS sucursal_nombre
+       FROM citas c
+       LEFT JOIN pacientes p ON p.id = c.paciente_id
+       JOIN profesionales pr ON pr.id = c.profesional_id
+       LEFT JOIN sucursales s ON s.id = c.sucursal_id';
+
+function cita_agenda_json(array $cita): array
+{
+    return [
+        'id'               => (int) $cita['id'],
+        'hora'             => substr($cita['fecha_hora_solicitada'], 11, 5),
+        'estado'           => $cita['estado'],
+        'estadoLabel'      => ESTADOS_CITA[$cita['estado']] ?? $cita['estado'],
+        'estudioLabel'     => estudios_etiquetas()[$cita['estudio']] ?? $cita['estudio'],
+        'pacienteCorto'    => $cita['paciente_id'] === null ? 'Pendiente' : $cita['paciente_apellido'],
+        'pacienteLabel'    => cita_nombre_paciente($cita),
+        'profesionalLabel' => $cita['profesional_apellido'] . ', ' . $cita['profesional_nombre'],
+        'sucursalNombre'   => $cita['sucursal_nombre'],
+    ];
 }

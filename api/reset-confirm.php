@@ -70,6 +70,8 @@ $db->prepare('UPDATE tokens_reset SET usado_en = NOW() WHERE cuenta_id = ? AND u
     ->execute([$fila['cuenta_id']]);
 $db->commit();
 
+registrar_evento('reset_ok', 'cuenta=' . $fila['cuenta_id']);
+
 if (isset($_SESSION['cuenta_id']) && (int) $_SESSION['cuenta_id'] === (int) $fila['cuenta_id']) {
     $_SESSION = [];
     session_destroy();

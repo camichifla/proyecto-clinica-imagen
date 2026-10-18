@@ -123,7 +123,8 @@
         contenedorFecha.dataset.max = data.fechaMax;
 
         poblarSucursales(selectSucursal, data.sucursalesOrden);
-        poblarProfesionales(selectProfesional, data.profesionales);
+        poblarEstudios(document.getElementById('estudio'), data.estudios);
+        poblarProfesionales(selectProfesional, data.profesionales, '', data.etiquetasEstudio);
         poblarPacientesConectados(data.pacientesConectados);
         renderGridDientes(document.getElementById('teeth-radio-intra'), 'radio_intra', data.dientes);
         renderGridDientes(document.getElementById('teeth-tomo-cone-beam'), 'tomo_cone_beam', data.dientes);

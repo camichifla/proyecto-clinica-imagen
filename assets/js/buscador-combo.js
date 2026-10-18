@@ -1,13 +1,6 @@
-// Combobox liviano: toma un <input type="text"> marcado con
-// data-buscador-combo="<id-del-hidden>" y data-lista="<id-del-datalist>",
-// y arma un listado desplegable propio -con la misma estetica del resto
-// del sitio- en lugar del popup nativo del navegador (que no se puede
-// estilar). El <datalist> referenciado nunca lleva el atributo `list`:
-// solo se usa como fuente de datos (sus <option data-id value="etiqueta">
-// son las mismas que antes renderizaba el <select>). El <input hidden> es
-// el que realmente viaja en el submit: coincide con la etiqueta completa
-// tipeada, y si no hay match exacto queda vacio, rechazado server-side
-// exactamente igual que un <select> sin elegir.
+// Combobox liviano sobre <input data-buscador-combo="<id-del-hidden>" data-lista="<id-del-datalist>"> con listado propio.
+// El <datalist> nunca lleva el atributo `list`: es solo fuente de datos (<option data-id value="etiqueta">).
+// El <input hidden> es el que viaja en el submit: etiqueta exacta, o vacio (rechazado server-side).
 (() => {
   document.querySelectorAll('input[data-buscador-combo]').forEach((input) => {
     const datalist = document.getElementById(input.dataset.lista);

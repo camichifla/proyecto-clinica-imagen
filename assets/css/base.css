@@ -3,14 +3,8 @@ html {
     scroll-behavior: smooth !important;
 }
 
-/* Root-cause fix, not per-element: any author rule that sets `display` on
-   an element (.campo, .orden-panel, etc.) beats the browser's default
-   [hidden] { display: none } — same specificity, but author styles always
-   win over the user-agent stylesheet. Toggling the `hidden` attribute via
-   JS/PHP then silently does nothing. This one rule makes `hidden` win
-   everywhere, instead of adding a one-off [id][hidden] override per
-   element every time this bites (see: modo_paciente panels, orden-panel,
-   the old #campo-especializacion[hidden] patch this replaces). */
+/* Author rules that set `display` beat the browser's [hidden] { display: none } (same specificity), so toggling
+   `hidden` silently did nothing. This makes `hidden` win everywhere. */
 [hidden] {
     display: none !important;
 }
@@ -26,6 +20,7 @@ body{
 
 header {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--space-4);
     padding: var(--space-4) var(--space-6);
@@ -48,12 +43,11 @@ header {
     margin-left: auto;
 }
 
-.user img {
+.user .avatar {
     display: block;
     width: 2.75rem;
     height: 2.75rem;
     border-radius: 50%;
-    object-fit: cover;
     border: 2px solid var(--surface);
     color: var(--text-secondary);
     background-color: var(--border-subtle);
@@ -63,15 +57,88 @@ header {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='8' r='4' fill='currentColor'/%3E%3Cpath d='M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7' fill='currentColor'/%3E%3C/svg%3E");
 }
 
+.skip-link {
+    position: absolute;
+    left: var(--space-3);
+    top: 0;
+    z-index: 100;
+    padding: var(--space-2) var(--space-4);
+    background: var(--surface);
+    color: var(--dark-neutral);
+    font-weight: var(--font-weight-semibold);
+    border-radius: 0 0 0.5rem 0.5rem;
+    transform: translateY(-120%);
+}
+
+.skip-link:focus {
+    transform: translateY(0);
+}
+
+/* Un solo indicador de foco para todo control; ningun otro CSS lo anula. */
+:focus-visible {
+    outline: 3px solid var(--dark-neutral);
+    outline-offset: 2px;
+}
+
+header :focus-visible {
+    outline-color: var(--surface);
+}
+
+.buscador-combo-lista li[aria-selected="true"] {
+    outline: 2px solid var(--dark-neutral);
+    outline-offset: -2px;
+}
+
+.nav-publica {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+}
+
+.nav-publica a {
+    color: var(--surface);
+    text-decoration: none;
+    font-weight: var(--font-weight-semibold);
+    padding: 0.25rem 0;
+    border-bottom: 2px solid transparent;
+}
+
+.nav-publica a:hover,
+.nav-publica a[aria-current="page"] {
+    border-bottom-color: var(--surface);
+}
+
+footer nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2) var(--space-5);
+    margin-bottom: var(--space-2);
+}
+
+footer nav a {
+    color: inherit;
+    font-weight: var(--font-weight-medium);
+}
+
+footer p {
+    margin: 0;
+}
+
+/* Campo trampa del formulario de contacto: fuera de pantalla, no display:none. */
+.campo-trampa {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
 main {
     max-width: var(--max-width);
     margin: 0 auto;
     padding: 0 var(--space-6);
 }
-
-/* --- Checkbox grid: reused by agendar-cita-medico.php's clinical order
-   forms and manejar-usuarios.php's especializacion field — lives here once
-   instead of duplicated per page. --- */
 
 .check-grid {
     display: grid;
@@ -130,8 +197,6 @@ footer {
     transform: translateY(-1px);
 }
 
-/* --- Auth forms (register/login/verify/reset) --- */
-
 .seccion-auth {
     max-width: 480px;
     margin: 2.5rem auto;
@@ -151,6 +216,11 @@ footer {
     display: flex;
     flex-direction: column;
     gap: 1.1rem;
+}
+
+.form-buscar-paciente input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .seccion-panel form:not([class]) .btn-primary,
@@ -186,6 +256,18 @@ footer {
     }
 }
 
+/* Un control nunca debe ser mas ancho que su columna (360px): el ancho
+   intrinseco de un <input> empujaba el formulario fuera de la pantalla. */
+.campo,
+.buscador-combo {
+    min-width: 0;
+}
+
+.campo :where(input:not([type="checkbox"], [type="radio"]), textarea) {
+    width: 100%;
+    box-sizing: border-box;
+}
+
 .campo label {
     font-weight: var(--font-weight-semibold);
     color: var(--dark-neutral);
@@ -202,18 +284,29 @@ footer {
 }
 
 .campo input:focus {
-    outline: none;
     border-color: var(--accent-color);
 }
 
-.campo input[aria-invalid="true"] {
-    border-color: var(--accent-secondary);
+.campo textarea {
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.6rem;
+    font-family: inherit;
+    font-size: var(--font-size-base);
+    background: var(--surface-alt);
+    color: var(--dark-neutral);
+    resize: vertical;
+    transition: border-color var(--transition-fast);
 }
 
-/* --- Buscador con lista desplegable (paciente, medico): reemplaza el
-   popup nativo de <datalist>, que no se puede estilar, por un listado
-   propio armado en JS (assets/js/buscador-combo.js) con la misma estetica
-   que el resto del sitio. --- */
+.campo textarea:focus {
+    border-color: var(--accent-color);
+}
+
+.campo input[aria-invalid="true"],
+.campo textarea[aria-invalid="true"] {
+    border-color: var(--accent-secondary);
+}
 
 .buscador-combo {
     position: relative;
@@ -258,15 +351,6 @@ footer {
     pointer-events: none;
 }
 
-/* --- Selector con lista propia (rol, estudio, sede, profesional, hora,
-   cita): mismo <ul class="buscador-combo-lista"> de arriba, pero
-   disparado por un boton en vez de por texto tipeado -no es un buscador,
-   solo reemplaza la lista nativa del <select> por una con el estilo del
-   sitio-. El <select> real (assets/js/selector-combo.js) sigue existiendo
-   oculto como fuente de verdad para el resto del codigo. El aspecto de la
-   caja del boton (borde, flecha, estados) se define junto al de
-   `.campo select` en el CSS de cada pagina, no aca. --- */
-
 select.selector-combo {
     display: none;
 }
@@ -292,6 +376,45 @@ select.selector-combo {
     font-size: var(--font-size-sm);
 }
 
+/* Format help floats over the fields below while focused: red until the value matches the input's native rules,
+   green once it does. Screen readers get it via aria-describedby. */
+.ayuda-al-foco .campo {
+    position: relative;
+    --validez: var(--color-danger);
+    --validez-rgb: var(--danger-rgb);
+}
+
+.ayuda-al-foco .campo:has(:valid) {
+    --validez: var(--color-success);
+    --validez-rgb: var(--success-rgb);
+}
+
+.ayuda-al-foco .campo input:focus {
+    outline: 2px solid var(--validez);
+    outline-offset: 0;
+    border-color: var(--validez);
+    background: rgba(var(--validez-rgb), 0.08);
+}
+
+.ayuda-al-foco .campo-hint {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    margin: var(--space-1) 0 0;
+    padding: var(--space-2) var(--space-3);
+    background: var(--surface);
+    border-left: 4px solid var(--validez);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(var(--overlay-rgb), 0.12);
+    color: var(--validez);
+}
+
+.ayuda-al-foco .campo:not(:focus-within) .campo-hint {
+    display: none;
+}
+
 .campo-error {
     color: var(--accent-secondary);
     font-size: var(--font-size-sm);
@@ -307,13 +430,19 @@ select.selector-combo {
     border-radius: 0.5rem;
 }
 
+.aviso-error {
+    color: var(--color-danger);
+    background: var(--light-neutral);
+    border-left: 4px solid var(--accent-secondary);
+    padding: 0.85rem var(--space-4);
+    border-radius: 0.5rem;
+}
+
 .seccion-auth .btn-primary {
     align-self: flex-start;
     border: none;
     cursor: pointer;
 }
-
-/* --- Logged-in header state --- */
 
 .user {
     gap: var(--space-3);
@@ -344,8 +473,6 @@ select.selector-combo {
     background: rgba(var(--white-rgb), 0.15);
 }
 
-/* --- Role-based dropdown menu --- */
-
 .menu-usuario {
     position: relative;
 }
@@ -362,10 +489,6 @@ select.selector-combo {
 
 .menu-usuario-toggle::marker {
     content: "";
-}
-
-.menu-usuario-toggle img {
-    display: block;
 }
 
 .menu-usuario-panel {
@@ -424,8 +547,6 @@ select.selector-combo {
     background: var(--light-neutral);
 }
 
-/* --- Content pages (citas / resultados): shared card container --- */
-
 .seccion-panel {
     max-width: var(--max-width);
     margin: var(--space-7) auto;
@@ -442,4 +563,98 @@ select.selector-combo {
 .seccion-panel h2 {
     margin-top: 0;
     color: var(--dark-neutral);
+}
+
+.grid-estudios {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+}
+
+.card-estudio {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    background: var(--surface-alt);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.5rem;
+}
+
+.card-estudio h2 {
+    margin: 0;
+    font-size: var(--font-size-lg);
+}
+
+.card-estudio p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.card-estudio .card-estudio-modo {
+    color: var(--dark-neutral);
+    font-weight: var(--font-weight-semibold);
+}
+
+.card-estudio .btn-primary {
+    align-self: flex-start;
+    margin-top: auto;
+}
+
+.mensaje-contacto {
+    padding: var(--space-4);
+    margin-bottom: var(--space-3);
+    background: var(--surface-alt);
+    border: 1px solid var(--border-subtle);
+    border-left: 4px solid var(--accent-color);
+    border-radius: 0.5rem;
+    overflow-wrap: anywhere;
+}
+
+.mensaje-contacto.mensaje-atendido {
+    border-left-color: var(--text-muted);
+}
+
+.mensaje-contacto-meta {
+    margin: 0 0 var(--space-2);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.mensaje-contacto-texto {
+    margin: 0 0 var(--space-3);
+    white-space: pre-wrap;
+}
+
+.mensaje-contacto-pie {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+/* Tarjetas en pantallas chicas: sin esto <table>/<tbody> siguen en layout de
+   tabla y la celda toma el ancho del contenido, desbordando el contenedor. */
+@media (width <= 480px) {
+    .tabla-datos,
+    .tabla-datos tbody {
+        display: block;
+    }
+
+    .tabla-datos td {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+}
+
+@media (width <= 480px) {
+    main {
+        padding: 0 var(--space-3);
+    }
+
+    .seccion-panel,
+    .seccion-auth {
+        padding: var(--space-4);
+    }
 }

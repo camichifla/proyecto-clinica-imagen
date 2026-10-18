@@ -1,6 +1,6 @@
 <?php
 // includes/mailer.php — the only file in the project that knows how mail
-// is delivered (design Decision 2). Sends via PHPMailer/SMTP when
+// is delivered. Sends via PHPMailer/SMTP when
 // config.php has complete SMTP settings; otherwise appends the link to
 // storage/mail.log so the flow completes end-to-end without a mail server.
 require_once __DIR__ . '/config.php';
@@ -9,19 +9,12 @@ require_once __DIR__ . '/db.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
 
-/**
- * True when config.php defines a usable SMTP host + credentials.
- */
 function smtp_configurado(): bool
 {
     return SMTP_HOST !== '' && SMTP_USER !== '' && SMTP_PASS !== '';
 }
 
-/**
- * Sends (or dev-logs) an arbitrary email. Returns true on success in
- * both modes: the dev fallback always "succeeds" so the calling flow
- * (registration, reset) completes without a mail server.
- */
+/** Returns true in both modes: the dev fallback always "succeeds" so registration/reset complete without a mail server. */
 function enviar_correo(string $destinatario, string $asunto, string $cuerpo): bool
 {
     if (!smtp_configurado()) {
@@ -62,9 +55,6 @@ function enviar_correo(string $destinatario, string $asunto, string $cuerpo): bo
     }
 }
 
-/**
- * Sends the account-verification email/link.
- */
 function enviar_verificacion(string $email, string $link): bool
 {
     return enviar_correo(
@@ -74,9 +64,6 @@ function enviar_verificacion(string $email, string $link): bool
     );
 }
 
-/**
- * Sends the password-reset email/link.
- */
 function enviar_reset(string $email, string $link): bool
 {
     return enviar_correo(
@@ -87,8 +74,21 @@ function enviar_reset(string $email, string $link): bool
 }
 
 /**
- * Sends the cita confirmation/rejection notification to the patient.
+ * Email del destinatario de las notificaciones de una cita: la cuenta del
+ * paciente, o el email_pendiente si todavia no tiene cuenta. Null si no hay.
  */
+function email_notificacion_cita(?int $pacienteId, ?string $emailPendiente): ?string
+{
+    if ($pacienteId !== null) {
+        $stmt = db()->prepare("SELECT email FROM cuentas WHERE rol = 'paciente' AND ref_id = ?");
+        $stmt->execute([$pacienteId]);
+        $email = $stmt->fetchColumn();
+        return $email !== false ? $email : null;
+    }
+
+    return $emailPendiente !== null && $emailPendiente !== '' ? $emailPendiente : null;
+}
+
 function enviar_notificacion_cita(string $email, string $estado, string $fechaHora, string $notas = ''): bool
 {
     if ($estado === 'confirmada') {
@@ -96,6 +96,22 @@ function enviar_notificacion_cita(string $email, string $estado, string $fechaHo
             $email,
             'Tu cita fue confirmada - Clinica Imagen',
             "Tu cita fue confirmada para el {$fechaHora}.\n\nSi no podes asistir, contactanos para reprogramarla."
+        );
+    }
+
+    if ($estado === 'cancelada') {
+        $cuerpo = "Tu cita del {$fechaHora} fue cancelada.";
+        if ($notas !== '') {
+            $cuerpo .= "\n\nMotivo: {$notas}";
+        }
+        return enviar_correo($email, 'Tu cita fue cancelada - Clinica Imagen', $cuerpo);
+    }
+
+    if ($estado === 'reprogramada') {
+        return enviar_correo(
+            $email,
+            'Tu cita fue reprogramada - Clinica Imagen',
+            "Tu cita fue reprogramada para el {$fechaHora}."
         );
     }
 
@@ -107,13 +123,17 @@ function enviar_notificacion_cita(string $email, string $estado, string $fechaHo
     return enviar_correo($email, 'Tu cita fue rechazada - Clinica Imagen', $cuerpo);
 }
 
-/**
- * Issues a fresh verification token for $cuentaId: generates the raw
- * token, stores only its sha256 hash, and invalidates any prior
- * outstanding (unused, unexpired) verification token for that account.
- * This is the single reusable token-issue seam shared by registration
- * and verify-resend.
- */
+/** No clinical content, just the link. */
+function enviar_aviso_resultado(string $email, string $link): bool
+{
+    return enviar_correo(
+        $email,
+        'Tenes un nuevo resultado - Clinica Imagen',
+        "Hay un nuevo resultado disponible en tu portal. Ingresa para verlo:\n\n{$link}"
+    );
+}
+
+/** Issues a fresh verification token: stores only its sha256 hash and invalidates any prior outstanding one. Shared by registration and verify-resend. */
 function emitir_token_verificacion(PDO $db, int $cuentaId): string
 {
     $raw  = bin2hex(random_bytes(32));
@@ -128,12 +148,7 @@ function emitir_token_verificacion(PDO $db, int $cuentaId): string
     return $raw;
 }
 
-/**
- * Issues a fresh password-reset token for $cuentaId, invalidating any
- * prior outstanding reset token. Same shape as emitir_token_verificacion,
- * separate table/lifetime/scope. Shared by reset-request and its resend
- * (a resubmission of the same form).
- */
+/** Same as emitir_token_verificacion, but separate table/lifetime/scope; invalidates prior reset tokens. */
 function emitir_token_reset(PDO $db, int $cuentaId): string
 {
     $raw  = bin2hex(random_bytes(32));

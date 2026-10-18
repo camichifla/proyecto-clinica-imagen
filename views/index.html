@@ -8,20 +8,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
   <link rel="stylesheet" href="./assets/css/styles.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
 
 <body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
   <header>
     <div class="logo">
       <img src="./assets/imagenes/logo.png" alt="Clinica Imagen">
     </div>
+    <nav class="nav-publica" aria-label="Principal">
+      <a href="index.html" aria-current="page">Inicio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
     <div class="user">
       <details class="menu-usuario" data-sesion="user" hidden>
         <summary class="menu-usuario-toggle" aria-label="Menu de usuario">
-          <img src="" alt="">
+          <span class="avatar" aria-hidden="true"></span>
         </summary>
         <div class="menu-usuario-panel">
           <span class="user-nombre"></span>
@@ -36,7 +43,7 @@
     </div>
   </header>
 
-  <main>
+  <main id="contenido">
 
     <section class="hero">
       <div class="hero-contenido">
@@ -240,7 +247,7 @@
                 <circle cx="11" cy="11" r="8"></circle>
                 <path d="m21 21-4.3-4.3"></path>
               </svg>
-              <input type="text" id="clinicSearch" placeholder="Buscar por sucursal, ciudad o dirección..."
+              <input type="text" id="clinicSearch" aria-label="Buscar sucursal" placeholder="Buscar por sucursal, ciudad o dirección..."
                 autocomplete="off">
             </div>
           </div>
@@ -256,7 +263,7 @@
                     <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
                     <circle cx="12" cy="10" r="3"></circle>
                   </svg>
-                  11 sucursales
+                  <span id="mapCount">0</span> sucursales
                 </span>
               </div>
             </div>
@@ -276,8 +283,12 @@
     </section>
   </main>
 
-  <footer class="footer-index">
-    <img src="./assets/imagenes/logo.png" alt="Clinica Imagen">
+  <footer>
+    <nav aria-label="Pie de pagina">
+      <a href="index.html">Inicio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
     <p>&copy; <span id="anio-actual"></span> Clínica Imagen</p>
   </footer>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"

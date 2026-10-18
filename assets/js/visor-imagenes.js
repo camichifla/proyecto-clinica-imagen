@@ -1,7 +1,3 @@
-// Visor de imagenes de resultados: click en una miniatura la abre agrandada
-// en un <dialog> nativo (Escape y click afuera ya cierran solos, gratis).
-// Un solo listener delegado en document cubre cualquier cantidad de
-// tarjetas de resultado, sin importar cuantas se hayan renderizado.
 (function () {
   var dialogo = document.getElementById('visor-imagen');
   if (!dialogo) {

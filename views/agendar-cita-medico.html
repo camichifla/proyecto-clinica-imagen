@@ -5,11 +5,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Agendar Cita para Paciente - Clinica Imagen</title>
+  <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
   <link rel="stylesheet" href="./assets/css/styles.css">
   <link rel="stylesheet" href="./assets/css/agendar-cita-medico.css">
 </head>
 
 <body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
   <header>
     <div class="logo">
       <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
@@ -17,7 +19,7 @@
     <div class="user">
       <details class="menu-usuario">
         <summary class="menu-usuario-toggle" aria-label="Menu de usuario">
-          <img src="" alt="">
+          <span class="avatar" aria-hidden="true"></span>
         </summary>
         <div class="menu-usuario-panel">
           <span class="user-nombre"></span>
@@ -31,7 +33,7 @@
     </div>
   </header>
 
-  <main>
+  <main id="contenido">
     <section class="seccion-auth seccion-ancha">
       <h1>Agendar Cita para Paciente</h1>
 
@@ -81,8 +83,6 @@
           <label for="estudio">Estudio</label>
           <select id="estudio" name="estudio" class="selector-combo">
             <option value="">Elegi un estudio</option>
-            <option value="placa">Placa</option>
-            <option value="radiografia">Radiografia</option>
           </select>
         </div>
 
@@ -94,9 +94,9 @@
         </div>
 
         <div class="campo">
-          <label for="profesional_id">Profesional</label>
+          <label for="profesional_id">Profesional (opcional)</label>
           <select id="profesional_id" name="profesional_id" class="selector-combo">
-            <option value="">Elegi un profesional</option>
+            <option value="">Cualquiera disponible</option>
           </select>
           <p class="campo-error" data-mensaje-sin-profesionales hidden>Todavia no hay profesionales cargados.</p>
         </div>
@@ -141,8 +141,8 @@
 
             <details class="orden-card">
               <summary>Radiografías Intrabucales</summary>
-              <label>Indicar region de interes</label>
-              <div class="teeth-grid" id="teeth-radio-intra"></div>
+              <label id="teeth-radio-intra-label">Indicar region de interes</label>
+              <div class="teeth-grid" id="teeth-radio-intra" role="group" aria-labelledby="teeth-radio-intra-label"></div>
               <div class="check-grid inline">
                 <label><input type="checkbox" name="radio_intra_tipo[]" value="Con conductimetría"> Con conductimetría</label>
                 <label><input type="checkbox" name="radio_intra_tipo[]" value="Periapical"> Periapical</label>
@@ -378,6 +378,15 @@
       </form>
     </section>
   </main>
+
+  <footer>
+    <nav aria-label="Pie de pagina">
+      <a href="index.html">Inicio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+    <p>&copy; Clinica Imagen</p>
+  </footer>
 
   <script src="assets/js/sesion.js" defer></script>
   <script src="assets/js/form-api.js" defer></script>

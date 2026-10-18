@@ -1,12 +1,5 @@
-// Reemplaza la lista nativa de un <select> (rol, estudio, sede,
-// profesional, hora, cita) por un listbox propio con la misma estetica que
-// buscador-combo.js -pero disparado por un boton, no por texto tipeado: no
-// es un buscador-. El <select> real sigue existiendo, oculto, como fuente
-// de verdad: scripts de cascada (agendado-cascada.js, citas-por-paciente.js)
-// lo siguen manipulando exactamente igual que antes (.value, .disabled,
-// options[].hidden, dispatchEvent), y este script solo lo espeja.
-//
-// Por eso el <script> de este archivo debe ir DESPUES de esos scripts de
+// Listbox propio disparado por boton sobre un <select> real, que sigue oculto como fuente de verdad (los scripts de
+// cascada lo manipulan igual que antes; este solo lo espeja). Por eso el <script> debe ir DESPUES de esos scripts de
 // cascada en cada vista: al cargar, ya arranca del estado inicial que
 // ellos dejaron filtrado. Despues se resincroniza con cada 'change' -propio
 // o disparado por la cascada- y con un MutationObserver para las

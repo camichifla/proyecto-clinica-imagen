@@ -5,11 +5,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Manejar Usuarios - Clinica Imagen</title>
+  <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
   <link rel="stylesheet" href="./assets/css/styles.css">
   <link rel="stylesheet" href="./assets/css/manejar-usuarios.css">
 </head>
 
 <body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
   <header>
     <div class="logo">
       <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
@@ -17,7 +19,7 @@
     <div class="user">
       <details class="menu-usuario">
         <summary class="menu-usuario-toggle" aria-label="Menu de usuario">
-          <img src="" alt="">
+          <span class="avatar" aria-hidden="true"></span>
         </summary>
         <div class="menu-usuario-panel">
           <span class="user-nombre"></span>
@@ -31,7 +33,7 @@
     </div>
   </header>
 
-  <main>
+  <main id="contenido">
     <section class="seccion-panel" id="seccion-cuentas">
       <h1>Manejar Usuarios</h1>
 
@@ -70,6 +72,45 @@
       <div id="asignaciones-lista"></div>
     </section>
 
+    <section class="seccion-panel" id="seccion-cambiar-rol">
+      <h2>Cambiar rol de una cuenta</h2>
+      <p class="campo-hint">Solo cuentas de personal, y no la propia. El perfil se crea en el nuevo rol con el mismo nombre y apellido; el anterior se conserva solo si otros registros dependen de el. La persona vera el cambio en su proxima accion.</p>
+
+      <p class="aviso-exito" data-mensaje role="status" hidden></p>
+      <p class="campo-error" data-general hidden></p>
+
+      <form method="post" action="api/manejar-usuarios.php" data-api="api/manejar-usuarios.php" id="form-cambiar-rol" novalidate>
+        <input type="hidden" name="csrf" value="">
+        <input type="hidden" name="accion" value="cambiar_rol">
+
+        <div class="campo">
+          <label for="cambio-cuenta">Cuenta</label>
+          <select id="cambio-cuenta" name="cuenta_id" class="selector-combo">
+            <option value="">Elegi una cuenta</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="cambio-rol">Nuevo rol</label>
+          <select id="cambio-rol" name="rol" class="selector-combo">
+            <option value="">Elegi un rol</option>
+            <option value="medico">Medico</option>
+            <option value="profesional">Profesional</option>
+            <option value="administrador">Administrador</option>
+            <option value="recepcionista">Recepcionista</option>
+          </select>
+        </div>
+
+        <div class="campo" id="campo-especializacion-cambio" hidden>
+          <label id="especializacion-cambio-label">Especializacion</label>
+          <div class="check-grid" role="group" aria-labelledby="especializacion-cambio-label"></div>
+          <p class="campo-hint">Las sedes y horarios del nuevo profesional se configuran en Profesionales.</p>
+        </div>
+
+        <button type="submit" class="btn-primary">Cambiar rol</button>
+      </form>
+    </section>
+
     <section class="seccion-panel" id="seccion-crear-staff">
       <h2>Crear cuenta de personal</h2>
 
@@ -87,6 +128,7 @@
             <option value="medico">Medico</option>
             <option value="profesional">Profesional</option>
             <option value="administrador">Administrador</option>
+            <option value="recepcionista">Recepcionista</option>
           </select>
         </div>
 
@@ -104,9 +146,6 @@
         <div class="campo" id="campo-especializacion" hidden>
           <label id="especializacion-label">Especializacion</label>
           <div class="check-grid" role="group" aria-labelledby="especializacion-label">
-            <label><input type="checkbox" name="especializacion[]" value="placa"> Placa</label>
-            <label><input type="checkbox" name="especializacion[]" value="radiografia"> Radiografia</label>
-            <label><input type="checkbox" name="especializacion[]" value="alineadores"> Alineadores</label>
           </div>
         </div>
 
@@ -125,6 +164,15 @@
     </section>
   </main>
 
+  <footer>
+    <nav aria-label="Pie de pagina">
+      <a href="index.html">Inicio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+    <p>&copy; Clinica Imagen</p>
+  </footer>
+
   <script src="assets/js/sesion.js" defer></script>
   <script src="assets/js/selector-combo.js" defer></script>
   <script src="assets/js/form-api.js" defer></script>
@@ -136,10 +184,7 @@
     (function () {
       var rolSelect = document.getElementById('rol');
       var campoEspecializacion = document.getElementById('campo-especializacion');
-      var especializacionCheckboxes = campoEspecializacion
-        ? campoEspecializacion.querySelectorAll('input[name="especializacion[]"]')
-        : [];
-      if (!rolSelect || !campoEspecializacion || !especializacionCheckboxes.length) {
+      if (!rolSelect || !campoEspecializacion) {
         return;
       }
 
@@ -147,7 +192,7 @@
         var esProfesional = rolSelect.value === 'profesional';
         campoEspecializacion.hidden = !esProfesional;
         if (!esProfesional) {
-          Array.prototype.forEach.call(especializacionCheckboxes, function (casilla) {
+          campoEspecializacion.querySelectorAll('input[name="especializacion[]"]').forEach(function (casilla) {
             casilla.checked = false;
           });
         }

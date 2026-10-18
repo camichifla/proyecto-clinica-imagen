@@ -3,8 +3,15 @@ require_once __DIR__ . '/../includes/session_bootstrap.php';
 require_once __DIR__ . '/../includes/validation.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/mailer.php';
+require_once __DIR__ . '/../includes/pacientes.php';
 
 require_post_json();
+
+if (demasiados_eventos('registro', 'ip', (string) ($_SERVER['REMOTE_ADDR'] ?? ''), 10, 60)) {
+    http_response_code(429);
+    echo json_encode(['ok' => false, 'errores' => ['general' => 'Demasiados registros desde esta conexion. Proba de nuevo mas tarde.']], JSON_UNESCAPED_UNICODE);
+    exit;
+}
 
 $campos  = ['nombre', 'apellido', 'ci', 'direccion', 'numero', 'email'];
 $valores = array_map(static fn (string $campo): string => trim((string) ($_POST[$campo] ?? '')), array_combine($campos, $campos));
@@ -32,17 +39,11 @@ try {
 
     $tokenRaw = emitir_token_verificacion($db, $cuentaId);
 
-    $stmt = $db->prepare('UPDATE citas SET paciente_id = ?, email_pendiente = NULL, nombre_pendiente = NULL, apellido_pendiente = NULL WHERE email_pendiente = ? AND paciente_id IS NULL');
-    $stmt->execute([$pacienteId, $valores['email']]);
-
-    $stmt = $db->prepare(
-        'UPDATE ordenes o JOIN citas c ON c.id = o.cita_id
-            SET o.paciente_id = ?
-          WHERE c.paciente_id = ? AND o.paciente_id IS NULL'
-    );
-    $stmt->execute([$pacienteId, $pacienteId]);
+    vincular_citas_pendientes($db, $pacienteId, $valores['email']);
 
     $db->commit();
+
+    registrar_evento('registro', 'cuenta=' . $cuentaId);
 
     $link = APP_URL . '/verify.html?token=' . $tokenRaw;
     enviar_verificacion($valores['email'], $link);

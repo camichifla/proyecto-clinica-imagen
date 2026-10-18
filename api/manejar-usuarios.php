@@ -3,6 +3,7 @@ require_once __DIR__ . '/../includes/session_bootstrap.php';
 require_once __DIR__ . '/../includes/auth_guard.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/validation.php';
+require_once __DIR__ . '/../includes/estudios.php';
 
 $usuario = requerir_rol_json(['administrador']);
 
@@ -10,12 +11,7 @@ const ROLES_STAFF = [
     'medico'        => 'Medico',
     'profesional'   => 'Profesional',
     'administrador' => 'Administrador',
-];
-
-const ESPECIALIZACIONES = [
-    'placa'       => 'Placa',
-    'radiografia' => 'Radiografia',
-    'alineadores' => 'Alineadores',
+    'recepcionista' => 'Recepcionista',
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -59,6 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $db->prepare('UPDATE cuentas SET activo = ? WHERE id = ?');
         $stmt->execute([$estabaActiva ? 0 : 1, $cuentaId]);
 
+        registrar_evento('cuenta_activo', 'cuenta=' . $cuentaId);
+
         echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -90,6 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $stmt = $db->prepare('INSERT INTO medico_paciente (medico_id, paciente_id) VALUES (?, ?)');
             $stmt->execute([$medicoId, $pacienteId]);
+            registrar_evento('paciente_asignado', 'medico=' . $medicoId . ' paciente=' . $pacienteId);
             echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);
         } catch (PDOException $e) {
             $mensaje = $e->getCode() === '23000'
@@ -121,6 +120,134 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    if ($accion === 'cambiar_rol') {
+        $cuentaId = filter_input(INPUT_POST, 'cuenta_id', FILTER_VALIDATE_INT);
+        $nuevoRol = trim((string) ($_POST['rol'] ?? ''));
+
+        $especializacionesEnviadas = $_POST['especializacion'] ?? [];
+        $especializaciones = is_array($especializacionesEnviadas) ? array_values(array_unique(array_map('strval', $especializacionesEnviadas))) : [];
+
+        $db   = db();
+        $stmt = $db->prepare('SELECT id, rol, ref_id, activo FROM cuentas WHERE id = ?');
+        $stmt->execute([$cuentaId ?: 0]);
+        $cuenta = $stmt->fetch();
+
+        if (!$cuenta) {
+            echo json_encode(['ok' => false, 'error' => 'Cuenta no encontrada.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+        // Las cuentas de pacientes quedan fuera en ambos sentidos.
+        if (!isset(ROLES_STAFF[$cuenta['rol']])) {
+            echo json_encode(['ok' => false, 'error' => 'Las cuentas de pacientes no cambian de rol.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+        if ((int) $cuenta['id'] === $usuario['cuenta_id']) {
+            echo json_encode(['ok' => false, 'error' => 'No podes cambiar tu propio rol.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $errores = [];
+        if (!isset(ROLES_STAFF[$nuevoRol])) {
+            $errores['rol'] = 'Elegi un rol valido.';
+        } elseif ($nuevoRol === $cuenta['rol']) {
+            $errores['rol'] = 'La cuenta ya tiene ese rol.';
+        }
+        // Lo unico que la tabla de profesionales exige y las demas no: al menos una especializacion.
+        if ($nuevoRol === 'profesional') {
+            if (!$especializaciones) {
+                $errores['especializacion'] = 'Elegi al menos una especializacion.';
+            } elseif (array_diff($especializaciones, array_keys(estudios_activos()))) {
+                $errores['especializacion'] = 'Elegi especializaciones validas.';
+            }
+        }
+        if ($errores) {
+            http_response_code(422);
+            echo json_encode(['ok' => false, 'errores' => $errores], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $rolViejo = $cuenta['rol'];
+        $refViejo = (int) $cuenta['ref_id'];
+        $tablaVieja = TABLA_POR_ROL[$rolViejo];
+        $tablaNueva = TABLA_POR_ROL[$nuevoRol];
+
+        // Sin perfil de profesional nadie atenderia esas citas: hay que reasignarlas o cancelarlas antes.
+        if ($rolViejo === 'profesional') {
+            $stmt = $db->prepare('SELECT COUNT(*) FROM citas WHERE profesional_id = ? AND slot_activo = 1 AND fecha_hora_solicitada > NOW()');
+            $stmt->execute([$refViejo]);
+            $pendientes = (int) $stmt->fetchColumn();
+            if ($pendientes > 0) {
+                http_response_code(422);
+                echo json_encode(['ok' => false, 'error' => "El profesional tiene {$pendientes} cita(s) futura(s) pendiente(s) o confirmada(s). Reasignalas o cancelalas antes de cambiar el rol."], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+        }
+
+        try {
+            $db->beginTransaction();
+
+            // Un solo administrador activo: se lee con bloqueo para que dos cambios simultaneos no dejen cero.
+            if ($rolViejo === 'administrador' && (int) $cuenta['activo'] === 1) {
+                $activos = (int) $db->query("SELECT COUNT(*) FROM cuentas WHERE rol = 'administrador' AND activo = 1 FOR UPDATE")->fetchColumn();
+                if ($activos <= 1) {
+                    $db->rollBack();
+                    echo json_encode(['ok' => false, 'error' => 'No se puede cambiar el rol del ultimo administrador activo.'], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+            }
+
+            $stmt = $db->prepare("SELECT nombre, apellido FROM {$tablaVieja} WHERE id = ?");
+            $stmt->execute([$refViejo]);
+            $perfil = $stmt->fetch();
+            if (!$perfil) {
+                throw new RuntimeException('perfil de origen inexistente');
+            }
+
+            $db->prepare("INSERT INTO {$tablaNueva} (nombre, apellido) VALUES (?, ?)")->execute([$perfil['nombre'], $perfil['apellido']]);
+            $refNuevo = (int) $db->lastInsertId();
+
+            if ($nuevoRol === 'profesional') {
+                $stmt = $db->prepare('INSERT INTO profesional_especializacion (profesional_id, especializacion) VALUES (?, ?)');
+                foreach ($especializaciones as $especializacion) {
+                    $stmt->execute([$refNuevo, $especializacion]);
+                }
+            }
+
+            $db->prepare('UPDATE cuentas SET rol = ?, ref_id = ? WHERE id = ?')->execute([$nuevoRol, $refNuevo, $cuenta['id']]);
+
+            // El perfil anterior se elimina salvo que tenga citas (historial). Las asignaciones medico_paciente
+            // se borran en cascada: sin cuenta de medico detras ya no darian acceso a nadie.
+            $referenciado = false;
+            if ($rolViejo === 'profesional') {
+                $stmt = $db->prepare('SELECT 1 FROM citas WHERE profesional_id = ? LIMIT 1');
+                $stmt->execute([$refViejo]);
+                $referenciado = (bool) $stmt->fetchColumn();
+            }
+            if ($referenciado) {
+                // Queda como historial; un profesional sin sedes deja de ofrecerse para agendar.
+                if ($rolViejo === 'profesional') {
+                    $db->prepare('DELETE FROM profesional_sucursal WHERE profesional_id = ?')->execute([$refViejo]);
+                }
+            } else {
+                $db->prepare("DELETE FROM {$tablaVieja} WHERE id = ?")->execute([$refViejo]);
+            }
+
+            $db->commit();
+        } catch (Throwable $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            error_log('manejar-usuarios cambiar_rol: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['ok' => false, 'error' => 'No se pudo cambiar el rol. Intenta nuevamente.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        registrar_evento('cuenta_rol', 'cuenta=' . $cuenta['id'] . ' de=' . $rolViejo . ' a=' . $nuevoRol);
+        echo json_encode(['ok' => true, 'perfil_anterior_conservado' => $referenciado], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     if ($accion === 'crear_staff') {
         $valores = [
             'rol'      => trim((string) ($_POST['rol'] ?? '')),
@@ -147,7 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errores['especializacion'] = 'Elegi al menos una especializacion.';
             } else {
                 foreach ($especializaciones as $especializacion) {
-                    if (!isset(ESPECIALIZACIONES[$especializacion])) {
+                    if (!isset(estudios_activos()[$especializacion])) {
                         $errores['especializacion'] = 'Elegi especializaciones validas.';
                         break;
                     }
@@ -186,6 +313,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $db->commit();
 
+            registrar_evento('staff_alta', 'cuenta=' . $db->lastInsertId());
+
             echo json_encode(['ok' => true, 'redirect' => 'manejar-usuarios.html?staff_ok=1'], JSON_UNESCAPED_UNICODE);
         } catch (PDOException $e) {
             if ($db->inTransaction()) {
@@ -219,13 +348,14 @@ $asignacionesFilas = db()->query(
 
 $stmt = db()->query(
     "SELECT c.id AS cuenta_id, c.email, c.rol, c.verificado, c.activo,
-            COALESCE(p.nombre, m.nombre, pr.nombre, a.nombre)       AS nombre,
-            COALESCE(p.apellido, m.apellido, pr.apellido, a.apellido) AS apellido
+            COALESCE(p.nombre, m.nombre, pr.nombre, a.nombre, r.nombre)       AS nombre,
+            COALESCE(p.apellido, m.apellido, pr.apellido, a.apellido, r.apellido) AS apellido
        FROM cuentas c
        LEFT JOIN pacientes      p  ON c.rol = 'paciente'      AND p.id  = c.ref_id
        LEFT JOIN medicos        m  ON c.rol = 'medico'        AND m.id  = c.ref_id
        LEFT JOIN profesionales  pr ON c.rol = 'profesional'   AND pr.id = c.ref_id
        LEFT JOIN administradores a ON c.rol = 'administrador' AND a.id  = c.ref_id
+       LEFT JOIN recepcionistas r  ON c.rol = 'recepcionista' AND r.id  = c.ref_id
       ORDER BY c.rol, apellido, nombre"
 );
 $cuentasFilas = $stmt->fetchAll();
@@ -254,4 +384,5 @@ echo json_encode([
     'medicos'      => $medicos,
     'pacientes'    => $pacientes,
     'asignaciones' => $asignacionesFilas,
+    'estudios'     => array_map(static fn (string $clave, string $etiqueta): array => ['clave' => $clave, 'etiqueta' => $etiqueta], array_keys(estudios_activos()), estudios_activos()),
 ], JSON_UNESCAPED_UNICODE);

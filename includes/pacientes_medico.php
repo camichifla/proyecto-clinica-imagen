@@ -3,9 +3,6 @@
 // que ya aparecen en alguna de sus ordenes (ordenes.creado_por) o los que un
 // administrador vinculo explicitamente via medico_paciente.
 
-/**
- * @return array<int,array{id:int,nombre:string,apellido:string,ci:string}>
- */
 function pacientes_de_medico(int $cuentaId, int $medicoId): array
 {
     $stmt = db()->prepare(

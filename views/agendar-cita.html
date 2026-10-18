@@ -5,10 +5,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Agendar Cita - Clinica Imagen</title>
+  <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
   <link rel="stylesheet" href="./assets/css/styles.css">
 </head>
 
 <body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
   <header>
     <div class="logo">
       <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
@@ -16,7 +18,7 @@
     <div class="user">
       <details class="menu-usuario">
         <summary class="menu-usuario-toggle" aria-label="Menu de usuario">
-          <img src="" alt="">
+          <span class="avatar" aria-hidden="true"></span>
         </summary>
         <div class="menu-usuario-panel">
           <span class="user-nombre"></span>
@@ -30,12 +32,12 @@
     </div>
   </header>
 
-  <main>
+  <main id="contenido">
     <div class="layout-agendar-citas">
       <section class="seccion-auth">
         <h1>Agendar Cita</h1>
 
-        <p class="aviso-exito" data-aviso="ok" hidden>Tu solicitud de cita fue enviada. Te avisaremos cuando sea confirmada.</p>
+        <p class="aviso-exito" data-aviso="ok" hidden>Tu solicitud de cita fue enviada. <span data-codigo hidden>Codigo de seguimiento: <span data-codigo-valor></span>. </span>Te avisaremos cuando sea confirmada.</p>
         <p class="aviso-exito" data-aviso="cancelado" hidden>La cita fue cancelada.</p>
         <p class="aviso-exito" data-aviso="reprogramado" hidden>La cita fue reprogramada.</p>
         <p class="campo-error" data-aviso="error-reprogramar" hidden>Esa cita ya no se puede reprogramar (cambio de estado o no te pertenece).</p>
@@ -50,8 +52,6 @@
             <label for="estudio">Estudio</label>
             <select id="estudio" name="estudio" class="selector-combo">
               <option value="">Elegi un estudio</option>
-              <option value="placa">Placa</option>
-              <option value="radiografia">Radiografia</option>
             </select>
           </div>
 
@@ -63,9 +63,9 @@
           </div>
 
           <div class="campo">
-            <label for="profesional_id">Profesional</label>
+            <label for="profesional_id">Profesional (opcional)</label>
             <select id="profesional_id" name="profesional_id" class="selector-combo">
-              <option value="">Elegi un profesional</option>
+              <option value="">Cualquiera disponible</option>
             </select>
             <p class="campo-error" data-mensaje-sin-profesionales hidden>Todavia no hay profesionales cargados.</p>
           </div>
@@ -108,6 +108,15 @@
       </section>
     </div>
   </main>
+
+  <footer>
+    <nav aria-label="Pie de pagina">
+      <a href="index.html">Inicio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+    <p>&copy; Clinica Imagen</p>
+  </footer>
 
   <script src="assets/js/sesion.js" defer></script>
   <script src="assets/js/form-api.js" defer></script>

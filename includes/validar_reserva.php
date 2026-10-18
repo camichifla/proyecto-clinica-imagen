@@ -5,7 +5,24 @@
 // solo cambia el INSERT/UPDATE final en cada caller.
 require_once __DIR__ . '/horarios.php';
 
-function validar_reserva(array $datos, array $estudiosPermitidos, string $fechaMin, string $fechaMax, int $rangoMeses): array
+function es_hora_ocupada(Throwable $e): bool
+{
+    return $e instanceof PDOException && $e->getCode() === '23000' && str_contains($e->getMessage(), 'uq_citas_slot');
+}
+
+// Responde 422 si la excepcion es el choque con uq_citas_slot; si no, la relanza.
+function hora_ocupada_json(PDOException $e): never
+{
+    if (!es_hora_ocupada($e)) {
+        throw $e;
+    }
+    http_response_code(422);
+    echo json_encode(['ok' => false, 'errores' => ['hora' => 'Esa hora ya fue reservada. Elegi otra.']], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+// $ignorarCitaId: la cita que se esta reprogramando; su propio horario no cuenta como ocupado al autoasignar.
+function validar_reserva(array $datos, array $estudiosPermitidos, string $fechaMin, string $fechaMax, int $rangoMeses, int $ignorarCitaId = 0): array
 {
     $errores = [];
 
@@ -17,21 +34,25 @@ function validar_reserva(array $datos, array $estudiosPermitidos, string $fechaM
     if (!$sucursalId) {
         $errores['sucursal_id'] = 'Elegi una sede valida.';
     } else {
-        $stmt = db()->prepare('SELECT id FROM sucursales WHERE id = ?');
+        $stmt = db()->prepare('SELECT activo FROM sucursales WHERE id = ?');
         $stmt->execute([$sucursalId]);
-        if (!$stmt->fetch()) {
-            $errores['sucursal_id'] = 'Elegi una sede valida.';
+        $activa = $stmt->fetchColumn();
+        if ($activa === false || (int) $activa !== 1) {
+            $errores['sucursal_id'] = $activa === false ? 'Elegi una sede valida.' : 'La sede elegida no esta disponible.';
             $sucursalId = null;
         }
     }
 
-    $profesionalId = filter_var($datos['profesional_id'], FILTER_VALIDATE_INT);
-    if (!$profesionalId) {
+    // Vacio = "cualquiera disponible": se asigna al final, con todo lo demas validado.
+    $autoAsignar   = $datos['profesional_id'] === '';
+    $profesionalId = $autoAsignar ? null : filter_var($datos['profesional_id'], FILTER_VALIDATE_INT);
+    if (!$autoAsignar && !$profesionalId) {
         $errores['profesional_id'] = 'Elegi un profesional.';
     }
 
     if (!$errores && $profesionalId) {
-        $stmt = db()->prepare('SELECT 1 FROM profesional_especializacion WHERE profesional_id = ? AND especializacion = ?');
+        $stmt = db()->prepare('SELECT 1 FROM profesional_especializacion pe WHERE pe.profesional_id = ? AND pe.especializacion = ? AND '
+            . sql_profesional_habilitado('pe.profesional_id'));
         $stmt->execute([$profesionalId, $datos['estudio']]);
         if (!$stmt->fetch()) {
             $errores['profesional_id'] = 'Ese profesional no atiende el estudio elegido.';
@@ -78,6 +99,41 @@ function validar_reserva(array $datos, array $estudiosPermitidos, string $fechaM
         $stmt->execute([$profesionalId, $sucursalId]);
         if (!$stmt->fetch()) {
             $errores['profesional_id'] = 'Ese profesional no atiende en la sede elegida.';
+        }
+    }
+
+    if (!$errores && $sucursalId && $profesionalId && $marcaTiempo) {
+        $propios = horarios_propios([$profesionalId], (int) $marcaTiempo->format('N'));
+        if (isset($propios[$profesionalId]) && !hora_en_turnos($propios[$profesionalId], $datos['hora'])) {
+            $errores['hora'] = 'Ese profesional no atiende en ese horario. Elegi otra hora.';
+        }
+    }
+
+    if (!$errores && $autoAsignar && $sucursalId && $marcaTiempo) {
+        // ponytail: lowest id wins, no load balancing; upgrade to least-booked if it matters
+        $stmt = db()->prepare(
+            'SELECT p.id
+               FROM profesionales p
+               JOIN profesional_especializacion pe ON pe.profesional_id = p.id AND pe.especializacion = ?
+               JOIN profesional_sucursal ps ON ps.profesional_id = p.id AND ps.sucursal_id = ?
+              WHERE ' . sql_profesional_habilitado('p.id') . '
+                AND NOT EXISTS (
+                      SELECT 1 FROM citas c
+                       WHERE c.profesional_id = p.id AND c.fecha_hora_solicitada = ? AND c.slot_activo = 1 AND c.id <> ?)
+              ORDER BY p.id'
+        );
+        $stmt->execute([$datos['estudio'], $sucursalId, $marcaTiempo->format('Y-m-d H:i:s'), $ignorarCitaId]);
+        $libres  = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+        $propios = horarios_propios($libres, (int) $marcaTiempo->format('N'));
+        $profesionalId = null;
+        foreach ($libres as $id) {
+            if (!isset($propios[$id]) || hora_en_turnos($propios[$id], $datos['hora'])) {
+                $profesionalId = $id;
+                break;
+            }
+        }
+        if ($profesionalId === null) {
+            $errores['hora'] = 'No hay profesionales disponibles en esa hora. Elegi otra.';
         }
     }
 

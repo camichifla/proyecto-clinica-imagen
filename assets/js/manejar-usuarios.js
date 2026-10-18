@@ -10,7 +10,7 @@
         return;
     }
 
-    const ROLES_TODOS = { paciente: 'Paciente', medico: 'Medico', profesional: 'Profesional', administrador: 'Administrador' };
+    const ROLES_TODOS = { paciente: 'Paciente', medico: 'Medico', profesional: 'Profesional', administrador: 'Administrador', recepcionista: 'Recepcionista' };
 
     let csrf = '';
     let buscadorComboCargado = false;
@@ -141,6 +141,39 @@
         asignacionesContenedor.appendChild(tabla(['Medico', 'Paciente', ''], filas));
     }
 
+    function poblarEspecializaciones(estudios) {
+        document.querySelectorAll('#campo-especializacion .check-grid, #campo-especializacion-cambio .check-grid').forEach((grilla) => {
+            if (grilla.children.length) {
+                return;
+            }
+            estudios.forEach((estudio) => {
+                const label = document.createElement('label');
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.name = 'especializacion[]';
+                input.value = estudio.clave;
+                label.append(input, ' ' + estudio.etiqueta);
+                grilla.appendChild(label);
+            });
+        });
+    }
+
+    // Cuentas de personal que se pueden cambiar de rol (no la propia, no pacientes).
+    function poblarCuentasCambioRol(data) {
+        const select = document.getElementById('cambio-cuenta');
+        const elegida = select.value;
+        select.replaceChildren(select.options[0]);
+        data.cuentas
+            .filter((c) => c.rol !== 'paciente' && c.cuenta_id !== data.cuenta_actual_id)
+            .forEach((c) => {
+                const opcion = document.createElement('option');
+                opcion.value = String(c.cuenta_id);
+                opcion.textContent = `${c.apellido} ${c.nombre}`.trim() + ' — ' + (ROLES_TODOS[c.rol] || c.rol);
+                select.appendChild(opcion);
+            });
+        select.value = elegida;
+    }
+
     async function cargarDatos() {
         const data = await apiJson('api/manejar-usuarios.php');
         if (!data) {
@@ -148,6 +181,8 @@
         }
         renderCuentas(data);
         renderAsignaciones(data);
+        poblarEspecializaciones(data.estudios);
+        poblarCuentasCambioRol(data);
 
         if (!buscadorComboCargado) {
             buscadorComboCargado = true;
@@ -174,6 +209,28 @@
             mostrarMensaje(seccionAsignaciones, resultado.error, true);
         }
     });
+
+    const formCambioRol = document.getElementById('form-cambiar-rol');
+    if (formCambioRol) {
+        const campoEspCambio = document.getElementById('campo-especializacion-cambio');
+        formCambioRol.elements.rol.addEventListener('change', () => {
+            campoEspCambio.hidden = formCambioRol.elements.rol.value !== 'profesional';
+        });
+        formCambioRol.addEventListener('submit', () => {
+            document.getElementById('seccion-cambiar-rol').querySelector('[data-mensaje]').hidden = true;
+        });
+        formCambioRol.addEventListener('form-api:respuesta', (evento) => {
+            if (!evento.detail.ok) {
+                return;
+            }
+            const aviso = document.getElementById('seccion-cambiar-rol').querySelector('[data-mensaje]');
+            aviso.textContent = 'Rol actualizado.';
+            aviso.hidden = false;
+            formCambioRol.reset();
+            ['cuenta_id', 'rol'].forEach((nombre) => formCambioRol.elements[nombre].dispatchEvent(new Event('change')));
+            cargarDatos();
+        });
+    }
 
     function mostrarAvisoStaff() {
         if (new URL(window.location.href).searchParams.get('staff_ok')) {

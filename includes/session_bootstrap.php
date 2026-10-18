@@ -40,9 +40,6 @@ if (isset($_SESSION['cuenta_id']) && isset($_SESSION['ultimo_acceso'])
 
 $_SESSION['ultimo_acceso'] = time();
 
-/**
- * Returns the CSRF token for the current session, generating one on first use.
- */
 function csrf_token(): string
 {
     if (empty($_SESSION['csrf'])) {
@@ -51,10 +48,7 @@ function csrf_token(): string
     return $_SESSION['csrf'];
 }
 
-/**
- * Validates a submitted CSRF token against the session's token. Responds
- * with 403 and exits on mismatch or missing token — never returns false.
- */
+/** Responds 403 and exits on mismatch or missing token; never returns false. */
 function csrf_check(?string $token): void
 {
     if (!is_string($token) || $token === '' || !hash_equals(csrf_token(), $token)) {
@@ -69,10 +63,7 @@ function csrf_check(?string $token): void
     }
 }
 
-/**
- * Prologue for JSON POST-only endpoints: JSON content type, 405 on any other
- * method, CSRF check.
- */
+/** Prologue for JSON POST-only endpoints: JSON content type, 405 on other methods, CSRF check. */
 function require_post_json(): void
 {
     header('Content-Type: application/json; charset=utf-8');
@@ -87,7 +78,8 @@ function require_post_json(): void
 }
 
 /**
- * Returns the authenticated account's session data, or null if none.
+ * Role and profile id are re-read from `cuentas` on every request, so a role change or deactivation applies to
+ * already-open sessions. A missing or deactivated account ends the session.
  *
  * @return array{cuenta_id:int,rol:string,ref_id:int,nombre:string}|null
  */
@@ -96,6 +88,20 @@ function usuario_actual(): ?array
     if (empty($_SESSION['cuenta_id'])) {
         return null;
     }
+
+    require_once __DIR__ . '/db.php';
+    $stmt = db()->prepare('SELECT rol, ref_id, activo FROM cuentas WHERE id = ?');
+    $stmt->execute([(int) $_SESSION['cuenta_id']]);
+    $fila = $stmt->fetch();
+    if (!$fila || (int) $fila['activo'] !== 1) {
+        foreach (['cuenta_id', 'rol', 'ref_id', 'nombre'] as $clave) {
+            unset($_SESSION[$clave]);
+        }
+        return null;
+    }
+    $_SESSION['rol']    = (string) $fila['rol'];
+    $_SESSION['ref_id'] = (int) $fila['ref_id'];
+
     return [
         'cuenta_id' => (int) $_SESSION['cuenta_id'],
         'rol'       => (string) $_SESSION['rol'],

@@ -1,6 +1,6 @@
 <?php
-// includes/db.php — single lazily-built PDO connection.
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/auditoria.php';
 
 // Profile table per cuentas.rol (cuentas.ref_id points at its id).
 const TABLA_POR_ROL = [
@@ -8,6 +8,7 @@ const TABLA_POR_ROL = [
     'medico'        => 'medicos',
     'profesional'   => 'profesionales',
     'administrador' => 'administradores',
+    'recepcionista' => 'recepcionistas',
 ];
 
 function db(): PDO

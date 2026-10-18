@@ -20,8 +20,24 @@
         }
     }
 
+    // El rol cambia el titulo y los mensajes de lista vacia; los permisos los
+    // decide la API.
+    const TEXTOS_PROFESIONAL = {
+        titulo: 'Cargar Observaciones y Resultados',
+        sinPacientes: 'Todavia no tenes pacientes con citas asignadas.',
+        sinCitas: 'Este paciente no tiene citas confirmadas con vos',
+    };
+
     async function init() {
         mostrarAviso();
+
+        const sesion = await window.sesionLista;
+        if (sesion && sesion.rol === 'profesional') {
+            document.getElementById('titulo-vista').textContent = TEXTOS_PROFESIONAL.titulo;
+            document.title = TEXTOS_PROFESIONAL.titulo + ' - Clinica Imagen';
+            inputBuscar.dataset.mensajeSinPacientes = TEXTOS_PROFESIONAL.sinPacientes;
+            selectCita.dataset.mensajeSinCitas = TEXTOS_PROFESIONAL.sinCitas;
+        }
 
         if (inputFecha) {
             inputFecha.max = new Date().toISOString().slice(0, 10);

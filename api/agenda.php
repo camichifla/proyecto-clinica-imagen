@@ -4,7 +4,7 @@ require_once __DIR__ . '/../includes/auth_guard.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/agenda.php';
 
-$usuario = requerir_rol_json(['administrador', 'profesional']);
+$usuario = requerir_rol_json(['administrador', 'recepcionista', 'profesional']);
 
 $vista = ($_GET['vista'] ?? 'mes') === 'semana' ? 'semana' : 'mes';
 
@@ -22,7 +22,7 @@ $sucursalId = null;
 $condicion  = '';
 $parametros = [];
 
-if ($usuario['rol'] === 'administrador') {
+if (in_array($usuario['rol'], ['administrador', 'recepcionista'], true)) {
 
     $sucursales = db()->query('SELECT id, nombre FROM sucursales ORDER BY nombre')->fetchAll();
     $sucursalId = filter_input(INPUT_GET, 'sucursal_id', FILTER_VALIDATE_INT) ?: null;
@@ -40,34 +40,12 @@ if ($usuario['rol'] === 'administrador') {
 }
 
 $stmt = db()->prepare(
-    "SELECT c.*,
-            p.nombre  AS paciente_nombre,  p.apellido  AS paciente_apellido,
-            pr.nombre AS profesional_nombre, pr.apellido AS profesional_apellido,
-            s.nombre  AS sucursal_nombre
-     FROM citas c
-     LEFT JOIN pacientes p ON p.id = c.paciente_id
-     JOIN profesionales pr ON pr.id = c.profesional_id
-     LEFT JOIN sucursales s ON s.id = c.sucursal_id
+    SQL_CITAS_CON_ETIQUETAS . "
      WHERE {$condicion}DATE(c.fecha_hora_solicitada) BETWEEN ? AND ?
      ORDER BY c.fecha_hora_solicitada ASC"
 );
 $stmt->execute([...$parametros, $rango['rangoInicio']->format('Y-m-d'), $rango['rangoFin']->format('Y-m-d')]);
 $citasPorDia = agrupar_citas_por_dia($stmt->fetchAll());
-
-function cita_agenda_json(array $cita): array
-{
-    return [
-        'id'               => (int) $cita['id'],
-        'hora'             => substr($cita['fecha_hora_solicitada'], 11, 5),
-        'estado'           => $cita['estado'],
-        'estadoLabel'      => ESTADOS_CITA[$cita['estado']] ?? $cita['estado'],
-        'estudioLabel'     => ESTUDIOS[$cita['estudio']] ?? $cita['estudio'],
-        'pacienteCorto'    => $cita['paciente_id'] === null ? 'Pendiente' : $cita['paciente_apellido'],
-        'pacienteLabel'    => cita_nombre_paciente($cita),
-        'profesionalLabel' => $cita['profesional_apellido'] . ', ' . $cita['profesional_nombre'],
-        'sucursalNombre'   => $cita['sucursal_nombre'],
-    ];
-}
 
 $hoy  = (new DateTime('today'))->format('Y-m-d');
 $dias = [];

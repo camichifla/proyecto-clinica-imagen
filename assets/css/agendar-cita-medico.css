@@ -1,7 +1,3 @@
-/* --- agendar-cita-medico.php: adjuntar-orden toggle + orden clinica --- */
-/* Reuses base.css's .campo/.seccion-auth for the booking fields (same
-   engine as agendar-cita.php); this file only styles what's new here: the
-   orden toggle, its nested cards, and the FDI tooth-selection grids. */
 
 .seccion-ancha {
     max-width: var(--max-width);
@@ -58,10 +54,7 @@
     font-size: var(--font-size-lg);
 }
 
-/* <details class="orden-card"> replaces the plain div for the 8 real
-   accordion sections of the source order form (agendar-cita-medico.php),
-   collapsed by default like the original — no JS needed. summary takes
-   over the h3's look since <details> renders it as its own list item. */
+/* <details> renders its summary as a list item, so summary takes over the h3 look. No JS needed. */
 .orden-card summary {
     margin: 0;
     color: var(--dark-neutral);
@@ -133,10 +126,6 @@
     color: var(--dark-neutral);
     font-size: var(--font-size-sm);
 }
-
-/* .check-grid itself now lives in base.css (shared with
-   manejar-usuarios.php) — only the .radio-row/.orden-fieldset variants
-   specific to this page's order forms stay here. */
 
 .radio-row {
     display: flex;
@@ -238,7 +227,6 @@
 
 .orden-card .campo select {
     padding-right: 2.2rem;
-    /* Misma flecha propia que agendar-cita.css, en vez de la nativa. */
     appearance: none;
     -webkit-appearance: none;
     background-image:

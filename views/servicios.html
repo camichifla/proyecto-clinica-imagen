@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Servicios - Clinica Imagen</title>
+  <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
+  <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <header>
+    <div class="logo">
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+    </div>
+    <nav class="nav-publica" aria-label="Principal">
+      <a href="index.html">Inicio</a>
+      <a href="servicios.html" aria-current="page">Servicios</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+    <div class="user">
+      <details class="menu-usuario" data-sesion="user" hidden>
+        <summary class="menu-usuario-toggle" aria-label="Menu de usuario">
+          <span class="avatar" aria-hidden="true"></span>
+        </summary>
+        <div class="menu-usuario-panel">
+          <span class="user-nombre"></span>
+          <ul class="menu-usuario-lista"></ul>
+          <form method="post" action="logout.php" class="form-logout">
+            <input type="hidden" name="csrf" value="">
+            <button type="submit" class="btn-logout">Cerrar sesion</button>
+          </form>
+        </div>
+      </details>
+      <a href="login.html" class="btn-primary" data-sesion="anon" hidden>Iniciar sesion</a>
+    </div>
+  </header>
+
+  <main id="contenido">
+    <section class="seccion-panel">
+      <h1>Servicios</h1>
+      <p>Estos son los estudios de imagenologia que ofrecemos. Algunos los podes agendar vos mismo en linea; otros requieren la orden de un profesional.</p>
+      <p class="aviso-error" data-error role="alert" hidden>No se pudieron cargar los servicios. Intenta nuevamente mas tarde.</p>
+      <div class="grid-estudios" id="estudios-publicos" aria-live="polite"></div>
+      <noscript><p>Activa JavaScript para ver el listado de estudios, o escribinos desde la pagina de <a href="contacto.html">contacto</a>.</p></noscript>
+    </section>
+  </main>
+
+  <footer>
+    <nav aria-label="Pie de pagina">
+      <a href="index.html">Inicio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+    <p>&copy; Clinica Imagen</p>
+  </footer>
+
+  <script src="assets/js/sesion.js" data-modo="publico" defer></script>
+  <script src="assets/js/servicios.js" defer></script>
+</body>
+
+</html>

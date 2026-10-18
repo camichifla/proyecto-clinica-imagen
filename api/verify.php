@@ -43,6 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['token'])) {
         $db->prepare('UPDATE tokens_verificacion SET usado_en = NOW() WHERE id = ?')->execute([$fila['id']]);
         $db->commit();
 
+        registrar_evento('verificacion', 'cuenta=' . $fila['cuenta_id']);
+
         echo json_encode(['ok' => true, 'redirect' => 'login.html?verificado=1'], JSON_UNESCAPED_UNICODE);
         exit;
     }

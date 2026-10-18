@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Profesionales - Clinica Imagen</title>
+  <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
+  <link rel="stylesheet" href="./assets/css/styles.css">
+  <link rel="stylesheet" href="./assets/css/backoffice.css">
+</head>
+
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <header>
+    <div class="logo">
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+    </div>
+    <div class="user">
+      <details class="menu-usuario">
+        <summary class="menu-usuario-toggle" aria-label="Menu de usuario">
+          <span class="avatar" aria-hidden="true"></span>
+        </summary>
+        <div class="menu-usuario-panel">
+          <span class="user-nombre"></span>
+          <ul class="menu-usuario-lista"></ul>
+          <form method="post" action="logout.php" class="form-logout">
+            <input type="hidden" name="csrf" value="">
+            <button type="submit" class="btn-logout">Cerrar sesion</button>
+          </form>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main id="contenido">
+    <section class="seccion-panel">
+      <h1>Profesionales</h1>
+      <p class="campo-hint">Elegi para cada profesional en que sedes trabaja, que estudios realiza y, si hace falta, sus propios horarios. Las cuentas se crean en Manejar Usuarios. Los cambios no mueven las citas ya agendadas.</p>
+
+      <p class="aviso-exito" data-mensaje role="status" hidden></p>
+      <p class="aviso-error" data-mensaje-error role="alert" hidden></p>
+
+      <div id="profesionales-lista"></div>
+    </section>
+
+    <section class="seccion-panel" id="seccion-profesional-form" hidden>
+      <h2 id="profesional-form-titulo">Editar profesional</h2>
+
+      <form id="form-profesional" novalidate>
+        <input type="hidden" name="csrf" value="">
+        <input type="hidden" name="accion" value="guardar">
+        <input type="hidden" name="id" value="">
+
+        <div class="campo">
+          <label id="profesional-sucursales-label">Sedes donde trabaja</label>
+          <div class="check-grid" id="profesional-sucursales" role="group" aria-labelledby="profesional-sucursales-label"></div>
+          <p class="campo-hint">Sin sedes, el profesional no se ofrece para agendar.</p>
+        </div>
+
+        <div class="campo">
+          <label id="profesional-estudios-label">Estudios que realiza</label>
+          <div class="check-grid" id="profesional-estudios" role="group" aria-labelledby="profesional-estudios-label"></div>
+        </div>
+
+        <div class="campo" id="campo-horarios">
+          <label id="profesional-horarios-label">Horarios propios</label>
+          <div id="profesional-horarios" role="group" aria-labelledby="profesional-horarios-label"></div>
+          <p class="campo-hint">Sin horarios propios, el profesional atiende siempre que la sede este abierta. Con horarios, solo se puede agendar dentro de ellos (y dentro del horario de la sede); un dia sin horarios es un dia que no atiende.</p>
+          <button type="button" class="btn-secundario" id="horario-agregar">Agregar horario</button>
+        </div>
+
+        <div class="acciones-formulario">
+          <button type="submit" class="btn-primary">Guardar</button>
+          <button type="button" class="btn-secundario" id="profesional-cancelar">Cancelar edicion</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <nav aria-label="Pie de pagina">
+      <a href="index.html">Inicio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+    <p>&copy; Clinica Imagen</p>
+  </footer>
+
+  <script src="assets/js/sesion.js" defer></script>
+  <script src="assets/js/form-api.js" defer></script>
+  <script src="assets/js/gestion-profesionales.js" defer></script>
+</body>
+
+</html>

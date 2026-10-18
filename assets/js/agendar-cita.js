@@ -14,6 +14,11 @@
     function mostrarAviso() {
         const params = new URL(window.location.href).searchParams;
         if (params.has('ok')) {
+            const codigo = params.get('codigo') || '';
+            if (/^CI-\d+$/.test(codigo)) {
+                document.querySelector('[data-codigo-valor]').textContent = codigo;
+                document.querySelector('[data-codigo]').hidden = false;
+            }
             document.querySelector('[data-aviso="ok"]').hidden = false;
         } else if (params.has('cancelado')) {
             document.querySelector('[data-aviso="cancelado"]').hidden = false;
@@ -42,6 +47,7 @@
 
     function renderFilaCita(cita, notasAdminMax, csrf) {
         const tr = document.createElement('tr');
+        tr.appendChild(celda('Codigo', cita.codigo));
         tr.appendChild(celda('Fecha y hora de la cita', cita.fechaHoraSolicitada));
         tr.appendChild(celda('Sede', cita.sucursalNombre || '-'));
         tr.appendChild(celda('Estudio', cita.estudioLabel));
@@ -96,7 +102,7 @@
             return;
         }
         misCitas.appendChild(tabla(
-            ['Fecha y hora de la cita', 'Sede', 'Estudio', 'Estado', ''],
+            ['Codigo', 'Fecha y hora de la cita', 'Sede', 'Estudio', 'Estado', ''],
             citas.map((cita) => renderFilaCita(cita, notasAdminMax, csrf))
         ));
     }
@@ -121,7 +127,8 @@
 
         const editar = data.editar;
         poblarSucursales(selectSucursal, data.sucursalesOrden, editar ? editar.sucursalId : '');
-        poblarProfesionales(selectProfesional, data.profesionales, editar ? editar.profesionalId : '');
+        poblarEstudios(document.getElementById('estudio'), data.estudios);
+        poblarProfesionales(selectProfesional, data.profesionales, editar ? editar.profesionalId : '', data.etiquetasEstudio);
 
         if (editar) {
             formAccion.value = 'reprogramar';

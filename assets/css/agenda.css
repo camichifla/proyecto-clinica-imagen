@@ -1,4 +1,3 @@
-/* --- Agenda: calendario mes/semana --- */
 
 .agenda-controles {
     display: flex;
@@ -53,8 +52,6 @@
 .agenda-hoy {
     text-decoration: none;
 }
-
-/* --- Vista mes --- */
 
 .agenda-mes-dias-semana {
     display: grid;
@@ -123,8 +120,6 @@
     font-weight: var(--font-weight-semibold);
 }
 
-/* --- Vista semana --- */
-
 .agenda-semana-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -192,8 +187,7 @@
     display: flex;
 }
 
-/* --- Estados: colores planos en la pastilla del mes, solo el borde
-   izquierdo tiñe la tarjeta de semana (nada de fondo degradado/translucido). --- */
+/* Estados: color plano en la pastilla del mes; en semana solo el borde izquierdo tiñe la tarjeta. */
 
 .agenda-cita-pill.estado-pendiente {
     background: rgba(var(--accent-rgb), 0.15);
@@ -232,8 +226,6 @@
     border-color: rgba(var(--danger-rgb), 0.25);
     border-left-color: var(--color-danger);
 }
-
-/* --- Responsive: semana y mes se apilan en pantallas chicas --- */
 
 @media (width <= 720px) {
     .agenda-mes-grid,

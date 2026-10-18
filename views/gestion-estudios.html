@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estudios - Clinica Imagen</title>
+  <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
+  <link rel="stylesheet" href="./assets/css/styles.css">
+  <link rel="stylesheet" href="./assets/css/backoffice.css">
+</head>
+
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <header>
+    <div class="logo">
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+    </div>
+    <div class="user">
+      <details class="menu-usuario">
+        <summary class="menu-usuario-toggle" aria-label="Menu de usuario">
+          <span class="avatar" aria-hidden="true"></span>
+        </summary>
+        <div class="menu-usuario-panel">
+          <span class="user-nombre"></span>
+          <ul class="menu-usuario-lista"></ul>
+          <form method="post" action="logout.php" class="form-logout">
+            <input type="hidden" name="csrf" value="">
+            <button type="submit" class="btn-logout">Cerrar sesion</button>
+          </form>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main id="contenido">
+    <section class="seccion-panel">
+      <h1>Estudios</h1>
+      <p class="campo-hint">Un estudio desactivado deja de ofrecerse para nuevas citas; las citas existentes conservan su etiqueta. Los estudios no se eliminan.</p>
+
+      <p class="aviso-exito" data-mensaje role="status" hidden></p>
+      <p class="aviso-error" data-mensaje-error role="alert" hidden></p>
+
+      <div id="estudios-lista"></div>
+    </section>
+
+    <section class="seccion-panel">
+      <h2 id="estudio-form-titulo">Nuevo estudio</h2>
+
+      <form id="form-estudio" novalidate>
+        <input type="hidden" name="csrf" value="">
+        <input type="hidden" name="accion" value="crear">
+
+        <div class="campo">
+          <label for="estudio-clave">Clave</label>
+          <input type="text" id="estudio-clave" name="clave" maxlength="30" autocomplete="off">
+          <p class="campo-hint" id="estudio-clave-hint">Identificador interno: minusculas, numeros y guion bajo. No se puede cambiar despues.</p>
+        </div>
+
+        <div class="campo">
+          <label for="estudio-etiqueta">Etiqueta</label>
+          <input type="text" id="estudio-etiqueta" name="etiqueta" maxlength="60" autocomplete="off">
+        </div>
+
+        <div class="campo">
+          <label for="estudio-descripcion">Descripcion (se muestra en la pagina de servicios)</label>
+          <textarea id="estudio-descripcion" name="descripcion" rows="3" maxlength="255"></textarea>
+        </div>
+
+        <div class="check-grid">
+          <label><input type="checkbox" name="autoagendable" value="1"> Los pacientes pueden agendarlo por su cuenta</label>
+          <label id="estudio-activo-label" hidden><input type="checkbox" name="activo" value="1"> Activo</label>
+        </div>
+
+        <div class="acciones-formulario">
+          <button type="submit" class="btn-primary">Guardar</button>
+          <button type="button" class="btn-secundario" id="estudio-nuevo" hidden>Cancelar edicion</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <nav aria-label="Pie de pagina">
+      <a href="index.html">Inicio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+    <p>&copy; Clinica Imagen</p>
+  </footer>
+
+  <script src="assets/js/sesion.js" defer></script>
+  <script src="assets/js/form-api.js" defer></script>
+  <script src="assets/js/gestion-estudios.js" defer></script>
+</body>
+
+</html>

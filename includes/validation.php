@@ -13,9 +13,7 @@ const REGLAS_PACIENTE = [
     'contrasena' => ['label' => 'Contrasena', 'pattern' => '/^(?=.*\p{L})(?=.*\d).{8,72}$/u',           'hint' => 'Minimo 8 caracteres, con al menos una letra y un numero.'],
 ];
 
-// Reuses the same nombre/apellido/email/contrasena rules as REGLAS_PACIENTE
-// (they were already generic, not paciente-specific) for staff accounts
-// (medico/profesional/administrador) created from manejar-usuarios.php.
+// Reuses REGLAS_PACIENTE's nombre/apellido/email/contrasena rules for staff accounts (manejar-usuarios.php).
 const REGLAS_STAFF = [
     'nombre'     => REGLAS_PACIENTE['nombre'],
     'apellido'   => REGLAS_PACIENTE['apellido'],
@@ -24,9 +22,7 @@ const REGLAS_STAFF = [
 ];
 
 /**
- * Validates $datos against $reglas. Returns an associative array of
- * field => error message for every field that failed; an empty array
- * means every field passed.
+ * Returns field => error message for every failed field; empty array = all passed.
  *
  * @param array<string,array{label:string,pattern?:string,filter?:int,hint:string}> $reglas
  * @param array<string,mixed> $datos

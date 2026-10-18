@@ -1,10 +1,5 @@
-// Cascada de agendado: estudio -> sucursal -> profesional -> fecha (calendario
-// custom) -> hora. Compartido por agendar-cita.php (paciente) y
-// agendar-cita-medico.php (medico agendando para un paciente) — el flujo, los
-// ids de campo y las reglas de filtrado son identicos entre ambas pantallas,
-// solo cambia quien es el "dueno" de la cita (logica de servidor, no de este
-// script). Client filtering is UX only — the server re-validates every
-// constraint independently (design.md Server-Side Re-Validation).
+// Cascada de agendado (estudio -> sucursal -> profesional -> fecha -> hora), compartida por paciente y medico.
+// Client filtering is UX only: the server re-validates every constraint.
 //
 // Requiere que el HTML que lo incluye ya haya declarado, antes de este
 // <script src>:
@@ -51,8 +46,6 @@
     });
   }
 
-  // --- Sede options filtered by estudio: el estudio se elige primero, asi
-  // que solo mostramos sedes que realmente lo cubren. ---
   function aplicarFiltroSede() {
     var estudio = estudioSelect.value;
     Array.prototype.forEach.call(sucursalSelect.options, function (opcion) {
@@ -72,7 +65,6 @@
     }
   }
 
-  // --- Profesional options filtered by branch AND estudio ---
   function aplicarFiltroProfesional() {
     var s = sucursalActual();
     var estudio = estudioSelect.value;
@@ -95,7 +87,6 @@
     }
   }
 
-  // --- 45-minute slot generation, mirrors includes/horarios.php ---
   function aMinutos(hhmm) {
     var partes = hhmm.split(':');
     return Number(partes[0]) * 60 + Number(partes[1]);
@@ -128,7 +119,6 @@
     return !!(s && s.horarios[diaSemanaISO(fecha)]);
   }
 
-  // --- Hora <select>, rebuilt whenever sucursal or fecha changes ---
   function aplicarHoras(fechaSeleccionada) {
     var s = sucursalActual();
     horaSelect.innerHTML = '';
@@ -157,15 +147,50 @@
     });
 
     horaSelect.disabled = opciones.length === 0;
+    quitarOcupadas(fechaSeleccionada);
+  }
+
+  // Quita las horas ya tomadas. Si el fetch falla se dejan todas (el
+  // constraint del servidor igual protege); la hora que se esta editando
+  // (HORA_ELEGIDA) nunca se quita. El contador descarta respuestas viejas.
+  var pedidoHoras = 0;
+  function quitarOcupadas(fecha) {
+    var pedido = ++pedidoHoras;
+    if (!sucursalSelect.value || !fecha || !estudioSelect.value) {
+      return;
+    }
+    var params = new URLSearchParams({
+      sucursal_id: sucursalSelect.value,
+      fecha: aISO(fecha),
+      estudio: estudioSelect.value
+    });
+    if (profesionalSelect.value) {
+      params.set('profesional_id', profesionalSelect.value);
+    }
+    fetch('api/horas-ocupadas.php?' + params.toString())
+      .then(function (respuesta) { return respuesta.ok ? respuesta.json() : null; })
+      .then(function (data) {
+        if (pedido !== pedidoHoras || !data || !Array.isArray(data.ocupadas)) {
+          return;
+        }
+        Array.prototype.slice.call(horaSelect.options).forEach(function (opcion) {
+          if (opcion.value !== '' && opcion.value !== HORA_ELEGIDA && data.ocupadas.indexOf(opcion.value) !== -1) {
+            horaSelect.removeChild(opcion);
+          }
+        });
+      })
+      .catch(function () {});
   }
 
   estudioSelect.addEventListener('change', function () {
     aplicarFiltroSede();
     aplicarFiltroProfesional();
+    aplicarHoras(seleccionada);
+  });
+  profesionalSelect.addEventListener('change', function () {
+    aplicarHoras(seleccionada);
   });
 
-  // --- Calendar: no free typing, only clickable days within [min, max]
-  // and open at the chosen sucursal ---
   var boton      = document.getElementById('fecha-boton');
   var textoBoton = boton.querySelector('.selector-fecha-texto');
   var oculto     = document.getElementById('fecha');
@@ -326,8 +351,6 @@
     aplicarHoras(seleccionada);
   });
 
-  // Restore prior state on load (a re-rendered form after a validation
-  // error keeps the previously chosen sucursal/estudio/profesional/fecha).
   aplicarFiltroSede();
   aplicarFiltroProfesional();
   aplicarHoras(seleccionada);

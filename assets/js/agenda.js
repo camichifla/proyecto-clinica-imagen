@@ -184,6 +184,9 @@
             renderSemana(data);
         }
         if (selectSucursal) {
+            // Solo administrador y recepcionista reciben sedes; el profesional
+            // ve unicamente su propia agenda.
+            formFiltro.hidden = !data.sucursales.length;
             renderOpcionesSucursal(data.sucursales, data.sucursalId);
         }
     }
@@ -225,6 +228,13 @@
             cargar(params.get('vista'), params.get('fecha'), selectSucursal.value, true);
         });
     }
+
+    window.sesionLista.then((sesion) => {
+        if (sesion && sesion.rol === 'profesional') {
+            document.getElementById('titulo-vista').textContent = 'Ver Agenda';
+            document.title = 'Ver Agenda - Clinica Imagen';
+        }
+    });
 
     const inicial = new URL(window.location.href).searchParams;
     cargar(inicial.get('vista'), inicial.get('fecha'), inicial.get('sucursal_id'), false);

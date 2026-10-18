@@ -5,21 +5,9 @@ require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/agenda.php';
 require_once __DIR__ . '/../includes/mailer.php';
 
-$usuario = requerir_rol_json(['administrador']);
+$usuario = requerir_rol_json(['administrador', 'recepcionista']);
 
 const MENSAJE_SOLICITUD_NO_PROCESADA = 'No se pudo procesar la solicitud (puede que ya haya sido resuelta).';
-
-function email_notificacion_cita(?int $pacienteId, ?string $emailPendiente): ?string
-{
-    if ($pacienteId !== null) {
-        $stmt = db()->prepare("SELECT email FROM cuentas WHERE rol = 'paciente' AND ref_id = ?");
-        $stmt->execute([$pacienteId]);
-        $email = $stmt->fetchColumn();
-        return $email !== false ? $email : null;
-    }
-
-    return $emailPendiente !== null && $emailPendiente !== '' ? $emailPendiente : null;
-}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check($_POST['csrf'] ?? null);
@@ -53,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($stmt->rowCount() > 0 && $cita) {
+            registrar_evento($confirmar ? 'cita_confirmar' : 'cita_rechazar', 'cita=' . $citaId);
             $email = email_notificacion_cita($cita['paciente_id'], $cita['email_pendiente']);
             if ($email !== null) {
                 enviar_notificacion_cita($email, $confirmar ? 'confirmada' : 'rechazada', $cita['fecha_hora_solicitada'], $notas);
@@ -92,7 +81,7 @@ echo json_encode([
             'id'               => (int) $cita['id'],
             'fechaHoraSolicitada' => $cita['fecha_hora_solicitada'],
             'pacienteLabel'    => cita_nombre_paciente($cita),
-            'estudioLabel'     => ESTUDIOS[$cita['estudio']] ?? $cita['estudio'],
+            'estudioLabel'     => estudios_etiquetas()[$cita['estudio']] ?? $cita['estudio'],
             'sucursalNombre'   => $cita['sucursal_nombre'],
             'profesionalLabel' => $cita['profesional_apellido'] . ', ' . $cita['profesional_nombre'],
         ];

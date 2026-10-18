@@ -1,4 +1,3 @@
-/* --- Layout: form de agendar al lado de Mis Citas en pantallas anchas --- */
 
 .layout-agendar-citas {
     display: grid;
@@ -8,17 +7,9 @@
     margin-top: var(--space-7);
 }
 
-/* Grid items default to min-width:auto, so su contenido puede forzar la
-   columna mas alla de lo asignado por el grid. Y tanto .seccion-auth como
-   .seccion-panel traen "margin: Xrem auto" de base.css (pensado para
-   paginas donde son el unico contenido) — ese auto en los lados saca al
-   item del stretch del grid: en vez de llenar la columna, calcula un
-   ancho "fit-content" propio (segun sus <select>, etc.) y lo centra, lo
-   que desborda en mobile. Anular el margin restaura el comportamiento
-   normal (llenar la columna); el margin-top ademas difiere entre las dos
-   clases (2.5rem vs 2rem), asi que sin anularlo tambien una tarjeta
-   arranca mas arriba que la otra — el espacio superior ahora lo pone
-   .layout-agendar-citas una sola vez, parejo para las dos columnas. */
+/* Grid items default to min-width:auto, and base.css gives .seccion-auth/.seccion-panel "margin: Xrem auto", which sizes
+   them fit-content and centers them (overflow on mobile). Resetting the margin makes them fill the column;
+   .layout-agendar-citas sets the top space once for both. */
 .layout-agendar-citas > section {
     min-width: 0;
     max-width: 100%;
@@ -31,10 +22,6 @@
     }
 }
 
-/* --- Selects del formulario: sede y hora --- */
-/* Base.css only styles `.campo input`; the sucursal/hora <select>s need the
-   same visual treatment for parity with the rest of the form. */
-
 .campo select,
 .selector-combo-boton {
     padding: 0.7rem 0.9rem;
@@ -46,9 +33,6 @@
     background-color: var(--surface-alt);
     color: var(--dark-neutral);
     transition: border-color var(--transition-fast);
-    /* Reemplaza la flecha nativa del navegador -inconsistente entre
-       navegadores y ajena al resto del sitio- por la misma flecha dibujada
-       con dos gradientes en 45/135 grados que usa .selector-fecha-boton. */
     appearance: none;
     -webkit-appearance: none;
     background-image:
@@ -63,7 +47,6 @@
 
 .campo select:focus,
 .selector-combo-boton:focus {
-    outline: none;
     border-color: var(--accent-color);
 }
 
@@ -78,8 +61,6 @@
     color: var(--text-muted);
     cursor: not-allowed;
 }
-
-/* --- Citas: acciones y tabla --- */
 
 .btn-secundario {
     display: inline-block;
@@ -113,6 +94,8 @@
 }
 
 .form-cancelar-cita textarea {
+    width: 100%;
+    box-sizing: border-box;
     padding: var(--space-2) 0.7rem;
     border: 1px solid var(--border-subtle);
     border-radius: 0.5rem;
@@ -125,7 +108,6 @@
 }
 
 .form-cancelar-cita textarea:focus {
-    outline: none;
     border-color: var(--accent-color);
 }
 
@@ -206,8 +188,6 @@
     }
 }
 
-/* --- Selector de fecha propio --- */
-
 .selector-fecha {
     position: relative;
 }
@@ -243,7 +223,6 @@
 
 .selector-fecha-boton:focus,
 .selector-fecha-boton[aria-expanded="true"] {
-    outline: none;
     border-color: var(--accent-color);
 }
 

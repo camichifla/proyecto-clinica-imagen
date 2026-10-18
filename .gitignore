@@ -1,3 +1,6 @@
 includes/config.php
 .atl/
 .claude/
+storage/mail.log
+storage/resultados/*
+!storage/resultados/.htaccess

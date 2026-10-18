@@ -1,4 +1,3 @@
-/* --- Resultados: lista de estudios --- */
 
 .lista-resultados {
     display: flex;
@@ -91,4 +90,74 @@
 
 .visor-imagen-cerrar:hover {
     background: rgba(var(--overlay-rgb), 0.8);
+}
+
+.tarjeta-resultado-informe {
+    display: inline-block;
+    margin: 0.5rem 0;
+    font-weight: 600;
+}
+
+.form-nota {
+    margin-bottom: 1rem;
+}
+
+.form-nota textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.nota-clinica {
+    border-left: 3px solid var(--dark-neutral);
+    padding: 0.25rem 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.nota-clinica-meta {
+    font-size: 0.85rem;
+    color: var(--dark-neutral);
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.nota-clinica-texto {
+    margin: 0.25rem 0 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.orden-propia {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    overflow-wrap: anywhere;
+}
+
+.orden-propia h3 {
+    margin: 0 0 0.25rem;
+}
+
+.orden-propia dl {
+    margin: 0.5rem 0 0;
+}
+
+.orden-propia dt {
+    font-weight: 600;
+}
+
+.orden-propia dd {
+    margin: 0 0 0.4rem;
+    overflow-wrap: anywhere;
+}
+
+.tarjeta-resultado,
+@media (width <= 480px) {
+    .tarjeta-resultado {
+        padding: var(--space-3);
+    }
+
+    .tarjeta-resultado-imagenes img {
+        max-width: 100%;
+    }
 }

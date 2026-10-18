@@ -1,10 +1,5 @@
 <?php
-/**
- * Fetches a patient's resultados plus their images, batched into two
- * queries regardless of row count.
- *
- * @return array{0: array<int,array<string,mixed>>, 1: array<int,array<int,array<string,mixed>>>}
- */
+/** @return array{0: array<int,array<string,mixed>>, 1: array<int,array<int,array<string,mixed>>>} resultados and their images, batched in two queries. */
 function obtener_resultados_de_paciente(PDO $db, int $pacienteId): array
 {
     $stmt = $db->prepare('SELECT * FROM resultados WHERE paciente_id = ? ORDER BY fecha_estudio DESC');
@@ -27,11 +22,6 @@ function obtener_resultados_de_paciente(PDO $db, int $pacienteId): array
     return [$resultados, $imagenesPorResultado];
 }
 
-
-/**
- * Maps resultados + their images (as returned by obtener_resultados_de_paciente)
- * to the JSON shape consumed by resultados-propios.js / resultados-paciente.js.
- */
 function resultados_json(array $resultados, array $imagenesPorResultado): array
 {
     return array_map(static function (array $resultado) use ($imagenesPorResultado): array {
@@ -41,6 +31,10 @@ function resultados_json(array $resultados, array $imagenesPorResultado): array
             'nombre_estudio' => $resultado['nombre_estudio'],
             'fecha_estudio'  => $resultado['fecha_estudio'],
             'observaciones'  => $resultado['observaciones'],
+            'informe'        => $resultado['informe_archivo'] !== null ? [
+                'url'             => 'ver-resultado-imagen.php?informe=' . (int) $resultado['id'],
+                'nombre_original' => $resultado['informe_nombre_original'],
+            ] : null,
             'imagenes'       => array_map(static function (array $imagen): array {
                 return [
                     'id'              => (int) $imagen['id'],

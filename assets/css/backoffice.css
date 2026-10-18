@@ -1,0 +1,192 @@
+
+.tarjetas-resumen {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-4);
+    margin: var(--space-4) 0;
+}
+
+.tarjeta-resumen {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-4);
+    background: var(--surface-alt);
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.5rem;
+    color: var(--dark-neutral);
+    text-decoration: none;
+}
+
+a.tarjeta-resumen:hover,
+a.tarjeta-resumen:focus-visible {
+    border-color: var(--accent-color);
+}
+
+.tarjeta-resumen-numero {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+}
+
+.tarjeta-resumen-etiqueta {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.filtros-turnos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--space-3);
+    align-items: end;
+    margin: var(--space-4) 0;
+}
+
+.filtros-turnos .campo {
+    margin: 0;
+    min-width: 0;
+}
+
+/* Misma altura en todos los controles de la fila (los <select> son mas bajos que los <input>). */
+.filtros-turnos input,
+.filtros-turnos select {
+    height: 3rem;
+    box-sizing: border-box;
+}
+
+.filtros-turnos .btn-primary {
+    height: 3rem;
+    padding-block: 0;
+    cursor: pointer;
+}
+
+.filtros-turnos select,
+.accion-turno select,
+.accion-turno textarea {
+    width: 100%;
+    padding: var(--space-2) 0.7rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.5rem;
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    background: var(--surface-alt);
+    color: var(--dark-neutral);
+    box-sizing: border-box;
+}
+
+.acciones-turno {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 200px;
+}
+
+.accion-turno {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin: 0;
+}
+
+.accion-turno label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.accion-turno input[type="date"] {
+    padding: var(--space-2) 0.7rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.5rem;
+    font-family: inherit;
+    background: var(--surface-alt);
+    color: var(--dark-neutral);
+}
+
+.totales-turnos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    margin: var(--space-3) 0;
+    padding: 0;
+    list-style: none;
+}
+
+.barra-turnos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    align-items: center;
+    justify-content: space-between;
+}
+
+@media (max-width: 480px) {
+    .filtros-turnos {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* Modo tarjeta: sin el ancho minimo la fila entra en la pantalla. */
+    .acciones-turno {
+        min-width: 0;
+    }
+
+    #turnos-lista .tabla-datos td:last-child {
+        flex-direction: column;
+    }
+}
+
+@media print {
+    header,
+    .filtros-turnos,
+    .barra-turnos button,
+    #turnos-lista .tabla-datos th:last-child,
+    #turnos-lista .tabla-datos td:last-child {
+        display: none !important;
+    }
+}
+
+.acciones-formulario {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+}
+
+.seccion-panel form:not([class]) .acciones-formulario .btn-primary {
+    align-self: auto;
+}
+
+.fila-horario {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: var(--space-2);
+    align-items: center;
+    margin-bottom: var(--space-2);
+}
+
+.fila-horario select,
+.fila-horario input {
+    width: 100%;
+    min-width: 0;
+    padding: var(--space-2) 0.7rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.5rem;
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    background: var(--surface-alt);
+    color: var(--dark-neutral);
+    box-sizing: border-box;
+}
+
+#campo-horarios > .btn-secundario {
+    align-self: flex-start;
+    margin-top: var(--space-2);
+}
+
+@media (max-width: 480px) {
+    .fila-horario {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .fila-horario select,
+    .fila-horario .btn-secundario {
+        grid-column: 1 / -1;
+    }
+}

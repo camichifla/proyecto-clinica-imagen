@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     [$erroresReserva, $sucursalId, $profesionalId, $marcaTiempo, $estudio] =
-        validar_reserva($valores, ESTUDIOS_BASE, $fechaMin, $fechaMax, RANGO_MESES);
+        validar_reserva($valores, estudios_activos(), $fechaMin, $fechaMax, RANGO_MESES);
     $errores = array_merge($errores, $erroresReserva);
 
     if ($errores) {
@@ -204,14 +204,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         )->execute(array_values($columnas));
 
         db()->commit();
+        registrar_evento('cita_crear', 'cita=' . $citaId);
         echo json_encode([
             'ok'       => true,
-            'redirect' => 'agendar-cita-medico.html?ok=' . ($emailPendiente !== null ? 'pendiente' : '1'),
+            'redirect' => 'agendar-cita-medico.html?ok=' . ($emailPendiente !== null ? 'pendiente' : '1') . '&codigo=' . codigo_cita($citaId),
         ], JSON_UNESCAPED_UNICODE);
         exit;
     } catch (Throwable $e) {
         if (db()->inTransaction()) {
             db()->rollBack();
+        }
+        if (es_hora_ocupada($e)) {
+            hora_ocupada_json($e);
         }
         echo json_encode(['ok' => false, 'errores' => ['general' => 'No se pudo guardar la cita. Intenta nuevamente.']], JSON_UNESCAPED_UNICODE);
         exit;
@@ -230,4 +234,4 @@ echo json_encode([
         'apellido' => $p['apellido'],
         'ci'       => $p['ci'],
     ], $pacientesConectados),
-] + catalogo_reserva(), JSON_UNESCAPED_UNICODE);
+] + catalogo_reserva(estudios_activos()), JSON_UNESCAPED_UNICODE);

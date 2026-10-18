@@ -1,5 +1,4 @@
 <?php
-// includes/auth_guard.php — JSON role gate layered on top of session_bootstrap.php.
 // Depends on usuario_actual() from session_bootstrap.php; require that first.
 
 function requerir_rol_json(array $roles): array

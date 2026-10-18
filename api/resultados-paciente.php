@@ -4,6 +4,7 @@ require_once __DIR__ . '/../includes/auth_guard.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/resultados.php';
 require_once __DIR__ . '/../includes/estudios.php';
+require_once __DIR__ . '/../includes/notas.php';
 require_once __DIR__ . '/../includes/pacientes_medico.php';
 require_once __DIR__ . '/../includes/pacientes_profesional.php';
 
@@ -57,6 +58,11 @@ $respuesta = [
     'resultados' => resultados_json($resultados, $imagenesPorResultado),
 ];
 
+// Clinical notes: medico and profesional only (the administrator never sees them).
+if ($usuario['rol'] !== 'administrador') {
+    $respuesta['notas'] = notas_de_paciente(db(), (int) $paciente['id']);
+}
+
 if ($usuario['rol'] === 'profesional') {
     $stmtCitas = db()->prepare(
         'SELECT c.*, s.nombre AS sucursal_nombre
@@ -71,7 +77,7 @@ if ($usuario['rol'] === 'profesional') {
         return [
             'fecha_hora_solicitada' => $cita['fecha_hora_solicitada'],
             'sucursal_nombre'       => $cita['sucursal_nombre'],
-            'estudio_label'         => ESTUDIOS[$cita['estudio']] ?? $cita['estudio'],
+            'estudio_label'         => estudios_etiquetas()[$cita['estudio']] ?? $cita['estudio'],
             'estado'                => $cita['estado'],
             'estado_label'          => ESTADOS_CITA[$cita['estado']] ?? $cita['estado'],
             'fecha_hora_confirmada' => $cita['fecha_hora_confirmada'],

@@ -1,5 +1,3 @@
-// Render compartido de resultados (tarjetas con imagenes), usado por
-// resultados-propios.js (paciente) y resultados-paciente.js (staff).
 function crearTarjetaResultado(resultado) {
     const articulo = document.createElement('article');
     articulo.className = 'tarjeta-resultado';
@@ -24,6 +22,16 @@ function crearTarjetaResultado(resultado) {
             p.appendChild(document.createTextNode(linea));
         });
         articulo.appendChild(p);
+    }
+
+    if (resultado.informe) {
+        const enlace = document.createElement('a');
+        enlace.className = 'tarjeta-resultado-informe';
+        enlace.href = resultado.informe.url;
+        enlace.target = '_blank';
+        enlace.rel = 'noopener';
+        enlace.textContent = 'Ver informe (PDF)';
+        articulo.appendChild(enlace);
     }
 
     if (resultado.imagenes.length) {

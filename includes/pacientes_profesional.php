@@ -2,9 +2,6 @@
 // includes/pacientes_profesional.php — "pacientes con los que este
 // profesional tiene una relacion de atencion real (al menos una cita)".
 
-/**
- * @return array<int,array{id:int,nombre:string,apellido:string,ci:string}>
- */
 function pacientes_de_profesional(int $profesionalId): array
 {
     $stmt = db()->prepare(
@@ -18,9 +15,6 @@ function pacientes_de_profesional(int $profesionalId): array
     return $stmt->fetchAll();
 }
 
-/**
- * @return array{id:int,nombre:string,apellido:string,ci:string}|false
- */
 function paciente_de_profesional(int $profesionalId, int $pacienteId)
 {
     $stmt = db()->prepare(

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sucursales - Clinica Imagen</title>
+  <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
+  <link rel="stylesheet" href="./assets/css/styles.css">
+  <link rel="stylesheet" href="./assets/css/backoffice.css">
+</head>
+
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <header>
+    <div class="logo">
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+    </div>
+    <div class="user">
+      <details class="menu-usuario">
+        <summary class="menu-usuario-toggle" aria-label="Menu de usuario">
+          <span class="avatar" aria-hidden="true"></span>
+        </summary>
+        <div class="menu-usuario-panel">
+          <span class="user-nombre"></span>
+          <ul class="menu-usuario-lista"></ul>
+          <form method="post" action="logout.php" class="form-logout">
+            <input type="hidden" name="csrf" value="">
+            <button type="submit" class="btn-logout">Cerrar sesion</button>
+          </form>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main id="contenido">
+    <section class="seccion-panel">
+      <h1>Sucursales</h1>
+      <p class="campo-hint">Una sede inactiva no se ofrece para agendar ni aparece en el mapa; las citas existentes conservan su nombre.</p>
+
+      <p class="aviso-exito" data-mensaje role="status" hidden></p>
+      <p class="aviso-error" data-mensaje-error role="alert" hidden></p>
+
+      <div id="sucursales-lista"></div>
+    </section>
+
+    <section class="seccion-panel">
+      <h2 id="sucursal-form-titulo">Nueva sede</h2>
+
+      <form id="form-sucursal" novalidate>
+        <input type="hidden" name="csrf" value="">
+        <input type="hidden" name="accion" value="guardar">
+        <input type="hidden" name="id" value="">
+
+        <div class="campo">
+          <label for="sucursal-nombre">Nombre</label>
+          <input type="text" id="sucursal-nombre" name="nombre" maxlength="80" autocomplete="off">
+        </div>
+
+        <div class="campo">
+          <label for="sucursal-direccion">Direccion</label>
+          <input type="text" id="sucursal-direccion" name="direccion" maxlength="160" autocomplete="off">
+        </div>
+
+        <div class="campo">
+          <label for="sucursal-equipamiento">Equipamiento</label>
+          <input type="text" id="sucursal-equipamiento" name="equipamiento" maxlength="255" autocomplete="off">
+          <p class="campo-hint">Descripcion breve del equipamiento de la sede. Se muestra en el mapa publico.</p>
+        </div>
+
+        <div class="campo-fila">
+          <div class="campo">
+            <label for="sucursal-latitud">Latitud</label>
+            <input type="text" id="sucursal-latitud" name="latitud" inputmode="decimal" autocomplete="off" placeholder="-34.9011">
+          </div>
+          <div class="campo">
+            <label for="sucursal-longitud">Longitud</label>
+            <input type="text" id="sucursal-longitud" name="longitud" inputmode="decimal" autocomplete="off" placeholder="-56.1645">
+          </div>
+        </div>
+        <p class="campo-hint">Sin coordenadas, la sede figura en la lista pero no tiene pin en el mapa.</p>
+
+        <div class="check-grid">
+          <label><input type="checkbox" name="activo" value="1" checked> Sede activa</label>
+        </div>
+
+        <div class="campo">
+          <label id="sucursal-estudios-label">Estudios que realiza</label>
+          <div class="check-grid" id="sucursal-estudios" role="group" aria-labelledby="sucursal-estudios-label"></div>
+          <p class="campo-hint">Si no marcas ninguno, la sede realiza todos los estudios.</p>
+        </div>
+
+        <div class="campo" id="campo-horarios">
+          <label id="sucursal-horarios-label">Horarios de atencion</label>
+          <div id="sucursal-horarios" role="group" aria-labelledby="sucursal-horarios-label"></div>
+          <p class="campo-hint">Un dia sin horarios es un dia cerrado. Para turno partido, agrega dos horarios el mismo dia. Las horas se ofrecen cada 45 minutos desde la apertura.</p>
+          <button type="button" class="btn-secundario" id="horario-agregar">Agregar horario</button>
+        </div>
+
+        <div class="acciones-formulario">
+          <button type="submit" class="btn-primary">Guardar</button>
+          <button type="button" class="btn-secundario" id="sucursal-nueva" hidden>Cancelar edicion</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <nav aria-label="Pie de pagina">
+      <a href="index.html">Inicio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+    <p>&copy; Clinica Imagen</p>
+  </footer>
+
+  <script src="assets/js/sesion.js" defer></script>
+  <script src="assets/js/form-api.js" defer></script>
+  <script src="assets/js/gestion-sucursales.js" defer></script>
+</body>
+
+</html>

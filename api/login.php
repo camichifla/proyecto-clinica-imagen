@@ -4,10 +4,22 @@ require_once __DIR__ . '/../includes/db.php';
 
 require_post_json();
 
+const MAX_FALLOS_EMAIL = 5;
+const MAX_FALLOS_IP    = 20;
+const VENTANA_MINUTOS  = 15;
 const DUMMY_HASH = '$2y$10$frrN.cZWEHqFbIH6xRp4R.WkE5mQDxy4sE35jd6QagOhrVYweahrS';
 
 $email    = trim((string) ($_POST['email'] ?? ''));
 $password = (string) ($_POST['password'] ?? '');
+
+// El limite por email cuenta solo los fallos desde esta IP: un tercero no puede bloquear al duenio desde otra.
+$ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+if (demasiados_eventos('login_fallo', 'email', $email, MAX_FALLOS_EMAIL, VENTANA_MINUTOS, $ip)
+    || demasiados_eventos('login_fallo', 'ip', $ip, MAX_FALLOS_IP, VENTANA_MINUTOS)) {
+    http_response_code(429);
+    echo json_encode(['ok' => false, 'error' => 'Demasiados intentos. Proba de nuevo en 15 minutos.'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
 
 $stmt = db()->prepare('SELECT id, password_hash, rol, ref_id, verificado, activo FROM cuentas WHERE email = ?');
 $stmt->execute([$email]);
@@ -26,6 +38,7 @@ if (!$cuenta) {
 }
 
 if ($error !== null) {
+    registrar_evento('login_fallo', null, $email);
     http_response_code(422);
     echo json_encode(['ok' => false, 'error' => $error], JSON_UNESCAPED_UNICODE);
     exit;
@@ -56,4 +69,6 @@ $_SESSION['nombre']        = $nombre;
 $_SESSION['ultimo_acceso'] = time();
 $_SESSION['csrf']          = bin2hex(random_bytes(32));
 
-echo json_encode(['ok' => true, 'redirect' => 'index.html'], JSON_UNESCAPED_UNICODE);
+registrar_evento('login_ok', 'cuenta=' . $cuenta['id'], $email);
+
+echo json_encode(['ok' => true, 'redirect' => in_array($cuenta['rol'], ['administrador', 'recepcionista'], true) ? 'panel.html' : 'index.html'], JSON_UNESCAPED_UNICODE);

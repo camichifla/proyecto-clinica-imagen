@@ -1,11 +1,11 @@
 <?php
-// includes/resultados_upload.php — shared image-upload validation for a
-// resultado's images, used by both enviar-resultados.php (administrador,
-// any patient) and cargar-resultados.php (profesional, own patients only).
-// Only the patient-scoping/cita-ownership logic differs between those two
-// pages; the upload mechanics below are identical, so they live here once.
+// Only the patient-scoping/cita-ownership logic differs between the two roles; the upload mechanics below are identical, so they live here once.
 
-const MAX_TAMANIO_IMAGEN = 10 * 1024 * 1024; // 10MB por archivo
+require_once __DIR__ . '/estudios.php';
+require_once __DIR__ . '/mailer.php';
+
+const MAX_TAMANIO_IMAGEN = 10 * 1024 * 1024;
+const MAX_TAMANIO_INFORME = 10 * 1024 * 1024; // 10MB, un PDF por resultado
 
 // Canonical extension derived from the REAL sniffed MIME type — never the
 // client-reported Content-Type and never the original filename's extension.
@@ -17,13 +17,7 @@ const MIME_A_EXTENSION = [
 
 const STORAGE_RESULTADOS_DIR = __DIR__ . '/../storage/resultados';
 
-/**
- * Reshapes PHP's parallel-array $_FILES['imagenes'] structure into a list
- * of per-file associative arrays. Entries with UPLOAD_ERR_NO_FILE (an
- * empty file input slot) are dropped rather than treated as a real file.
- *
- * @return array<int,array{name:string,type:string,tmp_name:string,error:int,size:int}>
- */
+/** Reshapes PHP's parallel-array $_FILES['imagenes'] into per-file arrays; UPLOAD_ERR_NO_FILE slots are dropped. */
 function normalizar_archivos(?array $archivos): array
 {
     if (!$archivos || !isset($archivos['name']) || !is_array($archivos['name'])) {
@@ -46,11 +40,12 @@ function normalizar_archivos(?array $archivos): array
 }
 
 /**
- * Validates one normalized upload entry. Returns an error message, or
- * null when valid — in which case $extension is filled with the
- * canonical extension for the sniffed MIME type.
+ * Validates against a MIME allowlist using the real sniffed type, never the client's. Returns an error message,
+ * or null when valid.
+ *
+ * @param array<string,string> $permitidos mime => extension
  */
-function validar_imagen(array $archivo, ?string &$extension): ?string
+function validar_subida(array $archivo, int $maxBytes, array $permitidos, string $mensajeTipo, ?string &$extension): ?string
 {
     if ($archivo['error'] !== UPLOAD_ERR_OK) {
         return 'Error al subir "' . $archivo['name'] . '".';
@@ -58,8 +53,8 @@ function validar_imagen(array $archivo, ?string &$extension): ?string
     if (!is_uploaded_file($archivo['tmp_name'])) {
         return 'Error al subir "' . $archivo['name'] . '".';
     }
-    if ($archivo['size'] > MAX_TAMANIO_IMAGEN) {
-        return '"' . $archivo['name'] . '" supera el tamano maximo de 10MB.';
+    if ($archivo['size'] > $maxBytes) {
+        return '"' . $archivo['name'] . '" supera el tamano maximo de ' . intdiv($maxBytes, 1024 * 1024) . 'MB.';
     }
 
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
@@ -68,24 +63,30 @@ function validar_imagen(array $archivo, ?string &$extension): ?string
         finfo_close($finfo);
     }
 
-    if (!$mime || !isset(MIME_A_EXTENSION[$mime])) {
-        return '"' . $archivo['name'] . '" no es una imagen valida (se aceptan JPG, PNG o WEBP).';
+    if (!$mime || !isset($permitidos[$mime])) {
+        return '"' . $archivo['name'] . '" ' . $mensajeTipo;
     }
 
-    $extension = MIME_A_EXTENSION[$mime];
+    $extension = $permitidos[$mime];
     return null;
 }
 
+function validar_imagen(array $archivo, ?string &$extension): ?string
+{
+    return validar_subida($archivo, MAX_TAMANIO_IMAGEN, MIME_A_EXTENSION, 'no es una imagen valida (se aceptan JPG, PNG o WEBP).', $extension);
+}
+
+function validar_informe(array $archivo, ?string &$extension): ?string
+{
+    return validar_subida($archivo, MAX_TAMANIO_INFORME, ['application/pdf' => 'pdf'], 'no es un PDF valido.', $extension);
+}
+
 /**
- * Inserts a resultado plus its already-validated images in one transaction
- * (INSERT resultados, move each file, INSERT resultado_imagenes). On any
- * failure it rolls back, unlinks every file already moved in this attempt
- * (no orphaned files), and rethrows — the caller only needs a try/catch to
- * turn that into a user-facing error. Identical between cargar-resultados.php
- * (profesional) and enviar-resultados.php (administrador); only the
- * paciente/cita ownership check before this call differs between them.
+ * Inserts a resultado plus its validated images in one transaction. On failure it rolls back, unlinks files already
+ * moved (no orphans) and rethrows.
  *
  * @param array<int,array{tmp_name:string,name:string,extension:string}> $archivosValidados
+ * @param ?array{tmp_name:string,name:string,extension:string}            $informe  optional PDF report
  */
 function guardar_resultado_con_imagenes(
     int $pacienteId,
@@ -94,18 +95,30 @@ function guardar_resultado_con_imagenes(
     string $fechaEstudio,
     ?string $observaciones,
     int $creadoPor,
-    array $archivosValidados
+    array $archivosValidados,
+    ?array $informe = null
 ): int {
     $archivosMovidos = [];
     try {
         db()->beginTransaction();
 
+        $informeArchivo  = $informe ? bin2hex(random_bytes(16)) . '.' . $informe['extension'] : null;
+        $informeOriginal = $informe ? mb_substr(basename($informe['name']), 0, 255) : null;
+
         $stmt = db()->prepare(
-            'INSERT INTO resultados (paciente_id, cita_id, nombre_estudio, fecha_estudio, observaciones, creado_por)
-             VALUES (?, ?, ?, ?, ?, ?)'
+            'INSERT INTO resultados (paciente_id, cita_id, nombre_estudio, fecha_estudio, observaciones, informe_archivo, informe_nombre_original, creado_por)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
         );
-        $stmt->execute([$pacienteId, $citaId, $nombreEstudio, $fechaEstudio, $observaciones, $creadoPor]);
+        $stmt->execute([$pacienteId, $citaId, $nombreEstudio, $fechaEstudio, $observaciones, $informeArchivo, $informeOriginal, $creadoPor]);
         $resultadoId = (int) db()->lastInsertId();
+
+        if ($informe) {
+            $destinoInforme = STORAGE_RESULTADOS_DIR . '/' . $informeArchivo;
+            if (!move_uploaded_file($informe['tmp_name'], $destinoInforme)) {
+                throw new RuntimeException('No se pudo guardar el informe.');
+            }
+            $archivosMovidos[] = $destinoInforme;
+        }
 
         $stmtImagen = db()->prepare(
             'INSERT INTO resultado_imagenes (resultado_id, nombre_archivo, nombre_original)
@@ -127,6 +140,7 @@ function guardar_resultado_con_imagenes(
         }
 
         db()->commit();
+        registrar_evento('resultado_carga', 'resultado=' . $resultadoId);
         return $resultadoId;
     } catch (Throwable $e) {
         if (db()->inTransaction()) {
@@ -142,9 +156,7 @@ function guardar_resultado_con_imagenes(
 }
 
 /**
- * Validates a POST of the "cargar resultado" form, saves it and echoes the
- * JSON response. Shared by cargar-resultados.php (profesional) and
- * enviar-resultados.php (administrador). The caller does the csrf_check.
+ * Validates and saves a POST of the "cargar resultado" form and echoes the JSON. The caller does the csrf_check.
  *
  * @param callable(int):bool $pacienteValido  whether the caller may use this paciente
  * @param ?int               $profesionalId   when set, the cita must belong to this profesional too
@@ -212,8 +224,24 @@ function procesar_post_resultado(array $usuario, callable $pacienteValido, ?int 
 
     $archivosValidados = [];
     $archivos = normalizar_archivos($_FILES['imagenes'] ?? null);
-    if (!$archivos) {
-        $errores['imagenes'] = 'Subi al menos una imagen.';
+
+    // Un solo PDF opcional (input name="informe"): se envuelve al formato de lista.
+    $informe = null;
+    $informes = isset($_FILES['informe']) && !is_array($_FILES['informe']['name'] ?? null)
+        ? normalizar_archivos(array_map(static fn ($v) => [$v], $_FILES['informe']))
+        : [];
+    if ($informes) {
+        $extensionInforme = null;
+        $errorInforme = validar_informe($informes[0], $extensionInforme);
+        if ($errorInforme !== null) {
+            $errores['informe'] = $errorInforme;
+        } else {
+            $informe = $informes[0] + ['extension' => $extensionInforme];
+        }
+    }
+
+    if (!$archivos && !$informe && !isset($errores['informe'])) {
+        $errores['imagenes'] = 'Subi al menos una imagen o un informe PDF.';
     } else {
         foreach ($archivos as $archivo) {
             $extension   = null;
@@ -240,25 +268,37 @@ function procesar_post_resultado(array $usuario, callable $pacienteValido, ?int 
             $fechaEstudio,
             $observaciones !== '' ? $observaciones : null,
             $usuario['cuenta_id'],
-            $archivosValidados
+            $archivosValidados,
+            $informe
         );
+        notificar_resultado_listo($pacienteId);
         echo json_encode(['ok' => true, 'redirect' => $redirectBase . '?ok=' . $resultadoId], JSON_UNESCAPED_UNICODE);
     } catch (Throwable $e) {
         echo json_encode(['ok' => false, 'errores' => ['general' => 'No se pudo guardar el resultado. Intenta nuevamente.']], JSON_UNESCAPED_UNICODE);
     }
 }
 
-/**
- * Groups confirmed-cita rows (id, paciente_id, fecha_hora_solicitada, estudio)
- * into the [paciente_id => [{id,label}]] map the upload forms consume.
- */
+/** One "result ready" email per saved resultado. Failures are swallowed: the resultado is already committed. */
+function notificar_resultado_listo(int $pacienteId): void
+{
+    try {
+        $email = email_notificacion_cita($pacienteId, null);
+        if ($email !== null) {
+            enviar_aviso_resultado($email, APP_URL . '/ver-resultados.html');
+        }
+    } catch (Throwable $e) {
+        error_log('notificar_resultado_listo: ' . $e->getMessage());
+    }
+}
+
+/** Confirmed-cita rows to the [paciente_id => [{id,label}]] map the upload forms consume. */
 function citas_por_paciente(array $filas): array
 {
     $porPaciente = [];
     foreach ($filas as $cita) {
         $fecha    = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $cita['fecha_hora_solicitada']);
         $etiqueta = ($fecha ? $fecha->format('d/m/Y H:i') : $cita['fecha_hora_solicitada'])
-            . ' - ' . (ESTUDIOS[$cita['estudio']] ?? $cita['estudio']);
+            . ' - ' . (estudios_etiquetas()[$cita['estudio']] ?? $cita['estudio']);
         $porPaciente[(string) $cita['paciente_id']][] = [
             'id'    => (int) $cita['id'],
             'label' => $etiqueta,

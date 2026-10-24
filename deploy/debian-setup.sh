@@ -73,6 +73,8 @@ SQL
 fi
 
 chown -R root:root "$DEST"
+# rsync -a copies the source root's mode; the operator clones into a 0700 mktemp dir, which locked Apache out.
+chmod 755 "$DEST"
 chown root:www-data "$DEST/includes/config.php"
 chown -R www-data:www-data "$DEST/storage"
 

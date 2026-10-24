@@ -32,8 +32,9 @@ apt-get install -y apache2 mariadb-server libapache2-mod-php php-cli php-mysql p
 timedatectl set-timezone America/Montevideo
 systemctl restart mariadb
 
+# --chmod: the clone may come from a 0700 mktemp dir or a restrictive umask; Apache must read every file.
 mkdir -p "$DEST"
-rsync -a \
+rsync -a --chmod=D755,F644 \
   --exclude='.git' --exclude='.claude' --exclude='.atl' \
   --exclude='includes/config.php' --exclude='storage/mail.log' \
   --include='storage/resultados/.htaccess' --exclude='storage/resultados/*' \

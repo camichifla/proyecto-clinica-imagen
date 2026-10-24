@@ -82,7 +82,7 @@
     border: none;
     border-radius: 50%;
     background: rgba(var(--overlay-rgb), 0.6);
-    color: var(--surface);
+    color: var(--on-brand);
     font-size: var(--font-size-xl);
     line-height: 1;
     cursor: pointer;
@@ -185,7 +185,7 @@
 }
 
 .orden-propia {
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-subtle);
     border-radius: 6px;
     padding: 0.75rem;
     margin-bottom: 0.75rem;

@@ -316,7 +316,7 @@
 
 .calendario-dia-seleccionado {
     background: var(--accent-color);
-    color: var(--surface);
+    color: var(--on-brand);
 }
 
 .calendario-dia-seleccionado:hover:not(:disabled) {

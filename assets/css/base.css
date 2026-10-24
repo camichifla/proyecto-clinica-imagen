@@ -25,7 +25,7 @@ header {
     gap: var(--space-4);
     padding: var(--space-4) var(--space-6);
     background: var(--gradient-brand);
-    color: var(--surface);
+    color: var(--on-brand);
     position: sticky;
     top: 0;
     z-index: 50;
@@ -48,7 +48,7 @@ header {
     width: 2.75rem;
     height: 2.75rem;
     border-radius: 50%;
-    border: 2px solid var(--surface);
+    border: 2px solid var(--on-brand);
     color: var(--text-secondary);
     background-color: var(--border-subtle);
     background-repeat: no-repeat;
@@ -81,7 +81,7 @@ header {
 }
 
 header :focus-visible {
-    outline-color: var(--surface);
+    outline-color: var(--on-brand);
 }
 
 .buscador-combo-lista li[aria-selected="true"] {
@@ -96,7 +96,7 @@ header :focus-visible {
 }
 
 .nav-publica a {
-    color: var(--surface);
+    color: var(--on-brand);
     text-decoration: none;
     font-weight: var(--font-weight-semibold);
     padding: 0.25rem 0;
@@ -105,7 +105,7 @@ header :focus-visible {
 
 .nav-publica a:hover,
 .nav-publica a[aria-current="page"] {
-    border-bottom-color: var(--surface);
+    border-bottom-color: var(--on-brand);
 }
 
 footer nav {
@@ -181,7 +181,7 @@ footer {
     display: inline-block;
     border: none;
     border-radius: 999px;
-    color: var(--surface);
+    color: var(--on-brand);
     font-weight: var(--font-weight-semibold);
     background: var(--accent-color);
     padding: 0.95rem 1.45rem;
@@ -452,7 +452,7 @@ select.selector-combo {
 }
 
 .user-nombre {
-    color: var(--surface);
+    color: var(--on-brand);
     font-weight: var(--font-weight-semibold);
 }
 
@@ -462,8 +462,8 @@ select.selector-combo {
 
 .btn-logout {
     background: transparent;
-    border: 1px solid var(--surface);
-    color: var(--surface);
+    border: 1px solid var(--on-brand);
+    color: var(--on-brand);
     border-radius: 999px;
     padding: 0.4rem 0.9rem;
     cursor: pointer;
@@ -474,6 +474,29 @@ select.selector-combo {
 
 .btn-logout:hover {
     background: rgba(var(--white-rgb), 0.15);
+}
+
+/* Theme toggle, inserted into every header by assets/js/tema.js. */
+.tema-toggle {
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-left: auto;
+    border: 1px solid var(--on-brand);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--on-brand);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.tema-toggle:hover {
+    background: rgba(var(--white-rgb), 0.15);
+}
+
+.tema-toggle + .user {
+    margin-left: 0;
 }
 
 .menu-usuario {
@@ -672,17 +695,27 @@ select.selector-combo {
 @media (width <= 640px) {
     header {
         position: static;
-        gap: var(--space-2) var(--space-4);
+        gap: var(--space-2) var(--space-3);
         padding: var(--space-3) var(--space-4);
     }
 
     .logo img {
-        height: 3.25rem;
+        height: 3rem;
     }
 
     .nav-publica {
         order: 3;
         width: 100%;
+    }
+
+    /* Logo, theme toggle and login button must share the first row. */
+    .user .btn-primary {
+        padding: 0.6rem 1rem;
+    }
+
+    .tema-toggle {
+        width: 2.4rem;
+        height: 2.4rem;
     }
 }
 

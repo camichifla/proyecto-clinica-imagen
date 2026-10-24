@@ -25,7 +25,13 @@
     --overlay-rgb: 0, 0, 0;
     --white-rgb: 255, 255, 255;
 
-    --gradient-brand: linear-gradient(135deg, var(--dark-neutral) 0%, var(--accent-secondary) 100%);
+    /* Brand colors and white-on-brand stay the same in both themes. */
+    --on-brand: #ffffff;
+    --brand-dark: #1D3557;
+    --brand-light: #457B9D;
+    --gradient-brand: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-light) 100%);
+
+    color-scheme: light;
 
     --font-family: 'Poppins', sans-serif;
     --font-size-xs: 0.75rem;
@@ -51,4 +57,28 @@
     --radius-sm: 1rem;
     --max-width: 1400px;
     --transition-fast: 0.2s ease;
+}
+
+/* Set by assets/js/tema.js from the saved choice or the system preference.
+   Screen only: printed reports always use the light palette. */
+@media screen {
+    :root[data-theme="dark"] {
+        color-scheme: dark;
+
+        --background: linear-gradient(145deg, #0b1626 0%, #0f1d30 40%, #141a24 100%);
+
+        --surface: #172234;
+        --surface-alt: #1e2b40;
+        --dark-neutral: #e2e8f0;
+        --light-neutral: #253449;
+        --text-secondary: #a3b1c2;
+        --text-muted: #7b8a9c;
+        --heading-muted: #cbd5e1;
+        --border-subtle: #2e3d53;
+
+        --accent-secondary: #8cc0e0;
+
+        --color-success: #5fd394;
+        --color-danger: #f78b84;
+    }
 }

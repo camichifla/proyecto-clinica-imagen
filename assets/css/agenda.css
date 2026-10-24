@@ -25,7 +25,7 @@
 
 .agenda-toggle-activa {
     background: var(--accent-color);
-    color: var(--surface);
+    color: var(--on-brand);
 }
 
 .agenda-nav {

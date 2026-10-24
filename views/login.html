@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Iniciar sesion - Clinica Imagen</title>
+  <title>Iniciar sesión - Clínica Imagen</title>
   <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
   <link rel="stylesheet" href="./assets/css/styles.css">
 </head>
@@ -13,18 +13,18 @@
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
   <header>
     <div class="logo">
-      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clínica Imagen"></a>
     </div>
   </header>
 
   <main id="contenido">
     <section class="seccion-auth">
-      <h1>Iniciar sesion</h1>
+      <h1>Iniciar sesión</h1>
 
-      <p class="campo-error" data-aviso="expirado" hidden>Tu sesion expiro por inactividad. Inicia sesion nuevamente.</p>
-      <p class="aviso-exito" data-aviso="verificado" hidden>Cuenta verificada. Ya podes iniciar sesion.</p>
+      <p class="campo-error" data-aviso="expirado" hidden>Tu sesión expiró por inactividad. Iniciá sesión nuevamente.</p>
+      <p class="aviso-exito" data-aviso="verificado" hidden>Cuenta verificada. Ya podés iniciar sesión.</p>
       <p class="campo-error" data-general hidden></p>
-      <p data-aviso="reenviar" hidden><a href="verify.html">Reenviar enlace de verificacion</a></p>
+      <p data-aviso="reenviar" hidden><a href="verify.html">Reenviar enlace de verificación</a></p>
 
       <form method="post" action="api/login.php" data-api="api/login.php" novalidate>
         <input type="hidden" name="csrf" value="">
@@ -33,24 +33,24 @@
           <input type="email" id="email" name="email" required>
         </div>
         <div class="campo">
-          <label for="password">Contrasena</label>
+          <label for="password">Contraseña</label>
           <input type="password" id="password" name="password" required>
         </div>
         <button type="submit" class="btn-primary">Ingresar</button>
       </form>
 
-      <p><a href="reset-request.html">¿Olvidaste tu contrasena?</a></p>
-      <p>¿No tenes cuenta? <a href="register.html">Registrate</a></p>
+      <p><a href="reset-request.html">¿Olvidaste tu contraseña?</a></p>
+      <p>¿No tenés cuenta? <a href="register.html">Registrate</a></p>
     </section>
   </main>
 
   <footer>
-    <nav aria-label="Pie de pagina">
+    <nav aria-label="Pie de página">
       <a href="index.html">Inicio</a>
       <a href="servicios.html">Servicios</a>
       <a href="contacto.html">Contacto</a>
     </nav>
-    <p>&copy; Clinica Imagen</p>
+    <p>&copy; Clínica Imagen</p>
   </footer>
 
   <script src="assets/js/sesion.js" data-modo="publico" defer></script>

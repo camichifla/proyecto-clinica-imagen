@@ -40,7 +40,7 @@
         const tr = document.createElement('tr');
         tr.appendChild(celda('Clave', estudio.clave));
         tr.appendChild(celda('Etiqueta', estudio.etiqueta));
-        tr.appendChild(celda('Agendable por el paciente', estudio.autoagendable ? 'Si' : 'No'));
+        tr.appendChild(celda('Agendable por el paciente', estudio.autoagendable ? 'Sí' : 'No'));
         tr.appendChild(celda('Estado', estudio.activo ? 'Activo' : 'Inactivo'));
         const td = document.createElement('td');
         td.dataset.label = 'Acciones';

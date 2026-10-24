@@ -34,12 +34,12 @@ function turnos_propios_de(int $id): array
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check($_POST['csrf'] ?? null);
     if (($_POST['accion'] ?? '') !== 'guardar') {
-        respuesta_profesionales(400, ['ok' => false, 'error' => 'Accion invalida.']);
+        respuesta_profesionales(400, ['ok' => false, 'error' => 'Acción inválida.']);
     }
 
     $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
     if (!$id) {
-        respuesta_profesionales(400, ['ok' => false, 'error' => 'Profesional invalido.']);
+        respuesta_profesionales(400, ['ok' => false, 'error' => 'Profesional inválido.']);
     }
     $stmt = db()->prepare('SELECT 1 FROM profesionales WHERE id = ?');
     $stmt->execute([$id]);
@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $sucursales = is_array($enviadas) ? array_values(array_unique(array_map('strval', $enviadas))) : [];
     $validas    = array_map('strval', db()->query('SELECT id FROM sucursales')->fetchAll(PDO::FETCH_COLUMN));
     if (array_diff($sucursales, $validas)) {
-        $errores['sucursales'] = 'Elegi sedes validas.';
+        $errores['sucursales'] = 'Elegí sedes válidas.';
     }
 
     // Estudios activos; los inactivos que ya tenia se pueden conservar pero no sumar.
@@ -64,9 +64,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         columna_de('SELECT especializacion FROM profesional_especializacion WHERE profesional_id = ?', $id)
     );
     if (!$claves) {
-        $errores['especializacion'] = 'Elegi al menos una especializacion.';
+        $errores['especializacion'] = 'Elegí al menos una especialización.';
     } elseif (array_diff($claves, $permitidos)) {
-        $errores['especializacion'] = 'Elegi especializaciones validas.';
+        $errores['especializacion'] = 'Elegí especializaciones válidas.';
     }
 
     $turnos = validar_turnos($_POST['horarios'] ?? '');

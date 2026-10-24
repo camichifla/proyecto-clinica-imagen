@@ -164,7 +164,7 @@ function poblarPacientes(datalist, pacientes, inputBuscar) {
     if (!pacientes.length && inputBuscar) {
         const mensaje = document.createElement('p');
         mensaje.className = 'campo-error';
-        mensaje.textContent = inputBuscar.dataset.mensajeSinPacientes || 'Todavia no hay pacientes registrados.';
+        mensaje.textContent = inputBuscar.dataset.mensajeSinPacientes || 'Todavía no hay pacientes registrados.';
         inputBuscar.closest('.campo').appendChild(mensaje);
     }
 }
@@ -207,14 +207,14 @@ function poblarProfesionales(select, profesionales, seleccionado = '', etiquetas
     }
 }
 
-const DIAS_SEMANA = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'];
+const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
 function filaHorario(turno) {
     const fila = document.createElement('div');
     fila.className = 'fila-horario';
 
     const dia = document.createElement('select');
-    dia.setAttribute('aria-label', 'Dia');
+    dia.setAttribute('aria-label', 'Día');
     DIAS_SEMANA.forEach((nombre, i) => {
         const opcion = document.createElement('option');
         opcion.value = String(i + 1);

@@ -50,13 +50,13 @@ function estudios_de(int $id): array
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check($_POST['csrf'] ?? null);
     if (($_POST['accion'] ?? '') !== 'guardar') {
-        respuesta_sucursales(400, ['ok' => false, 'error' => 'Accion invalida.']);
+        respuesta_sucursales(400, ['ok' => false, 'error' => 'Acción inválida.']);
     }
 
     $idCrudo = (string) ($_POST['id'] ?? '');
     $id      = $idCrudo === '' ? null : filter_var($idCrudo, FILTER_VALIDATE_INT);
     if ($id === false || $id === 0) {
-        respuesta_sucursales(400, ['ok' => false, 'error' => 'Sede invalida.']);
+        respuesta_sucursales(400, ['ok' => false, 'error' => 'Sede inválida.']);
     }
     if ($id !== null) {
         $stmt = db()->prepare('SELECT 1 FROM sucursales WHERE id = ?');
@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $activo       = ($_POST['activo'] ?? '') === '1' ? 1 : 0;
 
     if ($nombre === '' || mb_strlen($nombre) > SUCURSAL_NOMBRE_MAX) {
-        $errores['nombre'] = 'El nombre es obligatorio (maximo ' . SUCURSAL_NOMBRE_MAX . ' caracteres).';
+        $errores['nombre'] = 'El nombre es obligatorio (máximo ' . SUCURSAL_NOMBRE_MAX . ' caracteres).';
     } else {
         $stmt = db()->prepare('SELECT 1 FROM sucursales WHERE nombre = ? AND id <> ?');
         $stmt->execute([$nombre, $id ?? 0]);
@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     if (mb_strlen($direccion) > SUCURSAL_DIRECCION_MAX) {
-        $errores['direccion'] = 'La direccion admite hasta ' . SUCURSAL_DIRECCION_MAX . ' caracteres.';
+        $errores['direccion'] = 'La dirección admite hasta ' . SUCURSAL_DIRECCION_MAX . ' caracteres.';
     }
     if (mb_strlen($equipamiento) > SUCURSAL_EQUIPAMIENTO_MAX) {
         $errores['equipamiento'] = 'El equipamiento admite hasta ' . SUCURSAL_EQUIPAMIENTO_MAX . ' caracteres.';
@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $enviados = $_POST['estudios'] ?? [];
     $claves   = is_array($enviados) ? array_values(array_unique(array_map('strval', $enviados))) : [];
     if (array_diff($claves, array_keys(estudios_etiquetas()))) {
-        $errores['estudios'] = 'Elegi estudios validos.';
+        $errores['estudios'] = 'Elegí estudios validos.';
     }
 
     $turnos = validar_turnos($_POST['horarios'] ?? '');

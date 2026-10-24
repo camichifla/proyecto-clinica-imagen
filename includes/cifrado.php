@@ -8,7 +8,7 @@ function cifrado_clave(): string
 {
     $clave = defined('APP_KEY') ? base64_decode((string) APP_KEY, true) : false;
     if ($clave === false || strlen($clave) !== 32) {
-        throw new RuntimeException('APP_KEY no definida o invalida (se esperan 32 bytes en base64).');
+        throw new RuntimeException('APP_KEY no definida o inválida (se esperan 32 bytes en base64).');
     }
     return $clave;
 }

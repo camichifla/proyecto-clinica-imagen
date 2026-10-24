@@ -9,7 +9,7 @@ require_post_json();
 
 if (demasiados_eventos('registro', 'ip', (string) ($_SERVER['REMOTE_ADDR'] ?? ''), 10, 60)) {
     http_response_code(429);
-    echo json_encode(['ok' => false, 'errores' => ['general' => 'Demasiados registros desde esta conexion. Proba de nuevo mas tarde.']], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => false, 'errores' => ['general' => 'Demasiados registros desde esta conexión. Probá de nuevo más tarde.']], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -54,7 +54,7 @@ try {
         $db->rollBack();
     }
     if ($e->getCode() === '23000' && str_contains($e->getMessage(), 'uq_pacientes_ci')) {
-        $errores['ci'] = 'Ya existe una cuenta registrada con esa cedula.';
+        $errores['ci'] = 'Ya existe una cuenta registrada con esa cédula.';
     } elseif ($e->getCode() === '23000' && str_contains($e->getMessage(), 'uq_cuentas_email')) {
         $errores['email'] = 'Ya existe una cuenta registrada con ese correo.';
     } else {

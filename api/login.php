@@ -17,7 +17,7 @@ $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
 if (demasiados_eventos('login_fallo', 'email', $email, MAX_FALLOS_EMAIL, VENTANA_MINUTOS, $ip)
     || demasiados_eventos('login_fallo', 'ip', $ip, MAX_FALLOS_IP, VENTANA_MINUTOS)) {
     http_response_code(429);
-    echo json_encode(['ok' => false, 'error' => 'Demasiados intentos. Proba de nuevo en 15 minutos.'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => false, 'error' => 'Demasiados intentos. Probá de nuevo en 15 minutos.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -28,13 +28,13 @@ $cuenta = $stmt->fetch();
 $error = null;
 if (!$cuenta) {
     password_verify($password, DUMMY_HASH);
-    $error = 'Correo o contrasena invalidos.';
+    $error = 'Correo o contraseña inválidos.';
 } elseif (!password_verify($password, $cuenta['password_hash'])) {
-    $error = 'Correo o contrasena invalidos.';
+    $error = 'Correo o contraseña inválidos.';
 } elseif ((int) $cuenta['verificado'] === 0) {
-    $error = 'Debes verificar tu correo antes de iniciar sesion.';
+    $error = 'Debes verificar tu correo antes de iniciar sesión.';
 } elseif ((int) $cuenta['activo'] === 0) {
-    $error = 'Tu cuenta fue desactivada. Contacta a la clinica.';
+    $error = 'Tu cuenta fue desactivada. Contacta a la clínica.';
 }
 
 if ($error !== null) {

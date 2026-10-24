@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     http_response_code(400);
-    echo json_encode(['ok' => false, 'error' => 'Accion invalida.'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => false, 'error' => 'Acción inválida.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 

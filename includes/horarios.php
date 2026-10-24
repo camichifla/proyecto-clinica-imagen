@@ -46,7 +46,7 @@ function validar_turnos(mixed $crudo): array|string
         $apertura = is_array($t) ? (string) ($t['apertura'] ?? '') : '';
         $cierre   = is_array($t) ? (string) ($t['cierre'] ?? '') : '';
         if ($dia === false || $dia < 1 || $dia > 7) {
-            return 'Elegi un dia valido en cada horario.';
+            return 'Elegí un día válido en cada horario.';
         }
         if (!preg_match($hora, $apertura) || !preg_match($hora, $cierre)) {
             return 'Las horas deben tener formato HH:MM.';
@@ -59,7 +59,7 @@ function validar_turnos(mixed $crudo): array|string
     usort($turnos, static fn (array $a, array $b): int => [$a['dia'], $a['apertura']] <=> [$b['dia'], $b['apertura']]);
     foreach ($turnos as $i => $t) {
         if ($i > 0 && $turnos[$i - 1]['dia'] === $t['dia'] && $t['apertura'] <= $turnos[$i - 1]['cierre']) {
-            return 'Dos horarios del mismo dia no pueden superponerse ni tocarse.';
+            return 'Dos horarios del mismo día no pueden superponerse ni tocarse.';
         }
     }
     return $turnos;

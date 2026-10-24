@@ -15,7 +15,7 @@ $profesionalId = filter_input(INPUT_GET, 'profesional_id', FILTER_VALIDATE_INT) 
 $fechaOk = DateTimeImmutable::createFromFormat('!Y-m-d', $fecha);
 if (!$sucursalId || !$fechaOk || $fechaOk->format('Y-m-d') !== $fecha || !isset(estudios_etiquetas()[$estudio])) {
     http_response_code(422);
-    echo json_encode(['ok' => false, 'error' => 'Parametros invalidos.'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => false, 'error' => 'Parámetros inválidos.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 

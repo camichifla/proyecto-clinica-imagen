@@ -20,7 +20,7 @@ function registrar_evento(string $tipo, ?string $detalle = null, ?string $email 
 function demasiados_eventos(string $tipo, string $columna, string $valor, int $max, int $minutos, ?string $ip = null): bool
 {
     if (!in_array($columna, ['email', 'ip'], true)) {
-        throw new InvalidArgumentException('Columna invalida.');
+        throw new InvalidArgumentException('Columna inválida.');
     }
     $filtroIp = $ip === null ? '' : ' AND ip = ?';
     $stmt = db()->prepare("SELECT COUNT(*) FROM eventos WHERE tipo = ? AND {$columna} = ?{$filtroIp} AND creado_en >= NOW() - INTERVAL ? MINUTE");

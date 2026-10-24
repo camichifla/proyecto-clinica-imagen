@@ -48,7 +48,7 @@ if (isset($_SESSION['cuenta_id']) && isset($_SESSION['ultimo_acceso'])
     if (ES_API) {
         http_response_code(401);
         header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(['error' => 'Sesion expirada.', 'expirado' => true], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['error' => 'Sesión expirada.', 'expirado' => true], JSON_UNESCAPED_UNICODE);
         exit;
     }
     header('Location: ' . APP_URL . '/login.html?expirado=1');
@@ -74,8 +74,8 @@ function csrf_check(?string $token): void
         http_response_code($excedido ? 413 : 403);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(['ok' => false, 'error' => $excedido
-            ? 'Los archivos superan el tamano maximo permitido.'
-            : 'La sesion cambio. Recarga la pagina e intenta nuevamente.'], JSON_UNESCAPED_UNICODE);
+            ? 'Los archivos superan el tamaño máximo permitido.'
+            : 'La sesión cambió. Recarga la página e intenta nuevamente.'], JSON_UNESCAPED_UNICODE);
         exit;
     }
 }
@@ -87,7 +87,7 @@ function require_post_json(): void
 
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         http_response_code(405);
-        echo json_encode(['ok' => false, 'error' => 'Metodo no permitido.'], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['ok' => false, 'error' => 'Método no permitido.'], JSON_UNESCAPED_UNICODE);
         exit;
     }
 

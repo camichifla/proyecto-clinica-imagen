@@ -46,7 +46,7 @@
                     .forEach(([etiqueta, valor]) => tr.appendChild(celda(etiqueta, valor)));
                 return tr;
             }))
-            : parrafo('Sin actividad sospechosa en las ultimas 24 horas.'));
+            : parrafo('Sin actividad sospechosa en las últimas 24 horas.'));
     }
 
     form.addEventListener('submit', (evento) => {

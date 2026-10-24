@@ -24,7 +24,7 @@ function error_unico_paciente(PDOException $e): ?array
         return null;
     }
     if (str_contains($e->getMessage(), 'uq_pacientes_ci')) {
-        return ['ci' => 'Ya existe un paciente con esa cedula.'];
+        return ['ci' => 'Ya existe un paciente con esa cédula.'];
     }
     if (str_contains($e->getMessage(), 'uq_cuentas_email')) {
         return ['email' => 'Ya existe una cuenta registrada con ese correo.'];
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check($_POST['csrf'] ?? null);
     $accion = $_POST['accion'] ?? '';
     if (!in_array($accion, ['crear', 'guardar', 'toggle_activo'], true)) {
-        respuesta_pacientes(400, ['ok' => false, 'error' => 'Accion invalida.']);
+        respuesta_pacientes(400, ['ok' => false, 'error' => 'Acción inválida.']);
     }
 
     // Baja/alta of the patient's login account; the patient record and history are kept.
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($accion === 'guardar') {
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
         if (!$id) {
-            respuesta_pacientes(400, ['ok' => false, 'error' => 'Paciente invalido.']);
+            respuesta_pacientes(400, ['ok' => false, 'error' => 'Paciente inválido.']);
         }
         $stmt = $db->prepare('SELECT 1 FROM pacientes WHERE id = ?');
         $stmt->execute([$id]);

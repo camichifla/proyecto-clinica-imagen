@@ -100,12 +100,12 @@
             o.textContent = texto;
             return o;
         }
-        hora.replaceChildren(opcionHora('', 'Elegi una fecha primero'));
+        hora.replaceChildren(opcionHora('', 'Elegí una fecha primero'));
 
         let pedido = 0;
         fecha.addEventListener('change', async () => {
             const actual = ++pedido;
-            hora.replaceChildren(opcionHora('', 'Elegi un horario'));
+            hora.replaceChildren(opcionHora('', 'Elegí un horario'));
             if (!fecha.value) {
                 return;
             }
@@ -118,7 +118,7 @@
                 return;
             }
             if (!data.horas.length) {
-                hora.replaceChildren(opcionHora('', 'Sin horarios disponibles ese dia'));
+                hora.replaceChildren(opcionHora('', 'Sin horarios disponibles ese día'));
                 return;
             }
             data.horas.forEach((h) => hora.appendChild(opcionHora(h, h)));
@@ -134,7 +134,7 @@
 
     function renderFila(cita, data) {
         const tr = document.createElement('tr');
-        tr.appendChild(celda('Codigo', cita.codigo));
+        tr.appendChild(celda('Código', cita.codigo));
         tr.appendChild(celda('Fecha', cita.fecha));
         tr.appendChild(celda('Hora', cita.hora));
         tr.appendChild(celda('Paciente', cita.pacienteLabel));
@@ -209,7 +209,7 @@
             return;
         }
         lista.replaceChildren(tabla(
-            ['Codigo', 'Fecha', 'Hora', 'Paciente', 'Estudio', 'Sede', 'Profesional', 'Estado', 'Acciones'],
+            ['Código', 'Fecha', 'Hora', 'Paciente', 'Estudio', 'Sede', 'Profesional', 'Estado', 'Acciones'],
             data.citas.map((cita) => renderFila(cita, data))
         ));
     }

@@ -47,7 +47,7 @@
 
     function renderFilaCita(cita, notasAdminMax, csrf) {
         const tr = document.createElement('tr');
-        tr.appendChild(celda('Codigo', cita.codigo));
+        tr.appendChild(celda('Código', cita.codigo));
         tr.appendChild(celda('Fecha y hora de la cita', cita.fechaHoraSolicitada));
         tr.appendChild(celda('Sede', cita.sucursalNombre || '-'));
         tr.appendChild(celda('Estudio', cita.estudioLabel));
@@ -97,12 +97,12 @@
     function renderMisCitas(citas, notasAdminMax, csrf) {
         if (!citas.length) {
             const p = document.createElement('p');
-            p.textContent = 'Todavia no solicitaste ninguna cita.';
+            p.textContent = 'Todavía no solicitaste ninguna cita.';
             misCitas.appendChild(p);
             return;
         }
         misCitas.appendChild(tabla(
-            ['Codigo', 'Fecha y hora de la cita', 'Sede', 'Estudio', 'Estado', ''],
+            ['Código', 'Fecha y hora de la cita', 'Sede', 'Estudio', 'Estado', ''],
             citas.map((cita) => renderFilaCita(cita, notasAdminMax, csrf))
         ));
     }

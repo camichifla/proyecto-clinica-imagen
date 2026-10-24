@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Agendar Cita para Paciente - Clinica Imagen</title>
+  <title>Agendar Cita para Paciente - Clínica Imagen</title>
   <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
   <link rel="stylesheet" href="./assets/css/styles.css">
   <link rel="stylesheet" href="./assets/css/agendar-cita-medico.css">
@@ -14,11 +14,11 @@
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
   <header>
     <div class="logo">
-      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clínica Imagen"></a>
     </div>
     <div class="user">
       <details class="menu-usuario">
-        <summary class="menu-usuario-toggle" aria-label="Menu de usuario">
+        <summary class="menu-usuario-toggle" aria-label="Menú de usuario">
           <span class="avatar" aria-hidden="true"></span>
         </summary>
         <div class="menu-usuario-panel">
@@ -26,7 +26,7 @@
           <ul class="menu-usuario-lista"></ul>
           <form method="post" action="logout.php" class="form-logout">
             <input type="hidden" name="csrf" value="">
-            <button type="submit" class="btn-logout">Cerrar sesion</button>
+            <button type="submit" class="btn-logout">Cerrar sesión</button>
           </form>
         </div>
       </details>
@@ -37,7 +37,7 @@
     <section class="seccion-auth seccion-ancha">
       <h1>Agendar Cita para Paciente</h1>
 
-      <p class="aviso-exito" data-aviso="ok-pendiente" hidden>Cita creada. Se vinculara automaticamente cuando ese email se registre.</p>
+      <p class="aviso-exito" data-aviso="ok-pendiente" hidden>Cita creada. Se vinculara automáticamente cuando ese email se registre.</p>
       <p class="aviso-exito" data-aviso="ok" hidden>La cita fue creada correctamente.</p>
       <p class="campo-error" data-general hidden></p>
 
@@ -58,7 +58,7 @@
                  autocomplete="off" placeholder="Buscar por apellido, nombre o CI">
           <datalist id="paciente_id_lista"></datalist>
           <input type="hidden" id="paciente_id" name="paciente_id" value="">
-          <p class="campo-hint" data-mensaje-sin-pacientes hidden>Todavia no tenes pacientes conectados. Usa "Paciente nuevo".</p>
+          <p class="campo-hint" data-mensaje-sin-pacientes hidden>Todavía no tenés pacientes conectados. Usa "Paciente nuevo".</p>
         </div>
 
         <div id="panel-paciente-nuevo" class="campo" hidden>
@@ -75,21 +75,21 @@
           <div class="campo">
             <label for="paciente_email_nuevo">Email</label>
             <input type="email" id="paciente_email_nuevo" name="paciente_email_nuevo">
-            <p class="campo-hint">Si el paciente todavia no tiene cuenta, la cita queda pendiente y se vincula sola cuando se registre con este email.</p>
+            <p class="campo-hint">Si el paciente todavía no tiene cuenta, la cita queda pendiente y se vincula sola cuando se registre con este email.</p>
           </div>
         </div>
 
         <div class="campo">
           <label for="estudio">Estudio</label>
           <select id="estudio" name="estudio" class="selector-combo">
-            <option value="">Elegi un estudio</option>
+            <option value="">Elegí un estudio</option>
           </select>
         </div>
 
         <div class="campo">
           <label for="sucursal">Sede</label>
           <select id="sucursal" name="sucursal_id" class="selector-combo">
-            <option value="">Elegi una sede</option>
+            <option value="">Elegí una sede</option>
           </select>
         </div>
 
@@ -98,7 +98,7 @@
           <select id="profesional_id" name="profesional_id" class="selector-combo">
             <option value="">Cualquiera disponible</option>
           </select>
-          <p class="campo-error" data-mensaje-sin-profesionales hidden>Todavia no hay profesionales cargados.</p>
+          <p class="campo-error" data-mensaje-sin-profesionales hidden>Todavía no hay profesionales cargados.</p>
         </div>
 
         <div class="campo">
@@ -107,7 +107,7 @@
             <button type="button" id="fecha-boton" class="selector-fecha-boton"
                     aria-haspopup="dialog" aria-expanded="false"
                     aria-labelledby="fecha-label">
-              <span class="selector-fecha-texto">Elegi una fecha</span>
+              <span class="selector-fecha-texto">Elegí una fecha</span>
             </button>
             <input type="hidden" id="fecha" name="fecha" value="">
             <div class="calendario" id="calendario" role="dialog" aria-label="Elegir fecha" hidden>
@@ -125,7 +125,7 @@
         <div class="campo">
           <label for="hora">Hora</label>
           <select id="hora" name="hora" class="selector-combo" disabled>
-            <option value="">Elegi sede y fecha primero</option>
+            <option value="">Elegí sede y fecha primero</option>
           </select>
         </div>
 
@@ -135,8 +135,8 @@
             <div class="orden-card orden-aviso">
               <h3>AVISO IMPORTANTE</h3>
               <p>Todos los estudios indicados en esta orden requieren coordinacion previa.</p>
-              <p>Es necesario venir a la clinica sin nada de metal del cuello hacia arriba.</p>
-              <p>Los presupuestos dados por telefono se confirman con la presentacion de este formulario.</p>
+              <p>Es necesario venir a la clínica sin nada de metal del cuello hacia arriba.</p>
+              <p>Los presupuestos dados por teléfono se confirman con la presentacion de este formulario.</p>
             </div>
 
             <details class="orden-card">
@@ -249,7 +249,7 @@
                 <label><input type="checkbox" name="ortodoncia_tipo[]" value="Maxilar"> Maxilar</label>
                 <label><input type="checkbox" name="ortodoncia_tipo[]" value="Mandíbula"> Mandíbula</label>
               </div>
-              <label>Informacion clinica <textarea name="ortodoncia_info_clinica" rows="3"></textarea></label>
+              <label>Información clínica <textarea name="ortodoncia_info_clinica" rows="3"></textarea></label>
             </details>
 
             <details class="orden-card">
@@ -276,7 +276,7 @@
                 <label><input type="checkbox" name="tomo_tipo_estudio[]" value="Periodoncia"> Periodoncia</label>
                 <label><input type="checkbox" name="tomo_tipo_estudio[]" value="ATM"> ATM</label>
               </div>
-              <label>Interes del estudio <textarea name="interes_estudio_tomo" rows="3"></textarea></label>
+              <label>Interés del estudio <textarea name="interes_estudio_tomo" rows="3"></textarea></label>
             </details>
 
             <details class="orden-card">
@@ -296,7 +296,7 @@
                 </fieldset>
               </div>
               <div class="orden-grid-2">
-                <label>Indique la ubicacion del implante a colocar <input type="text" name="implante_ubicacion"></label>
+                <label>Indique la ubicación del implante a colocar <input type="text" name="implante_ubicacion"></label>
                 <label>Fecha probable de cirugia <input type="date" name="implante_fecha_cirugia"></label>
               </div>
             </details>
@@ -380,12 +380,12 @@
   </main>
 
   <footer>
-    <nav aria-label="Pie de pagina">
+    <nav aria-label="Pie de página">
       <a href="index.html">Inicio</a>
       <a href="servicios.html">Servicios</a>
       <a href="contacto.html">Contacto</a>
     </nav>
-    <p>&copy; Clinica Imagen</p>
+    <p>&copy; Clínica Imagen</p>
   </footer>
 
   <script src="assets/js/sesion.js" defer></script>

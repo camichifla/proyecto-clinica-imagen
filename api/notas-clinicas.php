@@ -12,7 +12,7 @@ $usuario = requerir_rol_json(['medico', 'profesional']);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['ok' => false, 'error' => 'Metodo no permitido.'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => false, 'error' => 'Método no permitido.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 csrf_check($_POST['csrf'] ?? null);

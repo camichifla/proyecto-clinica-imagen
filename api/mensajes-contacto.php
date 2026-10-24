@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $atendido = ($_POST['atendido'] ?? '1') === '0' ? 0 : 1;
     if ($id === false || $id < 1) {
         http_response_code(400);
-        echo json_encode(['ok' => false, 'error' => 'Mensaje invalido.'], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['ok' => false, 'error' => 'Mensaje inválido.'], JSON_UNESCAPED_UNICODE);
         exit;
     }
     $stmt = db()->prepare(

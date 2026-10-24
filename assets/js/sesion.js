@@ -12,7 +12,7 @@
         try {
             respuesta = await fetch(url);
             if (publico && respuesta.status === 401) {
-                // La sesion vencida se destruye en esa respuesta; reintentar
+                // La sesión vencida se destruye en esa respuesta; reintentar
                 // abre una nueva con su token CSRF.
                 respuesta = await fetch(url);
             }

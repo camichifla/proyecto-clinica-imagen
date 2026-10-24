@@ -7,8 +7,8 @@
     const formFiltro = document.querySelector('.form-buscar-paciente');
     const selectSucursal = formFiltro ? document.getElementById('sucursal_id') : null;
 
-    const NOMBRES_DIA_SEMANA_COMPLETO = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'];
-    const NOMBRES_DIA_SEMANA = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'];
+    const NOMBRES_DIA_SEMANA_COMPLETO = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const NOMBRES_DIA_SEMANA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
     const MAX_CITAS_VISIBLES_MES = 3;
 
     function urlAgenda(vista, fecha, sucursalId) {
@@ -86,7 +86,7 @@
             dia.citas.slice(0, MAX_CITAS_VISIBLES_MES).forEach((cita) => divDia.appendChild(renderPillCita(cita)));
 
             if (dia.citas.length > MAX_CITAS_VISIBLES_MES) {
-                divDia.appendChild(enlace('+' + (dia.citas.length - MAX_CITAS_VISIBLES_MES) + ' mas', urlAgenda('semana', dia.fecha, data.sucursalId), 'agenda-cita-mas'));
+                divDia.appendChild(enlace('+' + (dia.citas.length - MAX_CITAS_VISIBLES_MES) + ' más', urlAgenda('semana', dia.fecha, data.sucursalId), 'agenda-cita-mas'));
             }
 
             grid.appendChild(divDia);
@@ -232,7 +232,7 @@
     window.sesionLista.then((sesion) => {
         if (sesion && sesion.rol === 'profesional') {
             document.getElementById('titulo-vista').textContent = 'Ver Agenda';
-            document.title = 'Ver Agenda - Clinica Imagen';
+            document.title = 'Ver Agenda - Clínica Imagen';
         }
     });
 

@@ -18,7 +18,7 @@ define('SMTP_PORT', 587);
 define('SMTP_USER', '');
 define('SMTP_PASS', '');
 define('SMTP_FROM', 'no-responder@clinica-imagen.local');
-define('SMTP_FROM_NAME', 'Clinica Imagen');
+define('SMTP_FROM_NAME', 'Clínica Imagen');
 
 define('APP_URL', 'http://localhost/proyecto');
 define('APP_HTTPS', false); // set true only once the site is actually served over HTTPS (production: always true)

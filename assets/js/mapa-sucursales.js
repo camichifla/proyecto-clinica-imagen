@@ -1,7 +1,7 @@
 (function () {
     let clinics = [];
 
-    const DIAS = ["Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
+    const DIAS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
     // Escapa texto de la base antes de armarlo como HTML.
     function esc(texto) {
@@ -10,7 +10,7 @@
         return div.innerHTML;
     }
 
-    // [[dia, apertura, cierre], ...] -> "Lun a Vie 08:00-20:00 · Sab 08:00-13:00"
+    // [[dia, apertura, cierre], ...] -> "Lun a Vie 08:00-20:00 · Sáb 08:00-13:00"
     function horariosTexto(horarios) {
         const porDia = {};
         horarios.forEach(([dia, apertura, cierre]) => {

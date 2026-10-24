@@ -10,7 +10,7 @@
         return;
     }
 
-    const ROLES_TODOS = { paciente: 'Paciente', medico: 'Medico', profesional: 'Profesional', administrador: 'Administrador', recepcionista: 'Recepcionista' };
+    const ROLES_TODOS = { paciente: 'Paciente', medico: 'Médico', profesional: 'Profesional', administrador: 'Administrador', recepcionista: 'Recepcionista' };
 
     let csrf = '';
     let buscadorComboCargado = false;
@@ -18,7 +18,7 @@
     function badge(si) {
         const span = document.createElement('span');
         span.className = 'estado-badge ' + (si ? 'estado-si' : 'estado-no');
-        span.textContent = si ? 'Si' : 'No';
+        span.textContent = si ? 'Sí' : 'No';
         return span;
     }
 
@@ -42,7 +42,7 @@
         tablaCuentasContenedor.innerHTML = '';
         if (!data.cuentas.length) {
             const p = document.createElement('p');
-            p.textContent = 'Todavia no hay cuentas registradas.';
+            p.textContent = 'Todavía no hay cuentas registradas.';
             tablaCuentasContenedor.appendChild(p);
             return;
         }
@@ -77,7 +77,7 @@
                 boton.textContent = cuenta.activo ? 'Desactivar' : 'Reactivar';
                 if (cuenta.rol === 'administrador' && cuenta.activo && data.admin_activos_count <= 1) {
                     boton.disabled = true;
-                    boton.title = 'No se puede desactivar el ultimo administrador activo.';
+                    boton.title = 'No se puede desactivar el último administrador activo.';
                 }
                 boton.addEventListener('click', async () => {
                     const resultado = await accionFila({ accion: 'toggle_activo', cuenta_id: String(cuenta.cuenta_id) });
@@ -105,14 +105,14 @@
         asignacionesContenedor.innerHTML = '';
         if (!data.asignaciones.length) {
             const p = document.createElement('p');
-            p.textContent = 'Todavia no hay asignaciones.';
+            p.textContent = 'Todavía no hay asignaciones.';
             asignacionesContenedor.appendChild(p);
             return;
         }
 
         const filas = data.asignaciones.map((asignacion) => {
             const tr = document.createElement('tr');
-            tr.appendChild(celda('Medico', `${asignacion.medico_apellido}, ${asignacion.medico_nombre}`));
+            tr.appendChild(celda('Médico', `${asignacion.medico_apellido}, ${asignacion.medico_nombre}`));
             tr.appendChild(celda('Paciente', `${asignacion.paciente_apellido}, ${asignacion.paciente_nombre}`));
 
             const tdAcciones = document.createElement('td');
@@ -128,7 +128,7 @@
                     paciente_id: String(asignacion.paciente_id),
                 });
                 if (resultado.ok) {
-                    mostrarMensaje(seccionAsignaciones, 'Asignacion eliminada.', false);
+                    mostrarMensaje(seccionAsignaciones, 'Asignación eliminada.', false);
                     cargarDatos();
                 } else if (resultado.error) {
                     mostrarMensaje(seccionAsignaciones, resultado.error, true);
@@ -138,7 +138,7 @@
             tr.appendChild(tdAcciones);
             return tr;
         });
-        asignacionesContenedor.appendChild(tabla(['Medico', 'Paciente', ''], filas));
+        asignacionesContenedor.appendChild(tabla(['Médico', 'Paciente', ''], filas));
     }
 
     function poblarEspecializaciones(estudios) {
@@ -195,7 +195,7 @@
         const medicoId = document.getElementById('asignar-medico-id').value;
         const pacienteId = document.getElementById('asignar-paciente-id').value;
         if (!medicoId || !pacienteId) {
-            mostrarMensaje(seccionAsignaciones, 'Elegi un medico y un paciente validos.', true);
+            mostrarMensaje(seccionAsignaciones, 'Elegí un médico y un paciente validos.', true);
             return;
         }
         const resultado = await accionFila({ accion: 'asignar_paciente', medico_id: medicoId, paciente_id: pacienteId });

@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($accion === 'cancelar') {
-        $prefijo = 'Cancelado por la clinica';
+        $prefijo = 'Cancelado por la clínica';
         $motivo  = mb_substr(trim((string) ($_POST['notas_admin'] ?? '')), 0, NOTAS_ADMIN_MAX - mb_strlen($prefijo) - 2);
 
         $stmt = db()->prepare(
@@ -119,7 +119,7 @@ if (isset($_GET['horas'])) {
     $cita   = $citaId ? cita_gestionable($citaId) : null;
     [$fechaMin, $fechaMax] = rango_reserva();
     if ($cita === null || $cita['sucursal_id'] === null || !fecha_valida($fecha) || $fecha < $fechaMin || $fecha > $fechaMax) {
-        error_json(422, 'Elegi una fecha valida para esa cita.');
+        error_json(422, 'Elegí una fecha válida para esa cita.');
     }
 
     $dia = (int) (new DateTimeImmutable($fecha))->format('N');
@@ -142,7 +142,7 @@ $hoy   = new DateTimeImmutable('today');
 $desde = (string) ($_GET['desde'] ?? '') ?: $hoy->format('Y-m-d');
 $hasta = (string) ($_GET['hasta'] ?? '') ?: $hoy->modify('+30 days')->format('Y-m-d');
 if (!fecha_valida($desde) || !fecha_valida($hasta) || $hasta < $desde) {
-    error_json(422, 'El rango de fechas no es valido.');
+    error_json(422, 'El rango de fechas no es válido.');
 }
 
 $sucursales    = db()->query('SELECT id, nombre FROM sucursales ORDER BY nombre')->fetchAll();
@@ -152,7 +152,7 @@ $sucursalId = filter_input(INPUT_GET, 'sucursal_id', FILTER_VALIDATE_INT) ?: nul
 $profesionalId = filter_input(INPUT_GET, 'profesional_id', FILTER_VALIDATE_INT) ?: null;
 $estado     = (string) ($_GET['estado'] ?? '');
 if ($estado !== '' && !isset(ESTADOS_CITA[$estado])) {
-    error_json(422, 'Estado invalido.');
+    error_json(422, 'Estado inválido.');
 }
 
 // Base de listado y totales (el filtro de estado solo aplica al listado).
@@ -160,7 +160,7 @@ $codigo = trim((string) ($_GET['codigo'] ?? ''));
 if ($codigo !== '') {
     $citaId = id_de_codigo($codigo);
     if ($citaId === null) {
-        error_json(422, 'El codigo no es valido. Ejemplo: CI-000123.');
+        error_json(422, 'El código no es válido. Ejemplo: CI-000123.');
     }
     $where  = 'c.id = ?';
     $params = [$citaId];

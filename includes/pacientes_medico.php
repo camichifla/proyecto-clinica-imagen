@@ -1,5 +1,5 @@
 <?php
-// includes/pacientes_medico.php — "pacientes conectados a este medico": los
+// includes/pacientes_medico.php — "pacientes conectados a este médico": los
 // que ya aparecen en alguna de sus ordenes (ordenes.creado_por) o los que un
 // administrador vinculo explicitamente via medico_paciente.
 

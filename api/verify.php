@@ -53,9 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['token'])) {
     }
 
     http_response_code(400);
-    echo json_encode(['ok' => false, 'error' => 'El enlace de verificacion es invalido o vencio.'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => false, 'error' => 'El enlace de verificación es inválido o venció.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 http_response_code(405);
-echo json_encode(['ok' => false, 'error' => 'Metodo no permitido.'], JSON_UNESCAPED_UNICODE);
+echo json_encode(['ok' => false, 'error' => 'Método no permitido.'], JSON_UNESCAPED_UNICODE);

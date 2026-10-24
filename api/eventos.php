@@ -15,7 +15,7 @@ $tipo = trim((string) ($_GET['tipo'] ?? ''));
 if ($tipo !== '') {
     if (!preg_match('/^[a-z_]{1,40}$/', $tipo)) {
         http_response_code(422);
-        echo json_encode(['error' => 'Tipo invalido.'], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['error' => 'Tipo inválido.'], JSON_UNESCAPED_UNICODE);
         exit;
     }
     $where   .= ' AND tipo = ?';
@@ -29,7 +29,7 @@ foreach (['desde' => '>= ?', 'hasta' => '< ? + INTERVAL 1 DAY'] as $campo => $op
     $d = DateTimeImmutable::createFromFormat('!Y-m-d', $fecha);
     if (!$d || $d->format('Y-m-d') !== $fecha) {
         http_response_code(422);
-        echo json_encode(['error' => 'Fecha invalida.'], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['error' => 'Fecha inválida.'], JSON_UNESCAPED_UNICODE);
         exit;
     }
     $where   .= " AND creado_en {$op}";

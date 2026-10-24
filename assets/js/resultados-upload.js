@@ -24,7 +24,7 @@
     // decide la API.
     const TEXTOS_PROFESIONAL = {
         titulo: 'Cargar Observaciones y Resultados',
-        sinPacientes: 'Todavia no tenes pacientes con citas asignadas.',
+        sinPacientes: 'Todavía no tenés pacientes con citas asignadas.',
         sinCitas: 'Este paciente no tiene citas confirmadas con vos',
     };
 
@@ -34,7 +34,7 @@
         const sesion = await window.sesionLista;
         if (sesion && sesion.rol === 'profesional') {
             document.getElementById('titulo-vista').textContent = TEXTOS_PROFESIONAL.titulo;
-            document.title = TEXTOS_PROFESIONAL.titulo + ' - Clinica Imagen';
+            document.title = TEXTOS_PROFESIONAL.titulo + ' - Clínica Imagen';
             inputBuscar.dataset.mensajeSinPacientes = TEXTOS_PROFESIONAL.sinPacientes;
             selectCita.dataset.mensajeSinCitas = TEXTOS_PROFESIONAL.sinCitas;
         }

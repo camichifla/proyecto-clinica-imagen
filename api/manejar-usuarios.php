@@ -8,7 +8,7 @@ require_once __DIR__ . '/../includes/estudios.php';
 $usuario = requerir_rol_json(['administrador']);
 
 const ROLES_STAFF = [
-    'medico'        => 'Medico',
+    'medico'        => 'Médico',
     'profesional'   => 'Profesional',
     'administrador' => 'Administrador',
     'recepcionista' => 'Recepcionista',
@@ -22,12 +22,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cuentaId = filter_input(INPUT_POST, 'cuenta_id', FILTER_VALIDATE_INT);
 
         if (!$cuentaId) {
-            echo json_encode(['ok' => false, 'error' => 'Cuenta invalida.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'error' => 'Cuenta inválida.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
         if ($cuentaId === $usuario['cuenta_id']) {
-            echo json_encode(['ok' => false, 'error' => 'No podes desactivar tu propia cuenta.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'error' => 'No podés desactivar tu propia cuenta.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $activos = (int) $db->query("SELECT COUNT(*) FROM cuentas WHERE rol = 'administrador' AND activo = 1 FOR UPDATE")->fetchColumn();
             if ($activos <= 1) {
                 $db->rollBack();
-                echo json_encode(['ok' => false, 'error' => 'No se puede desactivar el ultimo administrador activo.'], JSON_UNESCAPED_UNICODE);
+                echo json_encode(['ok' => false, 'error' => 'No se puede desactivar el último administrador activo.'], JSON_UNESCAPED_UNICODE);
                 exit;
             }
         }
@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pacienteId = filter_input(INPUT_POST, 'paciente_id', FILTER_VALIDATE_INT);
 
         if (!$medicoId || !$pacienteId) {
-            echo json_encode(['ok' => false, 'error' => 'Elegi un medico y un paciente validos.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'error' => 'Elegí un médico y un paciente validos.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -77,14 +77,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $db->prepare('SELECT id FROM medicos WHERE id = ?');
         $stmt->execute([$medicoId]);
         if (!$stmt->fetch()) {
-            echo json_encode(['ok' => false, 'error' => 'Elegi un medico y un paciente validos.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'error' => 'Elegí un médico y un paciente validos.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
         $stmt = $db->prepare('SELECT id FROM pacientes WHERE id = ?');
         $stmt->execute([$pacienteId]);
         if (!$stmt->fetch()) {
-            echo json_encode(['ok' => false, 'error' => 'Elegi un medico y un paciente validos.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'error' => 'Elegí un médico y un paciente validos.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -95,8 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);
         } catch (PDOException $e) {
             $mensaje = $e->getCode() === '23000'
-                ? 'Ese paciente ya esta asignado a ese medico.'
-                : 'No se pudo crear la asignacion. Intenta nuevamente.';
+                ? 'Ese paciente ya está asignado a ese médico.'
+                : 'No se pudo crear la asignación. Intenta nuevamente.';
             echo json_encode(['ok' => false, 'error' => $mensaje], JSON_UNESCAPED_UNICODE);
         }
         exit;
@@ -107,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pacienteId = filter_input(INPUT_POST, 'paciente_id', FILTER_VALIDATE_INT);
 
         if (!$medicoId || !$pacienteId) {
-            echo json_encode(['ok' => false, 'error' => 'Asignacion invalida.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'error' => 'Asignación inválida.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -117,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(
             $stmt->rowCount() > 0
                 ? ['ok' => true]
-                : ['ok' => false, 'error' => 'La asignacion no existe.'],
+                : ['ok' => false, 'error' => 'La asignación no existe.'],
             JSON_UNESCAPED_UNICODE
         );
         exit;
@@ -145,22 +145,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
         if ((int) $cuenta['id'] === $usuario['cuenta_id']) {
-            echo json_encode(['ok' => false, 'error' => 'No podes cambiar tu propio rol.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'error' => 'No podés cambiar tu propio rol.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
         $errores = [];
         if (!isset(ROLES_STAFF[$nuevoRol])) {
-            $errores['rol'] = 'Elegi un rol valido.';
+            $errores['rol'] = 'Elegí un rol válido.';
         } elseif ($nuevoRol === $cuenta['rol']) {
             $errores['rol'] = 'La cuenta ya tiene ese rol.';
         }
         // Lo unico que la tabla de profesionales exige y las demas no: al menos una especializacion.
         if ($nuevoRol === 'profesional') {
             if (!$especializaciones) {
-                $errores['especializacion'] = 'Elegi al menos una especializacion.';
+                $errores['especializacion'] = 'Elegí al menos una especialización.';
             } elseif (array_diff($especializaciones, array_keys(estudios_activos()))) {
-                $errores['especializacion'] = 'Elegi especializaciones validas.';
+                $errores['especializacion'] = 'Elegí especializaciones válidas.';
             }
         }
         if ($errores) {
@@ -194,7 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $activos = (int) $db->query("SELECT COUNT(*) FROM cuentas WHERE rol = 'administrador' AND activo = 1 FOR UPDATE")->fetchColumn();
                 if ($activos <= 1) {
                     $db->rollBack();
-                    echo json_encode(['ok' => false, 'error' => 'No se puede cambiar el rol del ultimo administrador activo.'], JSON_UNESCAPED_UNICODE);
+                    echo json_encode(['ok' => false, 'error' => 'No se puede cambiar el rol del último administrador activo.'], JSON_UNESCAPED_UNICODE);
                     exit;
                 }
             }
@@ -267,24 +267,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $errores = [];
         if (!isset(ROLES_STAFF[$valores['rol']])) {
-            $errores['rol'] = 'Elegi un rol valido.';
+            $errores['rol'] = 'Elegí un rol válido.';
         }
 
         $errores = array_merge($errores, validar(REGLAS_STAFF, $_POST));
 
         if ($valores['rol'] === 'profesional') {
             if (!$especializaciones) {
-                $errores['especializacion'] = 'Elegi al menos una especializacion.';
+                $errores['especializacion'] = 'Elegí al menos una especialización.';
             } else {
                 foreach ($especializaciones as $especializacion) {
                     if (!isset(estudios_activos()[$especializacion])) {
-                        $errores['especializacion'] = 'Elegi especializaciones validas.';
+                        $errores['especializacion'] = 'Elegí especializaciones válidas.';
                         break;
                     }
                 }
             }
         } elseif ($especializaciones) {
-            $errores['especializacion'] = 'La especializacion solo aplica al rol Profesional.';
+            $errores['especializacion'] = 'La especialización solo aplica al rol Profesional.';
         }
 
         if ($errores) {
@@ -333,7 +333,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     http_response_code(400);
-    echo json_encode(['ok' => false, 'error' => 'Accion invalida.'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => false, 'error' => 'Acción inválida.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 

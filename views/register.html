@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Registro - Clinica Imagen</title>
+  <title>Registro - Clínica Imagen</title>
   <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
   <link rel="stylesheet" href="./assets/css/styles.css">
 </head>
@@ -13,7 +13,7 @@
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
   <header>
     <div class="logo">
-      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clínica Imagen"></a>
     </div>
   </header>
 
@@ -22,8 +22,8 @@
       <h1>Crear cuenta de paciente</h1>
 
       <div data-exito-panel hidden>
-        <p class="aviso-exito">Revisa tu correo (o <code>storage/mail.log</code> en modo de desarrollo) para verificar tu cuenta antes de iniciar sesion.</p>
-        <p><a href="login.html" class="btn-primary">Ir a iniciar sesion</a></p>
+        <p class="aviso-exito">Revisa tu correo (o <code>storage/mail.log</code> en modo de desarrollo) para verificar tu cuenta antes de iniciar sesión.</p>
+        <p><a href="login.html" class="btn-primary">Ir a iniciar sesión</a></p>
       </div>
 
       <p class="campo-error" data-general hidden></p>
@@ -45,19 +45,19 @@
         </div>
 
         <div class="campo">
-          <label for="ci">Cedula</label>
+          <label for="ci">Cédula</label>
           <input type="text" id="ci" name="ci" required pattern="\d{7,8}" inputmode="numeric" aria-describedby="ayuda-ci">
-          <p class="campo-hint" id="ayuda-ci">7 u 8 digitos, sin puntos ni guion. Ej: 12345678</p>
+          <p class="campo-hint" id="ayuda-ci">7 u 8 dígitos, sin puntos ni guion. Ej: 12345678</p>
         </div>
         <div class="campo">
-          <label for="direccion">Direccion</label>
+          <label for="direccion">Dirección</label>
           <input type="text" id="direccion" name="direccion" required minlength="5" maxlength="160" aria-describedby="ayuda-direccion">
-          <p class="campo-hint" id="ayuda-direccion">Calle y numero, 5 a 160 caracteres.</p>
+          <p class="campo-hint" id="ayuda-direccion">Calle y número, 5 a 160 caracteres.</p>
         </div>
         <div class="campo">
-          <label for="numero">Telefono</label>
+          <label for="numero">Teléfono</label>
           <input type="tel" id="numero" name="numero" required pattern="\+?\d[\d\s\-]{7,24}" aria-describedby="ayuda-numero">
-          <p class="campo-hint" id="ayuda-numero">8 a 25 digitos; se permite + inicial. Ej: 099123456</p>
+          <p class="campo-hint" id="ayuda-numero">8 a 25 dígitos; se permite + inicial. Ej: 099123456</p>
         </div>
         <div class="campo">
           <label for="email">Correo</label>
@@ -66,25 +66,25 @@
         </div>
 
         <div class="campo">
-          <label for="contrasena">Contrasena</label>
+          <label for="contrasena">Contraseña</label>
           <input type="password" id="contrasena" name="contrasena" required pattern="(?=.*\p{L})(?=.*\d).{8,72}" value="" aria-describedby="ayuda-contrasena">
-          <p class="campo-hint" id="ayuda-contrasena">Minimo 8 caracteres, con al menos una letra y un numero.</p>
+          <p class="campo-hint" id="ayuda-contrasena">Mínimo 8 caracteres, con al menos una letra y un número.</p>
         </div>
 
         <button type="submit" class="btn-primary">Registrarme</button>
       </form>
 
-      <p>¿Ya tenes cuenta? <a href="login.html">Iniciar sesion</a></p>
+      <p>¿Ya tenés cuenta? <a href="login.html">Iniciar sesión</a></p>
     </section>
   </main>
 
   <footer>
-    <nav aria-label="Pie de pagina">
+    <nav aria-label="Pie de página">
       <a href="index.html">Inicio</a>
       <a href="servicios.html">Servicios</a>
       <a href="contacto.html">Contacto</a>
     </nav>
-    <p>&copy; Clinica Imagen</p>
+    <p>&copy; Clínica Imagen</p>
   </footer>
 
   <script src="assets/js/sesion.js" data-modo="publico" defer></script>

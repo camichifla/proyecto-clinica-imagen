@@ -17,7 +17,7 @@ function hora_ocupada_json(PDOException $e): never
         throw $e;
     }
     http_response_code(422);
-    echo json_encode(['ok' => false, 'errores' => ['hora' => 'Esa hora ya fue reservada. Elegi otra.']], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => false, 'errores' => ['hora' => 'Esa hora ya fue reservada. Elegí otra.']], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -27,18 +27,18 @@ function validar_reserva(array $datos, array $estudiosPermitidos, string $fechaM
     $errores = [];
 
     if (!isset($estudiosPermitidos[$datos['estudio']])) {
-        $errores['estudio'] = 'Elegi un estudio valido.';
+        $errores['estudio'] = 'Elegí un estudio válido.';
     }
 
     $sucursalId = filter_var($datos['sucursal_id'], FILTER_VALIDATE_INT);
     if (!$sucursalId) {
-        $errores['sucursal_id'] = 'Elegi una sede valida.';
+        $errores['sucursal_id'] = 'Elegí una sede válida.';
     } else {
         $stmt = db()->prepare('SELECT activo FROM sucursales WHERE id = ?');
         $stmt->execute([$sucursalId]);
         $activa = $stmt->fetchColumn();
         if ($activa === false || (int) $activa !== 1) {
-            $errores['sucursal_id'] = $activa === false ? 'Elegi una sede valida.' : 'La sede elegida no esta disponible.';
+            $errores['sucursal_id'] = $activa === false ? 'Elegí una sede válida.' : 'La sede elegida no esta disponible.';
             $sucursalId = null;
         }
     }
@@ -47,7 +47,7 @@ function validar_reserva(array $datos, array $estudiosPermitidos, string $fechaM
     $autoAsignar   = $datos['profesional_id'] === '';
     $profesionalId = $autoAsignar ? null : filter_var($datos['profesional_id'], FILTER_VALIDATE_INT);
     if (!$autoAsignar && !$profesionalId) {
-        $errores['profesional_id'] = 'Elegi un profesional.';
+        $errores['profesional_id'] = 'Elegí un profesional.';
     }
 
     if (!$errores && $profesionalId) {
@@ -65,11 +65,11 @@ function validar_reserva(array $datos, array $estudiosPermitidos, string $fechaM
     }
 
     if (!$marcaTiempo) {
-        $errores['fecha'] = 'Elegi una fecha y hora validas.';
+        $errores['fecha'] = 'Elegí una fecha y hora válidas.';
     } elseif ($marcaTiempo <= new DateTimeImmutable()) {
         $errores['fecha'] = 'La fecha y hora debe ser futura.';
     } elseif ($datos['fecha'] < $fechaMin || $datos['fecha'] > $fechaMax) {
-        $errores['fecha'] = 'Solo se puede agendar dentro de los proximos ' . $rangoMeses . ' meses.';
+        $errores['fecha'] = 'Solo se puede agendar dentro de los próximos ' . $rangoMeses . ' meses.';
     }
 
     if (!$errores && $sucursalId && $marcaTiempo) {
@@ -79,7 +79,7 @@ function validar_reserva(array $datos, array $estudiosPermitidos, string $fechaM
         $turnosDelDia = $stmt->fetchAll();
 
         if (!$turnosDelDia) {
-            $errores['fecha'] = 'La sede elegida no atiende ese dia.';
+            $errores['fecha'] = 'La sede elegida no atiende ese día.';
         } elseif (!in_array($datos['hora'], slots_de_turnos($turnosDelDia), true)) {
             $errores['hora'] = 'Esa hora no esta disponible en la sede elegida.';
         }
@@ -105,7 +105,7 @@ function validar_reserva(array $datos, array $estudiosPermitidos, string $fechaM
     if (!$errores && $sucursalId && $profesionalId && $marcaTiempo) {
         $propios = horarios_propios([$profesionalId], (int) $marcaTiempo->format('N'));
         if (isset($propios[$profesionalId]) && !hora_en_turnos($propios[$profesionalId], $datos['hora'])) {
-            $errores['hora'] = 'Ese profesional no atiende en ese horario. Elegi otra hora.';
+            $errores['hora'] = 'Ese profesional no atiende en ese horario. Elegí otra hora.';
         }
     }
 
@@ -133,7 +133,7 @@ function validar_reserva(array $datos, array $estudiosPermitidos, string $fechaM
             }
         }
         if ($profesionalId === null) {
-            $errores['hora'] = 'No hay profesionales disponibles en esa hora. Elegi otra.';
+            $errores['hora'] = 'No hay profesionales disponibles en esa hora. Elegí otra.';
         }
     }
 

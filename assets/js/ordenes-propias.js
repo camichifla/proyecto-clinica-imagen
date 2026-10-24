@@ -42,7 +42,7 @@
         }
         if (!data.ordenes || !data.ordenes.length) {
             const p = document.createElement('p');
-            p.textContent = 'Todavia no tenes ordenes de estudio.';
+            p.textContent = 'Todavía no tenés órdenes de estudio.';
             contenedor.appendChild(p);
             return;
         }

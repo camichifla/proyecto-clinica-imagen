@@ -81,12 +81,12 @@ function renderListaResultados(destino, resultados, mensajeVacio, comparable = f
         const boton = document.createElement('button');
         boton.type = 'button';
         boton.className = 'btn-secundario comparar-abrir';
-        boton.textContent = 'Comparar imagenes seleccionadas';
+        boton.textContent = 'Comparar imágenes seleccionadas';
         boton.disabled = true;
         const aviso = document.createElement('p');
         aviso.className = 'campo-hint comparar-aviso';
         aviso.setAttribute('role', 'status');
-        aviso.textContent = 'Marca 2 imagenes con "Comparar" para verlas lado a lado.';
+        aviso.textContent = 'Marca 2 imágenes con "Comparar" para verlas lado a lado.';
         barra.append(boton, aviso);
         lista.appendChild(barra);
     }

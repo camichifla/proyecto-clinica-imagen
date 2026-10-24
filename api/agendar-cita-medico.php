@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $idCandidato = filter_var($_POST['paciente_id'] ?? '', FILTER_VALIDATE_INT);
         if (!$idCandidato || !in_array($idCandidato, $idsPacientesConectados, true)) {
-            $errores['paciente_id'] = 'Elegi un paciente valido.';
+            $errores['paciente_id'] = 'Elegí un paciente válido.';
         } else {
             $pacienteId = $idCandidato;
         }
@@ -125,14 +125,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $emailNuevo = trim((string) ($_POST['paciente_email_nuevo'] ?? ''));
         if (!filter_var($emailNuevo, FILTER_VALIDATE_EMAIL)) {
-            $errores['paciente_email_nuevo'] = 'Ingresa un email valido.';
+            $errores['paciente_email_nuevo'] = 'Ingresa un email válido.';
         } else {
             $stmt = db()->prepare("SELECT ref_id FROM cuentas WHERE rol = 'paciente' AND email = ?");
             $stmt->execute([$emailNuevo]);
             $refId = $stmt->fetchColumn();
             if ($refId !== false) {
 
-                $errores['paciente_email_nuevo'] = 'Ya existe una cuenta con ese email. Elegi el paciente desde "Paciente existente".';
+                $errores['paciente_email_nuevo'] = 'Ya existe una cuenta con ese email. Elegí el paciente desde "Paciente existente".';
             } else {
                 $emailPendiente    = $emailNuevo;
                 $nombrePendiente   = trim((string) ($_POST['paciente_nombre_nuevo'] ?? ''));

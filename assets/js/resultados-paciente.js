@@ -9,7 +9,7 @@
         return;
     }
 
-    const MENSAJE_VACIO = 'Este paciente todavia no tiene resultados cargados.';
+    const MENSAJE_VACIO = 'Este paciente todavía no tiene resultados cargados.';
 
     function renderCitas(destino, citas) {
         const h3 = document.createElement('h3');
@@ -37,18 +37,18 @@
             tdEstado.appendChild(span);
             tr.appendChild(tdEstado);
 
-            tr.appendChild(celda('Confirmacion', cita.fecha_hora_confirmada || '-'));
+            tr.appendChild(celda('Confirmación', cita.fecha_hora_confirmada || '-'));
             tr.appendChild(celda('Notas', cita.notas_admin || '-'));
             return tr;
         });
-        destino.appendChild(tabla(['Fecha y hora solicitada', 'Sede', 'Estudio', 'Estado', 'Confirmacion', 'Notas'], filas));
+        destino.appendChild(tabla(['Fecha y hora solicitada', 'Sede', 'Estudio', 'Estado', 'Confirmación', 'Notas'], filas));
     }
 
-    const ROLES = { medico: 'Medico', profesional: 'Profesional' };
+    const ROLES = { medico: 'Médico', profesional: 'Profesional' };
 
     function renderNotas(destino, notas, pacienteId) {
         const h3 = document.createElement('h3');
-        h3.textContent = 'Historia clinica';
+        h3.textContent = 'Historia clínica';
         destino.appendChild(h3);
 
         const form = document.createElement('form');
@@ -93,7 +93,7 @@
 
         if (!notas.length) {
             const p = document.createElement('p');
-            p.textContent = 'Todavia no hay notas para este paciente.';
+            p.textContent = 'Todavía no hay notas para este paciente.';
             destino.appendChild(p);
             return;
         }
@@ -187,7 +187,7 @@
     // y los datos que se ven los decide la API.
     const TEXTOS_ROL = {
         administrador: { titulo: 'Buscar Resultados' },
-        profesional: { titulo: 'Historial de Pacientes', sinPacientes: 'Todavia no tenes pacientes con citas asignadas.' },
+        profesional: { titulo: 'Historial de Pacientes', sinPacientes: 'Todavía no tenés pacientes con citas asignadas.' },
     };
 
     async function init() {
@@ -195,7 +195,7 @@
         const textos = (sesion && TEXTOS_ROL[sesion.rol]) || null;
         if (textos) {
             document.getElementById('titulo-vista').textContent = textos.titulo;
-            document.title = textos.titulo + ' - Clinica Imagen';
+            document.title = textos.titulo + ' - Clínica Imagen';
             if (textos.sinPacientes) {
                 inputBuscar.dataset.mensajeSinPacientes = textos.sinPacientes;
             }

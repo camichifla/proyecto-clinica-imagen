@@ -16,7 +16,7 @@
     placeholder.value = '';
     placeholder.textContent = pacienteSelect.value
       ? (citas.length ? 'Sin cita asociada' : MENSAJE_SIN_CITAS)
-      : 'Elegi un paciente primero';
+      : 'Elegí un paciente primero';
     citaSelect.appendChild(placeholder);
 
     citas.forEach(function (cita) {

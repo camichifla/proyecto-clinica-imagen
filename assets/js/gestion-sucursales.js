@@ -53,7 +53,7 @@
     function renderFila(sucursal) {
         const tr = document.createElement('tr');
         tr.appendChild(celda('Nombre', sucursal.nombre));
-        tr.appendChild(celda('Direccion', sucursal.direccion || '-'));
+        tr.appendChild(celda('Dirección', sucursal.direccion || '-'));
         tr.appendChild(celda('Estado', sucursal.activo ? 'Activa' : 'Inactiva'));
         const td = document.createElement('td');
         td.dataset.label = 'Acciones';
@@ -76,7 +76,7 @@
         if (!contenedorEstudios.children.length) {
             poblarEstudios(data.estudios);
         }
-        lista.replaceChildren(tabla(['Nombre', 'Direccion', 'Estado', 'Acciones'], data.sucursales.map(renderFila)));
+        lista.replaceChildren(tabla(['Nombre', 'Dirección', 'Estado', 'Acciones'], data.sucursales.map(renderFila)));
     }
 
     form.addEventListener('submit', async (evento) => {

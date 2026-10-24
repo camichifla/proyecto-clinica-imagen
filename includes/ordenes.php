@@ -6,7 +6,7 @@ require_once __DIR__ . '/estudios.php';
 // selections (orden_estudio_selecciones) and to the orden_estudio columns.
 const ORDEN_ETIQUETAS = [
     'radio_intra'                 => 'Radiografias intrabucales (piezas)',
-    'radio_intra_tipo'            => 'Tipo de radiografia intrabucal',
+    'radio_intra_tipo'            => 'Tipo de radiografía intrabucal',
     'otros_estudios_extraorales'  => 'Otros estudios extraorales',
     'radio_extraoral'             => 'Radiografias extraorales',
     'opt_indicacion'              => 'Indicacion de panoramica',
@@ -19,22 +19,22 @@ const ORDEN_ETIQUETAS = [
     'modelos_digitales'           => 'Modelos digitales',
     'ortodoncia_marca'            => 'Marca de ortodoncia',
     'ortodoncia_tipo'             => 'Tipo de ortodoncia',
-    'ortodoncia_info_clinica'     => 'Informacion clinica de ortodoncia',
-    'tomo_cone_beam'              => 'Tomografia Cone Beam (zona)',
-    'tomo_cone_beam_tipo'         => 'Tipo de tomografia',
+    'ortodoncia_info_clinica'     => 'Información clínica de ortodoncia',
+    'tomo_cone_beam'              => 'Tomografía Cone Beam (zona)',
+    'tomo_cone_beam_tipo'         => 'Tipo de tomografía',
     'tomo_elementos_sueltos'      => 'Elementos sueltos',
-    'tomo_tipo_estudio'           => 'Tomografia indicada para',
-    'interes_estudio_tomo'        => 'Interes del estudio de tomografia',
+    'tomo_tipo_estudio'           => 'Tomografía indicada para',
+    'interes_estudio_tomo'        => 'Interés del estudio de tomografía',
     'guia_implantes_servicio'     => 'Cirugia guiada: servicio',
     'guia_implante_tipo'          => 'Tipo de guia de implante',
     'implante_marca'              => 'Marca del implante',
-    'implante_ubicacion'          => 'Ubicacion del implante',
+    'implante_ubicacion'          => 'Ubicación del implante',
     'implante_fecha_cirugia'      => 'Fecha de cirugia',
     'realidad_virtual_m3dmix'     => 'Realidad virtual M3DMIX',
     'ecografias'                  => 'Ecografias',
     'eco_interes'                 => 'Interes de la ecografia',
     'otros_servicios'             => 'Otros servicios',
-    'solo_escaneo_interes'        => 'Interes del escaneo',
+    'solo_escaneo_interes'        => 'Interés del escaneo',
     'contencion_arcada'           => 'Contencion: arcada',
     'contencion_grosor'           => 'Contencion: grosor',
     'contencion_forma'            => 'Contencion: forma',
@@ -91,7 +91,7 @@ function ordenes_de_paciente(PDO $db, int $pacienteId): array
                 $valor = implode(', ', $selecciones[$id][$campo]);
             } else {
                 $v = $columnas[$id][$campo] ?? null;
-                $valor = $campo === 'telerradio_frontal_analisis' ? ($v ? 'Si' : '') : (string) ($v ?? '');
+                $valor = $campo === 'telerradio_frontal_analisis' ? ($v ? 'Sí' : '') : (string) ($v ?? '');
             }
             if ($valor !== '') {
                 $detalle[] = ['etiqueta' => $etiqueta, 'valor' => $valor];

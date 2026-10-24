@@ -24,7 +24,7 @@
         const enlace = document.createElement('a');
         enlace.className = 'btn-primary';
         if (estudio.autoagendable) {
-            modo.textContent = 'Podes agendarlo en linea.';
+            modo.textContent = 'Podes agendarlo en línea.';
             if (sesion && sesion.logueado) {
                 if (sesion.rol !== 'paciente') {
                     card.appendChild(modo);
@@ -33,7 +33,7 @@
                 enlace.textContent = 'Agendar';
                 enlace.href = 'agendar-cita.html';
             } else {
-                enlace.textContent = 'Iniciar sesion para agendar';
+                enlace.textContent = 'Iniciar sesión para agendar';
                 enlace.href = 'login.html';
             }
         } else {

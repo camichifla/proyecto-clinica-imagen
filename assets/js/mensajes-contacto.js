@@ -69,13 +69,13 @@
         }
         if (!data.mensajes.length) {
             const p = document.createElement('p');
-            p.textContent = 'Todavia no hay mensajes.';
+            p.textContent = 'Todavía no hay mensajes.';
             lista.replaceChildren(p);
             return;
         }
         lista.replaceChildren(...data.mensajes.map((m) => renderMensaje(m, sesion.csrf)));
         if (data.mensajes.length >= data.max) {
-            mostrarMensaje(`Se muestran los ultimos ${data.max} mensajes.`, false);
+            mostrarMensaje(`Se muestran los últimos ${data.max} mensajes.`, false);
         }
     }
 

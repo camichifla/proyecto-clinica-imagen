@@ -7,11 +7,11 @@
     function renderNotas(notas) {
         const destino = document.getElementById('historial-notas');
         if (notas === null) {
-            destino.replaceChildren(parrafo('No se pudo mostrar el historial clinico en este momento.'));
+            destino.replaceChildren(parrafo('No se pudo mostrar el historial clínico en este momento.'));
             return;
         }
         if (!notas.length) {
-            destino.replaceChildren(parrafo('Todavia no hay notas en tu historial.'));
+            destino.replaceChildren(parrafo('Todavía no hay notas en tu historial.'));
             return;
         }
         destino.replaceChildren(...notas.map((nota) => {
@@ -29,7 +29,7 @@
     function renderCitas(citas) {
         const destino = document.getElementById('historial-citas');
         if (!citas.length) {
-            destino.replaceChildren(parrafo('Todavia no tenes citas.'));
+            destino.replaceChildren(parrafo('Todavía no tenés citas.'));
             return;
         }
         const filas = citas.map((cita) => {
@@ -59,7 +59,7 @@
             return;
         }
 
-        renderListaResultados(contenedor, data.resultados, 'Todavia no tenes resultados cargados.');
+        renderListaResultados(contenedor, data.resultados, 'Todavía no tenés resultados cargados.');
         renderNotas(data.notas);
         renderCitas(data.citas || []);
     }

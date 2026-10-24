@@ -45,7 +45,7 @@
 
     async function cambiarActivo(paciente, boton) {
         const accion = paciente.activo ? 'dar de baja' : 'reactivar';
-        if (!window.confirm('Seguro que queres ' + accion + ' la cuenta de ' + paciente.apellido + ', ' + paciente.nombre + '?')) {
+        if (!window.confirm('Seguro que querés ' + accion + ' la cuenta de ' + paciente.apellido + ', ' + paciente.nombre + '?')) {
             return;
         }
         boton.disabled = true;
@@ -65,8 +65,8 @@
     function renderFila(paciente) {
         const tr = document.createElement('tr');
         tr.appendChild(celda('Nombre', paciente.apellido + ', ' + paciente.nombre));
-        tr.appendChild(celda('Cedula', paciente.ci));
-        tr.appendChild(celda('Telefono', paciente.numero));
+        tr.appendChild(celda('Cédula', paciente.ci));
+        tr.appendChild(celda('Teléfono', paciente.numero));
         tr.appendChild(celda('Correo', paciente.email || '-'));
         tr.appendChild(celda('Cuenta', paciente.email ? (paciente.activo ? 'Activa' : 'Inactiva') : 'Sin cuenta'));
         const td = document.createElement('td');
@@ -102,7 +102,7 @@
             lista.replaceChildren(p);
             return;
         }
-        const nodos = [tabla(['Nombre', 'Cedula', 'Telefono', 'Correo', 'Cuenta', 'Acciones'], data.pacientes.map(renderFila))];
+        const nodos = [tabla(['Nombre', 'Cédula', 'Teléfono', 'Correo', 'Cuenta', 'Acciones'], data.pacientes.map(renderFila))];
         if (data.truncado) {
             const p = document.createElement('p');
             p.className = 'campo-hint';
@@ -141,7 +141,7 @@
             mostrarMensaje(data.error || 'Ocurrio un error inesperado.', true);
             return;
         }
-        mostrarMensaje(editando ? 'Paciente actualizado.' : 'Paciente registrado. Se le envio un correo para elegir su contrasena.', false);
+        mostrarMensaje(editando ? 'Paciente actualizado.' : 'Paciente registrado. Se le envió un correo para elegir su contraseña.', false);
         cerrarForm();
         cargar();
     });

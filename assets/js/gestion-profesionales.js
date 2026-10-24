@@ -59,7 +59,7 @@
         tr.appendChild(celda('Sedes', profesional.sucursales
             .map((id) => (catalogo.sucursales.find((s) => s.id === id) || {}).nombre).filter(Boolean).join(', ') || '-'));
         tr.appendChild(celda('Estudios', profesional.especializacion.map((c) => etiquetas[c] || c).join(', ') || '-'));
-        tr.appendChild(celda('Horarios propios', profesional.horarios.length ? 'Si' : 'No (siempre que la sede abra)'));
+        tr.appendChild(celda('Horarios propios', profesional.horarios.length ? 'Sí' : 'No (siempre que la sede abra)'));
         const td = document.createElement('td');
         td.dataset.label = 'Acciones';
         const boton = document.createElement('button');
@@ -82,7 +82,7 @@
         etiquetas = Object.fromEntries(data.estudios.map((e) => [e.clave, e.etiqueta]));
         if (!data.profesionales.length) {
             const p = document.createElement('p');
-            p.textContent = 'Todavia no hay profesionales. Crea una cuenta de rol Profesional en Manejar Usuarios.';
+            p.textContent = 'Todavía no hay profesionales. Crea una cuenta de rol Profesional en Manejar Usuarios.';
             lista.replaceChildren(p);
             return;
         }

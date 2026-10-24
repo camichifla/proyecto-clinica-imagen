@@ -128,11 +128,11 @@
     var placeholder = document.createElement('option');
     placeholder.value = '';
     if (!s || !fechaSeleccionada) {
-      placeholder.textContent = 'Elegi sede y fecha primero';
+      placeholder.textContent = 'Elegí sede y fecha primero';
     } else if (!opciones.length) {
-      placeholder.textContent = 'Sin horarios disponibles ese dia';
+      placeholder.textContent = 'Sin horarios disponibles ese día';
     } else {
-      placeholder.textContent = 'Elegi un horario';
+      placeholder.textContent = 'Elegí un horario';
     }
     horaSelect.appendChild(placeholder);
 
@@ -343,7 +343,7 @@
     if (seleccionada && !diaAbierto(sucursalActual(), seleccionada)) {
       seleccionada = null;
       oculto.value = '';
-      textoBoton.textContent = 'Elegi una fecha';
+      textoBoton.textContent = 'Elegí una fecha';
     }
     if (!panel.hidden) {
       render();

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pacientes - Clinica Imagen</title>
+  <title>Pacientes - Clínica Imagen</title>
   <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
   <link rel="stylesheet" href="./assets/css/styles.css">
   <link rel="stylesheet" href="./assets/css/backoffice.css">
@@ -14,11 +14,11 @@
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
   <header>
     <div class="logo">
-      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clínica Imagen"></a>
     </div>
     <div class="user">
       <details class="menu-usuario">
-        <summary class="menu-usuario-toggle" aria-label="Menu de usuario">
+        <summary class="menu-usuario-toggle" aria-label="Menú de usuario">
           <span class="avatar" aria-hidden="true"></span>
         </summary>
         <div class="menu-usuario-panel">
@@ -26,7 +26,7 @@
           <ul class="menu-usuario-lista"></ul>
           <form method="post" action="logout.php" class="form-logout">
             <input type="hidden" name="csrf" value="">
-            <button type="submit" class="btn-logout">Cerrar sesion</button>
+            <button type="submit" class="btn-logout">Cerrar sesión</button>
           </form>
         </div>
       </details>
@@ -36,7 +36,7 @@
   <main id="contenido">
     <section class="seccion-panel">
       <h1>Pacientes</h1>
-      <p class="campo-hint">Busca por nombre, apellido o cedula. Podes dar de baja o reactivar la cuenta de un paciente desde la tabla. Los pacientes no se eliminan.</p>
+      <p class="campo-hint">Busca por nombre, apellido o cédula. Podes dar de baja o reactivar la cuenta de un paciente desde la tabla. Los pacientes no se eliminan.</p>
 
       <p class="aviso-exito" data-mensaje role="status" hidden></p>
       <p class="aviso-error" data-mensaje-error role="alert" hidden></p>
@@ -44,7 +44,7 @@
       <form id="form-busqueda" class="filtros-turnos" novalidate>
         <div class="campo">
           <label for="busqueda-q">Buscar</label>
-          <input type="search" id="busqueda-q" name="q" autocomplete="off" placeholder="Nombre, apellido o cedula">
+          <input type="search" id="busqueda-q" name="q" autocomplete="off" placeholder="Nombre, apellido o cédula">
         </div>
         <button type="submit" class="btn-secundario">Buscar</button>
         <button type="button" class="btn-secundario" id="paciente-nuevo">Nuevo paciente</button>
@@ -55,7 +55,7 @@
 
     <section class="seccion-panel" id="seccion-paciente-form" hidden>
       <h2 id="paciente-form-titulo">Nuevo paciente</h2>
-      <p class="campo-hint" id="paciente-form-ayuda">Se crea una cuenta verificada y se le envia un correo con un enlace (vence en 1 hora) para que elija su contrasena. Si vence, puede usar "Olvide mi contrasena".</p>
+      <p class="campo-hint" id="paciente-form-ayuda">Se crea una cuenta verificada y se le envía un correo con un enlace (vence en 1 hora) para que elija su contraseña. Si vence, puede usar "Olvidé mi contraseña".</p>
 
       <form id="form-paciente" novalidate>
         <input type="hidden" name="csrf" value="">
@@ -74,18 +74,18 @@
         </div>
 
         <div class="campo">
-          <label for="paciente-ci">Cedula</label>
+          <label for="paciente-ci">Cédula</label>
           <input type="text" id="paciente-ci" name="ci" inputmode="numeric" autocomplete="off">
-          <p class="campo-hint">7 u 8 digitos, sin puntos ni guion.</p>
+          <p class="campo-hint">7 u 8 dígitos, sin puntos ni guion.</p>
         </div>
 
         <div class="campo">
-          <label for="paciente-direccion">Direccion</label>
+          <label for="paciente-direccion">Dirección</label>
           <input type="text" id="paciente-direccion" name="direccion" autocomplete="off">
         </div>
 
         <div class="campo">
-          <label for="paciente-numero">Telefono</label>
+          <label for="paciente-numero">Teléfono</label>
           <input type="tel" id="paciente-numero" name="numero" autocomplete="off">
         </div>
 
@@ -103,12 +103,12 @@
   </main>
 
   <footer>
-    <nav aria-label="Pie de pagina">
+    <nav aria-label="Pie de página">
       <a href="index.html">Inicio</a>
       <a href="servicios.html">Servicios</a>
       <a href="contacto.html">Contacto</a>
     </nav>
-    <p>&copy; Clinica Imagen</p>
+    <p>&copy; Clínica Imagen</p>
   </footer>
 
   <script src="assets/js/sesion.js" defer></script>

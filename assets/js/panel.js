@@ -7,7 +7,7 @@
 
     function renderFila(cita) {
         const tr = document.createElement('tr');
-        tr.appendChild(celda('Codigo', cita.codigo));
+        tr.appendChild(celda('Código', cita.codigo));
         tr.appendChild(celda('Hora', cita.hora));
         tr.appendChild(celda('Paciente', cita.pacienteLabel));
         tr.appendChild(celda('Estudio', cita.estudioLabel));
@@ -30,7 +30,7 @@
             return;
         }
         listaHoy.replaceChildren(tabla(
-            ['Codigo', 'Hora', 'Paciente', 'Estudio', 'Sede', 'Profesional', 'Estado'],
+            ['Código', 'Hora', 'Paciente', 'Estudio', 'Sede', 'Profesional', 'Estado'],
             data.citasHoy.map(renderFila)
         ));
     }

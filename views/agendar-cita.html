@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Agendar Cita - Clinica Imagen</title>
+  <title>Agendar Cita - Clínica Imagen</title>
   <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
   <link rel="stylesheet" href="./assets/css/styles.css">
 </head>
@@ -13,11 +13,11 @@
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
   <header>
     <div class="logo">
-      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clínica Imagen"></a>
     </div>
     <div class="user">
       <details class="menu-usuario">
-        <summary class="menu-usuario-toggle" aria-label="Menu de usuario">
+        <summary class="menu-usuario-toggle" aria-label="Menú de usuario">
           <span class="avatar" aria-hidden="true"></span>
         </summary>
         <div class="menu-usuario-panel">
@@ -25,7 +25,7 @@
           <ul class="menu-usuario-lista"></ul>
           <form method="post" action="logout.php" class="form-logout">
             <input type="hidden" name="csrf" value="">
-            <button type="submit" class="btn-logout">Cerrar sesion</button>
+            <button type="submit" class="btn-logout">Cerrar sesión</button>
           </form>
         </div>
       </details>
@@ -37,7 +37,7 @@
       <section class="seccion-auth">
         <h1>Agendar Cita</h1>
 
-        <p class="aviso-exito" data-aviso="ok" hidden>Tu solicitud de cita fue enviada. <span data-codigo hidden>Codigo de seguimiento: <span data-codigo-valor></span>. </span>Te avisaremos cuando sea confirmada.</p>
+        <p class="aviso-exito" data-aviso="ok" hidden>Tu solicitud de cita fue enviada. <span data-codigo hidden>Código de seguimiento: <span data-codigo-valor></span>. </span>Te avisaremos cuando sea confirmada.</p>
         <p class="aviso-exito" data-aviso="cancelado" hidden>La cita fue cancelada.</p>
         <p class="aviso-exito" data-aviso="reprogramado" hidden>La cita fue reprogramada.</p>
         <p class="campo-error" data-aviso="error-reprogramar" hidden>Esa cita ya no se puede reprogramar (cambio de estado o no te pertenece).</p>
@@ -51,14 +51,14 @@
           <div class="campo">
             <label for="estudio">Estudio</label>
             <select id="estudio" name="estudio" class="selector-combo">
-              <option value="">Elegi un estudio</option>
+              <option value="">Elegí un estudio</option>
             </select>
           </div>
 
           <div class="campo">
             <label for="sucursal">Sede</label>
             <select id="sucursal" name="sucursal_id" class="selector-combo">
-              <option value="">Elegi una sede</option>
+              <option value="">Elegí una sede</option>
             </select>
           </div>
 
@@ -67,7 +67,7 @@
             <select id="profesional_id" name="profesional_id" class="selector-combo">
               <option value="">Cualquiera disponible</option>
             </select>
-            <p class="campo-error" data-mensaje-sin-profesionales hidden>Todavia no hay profesionales cargados.</p>
+            <p class="campo-error" data-mensaje-sin-profesionales hidden>Todavía no hay profesionales cargados.</p>
           </div>
 
           <div class="campo">
@@ -76,7 +76,7 @@
               <button type="button" id="fecha-boton" class="selector-fecha-boton"
                       aria-haspopup="dialog" aria-expanded="false"
                       aria-labelledby="fecha-label">
-                <span class="selector-fecha-texto">Elegi una fecha</span>
+                <span class="selector-fecha-texto">Elegí una fecha</span>
               </button>
               <input type="hidden" id="fecha" name="fecha" value="">
               <div class="calendario" id="calendario" role="dialog" aria-label="Elegir fecha" hidden>
@@ -94,7 +94,7 @@
           <div class="campo">
             <label for="hora">Hora</label>
             <select id="hora" name="hora" class="selector-combo" disabled>
-              <option value="">Elegi sede y fecha primero</option>
+              <option value="">Elegí sede y fecha primero</option>
             </select>
           </div>
 
@@ -110,12 +110,12 @@
   </main>
 
   <footer>
-    <nav aria-label="Pie de pagina">
+    <nav aria-label="Pie de página">
       <a href="index.html">Inicio</a>
       <a href="servicios.html">Servicios</a>
       <a href="contacto.html">Contacto</a>
     </nav>
-    <p>&copy; Clinica Imagen</p>
+    <p>&copy; Clínica Imagen</p>
   </footer>
 
   <script src="assets/js/sesion.js" defer></script>

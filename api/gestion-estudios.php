@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check($_POST['csrf'] ?? null);
     $accion = (string) ($_POST['accion'] ?? '');
     if (!in_array($accion, ['crear', 'editar'], true)) {
-        respuesta_estudios(400, ['ok' => false, 'error' => 'Accion invalida.']);
+        respuesta_estudios(400, ['ok' => false, 'error' => 'Acción inválida.']);
     }
 
     $clave         = (string) ($_POST['clave'] ?? '');
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errores['clave'] = 'La clave usa 2 a 30 letras minusculas, numeros o guion bajo, y empieza con una letra.';
     }
     if ($etiqueta === '' || mb_strlen($etiqueta) > ETIQUETA_ESTUDIO_MAX) {
-        $errores['etiqueta'] = 'La etiqueta es obligatoria (maximo ' . ETIQUETA_ESTUDIO_MAX . ' caracteres).';
+        $errores['etiqueta'] = 'La etiqueta es obligatoria (máximo ' . ETIQUETA_ESTUDIO_MAX . ' caracteres).';
     } else {
         $stmt = db()->prepare('SELECT 1 FROM estudios WHERE etiqueta = ? AND clave <> ?');
         $stmt->execute([$etiqueta, $clave]);
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (mb_strlen($descripcion) > DESCRIPCION_ESTUDIO_MAX) {
-        $errores['descripcion'] = 'La descripcion admite hasta ' . DESCRIPCION_ESTUDIO_MAX . ' caracteres.';
+        $errores['descripcion'] = 'La descripción admite hasta ' . DESCRIPCION_ESTUDIO_MAX . ' caracteres.';
     }
 
     $stmt = db()->prepare('SELECT 1 FROM estudios WHERE clave = ?');

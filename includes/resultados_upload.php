@@ -54,7 +54,7 @@ function validar_subida(array $archivo, int $maxBytes, array $permitidos, string
         return 'Error al subir "' . $archivo['name'] . '".';
     }
     if ($archivo['size'] > $maxBytes) {
-        return '"' . $archivo['name'] . '" supera el tamano maximo de ' . intdiv($maxBytes, 1024 * 1024) . 'MB.';
+        return '"' . $archivo['name'] . '" supera el tamaño máximo de ' . intdiv($maxBytes, 1024 * 1024) . 'MB.';
     }
 
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
@@ -73,12 +73,12 @@ function validar_subida(array $archivo, int $maxBytes, array $permitidos, string
 
 function validar_imagen(array $archivo, ?string &$extension): ?string
 {
-    return validar_subida($archivo, MAX_TAMANIO_IMAGEN, MIME_A_EXTENSION, 'no es una imagen valida (se aceptan JPG, PNG o WEBP).', $extension);
+    return validar_subida($archivo, MAX_TAMANIO_IMAGEN, MIME_A_EXTENSION, 'no es una imagen válida (se aceptan JPG, PNG o WEBP).', $extension);
 }
 
 function validar_informe(array $archivo, ?string &$extension): ?string
 {
-    return validar_subida($archivo, MAX_TAMANIO_INFORME, ['application/pdf' => 'pdf'], 'no es un PDF valido.', $extension);
+    return validar_subida($archivo, MAX_TAMANIO_INFORME, ['application/pdf' => 'pdf'], 'no es un PDF válido.', $extension);
 }
 
 /**
@@ -175,9 +175,9 @@ function procesar_post_resultado(array $usuario, callable $pacienteValido, ?int 
 
     $pacienteId = filter_var($pacienteIdPost, FILTER_VALIDATE_INT);
     if (!$pacienteId) {
-        $errores['paciente_id'] = 'Elegi un paciente.';
+        $errores['paciente_id'] = 'Elegí un paciente.';
     } elseif (!$pacienteValido($pacienteId)) {
-        $errores['paciente_id'] = 'Elegi un paciente valido.';
+        $errores['paciente_id'] = 'Elegí un paciente válido.';
         $pacienteId = null;
     }
 
@@ -185,9 +185,9 @@ function procesar_post_resultado(array $usuario, callable $pacienteValido, ?int 
     if ($citaIdPost !== '') {
         $citaIdCandidato = filter_var($citaIdPost, FILTER_VALIDATE_INT);
         if (!$citaIdCandidato) {
-            $errores['cita_id'] = 'Cita invalida.';
+            $errores['cita_id'] = 'Cita inválida.';
         } elseif (!$pacienteId) {
-            $errores['cita_id'] = 'Elegi un paciente valido primero.';
+            $errores['cita_id'] = 'Elegí un paciente válido primero.';
         } else {
             $sql    = "SELECT id FROM citas WHERE id = ? AND paciente_id = ? AND estado = 'confirmada'";
             $params = [$citaIdCandidato, $pacienteId];
@@ -212,11 +212,11 @@ function procesar_post_resultado(array $usuario, callable $pacienteValido, ?int 
     }
 
     if ($fechaEstudio === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fechaEstudio)) {
-        $errores['fecha_estudio'] = 'Elegi una fecha valida.';
+        $errores['fecha_estudio'] = 'Elegí una fecha válida.';
     } else {
         [$anioEstudio, $mesEstudio, $diaEstudio] = array_map('intval', explode('-', $fechaEstudio));
         if (!checkdate($mesEstudio, $diaEstudio, $anioEstudio)) {
-            $errores['fecha_estudio'] = 'Elegi una fecha valida.';
+            $errores['fecha_estudio'] = 'Elegí una fecha válida.';
         } elseif ($fechaEstudio > $fechaMaxEstudio) {
             $errores['fecha_estudio'] = 'La fecha del estudio no puede ser futura.';
         }

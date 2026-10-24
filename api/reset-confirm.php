@@ -8,7 +8,7 @@ header('Content-Type: application/json; charset=utf-8');
 function token_invalido_json(): void
 {
     http_response_code(400);
-    echo json_encode(['ok' => false, 'error' => 'El enlace de restablecimiento es invalido o vencio.'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => false, 'error' => 'El enlace de restablecimiento es inválido o venció.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -17,7 +17,7 @@ $metodo = $_SERVER['REQUEST_METHOD'];
 
 if ($metodo !== 'GET' && $metodo !== 'POST') {
     http_response_code(405);
-    echo json_encode(['ok' => false, 'error' => 'Metodo no permitido.'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => false, 'error' => 'Método no permitido.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
@@ -50,7 +50,7 @@ if (!preg_match(REGLAS_PACIENTE['contrasena']['pattern'], $nueva) || strlen($nue
     http_response_code(422);
     echo json_encode([
         'ok'      => false,
-        'errores' => ['contrasena' => 'Formato de contrasena invalido. ' . REGLAS_PACIENTE['contrasena']['hint']],
+        'errores' => ['contrasena' => 'Formato de contraseña inválido. ' . REGLAS_PACIENTE['contrasena']['hint']],
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }

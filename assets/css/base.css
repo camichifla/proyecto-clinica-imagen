@@ -46,24 +46,59 @@ header {
     margin-left: auto;
 }
 
-/* User menu button: bare hamburger icon (three thick bars). */
+/* User menu button: hamburger of three rounded bars that turns into an X while the menu is open.
+   Top/bottom bars are the avatar's pseudo-elements, the middle one is the summary's ::after. */
 .user .avatar {
-    --barra: linear-gradient(var(--on-brand), var(--on-brand));
     display: block;
-    box-sizing: border-box;
     width: 2.75rem;
     height: 2.75rem;
-    border-radius: 0.5rem;
-    background:
-        var(--barra) 50% calc(50% - 9px) / 1.75rem 4px no-repeat,
-        var(--barra) 50% 50% / 1.75rem 4px no-repeat,
-        var(--barra) 50% calc(50% + 9px) / 1.75rem 4px no-repeat;
-    transition: background-color var(--transition-fast);
 }
 
-.menu-usuario-toggle:hover .avatar,
-.menu-usuario[open] .avatar {
-    background-color: rgba(var(--white-rgb), 0.15);
+.menu-usuario-toggle {
+    position: relative;
+}
+
+.user .avatar::before,
+.user .avatar::after,
+.menu-usuario-toggle::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1.75rem;
+    height: 4px;
+    margin: -2px 0 0 -0.875rem;
+    border-radius: 999px;
+    background: var(--on-brand);
+    transition: transform 0.25s ease, opacity 0.2s ease;
+}
+
+.user .avatar::before {
+    transform: translateY(-9px);
+}
+
+.user .avatar::after {
+    transform: translateY(9px);
+}
+
+.menu-usuario[open] .avatar::before {
+    transform: rotate(45deg);
+}
+
+.menu-usuario[open] .avatar::after {
+    transform: rotate(-45deg);
+}
+
+.menu-usuario[open] .menu-usuario-toggle::after {
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .user .avatar::before,
+    .user .avatar::after,
+    .menu-usuario-toggle::after {
+        transition: none;
+    }
 }
 
 .skip-link {

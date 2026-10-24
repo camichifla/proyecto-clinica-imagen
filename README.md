@@ -58,6 +58,25 @@ Restaurar la base:
 gunzip -c /var/backups/operador/clinica_imagen_YYYYMMDD_HHMMSS.sql.gz | sudo mariadb clinica_imagen
 ```
 
+## Correo (SMTP)
+
+La instalación deja el SMTP vacío. Sin SMTP:
+
+- Con HTTP, los enlaces de verificación y de recuperación de contraseña se escriben en `storage/mail.log`.
+- Con HTTPS (certbot o Cloudflare Tunnel) no se envía nada, para no dejar enlaces en texto plano en el servidor. Los pacientes que se registren no van a poder verificar la cuenta ni iniciar sesión.
+
+Completar los datos en `/var/www/clinica-imagen/includes/config.php` (reinstalar no pisa este archivo). Ejemplo con Gmail, que requiere verificación en dos pasos y una [contraseña de aplicación](https://myaccount.google.com/apppasswords):
+
+```php
+define('SMTP_HOST', 'smtp.gmail.com');
+define('SMTP_PORT', 587);
+define('SMTP_USER', 'cuenta@gmail.com');
+define('SMTP_PASS', 'contraseña-de-aplicación');
+define('SMTP_FROM', 'cuenta@gmail.com'); // Gmail exige que coincida con SMTP_USER
+```
+
+Los errores de envío quedan en `/var/log/apache2/clinica-imagen-error.log` (líneas `enviar_correo:`).
+
 ## Publicar en internet (Cloudflare Tunnel)
 
 Menú `2) Gestión de redes`, opción 8. Sin cuenta, dominio ni puertos abiertos: instala `cloudflared`, lo deja como servicio (`clinica-tunel`) y publica el sitio en una URL `https://…trycloudflare.com` con HTTPS de Cloudflare. El operador actualiza `APP_URL` y `APP_HTTPS=true` en `includes/config.php`.

@@ -57,6 +57,7 @@ function enviar_correo(string $destinatario, string $asunto, string $cuerpo): bo
         $mail->send();
         return true;
     } catch (PHPMailerException $e) {
+        error_log('enviar_correo: ' . $mail->ErrorInfo);
         return false;
     }
 }
@@ -65,7 +66,7 @@ function enviar_verificacion(string $email, string $link): bool
 {
     return enviar_correo(
         $email,
-        'Verifica tu cuenta - Clinica Imagen',
+        'Verifica tu cuenta - Clínica Imagen',
         "Gracias por registrarte. Confirma tu cuenta visitando el siguiente enlace:\n\n{$link}\n\nEl enlace vence en 24 horas."
     );
 }
@@ -74,8 +75,8 @@ function enviar_reset(string $email, string $link): bool
 {
     return enviar_correo(
         $email,
-        'Restablecer contrasena - Clinica Imagen',
-        "Solicitaste restablecer tu contrasena. Visita el siguiente enlace para elegir una nueva:\n\n{$link}\n\nEl enlace vence en 1 hora. Si no fuiste vos, ignora este mensaje."
+        'Restablecer contraseña - Clínica Imagen',
+        "Solicitaste restablecer tu contraseña. Visita el siguiente enlace para elegir una nueva:\n\n{$link}\n\nEl enlace vence en 1 hora. Si no fuiste vos, ignora este mensaje."
     );
 }
 
@@ -100,8 +101,8 @@ function enviar_notificacion_cita(string $email, string $estado, string $fechaHo
     if ($estado === 'confirmada') {
         return enviar_correo(
             $email,
-            'Tu cita fue confirmada - Clinica Imagen',
-            "Tu cita fue confirmada para el {$fechaHora}.\n\nSi no podes asistir, contactanos para reprogramarla."
+            'Tu cita fue confirmada - Clínica Imagen',
+            "Tu cita fue confirmada para el {$fechaHora}.\n\nSi no podés asistir, contactanos para reprogramarla."
         );
     }
 
@@ -110,13 +111,13 @@ function enviar_notificacion_cita(string $email, string $estado, string $fechaHo
         if ($notas !== '') {
             $cuerpo .= "\n\nMotivo: {$notas}";
         }
-        return enviar_correo($email, 'Tu cita fue cancelada - Clinica Imagen', $cuerpo);
+        return enviar_correo($email, 'Tu cita fue cancelada - Clínica Imagen', $cuerpo);
     }
 
     if ($estado === 'reprogramada') {
         return enviar_correo(
             $email,
-            'Tu cita fue reprogramada - Clinica Imagen',
+            'Tu cita fue reprogramada - Clínica Imagen',
             "Tu cita fue reprogramada para el {$fechaHora}."
         );
     }
@@ -126,7 +127,7 @@ function enviar_notificacion_cita(string $email, string $estado, string $fechaHo
         $cuerpo .= "\n\nMotivo: {$notas}";
     }
 
-    return enviar_correo($email, 'Tu cita fue rechazada - Clinica Imagen', $cuerpo);
+    return enviar_correo($email, 'Tu cita fue rechazada - Clínica Imagen', $cuerpo);
 }
 
 /** No clinical content, just the link. */
@@ -134,7 +135,7 @@ function enviar_aviso_resultado(string $email, string $link): bool
 {
     return enviar_correo(
         $email,
-        'Tenes un nuevo resultado - Clinica Imagen',
+        'Tenés un nuevo resultado - Clínica Imagen',
         "Hay un nuevo resultado disponible en tu portal. Ingresa para verlo:\n\n{$link}"
     );
 }

@@ -30,6 +30,7 @@
 
 .agenda-nav {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 0.6rem;
 }
@@ -236,6 +237,20 @@
 
     .agenda-dia-mes {
         min-height: 4.5rem;
+        padding: 0.3rem;
+    }
+
+    /* Pills are too narrow for text on phones ("0..."): show a colored bar per cita; the text stays for
+       screen readers and the day number opens the week view with the details. */
+    .agenda-mes-grid .agenda-cita-pill {
+        height: 0.35rem;
+        padding: 0;
+        font-size: 0;
+        background: currentColor;
+    }
+
+    .agenda-cita-mas {
+        font-size: 0.65rem;
     }
 
     .agenda-semana-grid {

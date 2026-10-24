@@ -110,7 +110,7 @@
     cursor: not-allowed;
 }
 
-@media (width <= 480px) {
+@media (width <= 760px) {
     .tabla-datos thead {
         display: none;
     }

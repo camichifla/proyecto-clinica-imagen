@@ -46,19 +46,18 @@ header {
     margin-left: auto;
 }
 
-/* User menu button: hamburger icon (three bars), same look as .tema-toggle. */
+/* User menu button: bare hamburger icon (three thick bars). */
 .user .avatar {
     --barra: linear-gradient(var(--on-brand), var(--on-brand));
     display: block;
     box-sizing: border-box;
     width: 2.75rem;
     height: 2.75rem;
-    border-radius: 50%;
-    border: 1px solid var(--on-brand);
+    border-radius: 0.5rem;
     background:
-        var(--barra) 50% calc(50% - 6px) / 1.15rem 2px no-repeat,
-        var(--barra) 50% 50% / 1.15rem 2px no-repeat,
-        var(--barra) 50% calc(50% + 6px) / 1.15rem 2px no-repeat;
+        var(--barra) 50% calc(50% - 9px) / 1.75rem 4px no-repeat,
+        var(--barra) 50% 50% / 1.75rem 4px no-repeat,
+        var(--barra) 50% calc(50% + 9px) / 1.75rem 4px no-repeat;
     transition: background-color var(--transition-fast);
 }
 

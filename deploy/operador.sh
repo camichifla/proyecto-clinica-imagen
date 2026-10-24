@@ -126,8 +126,7 @@ menu_red() {
       7) read -rp "Nombre a resolver [$(hostname -f 2>/dev/null || hostname)]: " nombre
          nombre=${nombre:-$(hostname -f 2>/dev/null || hostname)}
          log ACTION "Prueba de resolución DNS de $nombre"
-         getent hosts "$nombre" || warn "getent no resolvió $nombre"
-         if command -v dig >/dev/null; then dig +short "$nombre"; else echo "(dig no instalado: apt install bind9-dnsutils)"; fi ;;
+         getent hosts "$nombre" || warn "getent no resolvió $nombre" ;;
       0) return ;;
       *) echo "Opción inválida" ;;
     esac
@@ -331,7 +330,7 @@ menu_log_interno() {
 instalar_dependencias() {
   echo "ℹ Instalando dependencias del sistema..."
   export DEBIAN_FRONTEND=noninteractive
-  apt-get update && apt-get install -y apache2 mariadb-server rclone nftables fail2ban python3-systemd openssh-server dnsutils \
+  apt-get update && apt-get install -y apache2 mariadb-server rclone nftables fail2ban python3-systemd openssh-server \
     curl wget git nano rsync iproute2 procps || { warn "Falló la instalación de dependencias"; return 1; }
   systemctl enable --now apache2 mariadb fail2ban ssh
   ok "Dependencias y servicios instalados"

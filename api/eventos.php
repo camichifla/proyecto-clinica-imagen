@@ -59,16 +59,7 @@ foreach (['ip', 'email'] as $columna) {
 $tipos = db()->query('SELECT DISTINCT tipo FROM eventos ORDER BY tipo')->fetchAll(PDO::FETCH_COLUMN);
 
 echo json_encode([
-    'eventos'     => array_map(static fn (array $e): array => [
-        'id'        => (int) $e['id'],
-        'tipo'      => $e['tipo'],
-        'cuenta_id' => $e['cuenta_id'] !== null ? (int) $e['cuenta_id'] : null,
-        'email'     => $e['email'] ?? '',
-        'ip'        => $e['ip'],
-        'detalle'   => $e['detalle'] ?? '',
-        'creado_en' => $e['creado_en'],
-    ], $eventos),
+    'eventos'     => $eventos,
     'sospechosos' => $sospechosos,
     'tipos'       => $tipos,
-    'max'         => MAX_FILAS_EVENTOS,
 ], JSON_UNESCAPED_UNICODE);

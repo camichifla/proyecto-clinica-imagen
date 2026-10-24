@@ -11,10 +11,6 @@ function registrar_evento(string $tipo, ?string $detalle = null, ?string $email 
         }
         db()->prepare('INSERT INTO eventos (tipo, cuenta_id, email, ip, detalle) VALUES (?, ?, ?, ?, ?)')
             ->execute([$tipo, $cuentaId, $email, $ip, $detalle]);
-        // ponytail: probabilistic prune of throttle rows only (audit rows are kept); make it a cron job if traffic grows.
-        if (random_int(1, 100) === 1) {
-            db()->exec("DELETE FROM eventos WHERE tipo IN ('login_fallo', 'reset_solicitud', 'contacto', 'verif_reenvio') AND creado_en < NOW() - INTERVAL 90 DAY");
-        }
     } catch (Throwable $e) {
         error_log('registrar_evento: ' . $e->getMessage());
     }

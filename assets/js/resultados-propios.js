@@ -4,17 +4,8 @@
         return;
     }
 
-    function parrafo(texto) {
-        const p = document.createElement('p');
-        p.textContent = texto;
-        return p;
-    }
-
     function renderNotas(notas) {
         const destino = document.getElementById('historial-notas');
-        if (!destino) {
-            return;
-        }
         if (notas === null) {
             destino.replaceChildren(parrafo('No se pudo mostrar el historial clinico en este momento.'));
             return;
@@ -37,9 +28,6 @@
 
     function renderCitas(citas) {
         const destino = document.getElementById('historial-citas');
-        if (!destino) {
-            return;
-        }
         if (!citas.length) {
             destino.replaceChildren(parrafo('Todavia no tenes citas.'));
             return;

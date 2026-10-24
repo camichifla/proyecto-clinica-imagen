@@ -13,3 +13,6 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # Remoto: sube /var/backups/operador con rclone todos los días a las 04:00 (se omite si no hay remote configurado).
 0 4 * * * root /usr/local/sbin/clinica-respaldo remoto
+
+# Limpieza: borra eventos de throttle de más de 90 días (los de auditoría se conservan), todos los días a las 05:00.
+0 5 * * * root mariadb clinica_imagen -e "DELETE FROM eventos WHERE tipo IN ('login_fallo','reset_solicitud','contacto','verif_reenvio') AND creado_en < NOW() - INTERVAL 90 DAY"

@@ -34,13 +34,9 @@ case ${1:-} in
   archivos)
     dest="$BACKUP_DIR/archivos_$stamp.tar.gz"
     # includes /var/www/clinica-imagen/storage/resultados (uploaded patient results)
-    if tar -czf "$dest" /etc "$APP_DIR" 2>/dev/null; then
-      done_ok "Respaldo de /etc y $APP_DIR creado en $dest"
-    else
-      # tar exits 1 on "file changed" warnings; keep the archive only if it is non-empty
-      [ -s "$dest" ] && tar -tzf "$dest" >/dev/null 2>&1 && done_ok "Respaldo de archivos creado en $dest (con avisos)" \
-        || { rm -f "$dest"; fail "Falló el respaldo de archivos"; }
-    fi ;;
+    # GNU tar exits 1 on "file changed" warnings (archive still valid), 2 on fatal errors
+    tar -czf "$dest" /etc "$APP_DIR" 2>/dev/null
+    if [ $? -le 1 ]; then done_ok "Respaldo de /etc y $APP_DIR creado en $dest"; else rm -f "$dest"; fail "Falló el respaldo de archivos"; fi ;;
   remoto)
     if ! command -v rclone >/dev/null; then
       log INFO "rclone no instalado; se omite el respaldo remoto"; echo "rclone no instalado: omitido"; exit 0

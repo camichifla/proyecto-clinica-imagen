@@ -4,17 +4,19 @@
 // edited; this file makes the app correct regardless of it.
 require_once __DIR__ . '/config.php';
 
+define('ES_API', str_contains($_SERVER['SCRIPT_NAME'] ?? '', '/api/'));
+
 ini_set('display_errors', '0');
 ini_set('log_errors', '1');
 set_exception_handler(function (Throwable $e): void {
     error_log((string) $e);
     if (!headers_sent()) {
         http_response_code(500);
-        if (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/api/') !== false) {
+        if (ES_API) {
             header('Content-Type: application/json; charset=utf-8');
         }
     }
-    if (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/api/') !== false) {
+    if (ES_API) {
         echo json_encode(['ok' => false, 'error' => 'Error interno.'], JSON_UNESCAPED_UNICODE);
     }
 });
@@ -43,7 +45,7 @@ if (isset($_SESSION['cuenta_id']) && isset($_SESSION['ultimo_acceso'])
         setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
     }
     session_destroy();
-    if (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/api/') !== false) {
+    if (ES_API) {
         http_response_code(401);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(['error' => 'Sesion expirada.', 'expirado' => true], JSON_UNESCAPED_UNICODE);

@@ -43,22 +43,13 @@
     return document.querySelectorAll('.comparar-check:checked');
   }
 
-  function imagenDe(check) {
-    return check.closest('.imagen-comparable').querySelector('img');
-  }
-
+  // The button and notice exist whenever checkboxes do (resultados-render.js creates them together).
   function actualizarBarra() {
     var n = marcadas().length;
-    var boton = document.querySelector('.comparar-abrir');
-    var aviso = document.querySelector('.comparar-aviso');
-    if (boton) {
-      boton.disabled = n !== MAX;
-    }
-    if (aviso) {
-      aviso.textContent = n === MAX
-        ? 'Listo: 2 imagenes seleccionadas.'
-        : 'Marca 2 imagenes con "Comparar" para verlas lado a lado (' + n + ' de ' + MAX + ').';
-    }
+    document.querySelector('.comparar-abrir').disabled = n !== MAX;
+    document.querySelector('.comparar-aviso').textContent = n === MAX
+      ? 'Listo: 2 imagenes seleccionadas.'
+      : 'Marca 2 imagenes con "Comparar" para verlas lado a lado (' + n + ' de ' + MAX + ').';
   }
 
   document.addEventListener('change', function (evento) {
@@ -68,10 +59,7 @@
     }
     if (marcadas().length > MAX) {
       check.checked = false;
-      var aviso = document.querySelector('.comparar-aviso');
-      if (aviso) {
-        aviso.textContent = 'Solo se pueden comparar 2 imagenes. Desmarca una antes de elegir otra.';
-      }
+      document.querySelector('.comparar-aviso').textContent = 'Solo se pueden comparar 2 imagenes. Desmarca una antes de elegir otra.';
       return;
     }
     actualizarBarra();
@@ -87,7 +75,7 @@
     }
     contenedor.replaceChildren();
     checks.forEach(function (check) {
-      var origen = imagenDe(check);
+      var origen = check.closest('.imagen-comparable').querySelector('img');
       var figura = document.createElement('figure');
       var img = document.createElement('img');
       img.src = origen.src;

@@ -45,6 +45,12 @@ async function cargarScripts(...srcs) {
     }
 }
 
+function parrafo(texto) {
+    const p = document.createElement('p');
+    p.textContent = texto;
+    return p;
+}
+
 function celda(etiqueta, texto) {
     const td = document.createElement('td');
     td.dataset.label = etiqueta;

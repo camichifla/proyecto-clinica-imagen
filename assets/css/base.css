@@ -46,18 +46,25 @@ header {
     margin-left: auto;
 }
 
+/* User menu button: hamburger icon (three bars), same look as .tema-toggle. */
 .user .avatar {
+    --barra: linear-gradient(var(--on-brand), var(--on-brand));
     display: block;
+    box-sizing: border-box;
     width: 2.75rem;
     height: 2.75rem;
     border-radius: 50%;
-    border: 2px solid var(--on-brand);
-    color: var(--text-secondary);
-    background-color: var(--border-subtle);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 60%;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='8' r='4' fill='currentColor'/%3E%3Cpath d='M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7' fill='currentColor'/%3E%3C/svg%3E");
+    border: 1px solid var(--on-brand);
+    background:
+        var(--barra) 50% calc(50% - 6px) / 1.15rem 2px no-repeat,
+        var(--barra) 50% 50% / 1.15rem 2px no-repeat,
+        var(--barra) 50% calc(50% + 6px) / 1.15rem 2px no-repeat;
+    transition: background-color var(--transition-fast);
+}
+
+.menu-usuario-toggle:hover .avatar,
+.menu-usuario[open] .avatar {
+    background-color: rgba(var(--white-rgb), 0.15);
 }
 
 .skip-link {
@@ -719,7 +726,8 @@ select.selector-combo {
         padding: 0.6rem 1rem;
     }
 
-    .tema-toggle {
+    .tema-toggle,
+    .user .avatar {
         width: 2.4rem;
         height: 2.4rem;
     }

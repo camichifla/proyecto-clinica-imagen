@@ -1,0 +1,15 @@
+# /etc/cron.d/clinica-imagen — scheduled backups for Clinica Imagen.
+# Formato: minuto hora día-mes mes día-semana usuario comando
+
+# Shell y PATH explícitos: cron arranca con un entorno mínimo.
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Base de datos: volcado comprimido todos los días a las 02:00.
+0 2 * * * root /usr/local/sbin/clinica-respaldo db
+
+# Archivos: /etc y la aplicación (incluye storage/resultados) los domingos a las 03:00.
+0 3 * * 0 root /usr/local/sbin/clinica-respaldo archivos
+
+# Remoto: sube /var/backups/operador con rclone todos los días a las 04:00 (se omite si no hay remote configurado).
+0 4 * * * root /usr/local/sbin/clinica-respaldo remoto

@@ -1,0 +1,19 @@
+# /etc/fail2ban/jail.d/clinica.local — IDS/IPS jails for Clinica Imagen.
+
+[DEFAULT]
+# Bans are enforced through nftables (the firewall used by this server).
+banaction = nftables-multiport
+backend = systemd
+bantime = 1h
+findtime = 10m
+maxretry = 5
+
+# SSH brute force (reads the journal).
+[sshd]
+enabled = true
+
+# Failed HTTP authentication seen in the app's Apache error log.
+[apache-auth]
+enabled = true
+backend = auto
+logpath = /var/log/apache2/clinica-imagen-error.log

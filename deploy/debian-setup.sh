@@ -2,6 +2,7 @@
 # deploy/debian-setup.sh — installs Clinica Imagen on a fresh Debian VM
 # (Apache + mod_php + MariaDB). Run as root from the project root:
 #   sudo bash deploy/debian-setup.sh [APP_URL]
+# HTTPS (Let's Encrypt): DOMAIN=clinica.example.com CERTBOT_EMAIL=you@example.com sudo -E bash deploy/debian-setup.sh
 # Safe to re-run: it updates the code and leaves the database, config.php and uploads alone.
 set -euo pipefail
 
@@ -12,11 +13,20 @@ DEST=/var/www/clinica-imagen
 DB_NAME=clinica_imagen
 DB_USER=clinica
 APP_URL=${1:-http://$(hostname -I | awk '{print $1}')}
+DOMAIN=${DOMAIN:-}
+if [ -n "$DOMAIN" ]; then
+  [ -n "${CERTBOT_EMAIL:-}" ] || { echo "DOMAIN requires CERTBOT_EMAIL (Let's Encrypt contact)." >&2; exit 1; }
+  APP_URL=https://$DOMAIN
+  APP_HTTPS=true
+else
+  APP_HTTPS=false
+fi
 APP_URL=${APP_URL%/}
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y apache2 mariadb-server libapache2-mod-php php-cli php-mysql php-mbstring rsync openssl
+apt-get install -y apache2 mariadb-server libapache2-mod-php php-cli php-mysql php-mbstring rsync openssl cron
+[ -z "$DOMAIN" ] || apt-get install -y certbot python3-certbot-apache
 
 # The app pins PHP to America/Montevideo and compares against MariaDB's NOW().
 timedatectl set-timezone America/Montevideo
@@ -38,7 +48,9 @@ if [ ! -f "$DEST/includes/config.php" ]; then
               GRANT SELECT, INSERT, UPDATE, DELETE ON \`$DB_NAME\`.* TO '$DB_USER'@'localhost';"
   sed -e "s|define('DB_USER', 'root')|define('DB_USER', '$DB_USER')|" \
       -e "s|define('DB_PASS', '')|define('DB_PASS', '$DB_PASS')|" \
+      -e "s|define('APP_KEY', '')|define('APP_KEY', '$(openssl rand -base64 32)')|" \
       -e "s|define('APP_URL', '[^']*')|define('APP_URL', '$APP_URL')|" \
+      -e "s|define('APP_HTTPS', [a-z]*)|define('APP_HTTPS', $APP_HTTPS)|" \
       includes/config.sample.php > "$DEST/includes/config.php"
   chown root:www-data "$DEST/includes/config.php"
   chmod 640 "$DEST/includes/config.php"
@@ -71,6 +83,7 @@ done
 
 cat > /etc/apache2/sites-available/clinica-imagen.conf <<EOF
 <VirtualHost *:80>
+    ${DOMAIN:+ServerName $DOMAIN}
     DocumentRoot $DEST
 
     <Directory $DEST>
@@ -79,7 +92,7 @@ cat > /etc/apache2/sites-available/clinica-imagen.conf <<EOF
         Require all granted
     </Directory>
 
-    <DirectoryMatch "^$DEST/(includes|sql|vendor|deploy|storage)(/|\$)">
+    <DirectoryMatch "^$DEST/(includes|sql|vendor|deploy|docs|storage)(/|\$)">
         Require all denied
     </DirectoryMatch>
 
@@ -92,10 +105,22 @@ cat > /etc/apache2/sites-available/clinica-imagen.conf <<EOF
 </VirtualHost>
 EOF
 
-a2enmod -q rewrite
+# Backups: script, cron schedule (daily DB, weekly files, daily remote) and shell environment/aliases.
+install -m 755 deploy/respaldo.sh /usr/local/sbin/clinica-respaldo
+install -m 644 deploy/cron/clinica-imagen /etc/cron.d/clinica-imagen
+install -m 644 deploy/profile-clinica.sh /etc/profile.d/clinica-imagen.sh
+
+a2enmod -q rewrite headers
 a2dissite -q 000-default || true
 a2ensite -q clinica-imagen
 apache2ctl configtest
 systemctl restart apache2
+
+if [ -n "$DOMAIN" ]; then
+  certbot --apache -d "$DOMAIN" --redirect --non-interactive --agree-tos -m "$CERTBOT_EMAIL"
+else
+  echo "WARNING: running WITHOUT HTTPS. Passwords and session cookies travel in clear text." >&2
+  echo "         Re-run with DOMAIN=<your.domain> CERTBOT_EMAIL=<you@example.com> to enable it." >&2
+fi
 
 echo "Done: $APP_URL"

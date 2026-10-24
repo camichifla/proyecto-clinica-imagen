@@ -89,6 +89,60 @@ menu_servicios() {
 }
 
 # ---------- 2) Network ----------
+TUNEL_SERVICE=/etc/systemd/system/clinica-tunel.service
+
+# Points the app's links and cookie flags at the given public URL.
+configurar_url() {  # configurar_url URL true|false
+  sed -i -e "s|define('APP_URL', '[^']*')|define('APP_URL', '$1')|" \
+         -e "s|define('APP_HTTPS', [a-z]*)|define('APP_HTTPS', $2)|" "$APP_DIR/includes/config.php"
+}
+
+# Publishes the site through a Cloudflare quick tunnel: no open ports, HTTPS by Cloudflare.
+# ponytail: quick tunnel URL changes on every restart/reboot; re-run this option, or use a named tunnel with a domain for a fixed URL.
+publicar_tunel() {
+  if ! command -v cloudflared >/dev/null; then
+    local deb; deb=$(mktemp --suffix=.deb)
+    if ! curl -fsSL -o "$deb" "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$(dpkg --print-architecture).deb" \
+       || ! dpkg -i "$deb"; then
+      rm -f "$deb"; warn "No se pudo instalar cloudflared"; return 1
+    fi
+    rm -f "$deb"
+  fi
+  cat > "$TUNEL_SERVICE" <<'EOF'
+[Unit]
+Description=Cloudflare quick tunnel for Clinica Imagen
+After=network-online.target apache2.service
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/cloudflared tunnel --no-autoupdate --url http://localhost:80
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+  local inicio url="" i
+  inicio=$(date '+%F %T')
+  systemctl daemon-reload && systemctl enable --quiet clinica-tunel && systemctl restart clinica-tunel
+  echo "Esperando la URL del túnel..."
+  for i in $(seq 1 30); do
+    url=$(journalctl -u clinica-tunel --since "$inicio" --no-pager -o cat | grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' | tail -n1)
+    [ -n "$url" ] && break
+    sleep 1
+  done
+  [ -n "$url" ] || { warn "No se obtuvo la URL del túnel (ver: journalctl -u clinica-tunel)"; return 1; }
+  configurar_url "$url" true
+  ok "Sitio publicado en $url"
+  echo "Nota: mientras el túnel esté activo, ingresar siempre por esa URL (la cookie de sesión exige HTTPS)."
+}
+
+detener_tunel() {
+  systemctl disable --now --quiet clinica-tunel 2>/dev/null
+  rm -f "$TUNEL_SERVICE"; systemctl daemon-reload
+  configurar_url "http://$(hostname -I | awk '{print $1}')" false
+  ok "Túnel detenido; el sitio vuelve a la IP local"
+}
+
 menu_red() {
   log INFO "Entrando al menú de red"
   while true; do
@@ -100,6 +154,8 @@ menu_red() {
       "5) Estado de fail2ban" \
       "6) Configurar dominio (hostname y /etc/hosts)" \
       "7) Probar resolución DNS" \
+      "8) Publicar en internet (Cloudflare Tunnel, URL temporal)" \
+      "9) Dejar de publicar en internet" \
       "0) Volver"
     case $op in
       1) log ACTION "Consulta IP del servidor"; ip -br address ;;
@@ -127,6 +183,8 @@ menu_red() {
          nombre=${nombre:-$(hostname -f 2>/dev/null || hostname)}
          log ACTION "Prueba de resolución DNS de $nombre"
          getent hosts "$nombre" || warn "getent no resolvió $nombre" ;;
+      8) publicar_tunel ;;
+      9) detener_tunel ;;
       0) return ;;
       *) echo "Opción inválida" ;;
     esac

@@ -48,6 +48,7 @@ RewriteRule ^ver-resultado-imagen\.php$ api/ver-resultado-imagen.php [L]
     # Origin-only cross-site referrer keeps verify/reset query tokens private; OSM tiles reject requests with no Referer.
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
     Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
-    Header always set Strict-Transport-Security "max-age=31536000" env=HTTPS
+    # HSTS on direct HTTPS (certbot) and behind Cloudflare Tunnel, where Apache itself sees plain HTTP.
+    Header always set Strict-Transport-Security "max-age=31536000" "expr=%{HTTPS} == 'on' || req('X-Forwarded-Proto') == 'https'"
     Header always set Content-Security-Policy "default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://*.tile.openstreetmap.org https://unpkg.com; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
 </IfModule>

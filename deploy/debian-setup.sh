@@ -100,6 +100,11 @@ cat > /etc/apache2/sites-available/clinica-imagen.conf <<EOF
         Require all denied
     </FilesMatch>
 
+    # Behind Cloudflare Tunnel every request arrives from localhost: take the real client IP
+    # (used by rate limiting and the event log) from CF-Connecting-IP, trusted only from localhost.
+    RemoteIPHeader CF-Connecting-IP
+    RemoteIPInternalProxy 127.0.0.1 ::1
+
     ErrorLog \${APACHE_LOG_DIR}/clinica-imagen-error.log
     CustomLog \${APACHE_LOG_DIR}/clinica-imagen-access.log combined
 </VirtualHost>
@@ -110,7 +115,7 @@ install -m 755 deploy/respaldo.sh /usr/local/sbin/clinica-respaldo
 install -m 644 deploy/config/cron-clinica-imagen /etc/cron.d/clinica-imagen
 install -m 644 deploy/config/profile-clinica.sh /etc/profile.d/clinica-imagen.sh
 
-a2enmod -q rewrite headers
+a2enmod -q rewrite headers remoteip
 a2dissite -q 000-default || true
 a2ensite -q clinica-imagen
 apache2ctl configtest

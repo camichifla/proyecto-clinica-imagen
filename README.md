@@ -58,6 +58,15 @@ Restaurar la base:
 gunzip -c /var/backups/operador/clinica_imagen_YYYYMMDD_HHMMSS.sql.gz | sudo mariadb clinica_imagen
 ```
 
+## Publicar en internet (Cloudflare Tunnel)
+
+Menú `2) Gestión de redes`, opción 8. Sin cuenta, dominio ni puertos abiertos: instala `cloudflared`, lo deja como servicio (`clinica-tunel`) y publica el sitio en una URL `https://…trycloudflare.com` con HTTPS de Cloudflare. El operador actualiza `APP_URL` y `APP_HTTPS=true` en `includes/config.php`.
+
+- La URL cambia cada vez que el servicio o el servidor se reinician: volver a ejecutar la opción 8 para obtener la nueva.
+- Mientras esté activo, ingresar siempre por esa URL (la cookie de sesión exige HTTPS; por la IP local no se puede iniciar sesión).
+- Apache toma la IP real del visitante del header `CF-Connecting-IP` (`mod_remoteip`, solo confiado desde localhost), así el límite de intentos y el log de eventos siguen funcionando por IP.
+- La opción 9 detiene el túnel y vuelve `APP_URL` a la IP local.
+
 ## Desarrollo local (XAMPP)
 
 1. Copiar el proyecto a `htdocs` e iniciar Apache y MySQL.

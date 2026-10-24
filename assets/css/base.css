@@ -563,7 +563,7 @@ select.selector-combo {
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    width: min(26rem, 100%);
+    width: min(26rem, 82%);
     padding: var(--space-6);
     background: var(--surface);
     box-shadow: -8px 0 24px rgba(var(--overlay-rgb), 0.18);
@@ -883,7 +883,8 @@ body.menu-abierto {
     }
 
     .seccion-panel,
-    .seccion-auth {
+    .seccion-auth,
+    .menu-usuario-panel {
         padding: var(--space-4);
     }
 }

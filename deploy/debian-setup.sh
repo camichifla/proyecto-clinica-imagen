@@ -5,6 +5,8 @@
 # HTTPS (Let's Encrypt): DOMAIN=clinica.example.com CERTBOT_EMAIL=you@example.com sudo -E bash deploy/debian-setup.sh
 # Safe to re-run: it updates the code and leaves the database, config.php and uploads alone.
 set -euo pipefail
+# Callers may run with a restrictive umask (operador.sh uses 077); everything created here must be readable by Apache.
+umask 022
 
 [ "$(id -u)" -eq 0 ] || { echo "Run as root (sudo)." >&2; exit 1; }
 [ -f includes/config.sample.php ] || { echo "Run from the project root." >&2; exit 1; }
@@ -25,7 +27,7 @@ APP_URL=${APP_URL%/}
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y apache2 mariadb-server libapache2-mod-php php-cli php-mysql php-mbstring rsync openssl cron
+apt-get install -y apache2 mariadb-server libapache2-mod-php php-cli php-mysql php-mbstring rsync openssl cron curl
 [ -z "$DOMAIN" ] || apt-get install -y certbot python3-certbot-apache
 
 # The app pins PHP to America/Montevideo and compares against MariaDB's NOW().
@@ -130,5 +132,17 @@ else
   echo "WARNING: running WITHOUT HTTPS. Passwords and session cookies travel in clear text." >&2
   echo "         Re-run with DOMAIN=<your.domain> CERTBOT_EMAIL=<you@example.com> to enable it." >&2
 fi
+
+# Self-check: Apache must be able to read the app and serve both a page and the API.
+fallo=0
+runuser -u www-data -- test -r "$DEST/.htaccess" || { echo "ERROR: www-data cannot read $DEST/.htaccess:" >&2; namei -l "$DEST/.htaccess" >&2; fallo=1; }
+for ruta in / /api/sesion.php; do
+  codigo=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost$ruta" || true)
+  case $codigo in
+    200|301|302) ;;
+    *) echo "ERROR: http://localhost$ruta answered $codigo (see /var/log/apache2/clinica-imagen-error.log)" >&2; fallo=1 ;;
+  esac
+done
+[ "$fallo" -eq 0 ] || exit 1
 
 echo "Done: $APP_URL"

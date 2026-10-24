@@ -456,7 +456,8 @@ menu_configuracion() {
          if [ -n "$DOMAIN" ]; then read -rp "Email de contacto para Let's Encrypt: " CERTBOT_EMAIL; fi
          export DOMAIN CERTBOT_EMAIL
          instdir=$(mktemp -d)
-         if instalar_dependencias && git clone --depth 1 "$REPO_URL" "$instdir"; then
+         # the operator runs with umask 077; the clone becomes Apache's document root
+         if instalar_dependencias && (umask 022; git clone --depth 1 "$REPO_URL" "$instdir"); then
            # debian-setup.sh expects to run from the project root
            (umask 022; cd "$instdir" && bash deploy/debian-setup.sh) && ok "Aplicación desplegada en $APP_DIR"
            DEPLOY_DIR=$instdir/deploy

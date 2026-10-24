@@ -13,7 +13,7 @@ APACHE_ERROR=/var/log/apache2/clinica-imagen-error.log
 RESPALDO_BIN=/usr/local/sbin/clinica-respaldo
 SHARE_DIR=/usr/local/share/clinica-imagen
 # Config templates (nftables, sshd, fail2ban): next to this script when run from the repo, else the installed copy.
-DEPLOY_DIR=$(dirname "$(readlink -f "$0")")
+DEPLOY_DIR=$(dirname "$(readlink -f "$0")")/config
 [ -f "$DEPLOY_DIR/nftables.conf" ] || DEPLOY_DIR=$SHARE_DIR
 
 umask 077
@@ -379,7 +379,7 @@ instalar_script() {
   ln -sf "$INSTALL_PATH" /usr/local/bin/operador
   # keep the config templates so options 9.1 / 9.3 work without the repo
   mkdir -p "$SHARE_DIR"
-  cp -f "$(dirname "$src")"/{nftables.conf,sshd-clinica.conf,fail2ban-clinica.local} "$SHARE_DIR/" 2>/dev/null
+  cp -f "$(dirname "$src")"/config/{nftables.conf,sshd-clinica.conf,fail2ban-clinica.local} "$SHARE_DIR/" 2>/dev/null
   ok "Script instalado en $INSTALL_PATH (comando: sudo operador)"
 }
 

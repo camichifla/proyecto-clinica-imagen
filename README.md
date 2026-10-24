@@ -31,16 +31,16 @@ Al terminar se muestra una sola vez el usuario administrador inicial (`admin@cli
 |---|---|---|
 | Apache | `deploy/debian-setup.sh` | VirtualHost en `/var/www/clinica-imagen`, `mod_rewrite`/`headers`, bloquea `includes`, `sql`, `deploy`, `storage`; logs `clinica-imagen-{access,error}.log`; PHP con subidas de hasta 10 MB. |
 | MariaDB | `deploy/debian-setup.sh` | Crea `clinica_imagen`, importa `sql/schema.sql` y un usuario `clinica` con mínimo privilegio (solo `SELECT, INSERT, UPDATE, DELETE` sobre esa base) y clave aleatoria en `includes/config.php` (modo 640). |
-| nftables | `deploy/nftables.conf` | Reemplaza a ufw. Política `drop` de entrada; permite loopback, conexiones establecidas, ICMP/ICMPv6 limitado, SSH (22) con límite por IP, y 80/443. |
-| SSH | `deploy/sshd-clinica.conf` | Drop-in en `/etc/ssh/sshd_config.d/`: sin root, 3 intentos, 30 s de gracia, sin X11, keepalive. Se valida con `sshd -t` antes de recargar. `AllowGroups` y `PasswordAuthentication no` quedan para activar manualmente cuando haya claves SSH. |
-| fail2ban | `deploy/fail2ban-clinica.local` | Jails `sshd` y `apache-auth` (log de errores de la app); bloqueos vía nftables, 1 h tras 5 fallos en 10 min. |
-| Respaldos | `deploy/respaldo.sh`, `deploy/cron/clinica-imagen` | Script `/usr/local/sbin/clinica-respaldo` y cron en `/etc/cron.d/` (ver abajo). |
-| Entorno | `deploy/profile-clinica.sh` | `/etc/profile.d/clinica-imagen.sh`: variables `CLINICA_APP_DIR`, `CLINICA_BACKUP_DIR`, `CLINICA_LOG` y alias (`operador`, `clinica`, `clinica-logs`, `clinica-respaldo`, `ll`). |
+| nftables | `deploy/config/nftables.conf` | Reemplaza a ufw. Política `drop` de entrada; permite loopback, conexiones establecidas, ICMP/ICMPv6 limitado, SSH (22) con límite por IP, y 80/443. |
+| SSH | `deploy/config/sshd-clinica.conf` | Drop-in en `/etc/ssh/sshd_config.d/`: sin root, 3 intentos, 30 s de gracia, sin X11, keepalive. Se valida con `sshd -t` antes de recargar. `AllowGroups` y `PasswordAuthentication no` quedan para activar manualmente cuando haya claves SSH. |
+| fail2ban | `deploy/config/fail2ban-clinica.local` | Jails `sshd` y `apache-auth` (log de errores de la app); bloqueos vía nftables, 1 h tras 5 fallos en 10 min. |
+| Respaldos | `deploy/respaldo.sh`, `deploy/config/cron-clinica-imagen` | Script `/usr/local/sbin/clinica-respaldo` y cron en `/etc/cron.d/` (ver abajo). |
+| Entorno | `deploy/config/profile-clinica.sh` | `/etc/profile.d/clinica-imagen.sh`: variables `CLINICA_APP_DIR`, `CLINICA_BACKUP_DIR`, `CLINICA_LOG` y alias (`operador`, `clinica`, `clinica-logs`, `clinica-respaldo`, `ll`). |
 | HTTPS | `deploy/debian-setup.sh` | Con `DOMAIN` y `CERTBOT_EMAIL`, instala certbot, emite el certificado y redirige a HTTPS (`APP_HTTPS=true`). |
 
 ### Dominio y DNS
 
-El registro **A** público (`clinica.example.com -> IP del servidor`) se crea en el panel del registrador del dominio; debe existir y propagarse antes de ejecutar certbot, que valida el dominio por el puerto 80. En el servidor, el menú `2) Gestión de redes` permite fijar el hostname y `/etc/hosts` (opción 6) y probar la resolución con `getent`/`dig` (opción 7).
+El registro **A** público (`clinica.example.com -> IP del servidor`) se crea en el panel del registrador del dominio; debe existir y propagarse antes de ejecutar certbot, que valida el dominio por el puerto 80. En el servidor, el menú `2) Gestión de redes` permite fijar el hostname y `/etc/hosts` (opción 6) y probar la resolución con `getent` (opción 7).
 
 ## Respaldos
 
@@ -69,10 +69,10 @@ gunzip -c /var/backups/operador/clinica_imagen_YYYYMMDD_HHMMSS.sql.gz | sudo mar
 ```
 api/        endpoints JSON
 assets/     JS, CSS e imágenes
-deploy/     operador.sh, debian-setup.sh, respaldo.sh y plantillas (nftables, ssh, fail2ban, cron, profile)
+deploy/     operador.sh, debian-setup.sh, respaldo.sh; config/ con plantillas (nftables, ssh, fail2ban, cron, profile)
 docs/       documentación
 includes/   lógica PHP compartida (config, db, sesión, mailer, validación)
-sql/        schema.sql y migraciones
+sql/        schema.sql (esquema completo + datos iniciales)
 storage/    resultados subidos (fuera de acceso web)
 views/      páginas .html
 ```

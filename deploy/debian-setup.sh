@@ -107,8 +107,8 @@ EOF
 
 # Backups: script, cron schedule (daily DB, weekly files, daily remote) and shell environment/aliases.
 install -m 755 deploy/respaldo.sh /usr/local/sbin/clinica-respaldo
-install -m 644 deploy/cron/clinica-imagen /etc/cron.d/clinica-imagen
-install -m 644 deploy/profile-clinica.sh /etc/profile.d/clinica-imagen.sh
+install -m 644 deploy/config/cron-clinica-imagen /etc/cron.d/clinica-imagen
+install -m 644 deploy/config/profile-clinica.sh /etc/profile.d/clinica-imagen.sh
 
 a2enmod -q rewrite headers
 a2dissite -q 000-default || true

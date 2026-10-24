@@ -4,13 +4,7 @@ RewriteEngine On
 # Internal dirs are never served (deploy vhost also denies them).
 RewriteRule ^(includes|sql|deploy|vendor|docs|storage)(/|$) - [F,L]
 
-# BASE = URL prefix of this directory ("/" at the web root, "/proyecto/" in a subfolder).
-RewriteCond %{REQUEST_URI}::$1 ^(.*?/)(.*)::\2$
-RewriteRule ^(.*)$ - [E=BASE:%1]
-
 RewriteRule ^logout\.php$ api/logout.php [L]
-
-RewriteRule ^(index|login|register|reset-request|reset-confirm|verify|agenda|solicitudes-cita|agendar-cita|agendar-cita-medico|resultados|ver-resultados|cargar-resultados|manejar-usuarios|modificar-usuario|panel|turnos|gestion-estudios|gestion-sucursales|gestion-profesionales|gestion-pacientes|contacto|servicios|mensajes-contacto|eventos)\.php$ %{ENV:BASE}$1.html [R=301,L,QSA]
 
 RewriteRule ^$ views/index.html [L]
 RewriteRule ^index\.html$ views/index.html [L]
@@ -40,10 +34,6 @@ RewriteRule ^gestion-profesionales\.html$ views/gestion-profesionales.html [L]
 RewriteRule ^gestion-pacientes\.html$ views/gestion-pacientes.html [L]
 RewriteRule ^mensajes-contacto\.html$ views/mensajes-contacto.html [L]
 RewriteRule ^eventos\.html$ views/eventos.html [L]
-
-RewriteRule ^ver-agenda\.html$ %{ENV:BASE}agenda.html [R=301,L,QSA]
-RewriteRule ^(buscar-resultados|historial-pacientes)\.html$ %{ENV:BASE}resultados.html [R=301,L,QSA]
-RewriteRule ^enviar-resultados\.html$ %{ENV:BASE}cargar-resultados.html [R=301,L,QSA]
 
 RewriteRule ^ver-resultado-imagen\.php$ api/ver-resultado-imagen.php [L]
 

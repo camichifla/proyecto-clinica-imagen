@@ -25,15 +25,11 @@ function cifrar(string $texto): string
     return CIFRADO_PREFIJO . base64_encode($iv . $tag . $cifrado);
 }
 
-// Input without the "v1:" prefix is legacy plaintext and is returned unchanged.
-// Tampered, truncated or wrong-key input throws RuntimeException (never returns garbage).
+// Tampered, truncated, unprefixed or wrong-key input throws RuntimeException (never returns garbage).
 function descifrar(string $valor): string
 {
-    if (!str_starts_with($valor, CIFRADO_PREFIJO)) {
-        return $valor;
-    }
     $clave = cifrado_clave();
-    $raw   = base64_decode(substr($valor, strlen(CIFRADO_PREFIJO)), true);
+    $raw   = str_starts_with($valor, CIFRADO_PREFIJO) ? base64_decode(substr($valor, strlen(CIFRADO_PREFIJO)), true) : false;
     if ($raw === false || strlen($raw) < 28) {
         throw new RuntimeException('Dato cifrado corrupto.');
     }

@@ -145,9 +145,11 @@ if (!fecha_valida($desde) || !fecha_valida($hasta) || $hasta < $desde) {
     error_json(422, 'El rango de fechas no es valido.');
 }
 
-$sucursales = db()->query('SELECT id, nombre FROM sucursales ORDER BY nombre')->fetchAll();
+$sucursales    = db()->query('SELECT id, nombre FROM sucursales ORDER BY nombre')->fetchAll();
+$profesionales = db()->query('SELECT id, nombre, apellido FROM profesionales ORDER BY apellido, nombre')->fetchAll();
 
 $sucursalId = filter_input(INPUT_GET, 'sucursal_id', FILTER_VALIDATE_INT) ?: null;
+$profesionalId = filter_input(INPUT_GET, 'profesional_id', FILTER_VALIDATE_INT) ?: null;
 $estado     = (string) ($_GET['estado'] ?? '');
 if ($estado !== '' && !isset(ESTADOS_CITA[$estado])) {
     error_json(422, 'Estado invalido.');
@@ -169,6 +171,10 @@ if ($codigo !== '') {
 if ($sucursalId !== null) {
     $where   .= ' AND c.sucursal_id = ?';
     $params[] = $sucursalId;
+}
+if ($profesionalId !== null) {
+    $where   .= ' AND c.profesional_id = ?';
+    $params[] = $profesionalId;
 }
 
 $stmt = db()->prepare("SELECT c.estado, COUNT(*) FROM citas c WHERE {$where} GROUP BY c.estado");
@@ -202,6 +208,7 @@ echo json_encode([
         'gestionable' => in_array($c['estado'], ['pendiente', 'confirmada'], true),
     ] + cita_agenda_json($c), array_slice($filas, 0, MAX_FILAS_TURNOS)),
     'sucursales'    => array_map(static fn (array $s): array => ['id' => (int) $s['id'], 'nombre' => $s['nombre']], $sucursales),
+    'profesionales' => array_map(static fn (array $p): array => ['id' => (int) $p['id'], 'label' => $p['apellido'] . ', ' . $p['nombre']], $profesionales),
     'rangoReserva'  => ['min' => rango_reserva()[0], 'max' => rango_reserva()[1]],
     'notasAdminMax' => NOTAS_ADMIN_MAX,
     'truncado'      => $truncado,

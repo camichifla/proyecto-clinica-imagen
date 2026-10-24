@@ -14,6 +14,7 @@ const MENU_POR_ROL = [
         ['href' => 'gestion-profesionales.html',   'label' => 'Profesionales'],
         ['href' => 'gestion-estudios.html',        'label' => 'Estudios'],
         ['href' => 'gestion-sucursales.html',      'label' => 'Sucursales'],
+        ['href' => 'eventos.html',                 'label' => 'Eventos de Seguridad'],
         ['href' => 'mensajes-contacto.html',       'label' => 'Mensajes de Contacto'],
         ['href' => 'solicitudes-cita.html',        'label' => 'Solicitudes de Cita'],
         ['href' => 'agenda.html',                  'label' => 'Agenda'],

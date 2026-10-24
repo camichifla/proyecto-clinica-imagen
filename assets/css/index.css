@@ -586,6 +586,12 @@
     color: var(--accent-secondary);
 }
 
+.equipamiento-lista {
+    margin: 0.25rem 0;
+    padding-left: 1.2rem;
+    font-size: var(--font-size-sm);
+}
+
 .clinic-footer {
     display: flex;
     justify-content: space-between;

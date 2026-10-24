@@ -46,7 +46,7 @@ if ($metodo === 'GET') {
 csrf_check($_POST['csrf'] ?? null);
 
 $nueva = (string) ($_POST['contrasena'] ?? '');
-if (!preg_match(REGLAS_PACIENTE['contrasena']['pattern'], $nueva)) {
+if (!preg_match(REGLAS_PACIENTE['contrasena']['pattern'], $nueva) || strlen($nueva) > REGLAS_PACIENTE['contrasena']['maxbytes']) {
     http_response_code(422);
     echo json_encode([
         'ok'      => false,

@@ -18,6 +18,10 @@ function smtp_configurado(): bool
 function enviar_correo(string $destinatario, string $asunto, string $cuerpo): bool
 {
     if (!smtp_configurado()) {
+        if (APP_HTTPS) {
+            error_log('enviar_correo: SMTP not configured; refusing to write plaintext links to mail.log in production.');
+            return false;
+        }
         $linea = sprintf(
             "[%s] to=%s subject=%s\n%s\n---\n",
             date('Y-m-d H:i:s'),
@@ -25,7 +29,9 @@ function enviar_correo(string $destinatario, string $asunto, string $cuerpo): bo
             $asunto,
             $cuerpo
         );
-        $ok = @file_put_contents(__DIR__ . '/../storage/mail.log', $linea, FILE_APPEND | LOCK_EX);
+        $ruta = __DIR__ . '/../storage/mail.log';
+        $ok = @file_put_contents($ruta, $linea, FILE_APPEND | LOCK_EX);
+        @chmod($ruta, 0600);
         return $ok !== false;
     }
 

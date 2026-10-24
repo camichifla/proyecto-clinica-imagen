@@ -43,10 +43,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $estabaActiva = (int) $cuentaObjetivo['activo'] === 1;
 
+        // Locking read inside the transaction so two simultaneous toggles cannot leave zero active admins.
+        $db->beginTransaction();
         if ($estabaActiva && $cuentaObjetivo['rol'] === 'administrador') {
-            $stmt = $db->prepare("SELECT COUNT(*) FROM cuentas WHERE rol = 'administrador' AND activo = 1");
-            $stmt->execute();
-            if ((int) $stmt->fetchColumn() <= 1) {
+            $activos = (int) $db->query("SELECT COUNT(*) FROM cuentas WHERE rol = 'administrador' AND activo = 1 FOR UPDATE")->fetchColumn();
+            if ($activos <= 1) {
+                $db->rollBack();
                 echo json_encode(['ok' => false, 'error' => 'No se puede desactivar el ultimo administrador activo.'], JSON_UNESCAPED_UNICODE);
                 exit;
             }
@@ -54,6 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $stmt = $db->prepare('UPDATE cuentas SET activo = ? WHERE id = ?');
         $stmt->execute([$estabaActiva ? 0 : 1, $cuentaId]);
+        $db->commit();
 
         registrar_evento('cuenta_activo', 'cuenta=' . $cuentaId);
 

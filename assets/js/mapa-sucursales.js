@@ -62,13 +62,19 @@
         });
     }
 
+    // Equipamiento is free text, one item per line; esc() keeps it safe inside the template.
+    function equipamientoLista(texto) {
+        const items = texto.split("\n").map((l) => l.trim()).filter(Boolean);
+        return `<ul class="equipamiento-lista">${items.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>`;
+    }
+
     function popupTemplate(clinic) {
         return `
             <div class="popup-clinic">
                 <h4>${esc(clinic.nombre)}</h4>
                 <p>${esc(clinic.direccion)}</p>
                 <div class="popup-meta">
-                    ${clinic.equipamiento ? `<span>${esc(clinic.equipamiento)}</span>` : ""}
+                    ${clinic.equipamiento ? equipamientoLista(clinic.equipamiento) : ""}
                     <span>${esc(horariosTexto(clinic.horarios))}</span>
                 </div>
             </div>
@@ -88,7 +94,7 @@
                     </svg>
                     ${esc(clinic.direccion)}
                 </div>
-                ${clinic.equipamiento ? `<div class="clinic-address">${esc(clinic.equipamiento)}</div>` : ""}
+                ${clinic.equipamiento ? equipamientoLista(clinic.equipamiento) : ""}
                 <div class="clinic-footer">
                     <span class="clinic-hours">${esc(horariosTexto(clinic.horarios))}</span>
                 </div>

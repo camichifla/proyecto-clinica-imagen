@@ -133,8 +133,20 @@ a.tarjeta-resumen:focus-visible {
     }
 }
 
+.solo-impresion {
+    display: none;
+}
+
 @media print {
+    .solo-impresion {
+        display: block;
+    }
+
     header,
+    footer,
+    .skip-link,
+    .aviso-exito,
+    .aviso-error,
     .filtros-turnos,
     .barra-turnos button,
     #turnos-lista .tabla-datos th:last-child,

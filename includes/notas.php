@@ -3,6 +3,8 @@
 // inserted and read, never updated or deleted. Visible to medico/profesional
 // accounts that already have access to the patient.
 
+require_once __DIR__ . '/cifrado.php';
+
 const NOTA_MAX = 2000;
 
 /**
@@ -25,7 +27,7 @@ function notas_de_paciente(PDO $db, int $pacienteId): array
     $stmt->execute([$pacienteId]);
     return array_map(static fn (array $f): array => [
         'id'        => (int) $f['id'],
-        'texto'     => $f['texto'],
+        'texto'     => descifrar($f['texto']),
         'creado_en' => $f['creado_en'],
         'autor'     => $f['autor'] ?? '-',
         'rol'       => $f['rol'],

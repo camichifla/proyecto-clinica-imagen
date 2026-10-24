@@ -59,6 +59,12 @@
           </select>
         </div>
         <div class="campo">
+          <label for="filtro-profesional">Profesional</label>
+          <select id="filtro-profesional" name="profesional_id">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div class="campo">
           <label for="filtro-estado">Estado</label>
           <select id="filtro-estado" name="estado">
             <option value="">Todos</option>
@@ -75,7 +81,8 @@
         <button type="submit" class="btn-primary">Filtrar</button>
       </form>
 
-      <ul class="totales-turnos" id="turnos-totales" aria-label="Totales por estado"></ul>
+      <p class="solo-impresion" id="turnos-filtros-activos"></p>
+      <ul class="totales-turnos" id="turnos-totales" aria-label="Totales por estado (rango filtrado)"></ul>
       <p class="campo-hint" id="turnos-truncado" hidden>Se muestran las primeras 500 citas. Acota el rango de fechas para ver el resto.</p>
 
       <div id="turnos-lista"></div>

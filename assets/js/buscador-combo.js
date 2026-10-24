@@ -24,6 +24,11 @@
     lista.setAttribute('role', 'listbox');
     lista.id = input.id + '_opciones';
     lista.hidden = true;
+    const etiqueta = input.id ? document.querySelector('label[for="' + input.id + '"]') : null;
+    if (etiqueta) {
+      etiqueta.id = etiqueta.id || input.id + '_etiqueta';
+      lista.setAttribute('aria-labelledby', etiqueta.id);
+    }
     wrapper.appendChild(lista);
 
     input.setAttribute('role', 'combobox');

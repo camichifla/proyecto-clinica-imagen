@@ -37,13 +37,22 @@ Los títulos principales usan `clamp()` para escalar de forma fluida entre móvi
 
 ## Roles del sistema
 
-La rúbrica menciona los roles "administrador" y "recepcionista". En el sistema, las tareas de recepción las cubre el rol **administrador**, y se agregan tres roles más que surgen del análisis del sector:
+El sistema define cinco roles (menú en `includes/menu.php`, acceso en cada endpoint con `requerir_rol_json()`):
 
 | Rol | Responsabilidades |
 |---|---|
-| `administrador` | Tareas de recepción y gestión: usuarios, solicitudes de cita, agenda, envío y búsqueda de resultados |
+| `administrador` | Gestión completa: usuarios y roles, pacientes, profesionales, estudios, sucursales, turnos, solicitudes de cita, agenda, mensajes de contacto, envío y búsqueda de resultados, y eventos de seguridad |
+| `recepcionista` | Atención en mostrador: panel, turnos, pacientes (alta y edición), solicitudes de cita, agenda y mensajes de contacto. No gestiona usuarios, catálogos ni resultados |
 | `medico` | Médico derivante externo: agenda citas para sus pacientes y consulta sus resultados |
 | `profesional` | Profesional de la clínica: ve su agenda, el historial de pacientes y carga observaciones y resultados |
 | `paciente` | Agenda sus citas y consulta sus resultados |
 
 El menú de cada rol se define en `includes/menu.php`. Las vistas son HTML estático sin lógica de acceso; cada endpoint en `api/` protege su acceso según el rol (`requerir_rol_json()`).
+
+## Seguridad
+
+- **Escape de salida.** Las vistas son HTML estático y la API devuelve solo JSON; el navegador inserta los datos con `textContent`, que los trata siempre como texto y nunca como marcado. Eso es equivalente a `htmlspecialchars` (que evita que `<script>` se interprete como etiqueta) y por eso no hace falta en el servidor. Como defensa adicional, la Content-Security-Policy de `.htaccess` prohíbe scripts y handlers inline.
+- **Base de datos.** Todas las consultas usan sentencias preparadas (PDO); las contraseñas se guardan con `password_hash` (bcrypt).
+- **Sesión y formularios.** Los POST exigen token CSRF; la sesión expira tras 25 minutos de inactividad.
+- **Límite de intentos.** Login, registro, reseteo de contraseña, reenvío de verificación y contacto se limitan por IP (y por email en el login) contando eventos recientes en la tabla `eventos`, que además sirve de registro de auditoría.
+- **Notas clínicas cifradas.** `notas_clinicas.texto` se guarda cifrado con AES-256-GCM (`includes/cifrado.php`): IV aleatorio por nota y etiqueta de autenticación, de modo que cualquier alteración del dato se detecta al descifrar. La clave (`APP_KEY`) vive solo en `includes/config.php` y se genera al instalar; si se pierde, las notas no se pueden recuperar. Las notas anteriores sin cifrar se siguen leyendo.

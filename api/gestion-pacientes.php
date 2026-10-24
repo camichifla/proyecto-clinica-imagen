@@ -35,8 +35,24 @@ function error_unico_paciente(PDOException $e): ?array
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check($_POST['csrf'] ?? null);
     $accion = $_POST['accion'] ?? '';
-    if (!in_array($accion, ['crear', 'guardar'], true)) {
+    if (!in_array($accion, ['crear', 'guardar', 'toggle_activo'], true)) {
         respuesta_pacientes(400, ['ok' => false, 'error' => 'Accion invalida.']);
+    }
+
+    // Baja/alta of the patient's login account; the patient record and history are kept.
+    if ($accion === 'toggle_activo') {
+        $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+        $stmt = db()->prepare("SELECT id, activo FROM cuentas WHERE rol = 'paciente' AND ref_id = ?");
+        $stmt->execute([$id ?: 0]);
+        $cuenta = $stmt->fetch();
+        if (!$cuenta) {
+            respuesta_pacientes(404, ['ok' => false, 'error' => 'El paciente no tiene cuenta.']);
+        }
+        $nuevo = (int) $cuenta['activo'] === 1 ? 0 : 1;
+        db()->prepare('UPDATE cuentas SET activo = ? WHERE id = ?')->execute([$nuevo, $cuenta['id']]);
+        registrar_evento('cuenta_activo', 'cuenta=' . $cuenta['id'] . ' paciente=' . $id . ' activo=' . $nuevo);
+        echo json_encode(['ok' => true, 'activo' => $nuevo === 1], JSON_UNESCAPED_UNICODE);
+        exit;
     }
 
     $valores = [];

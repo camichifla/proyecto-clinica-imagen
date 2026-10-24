@@ -51,7 +51,7 @@ function ordenes_de_paciente(PDO $db, int $pacienteId): array
 {
     $stmt = $db->prepare(
         'SELECT o.id, o.tipo, o.creado_en, c.estudio AS cita_estudio, c.fecha_hora_solicitada,
-                m.nombre AS medico_nombre, m.apellido AS medico_apellido
+                m.nombre AS medico_nombre, m.apellido AS medico_apellido, u.email AS medico_email
            FROM ordenes o
            LEFT JOIN citas c   ON c.id = o.cita_id
            LEFT JOIN cuentas u ON u.id = o.creado_por AND u.rol = \'medico\'
@@ -105,6 +105,7 @@ function ordenes_de_paciente(PDO $db, int $pacienteId): array
             'cita_estudio' => $o['cita_estudio'] !== null ? ($etiquetasEstudio[$o['cita_estudio']] ?? $o['cita_estudio']) : null,
             'cita_fecha'   => $o['fecha_hora_solicitada'],
             'medico'       => $o['medico_nombre'] !== null ? $o['medico_apellido'] . ', ' . $o['medico_nombre'] : null,
+            'medico_email' => $o['medico_nombre'] !== null ? $o['medico_email'] : null,
             'detalle'      => $detalle,
         ];
     }, $ordenes);

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Eventos de seguridad - Clinica Imagen</title>
+  <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
+  <link rel="stylesheet" href="./assets/css/styles.css">
+  <link rel="stylesheet" href="./assets/css/backoffice.css">
+</head>
+
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <header>
+    <div class="logo">
+      <a href="index.html"><img src="./assets/imagenes/logo.png" alt="Clinica Imagen"></a>
+    </div>
+    <div class="user">
+      <details class="menu-usuario">
+        <summary class="menu-usuario-toggle" aria-label="Menu de usuario">
+          <span class="avatar" aria-hidden="true"></span>
+        </summary>
+        <div class="menu-usuario-panel">
+          <span class="user-nombre"></span>
+          <ul class="menu-usuario-lista"></ul>
+          <form method="post" action="logout.php" class="form-logout">
+            <input type="hidden" name="csrf" value="">
+            <button type="submit" class="btn-logout">Cerrar sesion</button>
+          </form>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main id="contenido">
+    <section class="seccion-panel">
+      <h1>Eventos de seguridad</h1>
+      <p class="campo-hint">Ultimos 200 eventos registrados, los mas nuevos primero.</p>
+
+      <p class="aviso-error" data-mensaje-error role="alert" hidden></p>
+
+      <form id="form-eventos" class="filtros-turnos" novalidate>
+        <div class="campo">
+          <label for="filtro-tipo">Tipo</label>
+          <select id="filtro-tipo" name="tipo"><option value="">Todos</option></select>
+        </div>
+        <div class="campo">
+          <label for="filtro-desde">Desde</label>
+          <input type="date" id="filtro-desde" name="desde">
+        </div>
+        <div class="campo">
+          <label for="filtro-hasta">Hasta</label>
+          <input type="date" id="filtro-hasta" name="hasta">
+        </div>
+        <button type="submit" class="btn-secundario">Filtrar</button>
+      </form>
+
+      <div id="eventos-lista"></div>
+    </section>
+
+    <section class="seccion-panel">
+      <h2>Actividad sospechosa</h2>
+      <p class="campo-hint">IPs y correos con 5 o mas intentos de login fallidos en las ultimas 24 horas.</p>
+      <div id="sospechosos-lista"></div>
+    </section>
+  </main>
+
+  <footer>
+    <nav aria-label="Pie de pagina">
+      <a href="index.html">Inicio</a>
+      <a href="servicios.html">Servicios</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+    <p>&copy; Clinica Imagen</p>
+  </footer>
+
+  <script src="assets/js/sesion.js" defer></script>
+  <script src="assets/js/form-api.js" defer></script>
+  <script src="assets/js/eventos.js" defer></script>
+</body>
+
+</html>

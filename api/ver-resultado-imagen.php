@@ -98,6 +98,9 @@ registrar_evento('resultado_ver', ($esInforme ? 'informe=' : 'imagen=') . $id);
 header('Content-Type: ' . MIMES_PERMITIDOS[$extension]);
 if ($esInforme) {
     header('Content-Disposition: inline; filename="informe.pdf"');
+} else {
+    // Sandbox CSP is image-only: it breaks Chrome's PDF viewer.
+    header("Content-Security-Policy: default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; sandbox");
 }
 header('Content-Length: ' . (string) filesize($ruta));
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');

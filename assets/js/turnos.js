@@ -9,6 +9,8 @@
     const totalesEl = document.getElementById('turnos-totales');
     const avisoTruncado = document.getElementById('turnos-truncado');
     const selectSucursal = document.getElementById('filtro-sucursal');
+    const selectProfesional = document.getElementById('filtro-profesional');
+    const filtrosActivos = document.getElementById('turnos-filtros-activos');
 
     let csrf = '';
     let primeraCarga = true;
@@ -173,6 +175,12 @@
         }
         primeraCarga = false;
         poblarSucursales(selectSucursal, data.sucursales.map((s) => ({ id: s.id, nombre: s.nombre })));
+        data.profesionales.forEach((p) => {
+            const o = document.createElement('option');
+            o.value = String(p.id);
+            o.textContent = p.label;
+            selectProfesional.appendChild(o);
+        });
         formFiltros.elements.desde.value = data.desde;
         formFiltros.elements.hasta.value = data.hasta;
     }
@@ -191,6 +199,8 @@
         }
         poblarFiltros(data);
         renderTotales(data.totales);
+        const elegido = (select) => (select.value ? select.selectedOptions[0].textContent : 'Todos');
+        filtrosActivos.textContent = `Reporte de turnos del ${data.desde} al ${data.hasta}. Sede: ${elegido(selectSucursal)}. Profesional: ${elegido(selectProfesional)}.`;
         avisoTruncado.hidden = !data.truncado;
         if (!data.citas.length) {
             const p = document.createElement('p');

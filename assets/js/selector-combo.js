@@ -26,6 +26,16 @@
     lista.hidden = true;
     wrapper.appendChild(lista);
 
+    // The native <select> is hidden, so the button and the list need the label's name.
+    const etiqueta = select.id ? document.querySelector('label[for="' + select.id + '"]') : null;
+    if (etiqueta) {
+      etiqueta.id = etiqueta.id || select.id + '_etiqueta';
+      boton.id = boton.id || select.id + '_boton';
+      boton.setAttribute('aria-labelledby', etiqueta.id + ' ' + boton.id);
+      lista.setAttribute('aria-labelledby', etiqueta.id);
+      etiqueta.addEventListener('click', () => boton.focus());
+    }
+
     boton.setAttribute('aria-haspopup', 'listbox');
     boton.setAttribute('aria-expanded', 'false');
     boton.setAttribute('aria-controls', lista.id);

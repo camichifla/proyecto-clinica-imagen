@@ -169,7 +169,7 @@ function procesar_post_resultado(array $usuario, callable $pacienteValido, ?int 
     $citaIdPost     = (string) ($_POST['cita_id'] ?? '');
     $nombreEstudio  = trim((string) ($_POST['nombre_estudio'] ?? ''));
     $fechaEstudio   = (string) ($_POST['fecha_estudio'] ?? '');
-    $observaciones  = trim((string) ($_POST['observaciones'] ?? ''));
+    $observaciones  = mb_substr(trim((string) ($_POST['observaciones'] ?? '')), 0, 2000);
 
     $errores = [];
 

@@ -11,7 +11,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'reenv
     csrf_check($_POST['csrf'] ?? null);
 
     $email = trim((string) ($_POST['email'] ?? ''));
-    if ($email !== '') {
+    $ip    = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+    $limitado = demasiados_eventos('verif_reenvio', 'ip', $ip, 5, 15);
+    registrar_evento('verif_reenvio');
+    if ($email !== '' && !$limitado) {
         $stmt = $db->prepare('SELECT id FROM cuentas WHERE email = ? AND verificado = 0');
         $stmt->execute([$email]);
         $cuenta = $stmt->fetch();

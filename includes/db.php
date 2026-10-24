@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/config.php';
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
 require_once __DIR__ . '/auditoria.php';
 
 // Profile table per cuentas.rol (cuentas.ref_id points at its id).

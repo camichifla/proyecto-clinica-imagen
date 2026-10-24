@@ -122,7 +122,7 @@ CREATE TABLE sucursales (
   nombre    VARCHAR(80)  NOT NULL,
   direccion VARCHAR(160) NULL,                    -- NULL allowed (branch added without an address)
   activo       TINYINT(1)   NOT NULL DEFAULT 1,   -- 0 = not offered for booking and hidden from the public map; existing citas keep the name
-  equipamiento VARCHAR(255) NULL,
+  equipamiento VARCHAR(1000) NULL,                -- one item per line
   latitud      DECIMAL(9,6) NULL,                 -- map pin; NULL (either one) = listed but not pinned
   longitud     DECIMAL(9,6) NULL,
   creado_en DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -243,7 +243,7 @@ CREATE TABLE notas_clinicas (                         -- append-only clinical re
   id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
   paciente_id INT UNSIGNED NOT NULL,
   cuenta_id   INT UNSIGNED NOT NULL,                  -- author (medico or profesional account)
-  texto       VARCHAR(2000) NOT NULL,
+  texto       TEXT NOT NULL,
   creado_en   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY ix_notas_paciente (paciente_id, creado_en),

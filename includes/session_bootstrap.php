@@ -4,6 +4,21 @@
 // edited; this file makes the app correct regardless of it.
 require_once __DIR__ . '/config.php';
 
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+set_exception_handler(function (Throwable $e): void {
+    error_log((string) $e);
+    if (!headers_sent()) {
+        http_response_code(500);
+        if (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/api/') !== false) {
+            header('Content-Type: application/json; charset=utf-8');
+        }
+    }
+    if (strpos($_SERVER['SCRIPT_NAME'] ?? '', '/api/') !== false) {
+        echo json_encode(['ok' => false, 'error' => 'Error interno.'], JSON_UNESCAPED_UNICODE);
+    }
+});
+
 const SESION_TIMEOUT_SEGUNDOS = 1500; // 25 minutes
 
 if (session_status() === PHP_SESSION_NONE) {

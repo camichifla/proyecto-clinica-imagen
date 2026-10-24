@@ -40,7 +40,7 @@ if (mb_strlen($texto) > NOTA_MAX) {
 }
 
 db()->prepare('INSERT INTO notas_clinicas (paciente_id, cuenta_id, texto) VALUES (?, ?, ?)')
-    ->execute([$pacienteId, $usuario['cuenta_id'], $texto]);
+    ->execute([$pacienteId, $usuario['cuenta_id'], cifrar($texto)]);
 $notaId = (int) db()->lastInsertId();
 
 registrar_evento('nota_alta', 'paciente=' . $pacienteId . ' nota=' . $notaId);

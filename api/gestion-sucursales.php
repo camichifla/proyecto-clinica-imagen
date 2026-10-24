@@ -9,7 +9,7 @@ requerir_rol_json(['administrador']);
 
 const SUCURSAL_NOMBRE_MAX       = 80;
 const SUCURSAL_DIRECCION_MAX    = 160;
-const SUCURSAL_EQUIPAMIENTO_MAX = 255;
+const SUCURSAL_EQUIPAMIENTO_MAX = 1000;
 
 function respuesta_sucursales(int $codigo, array $cuerpo): never
 {
@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errores      = [];
     $nombre       = trim((string) ($_POST['nombre'] ?? ''));
     $direccion    = trim((string) ($_POST['direccion'] ?? ''));
-    $equipamiento = trim((string) ($_POST['equipamiento'] ?? ''));
+    $equipamiento = trim(str_replace("\r\n", "\n", (string) ($_POST['equipamiento'] ?? '')));
     $activo       = ($_POST['activo'] ?? '') === '1' ? 1 : 0;
 
     if ($nombre === '' || mb_strlen($nombre) > SUCURSAL_NOMBRE_MAX) {

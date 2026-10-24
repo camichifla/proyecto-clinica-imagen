@@ -16,7 +16,7 @@
         if (orden.cita_estudio) {
             datos.push(['Estudio de la cita', `${orden.cita_estudio} (${orden.cita_fecha})`]);
         }
-        datos.push(['Indicada por', orden.medico || '-']);
+        datos.push(['Indicada por', orden.medico ? orden.medico + (orden.medico_email ? ` (${orden.medico_email})` : '') : '-']);
         datos.push(...orden.detalle.map((d) => [d.etiqueta, d.valor]));
 
         const dl = document.createElement('dl');

@@ -1,4 +1,5 @@
-function crearTarjetaResultado(resultado) {
+// comparable: staff view adds a "Comparar" checkbox under each image (see visor-imagenes.js).
+function crearTarjetaResultado(resultado, comparable = false) {
     const articulo = document.createElement('article');
     articulo.className = 'tarjeta-resultado';
 
@@ -37,12 +38,27 @@ function crearTarjetaResultado(resultado) {
     if (resultado.imagenes.length) {
         const divImagenes = document.createElement('div');
         divImagenes.className = 'tarjeta-resultado-imagenes';
-        resultado.imagenes.forEach((imagen) => {
+        const total = resultado.imagenes.length;
+        resultado.imagenes.forEach((imagen, i) => {
             const img = document.createElement('img');
             img.src = imagen.url;
-            img.alt = imagen.nombre_original;
+            img.alt = `Imagen de ${resultado.nombre_estudio} del ${resultado.fecha_estudio}` + (total > 1 ? ` (${i + 1} de ${total})` : '');
+            img.dataset.estudio = resultado.nombre_estudio;
+            img.dataset.fecha = resultado.fecha_estudio;
             img.loading = 'lazy';
-            divImagenes.appendChild(img);
+            if (!comparable) {
+                divImagenes.appendChild(img);
+                return;
+            }
+            const figura = document.createElement('div');
+            figura.className = 'imagen-comparable';
+            const label = document.createElement('label');
+            const check = document.createElement('input');
+            check.type = 'checkbox';
+            check.className = 'comparar-check';
+            label.append(check, ' Comparar');
+            figura.append(img, label);
+            divImagenes.appendChild(figura);
         });
         articulo.appendChild(divImagenes);
     }
@@ -50,7 +66,7 @@ function crearTarjetaResultado(resultado) {
     return articulo;
 }
 
-function renderListaResultados(destino, resultados, mensajeVacio) {
+function renderListaResultados(destino, resultados, mensajeVacio, comparable = false) {
     if (!resultados.length) {
         const p = document.createElement('p');
         p.textContent = mensajeVacio;
@@ -59,6 +75,21 @@ function renderListaResultados(destino, resultados, mensajeVacio) {
     }
     const lista = document.createElement('div');
     lista.className = 'lista-resultados';
-    resultados.forEach((resultado) => lista.appendChild(crearTarjetaResultado(resultado)));
+    if (comparable && resultados.some((r) => r.imagenes.length)) {
+        const barra = document.createElement('div');
+        barra.className = 'barra-comparar';
+        const boton = document.createElement('button');
+        boton.type = 'button';
+        boton.className = 'btn-secundario comparar-abrir';
+        boton.textContent = 'Comparar imagenes seleccionadas';
+        boton.disabled = true;
+        const aviso = document.createElement('p');
+        aviso.className = 'campo-hint comparar-aviso';
+        aviso.setAttribute('role', 'status');
+        aviso.textContent = 'Marca 2 imagenes con "Comparar" para verlas lado a lado.';
+        barra.append(boton, aviso);
+        lista.appendChild(barra);
+    }
+    resultados.forEach((resultado) => lista.appendChild(crearTarjetaResultado(resultado, comparable)));
     destino.appendChild(lista);
 }

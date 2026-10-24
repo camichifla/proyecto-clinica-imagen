@@ -43,6 +43,25 @@
         seccionForm.hidden = true;
     }
 
+    async function cambiarActivo(paciente, boton) {
+        const accion = paciente.activo ? 'dar de baja' : 'reactivar';
+        if (!window.confirm('Seguro que queres ' + accion + ' la cuenta de ' + paciente.apellido + ', ' + paciente.nombre + '?')) {
+            return;
+        }
+        boton.disabled = true;
+        const cuerpo = new FormData(form);
+        cuerpo.set('accion', 'toggle_activo');
+        cuerpo.set('id', paciente.id);
+        const data = await apiJson('api/gestion-pacientes.php', { method: 'POST', body: cuerpo });
+        boton.disabled = false;
+        if (!data || !data.ok) {
+            mostrarMensaje((data && data.error) || 'No se pudo cambiar el estado de la cuenta.', true);
+            return;
+        }
+        mostrarMensaje(data.activo ? 'Cuenta reactivada.' : 'Cuenta dada de baja.', false);
+        cargar();
+    }
+
     function renderFila(paciente) {
         const tr = document.createElement('tr');
         tr.appendChild(celda('Nombre', paciente.apellido + ', ' + paciente.nombre));
@@ -58,6 +77,14 @@
         boton.textContent = 'Editar';
         boton.addEventListener('click', () => abrirForm(paciente));
         td.appendChild(boton);
+        if (paciente.email) {
+            const baja = document.createElement('button');
+            baja.type = 'button';
+            baja.className = 'btn-secundario';
+            baja.textContent = paciente.activo ? 'Dar de baja' : 'Reactivar';
+            baja.addEventListener('click', () => cambiarActivo(paciente, baja));
+            td.appendChild(baja);
+        }
         tr.appendChild(td);
         return tr;
     }

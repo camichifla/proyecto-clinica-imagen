@@ -1,6 +1,8 @@
 <?php
 // includes/pacientes_profesional.php — "pacientes con los que este
 // profesional tiene una relacion de atencion real (al menos una cita)".
+// Intentional: any cita (any estado) grants access to ALL of that patient's
+// results and clinical notes, including other doctors'. Not an IDOR.
 
 function pacientes_de_profesional(int $profesionalId): array
 {

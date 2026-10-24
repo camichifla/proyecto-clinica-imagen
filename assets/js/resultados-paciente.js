@@ -146,7 +146,7 @@
             section.appendChild(h3);
         }
 
-        renderListaResultados(section, data.resultados, MENSAJE_VACIO);
+        renderListaResultados(section, data.resultados, MENSAJE_VACIO, true);
         contenedor.appendChild(section);
     }
 

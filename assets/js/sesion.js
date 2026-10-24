@@ -5,6 +5,7 @@
 // redirige a index.html (el control real sigue en la API).
 (() => {
     const publico = document.currentScript.dataset.modo === 'publico';
+    const ROLES = { paciente: 'Paciente', medico: 'Médico', profesional: 'Profesional', administrador: 'Administrador', recepcionista: 'Recepcionista' };
 
     const promesa = (async () => {
         const url = publico ? 'api/sesion.php?opcional=1' : 'api/sesion.php';
@@ -57,23 +58,137 @@
             const nombre = document.querySelector('.user-nombre');
             if (nombre) {
                 nombre.textContent = sesion.nombre;
+                const rol = document.createElement('span');
+                rol.className = 'menu-usuario-rol';
+                rol.textContent = ROLES[sesion.rol] || '';
+                nombre.after(rol);
             }
 
             const lista = document.querySelector('.menu-usuario-lista');
             if (lista) {
-                sesion.menu.forEach((item) => {
-                    const li = document.createElement('li');
-                    const a = document.createElement('a');
-                    a.href = item.href;
-                    a.textContent = item.label;
-                    li.appendChild(a);
-                    lista.appendChild(li);
-                });
+                renderMenu(lista, sesion.menu, window.location.pathname.split('/').pop());
+                const pie = document.createElement('div');
+                pie.className = 'menu-usuario-pie';
+                pie.appendChild(interruptorTema());
+                const logout = lista.parentElement.querySelector('.form-logout');
+                if (logout) {
+                    pie.appendChild(logout);
+                }
+                lista.after(pie);
+                prepararPanel(lista.closest('details'));
             }
         }
 
         return sesion;
     })();
+
+    function enlaceMenu(item, actual) {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = item.href;
+        a.textContent = item.label;
+        if (item.href === actual) {
+            a.setAttribute('aria-current', 'page');
+        }
+        li.appendChild(a);
+        return li;
+    }
+
+    // Consecutive items sharing a grupo become one collapsible section; the section
+    // holding the current page starts open.
+    function renderMenu(lista, menu, actual) {
+        let grupo = null;
+        let sublista = null;
+        menu.forEach((item) => {
+            if (!item.grupo) {
+                grupo = null;
+                lista.appendChild(enlaceMenu(item, actual));
+                return;
+            }
+            if (item.grupo !== grupo) {
+                grupo = item.grupo;
+                const details = document.createElement('details');
+                details.className = 'menu-grupo';
+                const summary = document.createElement('summary');
+                summary.textContent = grupo;
+                sublista = document.createElement('ul');
+                details.append(summary, sublista);
+                const li = document.createElement('li');
+                li.appendChild(details);
+                lista.appendChild(li);
+            }
+            sublista.appendChild(enlaceMenu(item, actual));
+            if (item.href === actual) {
+                sublista.parentElement.open = true;
+            }
+        });
+    }
+
+    function interruptorTema() {
+        const label = document.createElement('label');
+        label.className = 'menu-tema';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.setAttribute('role', 'switch');
+        const sincronizar = () => {
+            input.checked = window.tema.actual() === 'dark';
+        };
+        sincronizar();
+        document.documentElement.addEventListener('cambio-tema', sincronizar);
+        input.addEventListener('change', () => window.tema.cambiar(input.checked ? 'dark' : 'light'));
+        label.append(input, 'Modo oscuro');
+        return label;
+    }
+
+    // Open menu: full-height panel under the header, the rest of the page dimmed and
+    // locked. Closes with Esc, a click on the backdrop or choosing a link.
+    function prepararPanel(details) {
+        const header = details.closest('header');
+        const toggle = details.querySelector('summary');
+        const fondo = document.createElement('div');
+        fondo.className = 'menu-fondo';
+        fondo.hidden = true;
+        header.after(fondo);
+
+        const medirHeader = () => {
+            const alto = Math.max(0, header.getBoundingClientRect().bottom);
+            document.documentElement.style.setProperty('--alto-header', alto + 'px');
+        };
+        const cerrar = () => {
+            details.open = false;
+        };
+
+        details.addEventListener('toggle', () => {
+            const abierto = details.open;
+            if (abierto) {
+                medirHeader();
+                const primero = details.querySelector('.menu-usuario-lista a, .menu-usuario-lista summary');
+                if (primero) {
+                    primero.focus();
+                }
+            } else {
+                toggle.focus();
+            }
+            fondo.hidden = !abierto;
+            document.body.classList.toggle('menu-abierto', abierto);
+        });
+        fondo.addEventListener('click', cerrar);
+        details.querySelector('.menu-usuario-lista').addEventListener('click', (evento) => {
+            if (evento.target.closest('a')) {
+                cerrar();
+            }
+        });
+        document.addEventListener('keydown', (evento) => {
+            if (evento.key === 'Escape' && details.open) {
+                cerrar();
+            }
+        });
+        window.addEventListener('resize', () => {
+            if (details.open) {
+                medirHeader();
+            }
+        });
+    }
 
     window[publico ? 'sesionPublica' : 'sesionLista'] = promesa;
 })();

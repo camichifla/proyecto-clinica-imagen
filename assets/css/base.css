@@ -82,15 +82,28 @@ header {
 }
 
 .menu-usuario[open] .avatar::before {
-    transform: rotate(45deg);
+    transform: rotate(-45deg);
 }
 
 .menu-usuario[open] .avatar::after {
-    transform: rotate(-45deg);
+    transform: rotate(45deg);
 }
 
 .menu-usuario[open] .menu-usuario-toggle::after {
     opacity: 0;
+}
+
+/* The menu panel drops in from the button when <details> opens. */
+.menu-usuario[open] .menu-usuario-panel {
+    transform-origin: top right;
+    animation: menu-usuario-entrada 0.2s ease-out;
+}
+
+@keyframes menu-usuario-entrada {
+    from {
+        opacity: 0;
+        transform: translateY(-0.5rem) scale(0.96);
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -98,6 +111,10 @@ header {
     .user .avatar::after,
     .menu-usuario-toggle::after {
         transition: none;
+    }
+
+    .menu-usuario[open] .menu-usuario-panel {
+        animation: none;
     }
 }
 

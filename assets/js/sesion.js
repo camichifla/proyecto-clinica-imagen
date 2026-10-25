@@ -6,6 +6,10 @@
 (() => {
     const publico = document.currentScript.dataset.modo === 'publico';
     const ROLES = { paciente: 'Paciente', medico: 'Médico', profesional: 'Profesional', administrador: 'Administrador', recepcionista: 'Recepcionista' };
+    const MENU_ANONIMO = [
+        { href: 'login.html', label: 'Iniciar sesión' },
+        { href: 'register.html', label: 'Registrarse' },
+    ];
 
     const promesa = (async () => {
         const url = publico ? 'api/sesion.php?opcional=1' : 'api/sesion.php';
@@ -54,29 +58,34 @@
             });
         }
 
-        if (!publico || sesion.logueado) {
-            const nombre = document.querySelector('.user-nombre');
-            if (nombre) {
-                nombre.textContent = sesion.nombre;
-                const rol = document.createElement('span');
-                rol.className = 'menu-usuario-rol';
-                rol.textContent = ROLES[sesion.rol] || '';
-                nombre.after(rol);
-            }
+        // Logged in: role menu, theme switch and logout. Visitors on public pages get the
+        // same hamburger with only "Iniciar sesión" and "Registrarse".
+        const lista = document.querySelector('.menu-usuario-lista');
+        if (lista) {
+            const logueado = !publico || sesion.logueado;
+            const nombre = lista.parentElement.querySelector('.user-nombre');
+            const rol = document.createElement('span');
+            rol.className = 'menu-usuario-rol';
+            nombre.textContent = logueado ? sesion.nombre : 'Bienvenido/a';
+            rol.textContent = logueado ? (ROLES[sesion.rol] || '') : 'Ingresá o creá tu cuenta';
+            nombre.after(rol);
 
-            const lista = document.querySelector('.menu-usuario-lista');
-            if (lista) {
-                renderMenu(lista, sesion.menu, window.location.pathname.split('/').pop());
+            const logout = lista.parentElement.querySelector('.form-logout');
+            renderMenu(lista, logueado ? sesion.menu : MENU_ANONIMO, window.location.pathname.split('/').pop());
+            if (logueado) {
                 const pie = document.createElement('div');
                 pie.className = 'menu-usuario-pie';
                 pie.appendChild(interruptorTema());
-                const logout = lista.parentElement.querySelector('.form-logout');
                 if (logout) {
                     pie.appendChild(logout);
                 }
                 lista.after(pie);
-                prepararPanel(lista.closest('details'));
+            } else if (logout) {
+                logout.remove();
             }
+            const detalles = lista.closest('details');
+            detalles.hidden = false;
+            prepararPanel(detalles);
         }
 
         return sesion;

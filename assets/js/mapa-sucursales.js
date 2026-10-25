@@ -35,6 +35,8 @@
 
     const map = L.map("map", { zoomControl: false }).setView([-34.9011, -56.1645], 12);
     L.control.zoom({ position: "topright" }).addTo(map);
+    // The map is hidden on phones (CSS); recompute its size when it becomes visible again.
+    window.addEventListener("resize", () => map.invalidateSize());
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
@@ -122,8 +124,9 @@
             ? items.map(clinicCardTemplate).join("")
             : emptyStateTemplate;
 
+        // Count only while a search filters the list.
         resultsCountEl.textContent = items.length === clinics.length
-            ? "Mostrando todas"
+            ? ""
             : `${items.length} resultado${items.length === 1 ? "" : "s"}`;
 
         listEl.querySelectorAll(".clinic-card").forEach((card) => {

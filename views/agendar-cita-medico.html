@@ -82,50 +82,34 @@
 
         <div class="campo">
           <label for="estudio">Estudio</label>
-          <select id="estudio" name="estudio" class="selector-combo">
+          <select id="estudio" name="estudio" class="selector-combo" required>
             <option value="">Elegí un estudio</option>
           </select>
         </div>
 
         <div class="campo">
           <label for="sucursal">Sede</label>
-          <select id="sucursal" name="sucursal_id" class="selector-combo">
+          <select id="sucursal" name="sucursal_id" class="selector-combo" required>
             <option value="">Elegí una sede</option>
           </select>
         </div>
 
         <div class="campo">
-          <label for="profesional_id">Profesional (opcional)</label>
-          <select id="profesional_id" name="profesional_id" class="selector-combo">
+          <label for="profesional_id">Profesional</label>
+          <select id="profesional_id" name="profesional_id" class="selector-combo" data-buscable>
             <option value="">Cualquiera disponible</option>
           </select>
           <p class="campo-error" data-mensaje-sin-profesionales hidden>Todavía no hay profesionales cargados.</p>
         </div>
 
         <div class="campo">
-          <label id="fecha-label">Fecha</label>
-          <div class="selector-fecha" data-min="" data-max="">
-            <button type="button" id="fecha-boton" class="selector-fecha-boton"
-                    aria-haspopup="dialog" aria-expanded="false"
-                    aria-labelledby="fecha-label">
-              <span class="selector-fecha-texto">Elegí una fecha</span>
-            </button>
-            <input type="hidden" id="fecha" name="fecha" value="">
-            <div class="calendario" id="calendario" role="dialog" aria-label="Elegir fecha" hidden>
-              <div class="calendario-header">
-                <button type="button" class="calendario-nav" data-dir="-1" aria-label="Mes anterior">‹</button>
-                <span class="calendario-mes-actual"></span>
-                <button type="button" class="calendario-nav" data-dir="1" aria-label="Mes siguiente">›</button>
-              </div>
-              <div class="calendario-dias-semana"></div>
-              <div class="calendario-grid"></div>
-            </div>
-          </div>
+          <label for="fecha">Fecha</label>
+          <input type="date" id="fecha" name="fecha" required>
         </div>
 
         <div class="campo">
           <label for="hora">Hora</label>
-          <select id="hora" name="hora" class="selector-combo" disabled>
+          <select id="hora" name="hora" class="selector-combo" disabled required>
             <option value="">Elegí sede y fecha primero</option>
           </select>
         </div>
@@ -381,16 +365,12 @@
   </main>
 
   <footer>
-    <nav aria-label="Pie de página">
-      <a href="index.html">Inicio</a>
-      <a href="servicios.html">Servicios</a>
-      <a href="contacto.html">Contacto</a>
-    </nav>
     <p>&copy; Clínica Imagen</p>
   </footer>
 
   <script src="assets/js/sesion.js" defer></script>
   <script src="assets/js/form-api.js" defer></script>
+  <script src="assets/js/selector-fecha.js" defer></script>
   <script src="assets/js/agendar-cita-medico.js" defer></script>
 </body>
 

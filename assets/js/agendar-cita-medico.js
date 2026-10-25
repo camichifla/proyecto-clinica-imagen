@@ -2,8 +2,8 @@
     const form = document.querySelector('form[data-api]');
     const selectSucursal = document.getElementById('sucursal');
     const selectProfesional = document.getElementById('profesional_id');
-    const contenedorFecha = document.querySelector('.selector-fecha');
-    if (!form || !selectSucursal || !selectProfesional || !contenedorFecha) {
+    const inputFecha = document.getElementById('fecha');
+    if (!form || !selectSucursal || !selectProfesional || !inputFecha) {
         return;
     }
 
@@ -119,8 +119,8 @@
             return;
         }
 
-        contenedorFecha.dataset.min = data.fechaMin;
-        contenedorFecha.dataset.max = data.fechaMax;
+        inputFecha.min = data.fechaMin;
+        inputFecha.max = data.fechaMax;
 
         poblarSucursales(selectSucursal, data.sucursalesOrden);
         poblarEstudios(document.getElementById('estudio'), data.estudios);

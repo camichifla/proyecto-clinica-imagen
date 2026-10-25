@@ -89,9 +89,10 @@
     opacity: 0.45;
 }
 
+/* Today: same 1px border as any day, in light blue, with a light-blue tint. */
 .agenda-dia-hoy {
     border-color: var(--accent-color);
-    border-width: 2px;
+    background: rgba(var(--accent-rgb), 0.08);
 }
 
 .agenda-dia-numero {
@@ -119,6 +120,47 @@
     color: var(--text-secondary);
     text-decoration: none;
     font-weight: var(--font-weight-semibold);
+}
+
+/* Month view: days with citas open their details below the grid. */
+.agenda-dia-con-citas {
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+/* Hover and selected borders use the day-number color (--dark-neutral). */
+.agenda-dia-con-citas:hover {
+    border-color: var(--dark-neutral);
+}
+
+.agenda-dia-con-citas[aria-expanded="true"] {
+    border-color: var(--dark-neutral);
+    box-shadow: 0 0 0 1px var(--dark-neutral);
+    background: var(--light-neutral);
+}
+
+/* Today while selected: the usual selected border, keeping today's light-blue fill. */
+.agenda-dia-hoy.agenda-dia-con-citas[aria-expanded="true"] {
+    background: rgba(var(--accent-rgb), 0.08);
+}
+
+.agenda-mes-detalle {
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 2px solid var(--border-subtle);
+}
+
+.agenda-mes-detalle h2 {
+    margin: 0 0 var(--space-3);
+    font-size: var(--font-size-lg);
+    color: var(--dark-neutral);
+}
+
+.agenda-mes-detalle-lista {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+    gap: var(--space-3);
+    align-items: start;
 }
 
 .agenda-semana-grid {
@@ -158,15 +200,14 @@
 
 .agenda-cita-card {
     display: block;
+    box-sizing: border-box;
     width: 100%;
     text-align: left;
     font-family: inherit;
-    cursor: pointer;
     padding: var(--space-2) 0.6rem;
     border-radius: 0.4rem;
     background: var(--surface);
     border: 1px solid var(--border-subtle);
-    border-left: 4px solid var(--border-subtle);
     font-size: var(--font-size-sm);
     color: var(--dark-neutral);
 }
@@ -178,17 +219,22 @@
 }
 
 .agenda-cita-detalle {
-    display: none;
+    display: flex;
     flex-direction: column;
     gap: 0.2rem;
     margin-top: 0.4rem;
 }
 
-.agenda-cita-card[aria-expanded="true"] .agenda-cita-detalle {
-    display: flex;
+/* Week view cards are buttons that fold their details. */
+button.agenda-cita-card {
+    cursor: pointer;
 }
 
-/* Estados: color plano en la pastilla del mes; en semana solo el borde izquierdo tiñe la tarjeta. */
+.agenda-cita-card[aria-expanded="false"] .agenda-cita-detalle {
+    display: none;
+}
+
+/* Estados: el color del estado tiñe la pastilla del mes y las tarjetas. */
 
 .agenda-cita-pill.estado-pendiente {
     background: rgba(var(--accent-rgb), 0.15);
@@ -210,14 +256,12 @@
     background: rgba(var(--accent-rgb), 0.15);
     color: var(--accent-secondary);
     border-color: rgba(var(--accent-rgb), 0.3);
-    border-left-color: var(--accent-secondary);
 }
 
 .agenda-cita-card.estado-confirmada {
     background: rgba(var(--success-rgb), 0.15);
     color: var(--color-success);
     border-color: rgba(var(--success-rgb), 0.3);
-    border-left-color: var(--color-success);
 }
 
 .agenda-cita-card.estado-rechazada,
@@ -225,7 +269,6 @@
     background: rgba(var(--danger-rgb), 0.12);
     color: var(--color-danger);
     border-color: rgba(var(--danger-rgb), 0.25);
-    border-left-color: var(--color-danger);
 }
 
 @media (width <= 720px) {

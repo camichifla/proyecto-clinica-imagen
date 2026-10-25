@@ -53,5 +53,6 @@
         evento.preventDefault();
         cargar();
     });
+    filtrarAlCambiar(form);
     cargar();
 })();

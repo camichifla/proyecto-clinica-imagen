@@ -9,6 +9,36 @@ html {
     display: none !important;
 }
 
+/* Text boxes keep their width and grow taller with their text instead of having a resize handle.
+   The rows attribute sets the minimum height; sesion.js grows them by hand where field-sizing is unsupported. */
+textarea {
+    --filas: 3;
+    box-sizing: border-box;
+    min-height: calc(var(--filas) * 1lh + 1.5rem);
+    resize: none;
+    field-sizing: content;
+    overflow-wrap: anywhere;
+}
+
+textarea[rows="2"] {
+    --filas: 2;
+}
+
+textarea[rows="4"] {
+    --filas: 4;
+}
+
+textarea[rows="6"] {
+    --filas: 6;
+}
+
+/* Light/dark switch cross-fade (tema.js wraps the change in a view transition). */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 0.25s;
+    animation-timing-function: ease-in-out;
+}
+
 body{
     background: var(--background);
     /* Column layout: main grows so the footer sits at the bottom on short pages. */
@@ -104,6 +134,39 @@ header {
     }
 }
 
+/* Closing (sesion.js adds .cerrando until the animation ends): the opening in reverse. */
+.menu-usuario.cerrando .menu-usuario-panel {
+    animation: menu-usuario-salida 0.25s ease-in forwards;
+}
+
+@keyframes menu-usuario-salida {
+    to {
+        transform: translateX(100%);
+    }
+}
+
+.menu-usuario.cerrando .avatar::before {
+    transform: translateY(-9px);
+}
+
+.menu-usuario.cerrando .avatar::after {
+    transform: translateY(9px);
+}
+
+.menu-usuario.cerrando .menu-usuario-toggle::after {
+    opacity: 1;
+}
+
+.menu-fondo.cerrando {
+    animation: menu-fondo-salida 0.25s ease-in forwards;
+}
+
+@keyframes menu-fondo-salida {
+    to {
+        opacity: 0;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .user .avatar::before,
     .user .avatar::after,
@@ -112,7 +175,9 @@ header {
     }
 
     .menu-usuario[open] .menu-usuario-panel,
-    .menu-fondo {
+    .menu-usuario.cerrando .menu-usuario-panel,
+    .menu-fondo,
+    .menu-fondo.cerrando {
         animation: none;
     }
 }
@@ -134,10 +199,39 @@ header {
     transform: translateY(0);
 }
 
-/* Un solo indicador de foco para todo control; ningun otro CSS lo anula. */
+/* Un solo indicador de foco para todo control; los campos de texto lo reemplazan por su borde (abajo). */
 :focus-visible {
     outline: 3px solid var(--dark-neutral);
     outline-offset: 2px;
+}
+
+/* Box hover, same as the agenda days: the border takes the day-number color (--dark-neutral). Not while
+   focused/open (light blue) or disabled. */
+:is(textarea, select, input:not([type="checkbox"], [type="radio"], [type="submit"], [type="button"], [type="file"]),
+    .selector-combo-boton, .selector-fecha-boton):hover:not(:disabled, :focus, [aria-expanded="true"]) {
+    border-color: var(--dark-neutral);
+}
+
+/* Selected box, same as the selected agenda day: thicker border in the day-number color (box-shadow, so nothing
+   shifts) and a soft gray fill. Fields while focused, dropdowns and date pickers while open or keyboard-focused
+   (:focus-visible), so the box deselects after picking an option with the mouse. */
+textarea:focus,
+select:focus,
+input:not([type="checkbox"], [type="radio"], [type="submit"], [type="button"], [type="file"]):focus,
+.selector-combo-boton:focus-visible,
+.selector-combo-boton[aria-expanded="true"],
+.selector-fecha-boton:focus-visible,
+.selector-fecha-boton[aria-expanded="true"] {
+    outline: none;
+    border-color: var(--dark-neutral);
+    box-shadow: 0 0 0 1px var(--dark-neutral);
+    background-color: var(--light-neutral);
+}
+
+/* A box with an error stays red while selected too. */
+:is(input, textarea, select, button)[aria-invalid="true"]:is(:focus, [aria-expanded="true"]) {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 1px var(--color-danger);
 }
 
 header :focus-visible {
@@ -147,38 +241,6 @@ header :focus-visible {
 .buscador-combo-lista li[aria-selected="true"] {
     outline: 2px solid var(--dark-neutral);
     outline-offset: -2px;
-}
-
-.nav-publica {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2) var(--space-4);
-}
-
-.nav-publica a {
-    color: var(--on-brand);
-    text-decoration: none;
-    font-weight: var(--font-weight-semibold);
-    padding: 0.25rem 0;
-    border-bottom: 2px solid transparent;
-}
-
-.nav-publica a:hover,
-.nav-publica a[aria-current="page"] {
-    border-bottom-color: var(--on-brand);
-}
-
-footer nav {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-2) var(--space-5);
-    margin-bottom: var(--space-2);
-}
-
-footer nav a {
-    color: inherit;
-    font-weight: var(--font-weight-medium);
 }
 
 footer p {
@@ -263,6 +325,50 @@ footer {
     transform: translateY(-1px);
 }
 
+/* Every "Cancelar" is red (and "Confirmar" green, .btn-exito): solid, plus a soft variant for the final confirmation step (also used by a solid
+   toggle while its form is open). Same pill shape as .btn-secundario so they line up next to it. */
+.btn-peligro,
+.btn-peligro-suave,
+.btn-exito {
+    display: inline-block;
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    text-align: center;
+    cursor: pointer;
+    transition: background var(--transition-fast), filter var(--transition-fast);
+}
+
+.btn-peligro {
+    background: var(--btn-peligro);
+    color: var(--on-brand);
+}
+
+.btn-exito {
+    background: var(--btn-exito);
+    color: var(--on-brand);
+}
+
+.btn-peligro:hover,
+.btn-exito:hover {
+    filter: brightness(1.1);
+}
+
+.btn-peligro-suave,
+.btn-peligro[aria-expanded="true"] {
+    background: rgba(var(--danger-rgb), 0.12);
+    border-color: rgba(var(--danger-rgb), 0.35);
+    color: var(--color-danger);
+    filter: none;
+}
+
+.btn-peligro-suave:hover {
+    background: rgba(var(--danger-rgb), 0.2);
+}
+
 .seccion-auth {
     max-width: 480px;
     margin: 2.5rem auto;
@@ -339,6 +445,208 @@ footer {
     color: var(--dark-neutral);
 }
 
+/* Floating labels: in a .campo whose label is followed by its box (text field, textarea, dropdown or date picker),
+   the label sits inside the empty box and, once the box is focused, open or filled, shrinks into its top-left
+   corner with a quick animation. Text fields need a placeholder for :placeholder-shown (sesion.js adds an
+   invisible one); real placeholders only show while focused. */
+.campo:has(> label + :is(input:not([type="checkbox"], [type="radio"], [type="file"], [type="hidden"]), textarea,
+    .buscador-combo, .selector-fecha)) {
+    position: relative;
+}
+
+.campo:has(> label + :is(input:not([type="checkbox"], [type="radio"], [type="file"], [type="hidden"]), textarea,
+    .buscador-combo, .selector-fecha)) > label {
+    position: absolute;
+    top: 1rem;
+    left: calc(0.9rem + 1px);
+    z-index: 1;
+    font-size: 1.05rem;
+    line-height: 1.5rem;
+    max-width: calc(100% - 3rem);
+    overflow: hidden;
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    pointer-events: none;
+    transform-origin: left top;
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.campo:has(> label + :is(input:not([type="checkbox"], [type="radio"], [type="file"], [type="hidden"]), textarea,
+    .buscador-combo, .selector-fecha)):is(:focus-within,
+    :has(input:not([type="checkbox"], [type="radio"], [type="file"], [type="hidden"]):not(:placeholder-shown)), :has(textarea:not(:placeholder-shown)),
+    :has(.selector-combo-boton:not(.selector-combo-placeholder)), :has(.selector-fecha-boton:not(.selector-fecha-vacio)),
+    :has([aria-expanded="true"])) > label {
+    transform: translateY(-0.7rem) scale(0.72);
+    color: var(--dark-neutral);
+    font-weight: var(--font-weight-semibold);
+}
+
+/* Room for the small label inside the box. */
+.campo:has(> label + :is(input, textarea, .buscador-combo, .selector-fecha)) :is(input:not([type="checkbox"], [type="radio"], [type="file"], [type="hidden"]), textarea,
+    .selector-combo-boton, .selector-fecha-boton) {
+    padding-top: 1.45rem;
+    padding-bottom: 0.45rem;
+    line-height: 1.5rem;
+}
+
+/* While the label is inside, the box's own hint text (placeholder, "Elegí ...") stays hidden. */
+.campo:has(> label + :is(input, textarea, .buscador-combo)):not(:focus-within) :is(input, textarea)::placeholder {
+    color: transparent;
+}
+
+.campo:has(> label + .buscador-combo):not(:focus-within) .selector-combo-boton.selector-combo-placeholder:not([aria-expanded="true"]),
+.campo:has(> label + .selector-fecha):not(:focus-within) .selector-fecha-vacio .selector-fecha-texto {
+    color: transparent;
+}
+
+/* A locked box fades its label too (only the box itself: the calendar's month arrows also get disabled). */
+.campo:has(> label + :is(.buscador-combo, .selector-fecha)):has(:is(.selector-combo-boton, .selector-combo-buscar, .selector-fecha-boton):disabled) > label {
+    opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .campo > label {
+        transition: none;
+    }
+}
+
+/* Clear/reset button (sesion.js): ✕ empties a text field or date, ↺ puts a dropdown back on its default.
+   sesion.js places it right after the box's text; it only shows when there is something to clear or reset. */
+.buscador-combo,
+.selector-fecha {
+    position: relative;
+}
+
+.campo-limpiar {
+    position: absolute;
+    top: calc(1.45rem + 0.75rem - 0.925rem);
+    right: 0.6rem;
+    z-index: 2;
+    display: none;
+    place-items: center;
+    width: 1.85rem;
+    height: 1.85rem;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+/* File box while files are dragged over it (sesion.js). */
+input[type="file"].arrastrando {
+    border-color: var(--dark-neutral);
+    border-style: solid;
+    background-color: var(--light-neutral);
+}
+
+/* Chosen files under a file field (sesion.js), each with its own ✕. */
+.archivos-lista {
+    display: grid;
+    gap: var(--space-1);
+    margin: var(--space-2) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.archivos-lista li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+    color: var(--dark-neutral);
+}
+
+.archivos-lista span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.archivo-quitar {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 1.85rem;
+    height: 1.85rem;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.archivo-quitar:hover {
+    background: var(--light-neutral);
+    color: var(--dark-neutral);
+}
+
+/* !important: stays visible while spinning, although the reset already hid it. */
+.campo-limpiar.girando {
+    display: grid !important;
+    animation: campo-limpiar-girar 0.2s ease-in-out;
+}
+
+@keyframes campo-limpiar-girar {
+    to {
+        transform: rotate(-360deg);
+    }
+}
+
+.campo-limpiar:hover {
+    background: var(--light-neutral);
+    color: var(--dark-neutral);
+}
+
+/* Left of the chevron on dropdowns and date pickers. */
+.buscador-combo:has(> .selector-combo-boton) > .campo-limpiar,
+.selector-fecha > .campo-limpiar {
+    right: 2.3rem;
+}
+
+/* Shown only with a value, never on locked boxes. */
+.campo:has(> input:not([type="hidden"], [hidden], :placeholder-shown)) > .campo-limpiar,
+.buscador-combo:has(> input:not(:placeholder-shown)) > .campo-limpiar,
+.buscador-combo:has(> .selector-combo-boton:not(.selector-combo-en-default)) > .campo-limpiar,
+.selector-fecha:has(> .selector-fecha-boton:not(.selector-fecha-vacio)) > .campo-limpiar {
+    display: grid;
+}
+
+:is(.campo, .buscador-combo, .selector-fecha):has(:disabled) > .campo-limpiar {
+    display: none;
+}
+
+/* Room so the text never runs under the button (only while it shows). */
+.campo:has(> .campo-limpiar) > input:not(:placeholder-shown),
+.buscador-combo:has(> .campo-limpiar) > input:not(:placeholder-shown) {
+    padding-right: 2.6rem;
+}
+
+.buscador-combo:has(> .campo-limpiar) > .selector-combo-boton:not(.selector-combo-en-default),
+.selector-fecha:has(> .campo-limpiar) > .selector-fecha-boton:not(.selector-fecha-vacio) {
+    padding-right: 4.2rem;
+}
+
+/* Box texts stay on one line. */
+.selector-combo-boton,
+.selector-fecha-texto {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
 .campo input {
     padding: 0.7rem 0.9rem;
     border: 1px solid var(--border-subtle);
@@ -349,10 +657,6 @@ footer {
     transition: border-color var(--transition-fast);
 }
 
-.campo input:focus {
-    border-color: var(--accent-color);
-}
-
 .campo textarea {
     padding: 0.7rem 0.9rem;
     border: 1px solid var(--border-subtle);
@@ -361,17 +665,12 @@ footer {
     font-size: var(--font-size-base);
     background: var(--surface-alt);
     color: var(--dark-neutral);
-    resize: vertical;
     transition: border-color var(--transition-fast);
-}
-
-.campo textarea:focus {
-    border-color: var(--accent-color);
 }
 
 .campo input[aria-invalid="true"],
 .campo textarea[aria-invalid="true"] {
-    border-color: var(--accent-secondary);
+    border-color: var(--color-danger);
 }
 
 .buscador-combo {
@@ -456,9 +755,9 @@ select.selector-combo {
 }
 
 .ayuda-al-foco .campo input:focus {
-    outline: 2px solid var(--validez);
-    outline-offset: 0;
+    outline: none;
     border-color: var(--validez);
+    box-shadow: 0 0 0 1px var(--validez);
     background: rgba(var(--validez-rgb), 0.08);
 }
 
@@ -482,7 +781,7 @@ select.selector-combo {
 }
 
 .campo-error {
-    color: var(--accent-secondary);
+    color: var(--color-danger);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
     margin: 0.1rem 0 0;
@@ -567,6 +866,8 @@ select.selector-combo {
     padding: var(--space-6);
     background: var(--surface);
     box-shadow: -8px 0 24px rgba(var(--overlay-rgb), 0.18);
+    /* Keep the shadow on the page side only; its blur used to spill onto the header. */
+    clip-path: inset(0 0 0 -40px);
     overflow-y: auto;
     overscroll-behavior: contain;
 }
@@ -593,7 +894,18 @@ body.menu-abierto {
     overflow: hidden;
 }
 
+/* Panel header: account icon next to the name and role. */
+.menu-usuario-cabecera {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding-bottom: var(--space-4);
+    margin-bottom: var(--space-3);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
 .menu-usuario-panel .user-nombre {
+    display: block;
     color: var(--dark-neutral);
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-bold);
@@ -601,11 +913,33 @@ body.menu-abierto {
 
 .menu-usuario-rol {
     display: block;
-    padding-bottom: var(--space-4);
-    margin-bottom: var(--space-3);
-    border-bottom: 1px solid var(--border-subtle);
     color: var(--text-secondary);
     font-size: var(--font-size-sm);
+}
+
+/* Generic user icon (no photo) that opens the account page. */
+.menu-cuenta {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    background: var(--light-neutral);
+    color: var(--text-secondary);
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.menu-cuenta svg {
+    width: 60%;
+    height: 60%;
+    fill: currentColor;
+}
+
+.menu-cuenta:hover,
+.menu-cuenta[aria-current="page"] {
+    background: var(--border-subtle);
+    color: var(--dark-neutral);
 }
 
 .menu-usuario-lista,
@@ -638,9 +972,11 @@ body.menu-abierto {
     background: var(--light-neutral);
 }
 
-.menu-usuario-lista a[aria-current="page"] {
-    background: var(--light-neutral);
-    box-shadow: inset 3px 0 0 var(--accent-color);
+/* Current page: solid light-blue pill. */
+.menu-usuario-lista a[aria-current="page"],
+.menu-usuario-lista a[aria-current="page"]:hover {
+    background: var(--accent-color);
+    color: var(--on-brand);
     font-weight: var(--font-weight-semibold);
 }
 
@@ -658,24 +994,9 @@ body.menu-abierto {
     display: none;
 }
 
-.menu-grupo summary::after {
-    content: "";
-    width: 0.5rem;
-    height: 0.5rem;
-    border-right: 2px solid currentColor;
-    border-bottom: 2px solid currentColor;
-    transform: rotate(45deg);
-    transition: transform var(--transition-fast);
-}
-
-.menu-grupo[open] summary::after {
-    transform: rotate(-135deg);
-}
 
 .menu-grupo ul {
     margin: 0.2rem 0 var(--space-2) var(--space-4);
-    padding-left: var(--space-2);
-    border-left: 1px solid var(--border-subtle);
 }
 
 .menu-usuario-pie {
@@ -747,6 +1068,19 @@ body.menu-abierto {
     padding: 1.75rem;
     background: var(--surface);
     border-radius: var(--radius-sm);
+}
+
+/* Details that open inside a box under a divider: agenda day, search results. */
+.detalle-expandido {
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 2px solid var(--border-subtle);
+}
+
+.detalle-expandido h2 {
+    margin: 0 0 var(--space-3);
+    font-size: var(--font-size-lg);
+    color: var(--dark-neutral);
 }
 
 .seccion-panel + .seccion-panel {
@@ -828,9 +1162,38 @@ body.menu-abierto {
     gap: var(--space-3);
 }
 
-/* Tarjetas en pantallas chicas: sin esto <table>/<tbody> siguen en layout de
-   tabla y la celda toma el ancho del contenido, desbordando el contenedor. */
-@media (width <= 760px) {
+/* Buttons inside tables are a size smaller than form buttons. */
+.tabla-datos td :is(.btn-primary, .btn-secundario, .btn-peligro, .btn-peligro-suave, .btn-exito, .btn-confirmar, .btn-rechazar, .btn-confirmar-rechazo) {
+    padding: 0.35rem 0.9rem;
+    font-size: var(--font-size-sm);
+}
+
+/* Action cells with two or more options stack them vertically, all the same (short) width; in card mode they
+   stretch to the card width instead, easier to tap. */
+.tabla-datos td[data-label="Acciones"]:has(> :nth-child(2)) > :is(button, a),
+.tabla-scroll:not(.tabla-tarjetas) :is(.botones-solicitud, .acciones-turno) > button {
+    display: block;
+    box-sizing: border-box;
+    width: 9.5rem;
+    text-align: center;
+}
+
+.tabla-scroll.tabla-tarjetas td[data-label="Acciones"] > :is(button, a) {
+    width: 100%;
+}
+
+/* The final "Confirmar ..." button of an action form is only as wide as its text. */
+.tabla-scroll:not(.tabla-tarjetas) :is(.form-rechazar-cita, .accion-turno) button[type="submit"] {
+    align-self: flex-start;
+}
+
+.tabla-datos td[data-label="Acciones"] > :is(button, a) + :is(button, a) {
+    margin-top: var(--space-2);
+}
+
+/* Card layout, applied by form-api.js (.tabla-tarjetas) when a table doesn't fit its container. Sin esto
+   <table>/<tbody> siguen en layout de tabla y la celda toma el ancho del contenido. */
+.tabla-scroll.tabla-tarjetas {
     .tabla-datos,
     .tabla-datos tbody {
         display: block;
@@ -858,8 +1221,7 @@ body.menu-abierto {
     }
 }
 
-/* Phones: compact header that scrolls away (sticky + wrapped nav took a third of the screen);
-   logo and user menu share the first row, nav gets its own. */
+/* Phones: compact header that scrolls away instead of staying stuck on top. */
 @media (width <= 640px) {
     header {
         position: static;
@@ -869,11 +1231,6 @@ body.menu-abierto {
 
     .logo img {
         height: 3.25rem;
-    }
-
-    .nav-publica {
-        order: 3;
-        width: 100%;
     }
 }
 

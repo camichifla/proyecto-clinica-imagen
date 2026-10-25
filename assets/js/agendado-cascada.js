@@ -5,18 +5,17 @@
 // <script src>:
 //   var SUCURSALES = {...};   // ver $datosSucursales en cada .php
 //   var HORA_ELEGIDA = '...'; // hora previamente elegida, para re-render tras error
-// y los siguientes ids/clases en el DOM: #sucursal, #estudio, #profesional_id
-// (con data-especializaciones en cada <option>), #hora, .selector-fecha
-// (con data-min/data-max), #fecha-boton (.selector-fecha-texto), #fecha,
-// #calendario (.calendario-mes-actual, .calendario-dias-semana,
-// .calendario-grid, [data-dir="-1"], [data-dir="1"]).
+// y los siguientes ids en el DOM: #sucursal, #estudio, #profesional_id
+// (con data-especializaciones en cada <option>), #hora y #fecha (un
+// <input type="date"> con min/max, convertido en calendario por selector-fecha.js;
+// aca solo se le indica que dias abre la sede).
 (function () {
   var sucursalSelect    = document.getElementById('sucursal');
   var estudioSelect     = document.getElementById('estudio');
   var profesionalSelect = document.getElementById('profesional_id');
   var horaSelect        = document.getElementById('hora');
-  var contenedor        = document.querySelector('.selector-fecha');
-  if (!sucursalSelect || !estudioSelect || !profesionalSelect || !horaSelect || !contenedor) {
+  var fechaInput        = document.getElementById('fecha');
+  if (!sucursalSelect || !estudioSelect || !profesionalSelect || !horaSelect || !fechaInput) {
     return;
   }
   var opcionesProfesional = Array.prototype.slice.call(profesionalSelect.options);
@@ -182,28 +181,6 @@
       .catch(function () {});
   }
 
-  estudioSelect.addEventListener('change', function () {
-    aplicarFiltroSede();
-    aplicarFiltroProfesional();
-    aplicarHoras(seleccionada);
-  });
-  profesionalSelect.addEventListener('change', function () {
-    aplicarHoras(seleccionada);
-  });
-
-  var boton      = document.getElementById('fecha-boton');
-  var textoBoton = boton.querySelector('.selector-fecha-texto');
-  var oculto     = document.getElementById('fecha');
-  var panel      = document.getElementById('calendario');
-  var header     = panel.querySelector('.calendario-mes-actual');
-  var filaDias   = panel.querySelector('.calendario-dias-semana');
-  var grid       = panel.querySelector('.calendario-grid');
-  var btnPrev    = panel.querySelector('[data-dir="-1"]');
-  var btnNext    = panel.querySelector('[data-dir="1"]');
-
-  var MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-  var DIAS  = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'];
-
   function pad(n) {
     return String(n).padStart(2, '0');
   }
@@ -214,144 +191,65 @@
   function aISO(d) {
     return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
   }
-  function aVisible(d) {
-    return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
-  }
-  function mismoDia(a, b) {
-    return a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  function seleccionada() {
+    return fechaInput.value ? parseISO(fechaInput.value) : null;
   }
 
-  var minFecha = parseISO(contenedor.dataset.min);
-  var maxFecha = parseISO(contenedor.dataset.max);
-  var seleccionada = oculto.value ? parseISO(oculto.value) : null;
-  var vista = new Date((seleccionada || minFecha).getFullYear(), (seleccionada || minFecha).getMonth(), 1);
-
-  if (seleccionada) {
-    textoBoton.textContent = aVisible(seleccionada);
-  }
-
-  DIAS.forEach(function (d) {
-    var span = document.createElement('span');
-    span.textContent = d;
-    filaDias.appendChild(span);
-  });
-
-  function enMesMin() {
-    return vista.getFullYear() === minFecha.getFullYear() && vista.getMonth() === minFecha.getMonth();
-  }
-  function enMesMax() {
-    return vista.getFullYear() === maxFecha.getFullYear() && vista.getMonth() === maxFecha.getMonth();
-  }
-
-  function render() {
-    header.textContent = MESES[vista.getMonth()] + ' ' + vista.getFullYear();
-    btnPrev.disabled = enMesMin();
-    btnNext.disabled = enMesMax();
-    grid.innerHTML = '';
-
-    var primerDiaSemana = (new Date(vista.getFullYear(), vista.getMonth(), 1).getDay() + 6) % 7;
-    var diasEnMes = new Date(vista.getFullYear(), vista.getMonth() + 1, 0).getDate();
-    var hoy = new Date();
-
-    for (var i = 0; i < primerDiaSemana; i++) {
-      grid.appendChild(document.createElement('span'));
+  // The shared calendar (selector-fecha.js) only offers days the chosen sede is open.
+  fechaInput.diaHabilitado = function (fecha) {
+    return diaAbierto(sucursalActual(), fecha);
+  };
+  function refrescarCalendario() {
+    if (fechaInput.refrescarCalendario) {
+      fechaInput.refrescarCalendario();
     }
+  }
 
-    var s = sucursalActual();
-
-    for (var dia = 1; dia <= diasEnMes; dia++) {
-      var fecha = new Date(vista.getFullYear(), vista.getMonth(), dia);
-      var celda = document.createElement('button');
-      celda.type = 'button';
-      celda.textContent = String(dia);
-      celda.className = 'calendario-dia';
-
-      if (fecha < minFecha || fecha > maxFecha || !diaAbierto(s, fecha)) {
-        celda.disabled = true;
-      } else {
-        celda.addEventListener('click', (function (f) {
-          return function () {
-            seleccionada = f;
-            oculto.value = aISO(f);
-            textoBoton.textContent = aVisible(f);
-            aplicarHoras(seleccionada);
-            cerrar();
-          };
-        })(fecha));
+  // Steps go top to bottom: each control stays locked (faded, no arrow) until the previous one is chosen.
+  // Estudio -> Sede -> Profesional (opcional) y Fecha -> Hora (aplicarHoras lo bloquea sin fecha).
+  // A locked step is also emptied, so clearing an earlier choice resets everything below it.
+  function aplicarBloqueos() {
+    if (!estudioSelect.value) {
+      sucursalSelect.value = '';
+    }
+    if (!sucursalSelect.value) {
+      profesionalSelect.value = '';
+      if (fechaInput.value) {
+        fechaInput.value = '';
       }
-
-      if (mismoDia(fecha, seleccionada)) {
-        celda.classList.add('calendario-dia-seleccionado');
-      }
-      if (mismoDia(fecha, hoy)) {
-        celda.classList.add('calendario-dia-hoy');
-      }
-
-      grid.appendChild(celda);
     }
+    sucursalSelect.disabled = !estudioSelect.value;
+    profesionalSelect.disabled = !sucursalSelect.value;
+    fechaInput.disabled = !sucursalSelect.value;
   }
 
-  function cerrarSiAfuera(evento) {
-    if (!contenedor.contains(evento.target)) {
-      cerrar();
-    }
-  }
-  function cerrarConEscape(evento) {
-    if (evento.key === 'Escape') {
-      cerrar();
-    }
-  }
-  function abrir() {
-    render();
-    panel.hidden = false;
-    boton.setAttribute('aria-expanded', 'true');
-    document.addEventListener('click', cerrarSiAfuera);
-    document.addEventListener('keydown', cerrarConEscape);
-  }
-  function cerrar() {
-    panel.hidden = true;
-    boton.setAttribute('aria-expanded', 'false');
-    document.removeEventListener('click', cerrarSiAfuera);
-    document.removeEventListener('keydown', cerrarConEscape);
-  }
-
-  boton.addEventListener('click', function (evento) {
-    evento.stopPropagation();
-    if (panel.hidden) {
-      abrir();
-    } else {
-      cerrar();
-    }
+  estudioSelect.addEventListener('change', function () {
+    aplicarFiltroSede();
+    aplicarFiltroProfesional();
+    aplicarBloqueos();
+    aplicarHoras(seleccionada());
   });
-  btnPrev.addEventListener('click', function () {
-    if (!enMesMin()) {
-      vista.setMonth(vista.getMonth() - 1);
-      render();
-    }
+  profesionalSelect.addEventListener('change', function () {
+    aplicarHoras(seleccionada());
   });
-  btnNext.addEventListener('click', function () {
-    if (!enMesMax()) {
-      vista.setMonth(vista.getMonth() + 1);
-      render();
-    }
+  fechaInput.addEventListener('change', function () {
+    aplicarHoras(seleccionada());
   });
 
   sucursalSelect.addEventListener('change', function () {
     aplicarFiltroProfesional();
 
     // A previously chosen date may now be closed at the new sucursal.
-    if (seleccionada && !diaAbierto(sucursalActual(), seleccionada)) {
-      seleccionada = null;
-      oculto.value = '';
-      textoBoton.textContent = 'Elegí una fecha';
+    if (seleccionada() && !diaAbierto(sucursalActual(), seleccionada())) {
+      fechaInput.value = '';
     }
-    if (!panel.hidden) {
-      render();
-    }
-    aplicarHoras(seleccionada);
+    aplicarBloqueos();
+    refrescarCalendario();
+    aplicarHoras(seleccionada());
   });
 
   aplicarFiltroSede();
   aplicarFiltroProfesional();
-  aplicarHoras(seleccionada);
+  aplicarBloqueos();
+  aplicarHoras(seleccionada());
 })();

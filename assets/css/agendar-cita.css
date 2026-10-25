@@ -35,31 +35,27 @@
     transition: border-color var(--transition-fast);
     appearance: none;
     -webkit-appearance: none;
-    background-image:
-        linear-gradient(45deg, transparent 50%, var(--text-secondary) 50%),
-        linear-gradient(135deg, var(--text-secondary) 50%, transparent 50%);
-    background-position:
-        calc(100% - 1.35rem) center,
-        calc(100% - 1rem) center;
-    background-size: 0.35rem 0.35rem, 0.35rem 0.35rem;
-    background-repeat: no-repeat;
-}
-
-.campo select:focus,
-.selector-combo-boton:focus {
-    border-color: var(--accent-color);
 }
 
 .campo select[aria-invalid="true"],
 .selector-combo-boton[aria-invalid="true"] {
-    border-color: var(--accent-secondary);
+    border-color: var(--color-danger);
 }
 
+/* Locked until the previous step is chosen: faded and without the arrow. */
 .campo select:disabled,
-.selector-combo-boton:disabled {
+.selector-combo-boton:disabled,
+.selector-combo-buscar:disabled,
+.selector-fecha-boton:disabled {
     background-color: var(--light-neutral);
     color: var(--text-muted);
+    opacity: 0.6;
     cursor: not-allowed;
+}
+
+.selector-combo-boton:disabled::after,
+.selector-fecha-boton:disabled::after {
+    display: none;
 }
 
 .btn-secundario {
@@ -80,36 +76,7 @@
     background: var(--light-neutral);
 }
 
-.form-cancelar-cita {
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-    min-width: 200px;
-}
 
-.form-cancelar-cita label {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-}
-
-.form-cancelar-cita textarea {
-    width: 100%;
-    box-sizing: border-box;
-    padding: var(--space-2) 0.7rem;
-    border: 1px solid var(--border-subtle);
-    border-radius: 0.5rem;
-    font-family: inherit;
-    font-size: var(--font-size-md);
-    background: var(--surface-alt);
-    color: var(--dark-neutral);
-    resize: vertical;
-    transition: border-color var(--transition-fast);
-}
-
-.form-cancelar-cita textarea:focus {
-    border-color: var(--accent-color);
-}
 
 .tabla-scroll {
     overflow-x: auto;
@@ -161,7 +128,7 @@
     color: var(--color-danger);
 }
 
-@media (width <= 760px) {
+.tabla-scroll.tabla-tarjetas {
     .tabla-datos thead {
         display: none;
     }
@@ -210,30 +177,80 @@
     transition: border-color var(--transition-fast);
 }
 
-.selector-fecha-boton::after {
+/* One dropdown arrow everywhere (dropdowns, date pickers, menu sections): a chevron pointing up that turns
+   down, animated, while the options are open. */
+.selector-combo-boton {
+    position: relative;
+}
+
+.selector-combo-boton::after,
+.selector-fecha-boton::after,
+.menu-grupo summary::after {
     content: '';
     width: 0.5rem;
     height: 0.5rem;
     border-right: 2px solid var(--text-secondary);
     border-bottom: 2px solid var(--text-secondary);
-    transform: rotate(45deg);
-    margin-top: -0.2rem;
+    transform: translateY(0.15rem) rotate(-135deg);
     flex-shrink: 0;
+    transition: transform 0.2s ease;
 }
 
-.selector-fecha-boton:focus,
-.selector-fecha-boton[aria-expanded="true"] {
-    border-color: var(--accent-color);
+/* The arrow is pinned to the right edge (the clear button sits to its left). */
+.selector-fecha-boton {
+    position: relative;
+}
+
+.selector-combo-boton::after,
+.selector-fecha-boton::after {
+    position: absolute;
+    top: calc(50% - 0.25rem);
+    right: 1rem;
+}
+
+.selector-combo-boton[aria-expanded="true"]::after,
+.selector-fecha-boton[aria-expanded="true"]::after,
+.menu-grupo[open] summary::after {
+    transform: translateY(-0.15rem) rotate(45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .selector-combo-boton::after,
+    .selector-fecha-boton::after,
+    .menu-grupo summary::after {
+        transition: none;
+    }
 }
 
 .selector-fecha-boton[aria-invalid="true"] {
-    border-color: var(--accent-secondary);
+    border-color: var(--color-danger);
 }
 
+.selector-fecha-vacio .selector-fecha-texto {
+    color: var(--text-muted);
+}
+
+.calendario-borrar {
+    display: block;
+    margin: var(--space-3) 0 0 auto;
+    padding: var(--space-1) var(--space-3);
+    border: none;
+    border-radius: 999px;
+    background: none;
+    color: var(--accent-secondary);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+}
+
+.calendario-borrar:hover {
+    background: var(--light-neutral);
+}
+
+/* Fixed and placed by selector-fecha.js next to its button, so table scroll areas never clip it. */
 .calendario {
-    position: absolute;
-    top: calc(100% + 0.5rem);
-    left: 0;
+    position: fixed;
     z-index: 70;
     width: 280px;
     max-width: calc(100vw - 2rem);
@@ -241,6 +258,7 @@
     background: var(--surface);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
+    box-shadow: 0 8px 24px rgba(var(--overlay-rgb), 0.18);
 }
 
 .calendario-header {
@@ -266,7 +284,7 @@
 }
 
 .calendario-nav:hover:not(:disabled) {
-    border-color: var(--accent-color);
+    border-color: var(--dark-neutral);
 }
 
 .calendario-nav:disabled {
@@ -302,7 +320,7 @@
 }
 
 .calendario-dia:hover:not(:disabled) {
-    background: var(--light-neutral);
+    border-color: var(--dark-neutral);
 }
 
 .calendario-dia:disabled {
@@ -310,15 +328,17 @@
     cursor: not-allowed;
 }
 
+/* Today: light-blue border and tint, same as the agenda. */
 .calendario-dia-hoy {
     border-color: var(--accent-color);
+    background: rgba(var(--accent-rgb), 0.08);
 }
 
-.calendario-dia-seleccionado {
-    background: var(--accent-color);
-    color: var(--on-brand);
-}
-
+/* Chosen day: same as the selected agenda day. */
+.calendario-dia-seleccionado,
 .calendario-dia-seleccionado:hover:not(:disabled) {
-    background: var(--accent-color);
+    border-color: var(--dark-neutral);
+    box-shadow: 0 0 0 1px var(--dark-neutral);
+    background-color: var(--light-neutral);
+    font-weight: var(--font-weight-semibold);
 }

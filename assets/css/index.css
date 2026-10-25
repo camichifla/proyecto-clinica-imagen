@@ -53,38 +53,15 @@
     line-height: 1.6;
 }
 
-.hero-acciones {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 0.9rem;
-}
-
-.btn-outline-hero {
-    display: inline-block;
-    border: 1.5px solid var(--on-brand);
-    border-radius: 999px;
-    padding: 0.9rem 1.4rem;
-    color: var(--on-brand);
-    font-weight: var(--font-weight-semibold);
-    text-decoration: none;
-    transition: background var(--transition-fast), transform var(--transition-fast);
-}
-
-.btn-outline-hero:hover {
-    background: rgba(var(--white-rgb), 0.12);
-    transform: translateY(-1px);
-}
-
 @media (width <= 760px) {
     .hero {
         padding: 2.5rem 1.2rem;
     }
 }
 
+/* Services and values read as one block of cards: same gap between and within rows. */
 .section-servicios {
-    margin: 3.5rem 0;
+    margin: 3.5rem 0 var(--space-6);
     text-align: center;
 }
 
@@ -102,17 +79,13 @@
     text-align: left;
 }
 
-.card-servicios {
+/* Services and values share the same card. */
+.card-servicios,
+.valor {
     background: var(--surface);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-sm);
     padding: 1.75rem;
-    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.card-servicios:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 24px -16px rgba(var(--accent-rgb), 0.45);
 }
 
 .card-servicios-icono {
@@ -154,19 +127,20 @@
 }
 
 @media (width <= 760px) {
-    .card-servicios {
+    .card-servicios,
+    .valor {
         padding: var(--space-5);
     }
 }
 
 .section-valores {
-    margin: 3.5rem 0;
+    margin: 0 0 3.5rem;
 }
 
 .grid-valores {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-7);
+    gap: var(--space-6);
 }
 
 .valor-icono {
@@ -190,10 +164,10 @@
     color: var(--text-secondary);
 }
 
-@media (width <= 760px) {
+@media (width <= 980px) {
     .grid-valores {
         grid-template-columns: 1fr;
-        gap: 1.75rem;
+        gap: var(--space-6);
     }
 }
 
@@ -279,35 +253,9 @@
     }
 }
 
-.banda-profesionales {
-    margin: 0 calc(50% - 50vw) 3.5rem;
-    padding: var(--space-8) var(--space-6);
-    text-align: center;
-    background: var(--gradient-brand);
-    color: var(--on-brand);
-}
-
-.banda-profesionales h2 {
-    margin-bottom: 0.6rem;
-    font-size: clamp(1.5rem, 3vw, 1.9rem);
-}
-
-.banda-profesionales p {
-    max-width: 34rem;
-    margin: 0 auto var(--space-6);
-    color: rgba(var(--white-rgb), 0.9);
-}
-
-.banda-profesionales .btn-primary {
-    background: var(--surface);
-    color: var(--dark-neutral);
-}
-
 .sucursales {
     padding: 60px 20px;
     background: linear-gradient(180deg, var(--surface) 0%, var(--surface-alt) 100%);
-    /* La sticky header (~6.5rem) tapaba el titulo al saltar desde el CTA "Ver sucursales". */
-    scroll-margin-top: 6.5rem;
 }
 
 .section-subtitulo {
@@ -366,8 +314,14 @@
     transition: all 0.3s ease;
 }
 
+#clinicSearch:hover:not(:focus) {
+    border-color: var(--dark-neutral);
+}
+
 #clinicSearch:focus {
-    border-color: var(--accent-color);
+    border-color: var(--dark-neutral);
+    box-shadow: 0 0 0 1px var(--dark-neutral);
+    background-color: var(--light-neutral);
 }
 
 #clinicSearch::placeholder {
@@ -547,13 +501,13 @@
 }
 
 .clinic-card:hover {
-    background: var(--surface-alt);
-    border-color: var(--border-subtle);
+    border-color: var(--dark-neutral);
 }
 
 .clinic-card.active {
-    background: rgba(var(--accent-rgb), 0.08);
-    border-color: var(--accent-color);
+    border-color: var(--dark-neutral);
+    box-shadow: 0 0 0 1px var(--dark-neutral);
+    background-color: var(--light-neutral);
 }
 
 .clinic-card-header {
@@ -646,12 +600,13 @@
         padding: 40px 12px;
     }
 
-    #map {
-        height: 350px;
+    /* Phones get the list only: the map is hidden and the list grows with its content. */
+    .map-container {
+        display: none;
     }
 
     .clinics-list-container {
-        max-height: 400px;
+        max-height: none;
     }
 }
 

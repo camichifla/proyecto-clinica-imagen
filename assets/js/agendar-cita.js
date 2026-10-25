@@ -2,14 +2,11 @@
     const form = document.querySelector('form[data-api]');
     const selectSucursal = document.getElementById('sucursal');
     const selectProfesional = document.getElementById('profesional_id');
-    const contenedorFecha = document.querySelector('.selector-fecha');
+    const inputFecha = document.getElementById('fecha');
     const misCitas = document.getElementById('mis-citas');
-    if (!form || !selectSucursal || !selectProfesional || !contenedorFecha || !misCitas) {
+    if (!form || !selectSucursal || !selectProfesional || !inputFecha || !misCitas) {
         return;
     }
-    const formAccion = document.getElementById('form-accion');
-    const formCitaId = document.getElementById('form-cita-id');
-    const btnSubmit = document.getElementById('btn-agendar-submit');
 
     function mostrarAviso() {
         const params = new URL(window.location.href).searchParams;
@@ -22,20 +19,11 @@
             document.querySelector('[data-aviso="ok"]').hidden = false;
         } else if (params.has('cancelado')) {
             document.querySelector('[data-aviso="cancelado"]').hidden = false;
-        } else if (params.has('reprogramado')) {
-            document.querySelector('[data-aviso="reprogramado"]').hidden = false;
-        } else if (params.get('error') === 'reprogramar') {
-            document.querySelector('[data-aviso="error-reprogramar"]').hidden = false;
         }
     }
 
-    function aVisible(iso) {
-        const [anio, mes, dia] = iso.split('-');
-        return dia + '/' + mes + '/' + anio;
-    }
-
-    async function cancelarCita(cita, csrf, notasAdmin) {
-        const body = new URLSearchParams({ csrf, accion: 'cancelar', cita_id: String(cita.id), notas_admin: notasAdmin });
+    async function cancelarCita(cita, csrf) {
+        const body = new URLSearchParams({ csrf, accion: 'cancelar', cita_id: String(cita.id) });
         const data = await apiJson('api/agendar-cita.php', { method: 'POST', body });
         if (!data) {
             return;
@@ -45,7 +33,7 @@
         }
     }
 
-    function renderFilaCita(cita, notasAdminMax, csrf) {
+    function renderFilaCita(cita, csrf) {
         const tr = document.createElement('tr');
         tr.appendChild(celda('Código', cita.codigo));
         tr.appendChild(celda('Fecha y hora de la cita', cita.fechaHoraSolicitada));
@@ -62,48 +50,32 @@
 
         const tdAcciones = document.createElement('td');
         tdAcciones.dataset.label = '';
-        if (cita.editable) {
-            const link = document.createElement('a');
-            link.href = 'agendar-cita.html?editar=' + cita.id;
-            link.className = 'btn-secundario';
-            link.textContent = 'Reprogramar';
-            tdAcciones.appendChild(link);
-
-            const formCancelar = document.createElement('form');
-            formCancelar.className = 'form-cancelar-cita';
-            const labelMotivo = document.createElement('label');
-            labelMotivo.htmlFor = 'motivo-cancelar-' + cita.id;
-            labelMotivo.textContent = 'Motivo (opcional)';
-            const textareaMotivo = document.createElement('textarea');
-            textareaMotivo.id = 'motivo-cancelar-' + cita.id;
-            textareaMotivo.name = 'notas_admin';
-            textareaMotivo.maxLength = notasAdminMax;
-            textareaMotivo.rows = 2;
-            const btnCancelar = document.createElement('button');
-            btnCancelar.type = 'submit';
-            btnCancelar.className = 'btn-secundario';
-            btnCancelar.textContent = 'Cancelar';
-            formCancelar.append(labelMotivo, textareaMotivo, btnCancelar);
-            formCancelar.addEventListener('submit', (evento) => {
-                evento.preventDefault();
-                cancelarCita(cita, csrf, textareaMotivo.value);
-            });
-            tdAcciones.appendChild(formCancelar);
-        }
+        // Every listed cita (upcoming, pending or confirmed) can be cancelled: confirmation only, no reason asked.
+        // To change the date the patient cancels and books a new cita.
+        const btnCancelar = document.createElement('button');
+        btnCancelar.type = 'button';
+        btnCancelar.className = 'btn-peligro';
+        btnCancelar.textContent = 'Cancelar';
+        btnCancelar.addEventListener('click', () => {
+            if (window.confirm('¿Cancelar la cita ' + cita.codigo + ' del ' + cita.fechaHoraSolicitada + '?')) {
+                cancelarCita(cita, csrf);
+            }
+        });
+        tdAcciones.appendChild(btnCancelar);
         tr.appendChild(tdAcciones);
         return tr;
     }
 
-    function renderMisCitas(citas, notasAdminMax, csrf) {
+    function renderMisCitas(citas, csrf) {
         if (!citas.length) {
             const p = document.createElement('p');
-            p.textContent = 'Todavía no solicitaste ninguna cita.';
+            p.textContent = 'No tenés citas próximas.';
             misCitas.appendChild(p);
             return;
         }
         misCitas.appendChild(tabla(
             ['Código', 'Fecha y hora de la cita', 'Sede', 'Estudio', 'Estado', ''],
-            citas.map((cita) => renderFilaCita(cita, notasAdminMax, csrf))
+            citas.map((cita) => renderFilaCita(cita, csrf))
         ));
     }
 
@@ -115,34 +87,22 @@
             return;
         }
 
-        const editarId = new URL(window.location.href).searchParams.get('editar');
-        const qs = editarId ? '?editar=' + encodeURIComponent(editarId) : '';
-        const data = await apiJson('api/agendar-cita.php' + qs);
+        const data = await apiJson('api/agendar-cita.php');
         if (!data) {
             return;
         }
 
-        contenedorFecha.dataset.min = data.fechaMin;
-        contenedorFecha.dataset.max = data.fechaMax;
+        inputFecha.min = data.fechaMin;
+        inputFecha.max = data.fechaMax;
 
-        const editar = data.editar;
-        poblarSucursales(selectSucursal, data.sucursalesOrden, editar ? editar.sucursalId : '');
+        poblarSucursales(selectSucursal, data.sucursalesOrden, '');
         poblarEstudios(document.getElementById('estudio'), data.estudios);
-        poblarProfesionales(selectProfesional, data.profesionales, editar ? editar.profesionalId : '', data.etiquetasEstudio);
+        poblarProfesionales(selectProfesional, data.profesionales, '', data.etiquetasEstudio);
 
-        if (editar) {
-            formAccion.value = 'reprogramar';
-            formCitaId.value = editar.citaId;
-            document.getElementById('estudio').value = editar.estudio;
-            document.getElementById('fecha').value = editar.fecha;
-            document.querySelector('.selector-fecha-texto').textContent = aVisible(editar.fecha);
-            btnSubmit.textContent = 'Guardar cambios';
-        }
-
-        renderMisCitas(data.citas, data.notasAdminMax, sesion.csrf);
+        renderMisCitas(data.citas, sesion.csrf);
 
         window.SUCURSALES = data.sucursales;
-        window.HORA_ELEGIDA = editar ? editar.hora : '';
+        window.HORA_ELEGIDA = '';
 
         await cargarScripts('assets/js/agendado-cascada.js', 'assets/js/selector-combo.js');
     }

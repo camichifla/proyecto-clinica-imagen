@@ -4,7 +4,6 @@
     const inputBuscar = document.getElementById('paciente_id_buscar');
     const inputHidden = document.getElementById('paciente_id');
     const datalist = document.getElementById('paciente_id_lista');
-    const boton = document.getElementById('btn-buscar');
     if (!contenedor || !form) {
         return;
     }
@@ -117,9 +116,10 @@
     function renderResultadosBusqueda(data, encontrado) {
         contenedor.innerHTML = '';
 
+        // Details open inside the search box, under a divider (same as the agenda's day details).
         if (!encontrado) {
-            const section = document.createElement('section');
-            section.className = 'seccion-panel';
+            const section = document.createElement('div');
+            section.className = 'detalle-expandido';
             const p = document.createElement('p');
             p.className = 'aviso-error';
             p.textContent = 'Paciente no encontrado.';
@@ -128,8 +128,8 @@
             return;
         }
 
-        const section = document.createElement('section');
-        section.className = 'seccion-panel';
+        const section = document.createElement('div');
+        section.className = 'detalle-expandido';
         const h2 = document.createElement('h2');
         h2.textContent = `${data.paciente.apellido}, ${data.paciente.nombre}`;
         section.appendChild(h2);
@@ -173,6 +173,7 @@
         actualizarUrl(pacienteId);
         buscarResultados(pacienteId);
     });
+    filtrarAlCambiar(form);
 
     window.addEventListener('popstate', () => {
         const pacienteId = new URL(window.location.href).searchParams.get('paciente_id');
@@ -216,7 +217,6 @@
             if (opcionElegida) {
                 inputBuscar.value = opcionElegida.value;
                 inputHidden.value = pacienteIdUrl;
-                boton.disabled = false;
             }
         }
 

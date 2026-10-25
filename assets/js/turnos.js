@@ -30,8 +30,9 @@
         return (data && data.error) || 'No se pudo conectar. Intenta nuevamente.';
     }
 
-    async function enviarAccion(cuerpo, textoOk) {
-        const data = await apiJson('api/turnos.php', { method: 'POST', body: new URLSearchParams({ csrf, ...cuerpo }) });
+    // Pending citas are confirmed/rejected through the solicitudes API, the rest through turnos.
+    async function enviarAccion(cuerpo, textoOk, api = 'api/turnos.php') {
+        const data = await apiJson(api, { method: 'POST', body: new URLSearchParams({ csrf, ...cuerpo }) });
         if (!data || !data.ok) {
             mostrarMensaje(textoErrores(data), true);
             return;
@@ -48,10 +49,10 @@
         return [label, control];
     }
 
-    function desplegable(textoBoton, form) {
+    function desplegable(textoBoton, form, clase = 'btn-secundario') {
         const boton = document.createElement('button');
         boton.type = 'button';
-        boton.className = 'btn-secundario';
+        boton.className = clase;
         boton.textContent = textoBoton;
         boton.setAttribute('aria-expanded', 'false');
         form.hidden = true;
@@ -71,14 +72,44 @@
         textarea.rows = 2;
         const confirmar = document.createElement('button');
         confirmar.type = 'submit';
-        confirmar.className = 'btn-primary';
-        confirmar.textContent = 'Confirmar cancelacion';
-        form.append(...campo('motivo-' + cita.id, 'Motivo (opcional)', textarea), confirmar);
+        confirmar.className = 'btn-peligro-suave';
+        confirmar.textContent = 'Confirmar cancelación';
+        form.append(...campo('motivo-' + cita.id, 'Motivo', textarea), confirmar);
         form.addEventListener('submit', (evento) => {
             evento.preventDefault();
             enviarAccion({ accion: 'cancelar', cita_id: String(cita.id), notas_admin: textarea.value }, 'La cita fue cancelada.');
         });
         return form;
+    }
+
+    function formRechazar(cita, notasAdminMax) {
+        const form = document.createElement('form');
+        form.className = 'accion-turno';
+        const textarea = document.createElement('textarea');
+        textarea.name = 'notas_admin';
+        textarea.maxLength = notasAdminMax;
+        textarea.rows = 2;
+        const confirmar = document.createElement('button');
+        confirmar.type = 'submit';
+        confirmar.className = 'btn-peligro-suave';
+        confirmar.textContent = 'Confirmar rechazo';
+        form.append(...campo('rechazo-' + cita.id, 'Motivo', textarea), confirmar);
+        form.addEventListener('submit', (evento) => {
+            evento.preventDefault();
+            enviarAccion({ accion: 'rechazar', cita_id: String(cita.id), notas_admin: textarea.value }, 'La cita fue rechazada.', 'api/solicitudes-cita.php');
+        });
+        return form;
+    }
+
+    function botonConfirmar(cita) {
+        const boton = document.createElement('button');
+        boton.type = 'button';
+        boton.className = 'btn-exito';
+        boton.textContent = 'Confirmar';
+        boton.addEventListener('click', () => {
+            enviarAccion({ accion: 'confirmar', cita_id: String(cita.id) }, 'La cita fue confirmada.', 'api/solicitudes-cita.php');
+        });
+        return boton;
     }
 
     function formReprogramar(cita, rango) {
@@ -89,10 +120,11 @@
         fecha.min = rango.min;
         fecha.max = rango.max;
         const hora = document.createElement('select');
+        hora.className = 'selector-combo';
         const confirmar = document.createElement('button');
         confirmar.type = 'submit';
         confirmar.className = 'btn-primary';
-        confirmar.textContent = 'Confirmar reprogramacion';
+        confirmar.textContent = 'Confirmar reprogramación';
 
         function opcionHora(valor, texto) {
             const o = document.createElement('option');
@@ -100,15 +132,19 @@
             o.textContent = texto;
             return o;
         }
+        // The hour stays locked until a date with free hours is chosen.
         hora.replaceChildren(opcionHora('', 'Elegí una fecha primero'));
+        hora.disabled = true;
 
         let pedido = 0;
         fecha.addEventListener('change', async () => {
             const actual = ++pedido;
-            hora.replaceChildren(opcionHora('', 'Elegí un horario'));
+            hora.disabled = true;
             if (!fecha.value) {
+                hora.replaceChildren(opcionHora('', 'Elegí una fecha primero'));
                 return;
             }
+            hora.replaceChildren(opcionHora('', 'Elegí un horario'));
             const data = await apiJson('api/turnos.php?' + new URLSearchParams({ horas: '1', cita_id: String(cita.id), fecha: fecha.value }));
             if (actual !== pedido) {
                 return;
@@ -122,6 +158,7 @@
                 return;
             }
             data.horas.forEach((h) => hora.appendChild(opcionHora(h, h)));
+            hora.disabled = false;
         });
 
         form.append(...campo('fecha-' + cita.id, 'Nueva fecha', fecha), ...campo('hora-' + cita.id, 'Nueva hora', hora), confirmar);
@@ -148,12 +185,17 @@
         if (cita.gestionable) {
             const div = document.createElement('div');
             div.className = 'acciones-turno';
-            const fCancelar = formCancelar(cita, data.notasAdminMax);
-            const fReprogramar = formReprogramar(cita, data.rangoReserva);
-            div.append(
-                desplegable('Cancelar', fCancelar), fCancelar,
-                desplegable('Reprogramar', fReprogramar), fReprogramar
-            );
+            if (cita.estado === 'pendiente') {
+                const fRechazar = formRechazar(cita, data.notasAdminMax);
+                div.append(desplegable('Rechazar', fRechazar, 'btn-peligro'), fRechazar, botonConfirmar(cita));
+            } else {
+                const fCancelar = formCancelar(cita, data.notasAdminMax);
+                const fReprogramar = formReprogramar(cita, data.rangoReserva);
+                div.append(
+                    desplegable('Cancelar', fCancelar, 'btn-peligro'), fCancelar,
+                    desplegable('Reprogramar', fReprogramar), fReprogramar
+                );
+            }
             tdAcciones.appendChild(div);
         }
         tr.appendChild(tdAcciones);
@@ -192,6 +234,11 @@
                 params.set(clave, String(valor).trim());
             }
         });
+        // After the first load Desde/Hasta always go, empty included (cleared = that end of the range open).
+        if (!primeraCarga) {
+            params.set('desde', formFiltros.elements.desde.value);
+            params.set('hasta', formFiltros.elements.hasta.value);
+        }
         const data = await apiJson('api/turnos.php?' + params.toString());
         if (!data || !data.citas) {
             mostrarMensaje(textoErrores(data), true);
@@ -199,8 +246,10 @@
         }
         poblarFiltros(data);
         renderTotales(data.totales);
-        const elegido = (select) => (select.value ? select.selectedOptions[0].textContent : 'Todos');
-        filtrosActivos.textContent = `Reporte de turnos del ${data.desde} al ${data.hasta}. Sede: ${elegido(selectSucursal)}. Profesional: ${elegido(selectProfesional)}.`;
+        const elegido = (select) => (select.selectedOptions[0] ? select.selectedOptions[0].textContent : 'Todos');
+        const rango = data.desde && data.hasta ? `del ${data.desde} al ${data.hasta}`
+            : data.desde ? `desde el ${data.desde}` : data.hasta ? `hasta el ${data.hasta}` : 'de todas las fechas';
+        filtrosActivos.textContent = `Reporte de turnos ${rango}. Sede: ${elegido(selectSucursal)}. Profesional: ${elegido(selectProfesional)}.`;
         avisoTruncado.hidden = !data.truncado;
         if (!data.citas.length) {
             const p = document.createElement('p');
@@ -218,6 +267,15 @@
         evento.preventDefault();
         mensajeError.hidden = true;
         cargar();
+    });
+    filtrarAlCambiar(formFiltros);
+
+    // Código: only digits can be typed; the "CI-" prefix is added automatically (pasting "CI-000123" works too).
+    const inputCodigo = document.getElementById('filtro-codigo');
+    inputCodigo.inputMode = 'numeric';
+    inputCodigo.addEventListener('input', () => {
+        const digitos = inputCodigo.value.replace(/\D/g, '').slice(0, 9);
+        inputCodigo.value = digitos ? 'CI-' + digitos : '';
     });
     document.getElementById('btn-imprimir').addEventListener('click', () => window.print());
 

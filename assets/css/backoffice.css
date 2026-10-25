@@ -18,9 +18,8 @@
     text-decoration: none;
 }
 
-a.tarjeta-resumen:hover,
-a.tarjeta-resumen:focus-visible {
-    border-color: var(--accent-color);
+a.tarjeta-resumen:hover {
+    border-color: var(--dark-neutral);
 }
 
 .tarjeta-resumen-numero {
@@ -46,21 +45,7 @@ a.tarjeta-resumen:focus-visible {
     min-width: 0;
 }
 
-/* Misma altura en todos los controles de la fila (los <select> son mas bajos que los <input>). */
-.filtros-turnos input,
-.filtros-turnos select {
-    height: 3rem;
-    box-sizing: border-box;
-}
-
-.filtros-turnos .btn-primary {
-    height: 3rem;
-    padding-block: 0;
-    cursor: pointer;
-}
-
 .filtros-turnos select,
-.accion-turno select,
 .accion-turno textarea {
     width: 100%;
     padding: var(--space-2) 0.7rem;
@@ -73,11 +58,12 @@ a.tarjeta-resumen:focus-visible {
     box-sizing: border-box;
 }
 
+/* Fixed width: the cancel/reschedule boxes only grow taller, never wider. */
 .acciones-turno {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
-    min-width: 200px;
+    width: 20rem;
 }
 
 .accion-turno {
@@ -122,13 +108,15 @@ a.tarjeta-resumen:focus-visible {
     .filtros-turnos {
         grid-template-columns: minmax(0, 1fr);
     }
+}
 
-    /* Modo tarjeta: sin el ancho minimo la fila entra en la pantalla. */
+.tabla-scroll.tabla-tarjetas {
+    /* Modo tarjeta: las acciones ocupan todo el ancho de la tarjeta. */
     .acciones-turno {
-        min-width: 0;
+        width: auto;
     }
 
-    #turnos-lista .tabla-datos td:last-child {
+    #turnos-lista & .tabla-datos td:last-child {
         flex-direction: column;
     }
 }
@@ -173,18 +161,9 @@ a.tarjeta-resumen:focus-visible {
     margin-bottom: var(--space-2);
 }
 
-.fila-horario select,
-.fila-horario input {
-    width: 100%;
+/* Day, opening and closing are selector-combo dropdowns (same widget as the booking hour). */
+.fila-horario .buscador-combo {
     min-width: 0;
-    padding: var(--space-2) 0.7rem;
-    border: 1px solid var(--border-subtle);
-    border-radius: 0.5rem;
-    font-family: inherit;
-    font-size: var(--font-size-md);
-    background: var(--surface-alt);
-    color: var(--dark-neutral);
-    box-sizing: border-box;
 }
 
 #campo-horarios > .btn-secundario {
@@ -197,7 +176,7 @@ a.tarjeta-resumen:focus-visible {
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
 
-    .fila-horario select,
+    .fila-horario > .buscador-combo:first-child,
     .fila-horario .btn-secundario {
         grid-column: 1 / -1;
     }

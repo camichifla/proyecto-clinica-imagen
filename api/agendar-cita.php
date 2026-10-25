@@ -16,22 +16,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($accion === 'cancelar') {
         $citaId = filter_input(INPUT_POST, 'cita_id', FILTER_VALIDATE_INT);
-        $motivo = trim((string) ($_POST['notas_admin'] ?? ''));
-
-        $prefijoPaciente = 'Cancelado por el paciente: ';
-        $maxMotivo = NOTAS_ADMIN_MAX - mb_strlen($prefijoPaciente);
-        if (mb_strlen($motivo) > $maxMotivo) {
-            $motivo = mb_substr($motivo, 0, $maxMotivo);
-        }
-        $notaGuardada = $motivo !== '' ? $prefijoPaciente . $motivo : null;
 
         if ($citaId) {
-
+            // Pending or confirmed upcoming citas; patients are not asked for a reason, the note
+            // only tells staff who cancelled.
             $stmt = db()->prepare(
-                "UPDATE citas SET estado = 'cancelada', notas_admin = ?
-                 WHERE id = ? AND paciente_id = ? AND estado = 'pendiente'"
+                "UPDATE citas SET estado = 'cancelada', notas_admin = 'Cancelado por el paciente.'
+                 WHERE id = ? AND paciente_id = ? AND estado IN ('pendiente', 'confirmada')
+                   AND fecha_hora_solicitada >= NOW()"
             );
-            $stmt->execute([$notaGuardada, $citaId, $usuario['ref_id']]);
+            $stmt->execute([$citaId, $usuario['ref_id']]);
             if ($stmt->rowCount() > 0) {
                 registrar_evento('cita_cancelar', 'cita=' . $citaId);
             }
@@ -40,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    if ($accion === 'crear' || $accion === 'reprogramar') {
+    if ($accion === 'crear') {
         $valores = [
             'sucursal_id'    => (string) ($_POST['sucursal_id'] ?? ''),
             'estudio'        => (string) ($_POST['estudio'] ?? ''),
@@ -49,63 +43,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'hora'           => (string) ($_POST['hora'] ?? ''),
         ];
 
-        $citaId = $accion === 'reprogramar' ? (int) filter_input(INPUT_POST, 'cita_id', FILTER_VALIDATE_INT) : 0;
-        [$errores, $sucursalId, $profesionalId, $marcaTiempo, $estudio] = validar_reserva($valores, estudios_autoagendables(), $fechaMin, $fechaMax, RANGO_MESES, $citaId);
+        [$errores, $sucursalId, $profesionalId, $marcaTiempo, $estudio] = validar_reserva($valores, estudios_autoagendables(), $fechaMin, $fechaMax, RANGO_MESES, 0);
 
         if ($errores) {
             echo json_encode(['ok' => false, 'errores' => $errores], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
-        if ($accion === 'crear') {
-            $stmt = db()->prepare(
-                "INSERT INTO citas (paciente_id, profesional_id, sucursal_id, fecha_hora_solicitada, estudio, estado)
-                 VALUES (?, ?, ?, ?, ?, 'pendiente')"
-            );
-            try {
-                $stmt->execute([
-                    $usuario['ref_id'],
-                    $profesionalId,
-                    $sucursalId,
-                    $marcaTiempo->format('Y-m-d H:i:s'),
-                    $estudio,
-                ]);
-            } catch (PDOException $e) {
-                hora_ocupada_json($e);
-            }
-            $citaId = (int) db()->lastInsertId();
-            registrar_evento('cita_crear', 'cita=' . $citaId);
-            echo json_encode(['ok' => true, 'redirect' => 'agendar-cita.html?ok=1&codigo=' . codigo_cita($citaId)], JSON_UNESCAPED_UNICODE);
-            exit;
+        $stmt = db()->prepare(
+            "INSERT INTO citas (paciente_id, profesional_id, sucursal_id, fecha_hora_solicitada, estudio, estado)
+             VALUES (?, ?, ?, ?, ?, 'pendiente')"
+        );
+        try {
+            $stmt->execute([
+                $usuario['ref_id'],
+                $profesionalId,
+                $sucursalId,
+                $marcaTiempo->format('Y-m-d H:i:s'),
+                $estudio,
+            ]);
+        } catch (PDOException $e) {
+            hora_ocupada_json($e);
         }
-
-        if ($citaId) {
-
-            $stmt = db()->prepare(
-                "UPDATE citas SET fecha_hora_solicitada = ?, profesional_id = ?, sucursal_id = ?, estudio = ?
-                 WHERE id = ? AND paciente_id = ? AND estado = 'pendiente'"
-            );
-            try {
-                $stmt->execute([
-                    $marcaTiempo->format('Y-m-d H:i:s'),
-                    $profesionalId,
-                    $sucursalId,
-                    $estudio,
-                    $citaId,
-                    $usuario['ref_id'],
-                ]);
-            } catch (PDOException $e) {
-                hora_ocupada_json($e);
-            }
-
-            if ($stmt->rowCount() > 0) {
-                registrar_evento('cita_reprogramar', 'cita=' . $citaId);
-                echo json_encode(['ok' => true, 'redirect' => 'agendar-cita.html?reprogramado=1'], JSON_UNESCAPED_UNICODE);
-                exit;
-            }
-        }
-
-        echo json_encode(['ok' => true, 'redirect' => 'agendar-cita.html?error=reprogramar'], JSON_UNESCAPED_UNICODE);
+        $citaId = (int) db()->lastInsertId();
+        registrar_evento('cita_crear', 'cita=' . $citaId);
+        echo json_encode(['ok' => true, 'redirect' => 'agendar-cita.html?ok=1&codigo=' . codigo_cita($citaId)], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
@@ -114,34 +76,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-$editar = null;
-$editarId = filter_input(INPUT_GET, 'editar', FILTER_VALIDATE_INT);
-if ($editarId) {
-    $stmt = db()->prepare(
-        "SELECT sucursal_id, estudio, profesional_id, fecha_hora_solicitada
-           FROM citas WHERE id = ? AND paciente_id = ? AND estado = 'pendiente'"
-    );
-    $stmt->execute([$editarId, $usuario['ref_id']]);
-    $citaAEditar = $stmt->fetch();
-    if ($citaAEditar) {
-        $fechaHoraEditar = new DateTimeImmutable($citaAEditar['fecha_hora_solicitada']);
-        $editar = [
-            'citaId'        => $editarId,
-            'sucursalId'    => (string) $citaAEditar['sucursal_id'],
-            'estudio'       => (string) $citaAEditar['estudio'],
-            'profesionalId' => (string) $citaAEditar['profesional_id'],
-            'fecha'         => $fechaHoraEditar->format('Y-m-d'),
-            'hora'          => $fechaHoraEditar->format('H:i'),
-        ];
-    }
-}
-
 $stmt = db()->prepare(
-    'SELECT c.*, s.nombre AS sucursal_nombre
+    "SELECT c.*, s.nombre AS sucursal_nombre
      FROM citas c
      LEFT JOIN sucursales s ON s.id = c.sucursal_id
-     WHERE c.paciente_id = ?
-     ORDER BY c.creado_en DESC'
+     WHERE c.paciente_id = ? AND c.estado IN ('pendiente', 'confirmada') AND c.fecha_hora_solicitada >= NOW()
+     ORDER BY c.fecha_hora_solicitada ASC"
 );
 $stmt->execute([$usuario['ref_id']]);
 $citas = array_map(static function (array $cita): array {
@@ -153,14 +93,11 @@ $citas = array_map(static function (array $cita): array {
         'estudioLabel'        => estudios_etiquetas()[$cita['estudio']] ?? $cita['estudio'],
         'estado'              => $cita['estado'],
         'estadoLabel'         => ESTADOS_CITA[$cita['estado']] ?? $cita['estado'],
-        'editable'            => $cita['estado'] === 'pendiente',
     ];
 }, $stmt->fetchAll());
 
 echo json_encode([
     'fechaMin'      => $fechaMin,
     'fechaMax'      => $fechaMax,
-    'notasAdminMax' => NOTAS_ADMIN_MAX,
     'citas'         => $citas,
-    'editar'        => $editar,
 ] + catalogo_reserva(estudios_autoagendables()), JSON_UNESCAPED_UNICODE);

@@ -73,6 +73,9 @@ INSERT INTO cuentas (email, password_hash, rol, ref_id, verificado, activo)
 VALUES ('$ADMIN_EMAIL', '$ADMIN_HASH', 'administrador', LAST_INSERT_ID(), 1, 1);
 SQL
   echo "First administrator: $ADMIN_EMAIL / $ADMIN_PASS  (shown once, change it after logging in)"
+else
+  # Existing databases: columns added after the first install (idempotent).
+  mariadb "$DB_NAME" -e "ALTER TABLE pacientes ADD COLUMN IF NOT EXISTS email_anterior VARCHAR(254) NULL AFTER numero"
 fi
 
 chown -R root:root "$DEST"

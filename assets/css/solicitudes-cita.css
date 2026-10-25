@@ -1,12 +1,12 @@
 
+/* Fixed width: the reason box only grows taller, never wider. */
 .acciones-solicitud {
     display: flex;
     flex-direction: column;
     gap: 0.6rem;
-    min-width: 200px;
+    width: 20rem;
 }
 
-.form-confirmar-cita,
 .form-rechazar-cita {
     margin: 0;
 }
@@ -32,25 +32,71 @@
     font-size: var(--font-size-md);
     background: var(--surface-alt);
     color: var(--dark-neutral);
-    resize: vertical;
     transition: border-color var(--transition-fast);
 }
 
-.form-rechazar-cita textarea:focus {
-    border-color: var(--accent-color);
+/* Confirmar above Rechazar, stacked like every two-option actions cell. */
+.botones-solicitud {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+/* Green confirm, red reject: filled pills with white text. */
+.btn-confirmar,
+.btn-rechazar {
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid transparent;
+    border-radius: 999px;
+    color: var(--on-brand);
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: filter var(--transition-fast);
 }
 
 .btn-confirmar {
-    padding: var(--space-2) var(--space-4);
-    font-size: var(--font-size-md);
+    background: var(--btn-exito);
 }
 
-@media (width <= 480px) {
-    .acciones-solicitud {
-        min-width: 0;
-    }
+.btn-rechazar {
+    background: var(--btn-peligro);
+}
 
-    .btn-confirmar {
-        width: 100%;
+.btn-confirmar:hover,
+.btn-rechazar:hover {
+    filter: brightness(1.1);
+}
+
+/* Reject toggle while its reason box is open: light red like "Confirmar rechazo", which is now the action. */
+.btn-rechazar[aria-expanded="true"] {
+    background: rgba(var(--danger-rgb), 0.12);
+    border-color: rgba(var(--danger-rgb), 0.35);
+    color: var(--color-danger);
+}
+
+/* Final reject step: soft tint instead of solid red, so the form doesn't shout. */
+.btn-confirmar-rechazo {
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid rgba(var(--danger-rgb), 0.35);
+    border-radius: 999px;
+    background: rgba(var(--danger-rgb), 0.12);
+    color: var(--color-danger);
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.btn-confirmar-rechazo:hover {
+    background: rgba(var(--danger-rgb), 0.2);
+}
+
+/* Card mode (.tabla-tarjetas, see form-api.js): actions take the full card width. */
+.tabla-scroll.tabla-tarjetas {
+    .acciones-solicitud {
+        width: auto;
     }
 }

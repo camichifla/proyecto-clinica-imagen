@@ -39,9 +39,10 @@ if (in_array($usuario['rol'], ['administrador', 'recepcionista'], true)) {
     $parametros[] = $usuario['ref_id'];
 }
 
+// The agenda shows confirmed citas only; pending ones are handled in solicitudes-cita.
 $stmt = db()->prepare(
     SQL_CITAS_CON_ETIQUETAS . "
-     WHERE {$condicion}DATE(c.fecha_hora_solicitada) BETWEEN ? AND ?
+     WHERE c.estado = 'confirmada' AND {$condicion}DATE(c.fecha_hora_solicitada) BETWEEN ? AND ?
      ORDER BY c.fecha_hora_solicitada ASC"
 );
 $stmt->execute([...$parametros, $rango['rangoInicio']->format('Y-m-d'), $rango['rangoFin']->format('Y-m-d')]);

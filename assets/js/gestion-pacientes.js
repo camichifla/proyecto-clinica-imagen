@@ -43,6 +43,25 @@
         seccionForm.hidden = true;
     }
 
+    // Only the login account goes away; the patient and their history stay ("Sin cuenta").
+    async function borrarCuenta(paciente, boton) {
+        if (!window.confirm('¿Deseás borrar la cuenta?')) {
+            return;
+        }
+        boton.disabled = true;
+        const cuerpo = new FormData(form);
+        cuerpo.set('accion', 'borrar_cuenta');
+        cuerpo.set('id', paciente.id);
+        const data = await apiJson('api/gestion-pacientes.php', { method: 'POST', body: cuerpo });
+        boton.disabled = false;
+        if (!data || !data.ok) {
+            mostrarMensaje((data && data.error) || 'No se pudo borrar la cuenta.', true);
+            return;
+        }
+        mostrarMensaje('Cuenta borrada. El paciente y su historial se conservan.', false);
+        cargar();
+    }
+
     async function cambiarActivo(paciente, boton) {
         const accion = paciente.activo ? 'dar de baja' : 'reactivar';
         if (!window.confirm('Seguro que querés ' + accion + ' la cuenta de ' + paciente.apellido + ', ' + paciente.nombre + '?')) {
@@ -84,6 +103,14 @@
             baja.textContent = paciente.activo ? 'Dar de baja' : 'Reactivar';
             baja.addEventListener('click', () => cambiarActivo(paciente, baja));
             td.appendChild(baja);
+            if (!paciente.activo) {
+                const borrar = document.createElement('button');
+                borrar.type = 'button';
+                borrar.className = 'btn-peligro';
+                borrar.textContent = 'Borrar cuenta';
+                borrar.addEventListener('click', () => borrarCuenta(paciente, borrar));
+                td.appendChild(borrar);
+            }
         }
         tr.appendChild(td);
         return tr;
@@ -116,6 +143,7 @@
         evento.preventDefault();
         cargar();
     });
+    filtrarAlCambiar(busqueda);
     document.getElementById('paciente-nuevo').addEventListener('click', () => abrirForm(null));
     document.getElementById('paciente-cancelar').addEventListener('click', cerrarForm);
 

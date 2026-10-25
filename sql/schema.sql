@@ -24,6 +24,8 @@ CREATE TABLE pacientes (
   ci        VARCHAR(15)  NOT NULL,
   direccion VARCHAR(160) NOT NULL,
   numero    VARCHAR(25)  NOT NULL,                    -- phone; VARCHAR, never numeric
+  email_anterior VARCHAR(254) NULL,                    -- email of a deleted account; signing up again with this CI
+                                                       -- and this same email gets the patient (and history) back
   creado_en DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_pacientes_ci (ci)

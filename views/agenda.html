@@ -41,12 +41,10 @@
       <form method="get" action="agenda.html" class="form-buscar-paciente" id="filtro-sede" hidden>
         <div class="campo">
           <label for="sucursal_id">Sede</label>
-          <select id="sucursal_id" name="sucursal_id">
+          <select class="selector-combo" id="sucursal_id" name="sucursal_id">
             <option value="">Todas</option>
           </select>
         </div>
-
-        <button type="submit" class="btn-primary">Filtrar</button>
       </form>
     </section>
 
@@ -56,16 +54,12 @@
   </main>
 
   <footer>
-    <nav aria-label="Pie de página">
-      <a href="index.html">Inicio</a>
-      <a href="servicios.html">Servicios</a>
-      <a href="contacto.html">Contacto</a>
-    </nav>
     <p>&copy; Clínica Imagen</p>
   </footer>
 
   <script src="assets/js/sesion.js" defer></script>
   <script src="assets/js/form-api.js" defer></script>
+  <script src="assets/js/selector-combo.js" defer></script>
   <script src="assets/js/agenda.js" defer></script>
 </body>
 

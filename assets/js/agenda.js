@@ -78,6 +78,13 @@
         const grid = document.createElement('div');
         grid.className = 'agenda-mes-grid';
 
+        // Details of the selected day, shown under the month grid.
+        const detalle = document.createElement('section');
+        detalle.className = 'agenda-mes-detalle';
+        detalle.id = 'agenda-mes-detalle';
+        detalle.hidden = true;
+        let seleccionado = null;
+
         data.dias.forEach((dia) => {
             const divDia = document.createElement('div');
             divDia.className = 'agenda-dia-mes' + (!dia.esMesActual ? ' agenda-dia-fuera-mes' : '') + (dia.esHoy ? ' agenda-dia-hoy' : '');
@@ -86,20 +93,73 @@
             dia.citas.slice(0, MAX_CITAS_VISIBLES_MES).forEach((cita) => divDia.appendChild(renderPillCita(cita)));
 
             if (dia.citas.length > MAX_CITAS_VISIBLES_MES) {
-                divDia.appendChild(enlace('+' + (dia.citas.length - MAX_CITAS_VISIBLES_MES) + ' más', urlAgenda('semana', dia.fecha, data.sucursalId), 'agenda-cita-mas'));
+                const mas = document.createElement('span');
+                mas.className = 'agenda-cita-mas';
+                mas.textContent = '+' + (dia.citas.length - MAX_CITAS_VISIBLES_MES) + ' más';
+                divDia.appendChild(mas);
+            }
+
+            if (dia.citas.length) {
+                // The day cell toggles its details; the day number still opens the week view.
+                divDia.classList.add('agenda-dia-con-citas');
+                divDia.tabIndex = 0;
+                divDia.setAttribute('role', 'button');
+                divDia.setAttribute('aria-expanded', 'false');
+                divDia.setAttribute('aria-controls', detalle.id);
+                divDia.setAttribute('aria-label', dia.dia + ': ' + dia.citas.length + (dia.citas.length === 1 ? ' cita' : ' citas'));
+                const alternar = () => {
+                    const abrir = seleccionado !== divDia;
+                    if (seleccionado) {
+                        seleccionado.setAttribute('aria-expanded', 'false');
+                    }
+                    seleccionado = abrir ? divDia : null;
+                    divDia.setAttribute('aria-expanded', String(abrir));
+                    detalle.hidden = !abrir;
+                    if (abrir) {
+                        renderDetalleDia(detalle, dia);
+                        detalle.scrollIntoView({ block: 'nearest' });
+                    }
+                };
+                divDia.addEventListener('click', (evento) => {
+                    if (!evento.target.closest('a')) {
+                        alternar();
+                    }
+                });
+                divDia.addEventListener('keydown', (evento) => {
+                    if ((evento.key === 'Enter' || evento.key === ' ') && evento.target === divDia) {
+                        evento.preventDefault();
+                        alternar();
+                    }
+                });
             }
 
             grid.appendChild(divDia);
         });
 
-        calendario.appendChild(grid);
+        calendario.append(grid, detalle);
     }
 
-    function renderTarjetaCita(cita) {
-        const boton = document.createElement('button');
-        boton.type = 'button';
-        boton.className = 'agenda-cita-card estado-' + cita.estado;
-        boton.setAttribute('aria-expanded', 'false');
+    function renderDetalleDia(detalle, dia) {
+        const titulo = document.createElement('h2');
+        titulo.textContent = NOMBRES_DIA_SEMANA_COMPLETO[dia.diaSemanaIso - 1] + ' ' + dia.dia;
+        const lista = document.createElement('div');
+        lista.className = 'agenda-mes-detalle-lista';
+        dia.citas.forEach((cita) => lista.appendChild(renderTarjetaCita(cita)));
+        detalle.replaceChildren(titulo, lista);
+    }
+
+    // Month details: static card, everything visible. Week view (plegable): a button that
+    // shows only time and study until it is opened.
+    function renderTarjetaCita(cita, plegable) {
+        const tarjeta = document.createElement(plegable ? 'button' : 'article');
+        tarjeta.className = 'agenda-cita-card estado-' + cita.estado;
+        if (plegable) {
+            tarjeta.type = 'button';
+            tarjeta.setAttribute('aria-expanded', 'false');
+            tarjeta.addEventListener('click', () => {
+                tarjeta.setAttribute('aria-expanded', String(tarjeta.getAttribute('aria-expanded') !== 'true'));
+            });
+        }
 
         const resumen = document.createElement('span');
         resumen.className = 'agenda-cita-resumen';
@@ -121,12 +181,8 @@
         estadoBadge.textContent = cita.estadoLabel;
         detalle.appendChild(estadoBadge);
 
-        boton.append(resumen, detalle);
-        boton.addEventListener('click', () => {
-            const expandida = boton.getAttribute('aria-expanded') === 'true';
-            boton.setAttribute('aria-expanded', String(!expandida));
-        });
-        return boton;
+        tarjeta.append(resumen, detalle);
+        return tarjeta;
     }
 
     function renderSemana(data) {
@@ -151,7 +207,7 @@
                 vacio.textContent = 'Sin citas';
                 divDia.appendChild(vacio);
             } else {
-                dia.citas.forEach((cita) => divDia.appendChild(renderTarjetaCita(cita)));
+                dia.citas.forEach((cita) => divDia.appendChild(renderTarjetaCita(cita, true)));
             }
 
             grid.appendChild(divDia);
@@ -227,6 +283,7 @@
             const params = new URL(window.location.href).searchParams;
             cargar(params.get('vista'), params.get('fecha'), selectSucursal.value, true);
         });
+        filtrarAlCambiar(formFiltro);
     }
 
     window.sesionLista.then((sesion) => {

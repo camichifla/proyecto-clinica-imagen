@@ -50,11 +50,11 @@
                  data-mensaje-sin-pacientes="Todavia no hay pacientes registrados."
                  autocomplete="off" placeholder="Buscar por apellido, nombre o CI">
           <datalist id="paciente_id_lista"></datalist>
-          <input type="hidden" id="paciente_id" name="paciente_id" value="">
+          <input type="hidden" id="paciente_id" name="paciente_id" value="" required>
         </div>
 
         <div class="campo">
-          <label for="cita_id">Cita asociada (opcional)</label>
+          <label for="cita_id">Cita asociada</label>
           <select id="cita_id" name="cita_id" class="selector-combo" disabled
                   data-mensaje-sin-citas="Este paciente no tiene citas confirmadas">
             <option value="">Elegí un paciente primero</option>
@@ -63,26 +63,26 @@
 
         <div class="campo">
           <label for="nombre_estudio">Nombre del estudio</label>
-          <input type="text" id="nombre_estudio" name="nombre_estudio" maxlength="120">
+          <input type="text" id="nombre_estudio" name="nombre_estudio" maxlength="120" required>
         </div>
 
         <div class="campo">
           <label for="fecha_estudio">Fecha del estudio</label>
-          <input type="date" id="fecha_estudio" name="fecha_estudio">
+          <input type="date" id="fecha_estudio" name="fecha_estudio" required>
         </div>
 
         <div class="campo">
-          <label for="observaciones">Observaciones (opcional)</label>
+          <label for="observaciones">Observaciones</label>
           <textarea id="observaciones" name="observaciones" rows="4"></textarea>
         </div>
 
         <div class="campo">
-          <label for="imagenes">Imágenes (opcional si subis un informe)</label>
+          <label for="imagenes">Imágenes</label>
           <input type="file" id="imagenes" name="imagenes[]" accept="image/png,image/jpeg,image/webp" multiple>
         </div>
 
         <div class="campo">
-          <label for="informe">Informe PDF (opcional)</label>
+          <label for="informe">Informe PDF</label>
           <input type="file" id="informe" name="informe" accept="application/pdf">
         </div>
 
@@ -92,16 +92,12 @@
   </main>
 
   <footer>
-    <nav aria-label="Pie de página">
-      <a href="index.html">Inicio</a>
-      <a href="servicios.html">Servicios</a>
-      <a href="contacto.html">Contacto</a>
-    </nav>
     <p>&copy; Clínica Imagen</p>
   </footer>
 
   <script src="assets/js/sesion.js" defer></script>
   <script src="assets/js/form-api.js" defer></script>
+  <script src="assets/js/selector-fecha.js" defer></script>
   <script src="assets/js/resultados-upload.js" defer></script>
 </body>
 

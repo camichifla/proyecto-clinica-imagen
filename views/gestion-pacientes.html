@@ -37,7 +37,7 @@
   <main id="contenido">
     <section class="seccion-panel">
       <h1>Pacientes</h1>
-      <p class="campo-hint">Busca por nombre, apellido o cédula. Podes dar de baja o reactivar la cuenta de un paciente desde la tabla. Los pacientes no se eliminan.</p>
+      <p class="campo-hint">Buscá por nombre, apellido o cédula. Desde la tabla podés dar de baja o reactivar la cuenta de un paciente, y borrarla una vez dada de baja. Los pacientes y su historial no se eliminan.</p>
 
       <p class="aviso-exito" data-mensaje role="status" hidden></p>
       <p class="aviso-error" data-mensaje-error role="alert" hidden></p>
@@ -47,68 +47,63 @@
           <label for="busqueda-q">Buscar</label>
           <input type="search" id="busqueda-q" name="q" autocomplete="off" placeholder="Nombre, apellido o cédula">
         </div>
-        <button type="submit" class="btn-secundario">Buscar</button>
         <button type="button" class="btn-secundario" id="paciente-nuevo">Nuevo paciente</button>
       </form>
 
       <div id="pacientes-lista"></div>
-    </section>
 
-    <section class="seccion-panel" id="seccion-paciente-form" hidden>
-      <h2 id="paciente-form-titulo">Nuevo paciente</h2>
-      <p class="campo-hint" id="paciente-form-ayuda">Se crea una cuenta verificada y se le envía un correo con un enlace (vence en 1 hora) para que elija su contraseña. Si vence, puede usar "Olvidé mi contraseña".</p>
+      <!-- Opens inside the list box, under a divider (same as the agenda day details). -->
+      <div class="detalle-expandido" id="seccion-paciente-form" hidden>
+        <h2 id="paciente-form-titulo">Nuevo paciente</h2>
+        <p class="campo-hint" id="paciente-form-ayuda">Se crea una cuenta verificada y se le envía un correo con un enlace (vence en 1 hora) para que elija su contraseña. Si vence, puede usar "Olvidé mi contraseña".</p>
 
-      <form id="form-paciente" novalidate>
-        <input type="hidden" name="csrf" value="">
-        <input type="hidden" name="accion" value="crear">
-        <input type="hidden" name="id" value="">
+        <form id="form-paciente" novalidate>
+          <input type="hidden" name="csrf" value="">
+          <input type="hidden" name="accion" value="crear">
+          <input type="hidden" name="id" value="">
 
-        <div class="campo-fila">
-          <div class="campo">
-            <label for="paciente-nombre">Nombre</label>
-            <input type="text" id="paciente-nombre" name="nombre" autocomplete="off">
+          <div class="campo-fila">
+            <div class="campo">
+              <label for="paciente-nombre">Nombre</label>
+              <input type="text" id="paciente-nombre" name="nombre" autocomplete="off">
+            </div>
+            <div class="campo">
+              <label for="paciente-apellido">Apellido</label>
+              <input type="text" id="paciente-apellido" name="apellido" autocomplete="off">
+            </div>
           </div>
+
           <div class="campo">
-            <label for="paciente-apellido">Apellido</label>
-            <input type="text" id="paciente-apellido" name="apellido" autocomplete="off">
+            <label for="paciente-ci">Cédula</label>
+            <input type="text" id="paciente-ci" name="ci" inputmode="numeric" autocomplete="off">
+            <p class="campo-hint">7 u 8 dígitos, sin puntos ni guion.</p>
           </div>
-        </div>
 
-        <div class="campo">
-          <label for="paciente-ci">Cédula</label>
-          <input type="text" id="paciente-ci" name="ci" inputmode="numeric" autocomplete="off">
-          <p class="campo-hint">7 u 8 dígitos, sin puntos ni guion.</p>
-        </div>
+          <div class="campo">
+            <label for="paciente-direccion">Dirección</label>
+            <input type="text" id="paciente-direccion" name="direccion" autocomplete="off">
+          </div>
 
-        <div class="campo">
-          <label for="paciente-direccion">Dirección</label>
-          <input type="text" id="paciente-direccion" name="direccion" autocomplete="off">
-        </div>
+          <div class="campo">
+            <label for="paciente-numero">Teléfono</label>
+            <input type="tel" id="paciente-numero" name="numero" autocomplete="off">
+          </div>
 
-        <div class="campo">
-          <label for="paciente-numero">Teléfono</label>
-          <input type="tel" id="paciente-numero" name="numero" autocomplete="off">
-        </div>
+          <div class="campo" id="campo-email">
+            <label for="paciente-email">Correo</label>
+            <input type="email" id="paciente-email" name="email" autocomplete="off">
+          </div>
 
-        <div class="campo" id="campo-email">
-          <label for="paciente-email">Correo</label>
-          <input type="email" id="paciente-email" name="email" autocomplete="off">
-        </div>
-
-        <div class="acciones-formulario">
-          <button type="submit" class="btn-primary">Guardar</button>
-          <button type="button" class="btn-secundario" id="paciente-cancelar">Cancelar</button>
-        </div>
-      </form>
+          <div class="acciones-formulario">
+            <button type="submit" class="btn-primary">Guardar</button>
+            <button type="button" class="btn-peligro" id="paciente-cancelar">Cancelar</button>
+          </div>
+        </form>
+      </div>
     </section>
   </main>
 
   <footer>
-    <nav aria-label="Pie de página">
-      <a href="index.html">Inicio</a>
-      <a href="servicios.html">Servicios</a>
-      <a href="contacto.html">Contacto</a>
-    </nav>
     <p>&copy; Clínica Imagen</p>
   </footer>
 

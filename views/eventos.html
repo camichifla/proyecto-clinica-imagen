@@ -44,7 +44,7 @@
       <form id="form-eventos" class="filtros-turnos" novalidate>
         <div class="campo">
           <label for="filtro-tipo">Tipo</label>
-          <select id="filtro-tipo" name="tipo"><option value="">Todos</option></select>
+          <select class="selector-combo" id="filtro-tipo" name="tipo"><option value="">Todos</option></select>
         </div>
         <div class="campo">
           <label for="filtro-desde">Desde</label>
@@ -54,7 +54,6 @@
           <label for="filtro-hasta">Hasta</label>
           <input type="date" id="filtro-hasta" name="hasta">
         </div>
-        <button type="submit" class="btn-secundario">Filtrar</button>
       </form>
 
       <div id="eventos-lista"></div>
@@ -68,16 +67,13 @@
   </main>
 
   <footer>
-    <nav aria-label="Pie de página">
-      <a href="index.html">Inicio</a>
-      <a href="servicios.html">Servicios</a>
-      <a href="contacto.html">Contacto</a>
-    </nav>
     <p>&copy; Clínica Imagen</p>
   </footer>
 
   <script src="assets/js/sesion.js" defer></script>
   <script src="assets/js/form-api.js" defer></script>
+  <script src="assets/js/selector-combo.js" defer></script>
+  <script src="assets/js/selector-fecha.js" defer></script>
   <script src="assets/js/eventos.js" defer></script>
 </body>
 

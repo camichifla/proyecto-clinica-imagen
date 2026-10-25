@@ -55,19 +55,19 @@
         </div>
         <div class="campo">
           <label for="filtro-sucursal">Sede</label>
-          <select id="filtro-sucursal" name="sucursal_id">
+          <select class="selector-combo" id="filtro-sucursal" name="sucursal_id">
             <option value="">Todas</option>
           </select>
         </div>
         <div class="campo">
           <label for="filtro-profesional">Profesional</label>
-          <select id="filtro-profesional" name="profesional_id">
+          <select class="selector-combo" id="filtro-profesional" name="profesional_id" data-buscable>
             <option value="">Todos</option>
           </select>
         </div>
         <div class="campo">
           <label for="filtro-estado">Estado</label>
-          <select id="filtro-estado" name="estado">
+          <select class="selector-combo" id="filtro-estado" name="estado">
             <option value="">Todos</option>
             <option value="pendiente">Pendiente</option>
             <option value="confirmada">Confirmada</option>
@@ -79,7 +79,6 @@
           <label for="filtro-codigo">Código</label>
           <input type="text" id="filtro-codigo" name="codigo" placeholder="CI-000123" autocomplete="off">
         </div>
-        <button type="submit" class="btn-primary">Filtrar</button>
       </form>
 
       <p class="solo-impresion" id="turnos-filtros-activos"></p>
@@ -91,16 +90,13 @@
   </main>
 
   <footer>
-    <nav aria-label="Pie de página">
-      <a href="index.html">Inicio</a>
-      <a href="servicios.html">Servicios</a>
-      <a href="contacto.html">Contacto</a>
-    </nav>
     <p>&copy; Clínica Imagen</p>
   </footer>
 
   <script src="assets/js/sesion.js" defer></script>
   <script src="assets/js/form-api.js" defer></script>
+  <script src="assets/js/selector-combo.js" defer></script>
+  <script src="assets/js/selector-fecha.js" defer></script>
   <script src="assets/js/turnos.js" defer></script>
 </body>
 

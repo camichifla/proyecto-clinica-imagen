@@ -30,6 +30,9 @@
     --brand-dark: #1D3557;
     --brand-light: #457B9D;
     --gradient-brand: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-light) 100%);
+    /* Filled confirm/reject buttons (white text, same in both themes). */
+    --btn-exito: #16a34a;
+    --btn-peligro: #e5484d;
 
     color-scheme: light;
 

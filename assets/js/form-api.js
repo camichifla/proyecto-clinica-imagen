@@ -122,6 +122,41 @@ function celdaEstado(estado, etiqueta) {
     return td;
 }
 
+// Tables switch to cards (.tabla-tarjetas, see base.css) whenever they don't fit their container, whatever the
+// screen size or column count. Only width changes are re-checked: turning into cards changes the height.
+const observadorTablas = new ResizeObserver((entradas) => {
+    entradas.forEach(({ target: scroll }) => {
+        const ancho = scroll.clientWidth;
+        if (ancho === Number(scroll.dataset.ancho)) {
+            return;
+        }
+        scroll.dataset.ancho = String(ancho);
+        scroll.classList.remove('tabla-tarjetas');
+        scroll.classList.toggle('tabla-tarjetas', scroll.scrollWidth > ancho + 1);
+    });
+});
+
+// Filter/search forms run on their own (no "Filtrar"/"Buscar" button): right away when a dropdown or date changes,
+// and after a short pause while typing. Goes through requestSubmit(), so each page's submit handler is unchanged.
+function filtrarAlCambiar(form, demora = 400) {
+    const esTexto = (el) => el.matches('input[type="text"], input[type="search"]');
+    // Search-as-you-type comboboxes don't filter while typing: only once an option is picked (their field's 'change').
+    const esBuscador = (el) => el.matches('[role="combobox"]');
+    let espera;
+    form.addEventListener('input', (evento) => {
+        if (esTexto(evento.target) && !esBuscador(evento.target)) {
+            clearTimeout(espera);
+            espera = setTimeout(() => form.requestSubmit(), demora);
+        }
+    });
+    form.addEventListener('change', (evento) => {
+        if (!esTexto(evento.target) && !esBuscador(evento.target)) {
+            clearTimeout(espera);
+            form.requestSubmit();
+        }
+    });
+}
+
 // Devuelve el contenedor .tabla-scroll con una <table class="tabla-datos">:
 // `encabezados` son los textos de <th>, `filas` ya son elementos <tr>.
 function tabla(encabezados, filas) {
@@ -146,6 +181,7 @@ function tabla(encabezados, filas) {
     table.appendChild(tbody);
 
     scroll.appendChild(table);
+    observadorTablas.observe(scroll);
     return scroll;
 }
 
@@ -160,7 +196,7 @@ function poblarDatalist(datalist, filas, etiquetaFn) {
 }
 
 function poblarPacientes(datalist, pacientes, inputBuscar) {
-    poblarDatalist(datalist, pacientes, (p) => `${p.apellido}, ${p.nombre} (CI ${p.ci})`);
+    poblarDatalist(datalist, pacientes, (p) => `${p.apellido}, ${p.nombre} (${p.ci})`);
     if (!pacientes.length && inputBuscar) {
         const mensaje = document.createElement('p');
         mensaje.className = 'campo-error';
@@ -209,11 +245,30 @@ function poblarProfesionales(select, profesionales, seleccionado = '', etiquetas
 
 const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
+// Opening/closing times offered every 15 minutes; a stored value off that grid is kept as its own option.
+function selectorHora(valor, etiqueta) {
+    const select = document.createElement('select');
+    select.className = 'selector-combo';
+    select.setAttribute('aria-label', etiqueta);
+    const horas = [];
+    for (let minutos = 0; minutos < 24 * 60; minutos += 15) {
+        horas.push(String(Math.floor(minutos / 60)).padStart(2, '0') + ':' + String(minutos % 60).padStart(2, '0'));
+    }
+    if (valor && !horas.includes(valor)) {
+        horas.push(valor);
+        horas.sort();
+    }
+    horas.forEach((hora) => select.appendChild(new Option(hora, hora)));
+    select.value = valor;
+    return select;
+}
+
 function filaHorario(turno) {
     const fila = document.createElement('div');
     fila.className = 'fila-horario';
 
     const dia = document.createElement('select');
+    dia.className = 'selector-combo';
     dia.setAttribute('aria-label', 'Día');
     DIAS_SEMANA.forEach((nombre, i) => {
         const opcion = document.createElement('option');
@@ -223,14 +278,8 @@ function filaHorario(turno) {
     });
     dia.value = String(turno.dia);
 
-    const apertura = document.createElement('input');
-    apertura.type = 'time';
-    apertura.value = turno.apertura;
-    apertura.setAttribute('aria-label', 'Apertura');
-    const cierre = document.createElement('input');
-    cierre.type = 'time';
-    cierre.value = turno.cierre;
-    cierre.setAttribute('aria-label', 'Cierre');
+    const apertura = selectorHora(turno.apertura, 'Apertura');
+    const cierre = selectorHora(turno.cierre, 'Cierre');
 
     const quitar = document.createElement('button');
     quitar.type = 'button';
@@ -244,7 +293,7 @@ function filaHorario(turno) {
 
 function turnosDeContenedor(contenedor) {
     return Array.from(contenedor.querySelectorAll('.fila-horario')).map((fila) => {
-        const [dia, apertura, cierre] = fila.querySelectorAll('select, input');
+        const [dia, apertura, cierre] = fila.querySelectorAll('select');
         return { dia: dia.value, apertura: apertura.value, cierre: cierre.value };
     });
 }
@@ -293,8 +342,25 @@ function turnosDeContenedor(contenedor) {
         form.querySelectorAll('[data-error-id]').forEach(desvincularError);
     }
 
+    // Required fields left empty are flagged before sending (the server still validates everything):
+    // "Este campo es obligatorio." under each one, and the cursor goes to the first.
+    function faltanObligatorios(form) {
+        const vacios = Array.from(form.querySelectorAll('[required]'))
+            .filter((el) => !el.disabled && el.type !== 'checkbox' && el.type !== 'radio' && !String(el.value).trim());
+        vacios.forEach((el) => mostrarError(form, el.name.replace(/\[\]$/, ''), 'Este campo es obligatorio.'));
+        if (vacios.length) {
+            const campo = vacios[0].closest('.campo');
+            const destino = campo && campo.querySelector('input:not([type="hidden"]), textarea, button');
+            (destino || vacios[0]).focus();
+        }
+        return vacios.length > 0;
+    }
+
     async function enviar(form) {
         limpiarErrores(form);
+        if (faltanObligatorios(form)) {
+            return;
+        }
         const url = form.dataset.api;
 
         const data = await apiJson(url, { method: 'POST', body: new FormData(form) });

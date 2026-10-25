@@ -24,10 +24,21 @@
         raiz.dispatchEvent(new CustomEvent('cambio-tema', { detail: tema }));
     }
 
+    // Cross-fades the whole page into the new theme (View Transitions API); browsers without
+    // it, or with reduced motion requested, switch instantly.
+    function aplicarGradual(tema) {
+        const reducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (document.startViewTransition && !reducido) {
+            document.startViewTransition(() => aplicar(tema));
+        } else {
+            aplicar(tema);
+        }
+    }
+
     aplicar(preferido());
     sistema.addEventListener('change', () => {
         if (!guardado()) {
-            aplicar(preferido());
+            aplicarGradual(preferido());
         }
     });
 
@@ -39,7 +50,7 @@
             } catch {
                 // sin storage el cambio dura hasta recargar
             }
-            aplicar(tema);
+            aplicarGradual(tema);
         },
     };
 })();

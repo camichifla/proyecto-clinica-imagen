@@ -35,7 +35,7 @@ function error_unico_paciente(PDOException $e): ?array
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check($_POST['csrf'] ?? null);
     $accion = $_POST['accion'] ?? '';
-    if (!in_array($accion, ['crear', 'guardar', 'toggle_activo'], true)) {
+    if (!in_array($accion, ['crear', 'guardar', 'toggle_activo', 'borrar_cuenta'], true)) {
         respuesta_pacientes(400, ['ok' => false, 'error' => 'Acción inválida.']);
     }
 
@@ -52,6 +52,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         db()->prepare('UPDATE cuentas SET activo = ? WHERE id = ?')->execute([$nuevo, $cuenta['id']]);
         registrar_evento('cuenta_activo', 'cuenta=' . $cuenta['id'] . ' paciente=' . $id . ' activo=' . $nuevo);
         echo json_encode(['ok' => true, 'activo' => $nuevo === 1], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    // Deletes only the login account, and only once it was deactivated ("dada de baja"). The patient record, citas,
+    // results and clinical notes stay; the email is kept so signing up again with the same CI and email brings the
+    // patient back (register.php). Nothing else references a patient's account except its tokens, which cascade.
+    if ($accion === 'borrar_cuenta') {
+        $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+        $stmt = db()->prepare("SELECT id, email, activo FROM cuentas WHERE rol = 'paciente' AND ref_id = ?");
+        $stmt->execute([$id ?: 0]);
+        $cuenta = $stmt->fetch();
+        if (!$cuenta) {
+            respuesta_pacientes(404, ['ok' => false, 'error' => 'El paciente no tiene cuenta.']);
+        }
+        if ((int) $cuenta['activo'] === 1) {
+            respuesta_pacientes(409, ['ok' => false, 'error' => 'Primero hay que dar de baja la cuenta.']);
+        }
+        $db = db();
+        $db->beginTransaction();
+        $db->prepare('UPDATE pacientes SET email_anterior = ? WHERE id = ?')->execute([$cuenta['email'], $id]);
+        $db->prepare("DELETE FROM cuentas WHERE id = ? AND rol = 'paciente' AND activo = 0")->execute([$cuenta['id']]);
+        $db->commit();
+        registrar_evento('cuenta_borrada', 'cuenta=' . $cuenta['id'] . ' paciente=' . $id);
+        echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);
         exit;
     }
 
@@ -145,7 +169,7 @@ foreach (array_slice($palabras, 0, 5) as $palabra) {
 $stmt = db()->prepare(
     "SELECT p.id, p.nombre, p.apellido, p.ci, p.direccion, p.numero, c.email, c.verificado, c.activo
        FROM pacientes p
-       LEFT JOIN cuentas c ON c.rol = 'paciente' AND c.ref_id = p.id
+       JOIN cuentas c ON c.rol = 'paciente' AND c.ref_id = p.id -- patients whose account was deleted are not listed
       WHERE {$where}
       ORDER BY p.apellido, p.nombre
       LIMIT " . (MAX_FILAS_PACIENTES + 1)

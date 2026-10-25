@@ -139,9 +139,10 @@ if (isset($_GET['horas'])) {
 }
 
 $hoy   = new DateTimeImmutable('today');
-$desde = (string) ($_GET['desde'] ?? '') ?: $hoy->format('Y-m-d');
-$hasta = (string) ($_GET['hasta'] ?? '') ?: $hoy->modify('+30 days')->format('Y-m-d');
-if (!fecha_valida($desde) || !fecha_valida($hasta) || $hasta < $desde) {
+// Absent (first load): today .. +30 days. Sent empty (cleared with ✕): that end of the range stays open.
+$desde = (string) ($_GET['desde'] ?? $hoy->format('Y-m-d'));
+$hasta = (string) ($_GET['hasta'] ?? $hoy->modify('+30 days')->format('Y-m-d'));
+if (($desde !== '' && !fecha_valida($desde)) || ($hasta !== '' && !fecha_valida($hasta)) || ($desde !== '' && $hasta !== '' && $hasta < $desde)) {
     error_json(422, 'El rango de fechas no es válido.');
 }
 
@@ -158,15 +159,20 @@ if ($estado !== '' && !isset(ESTADOS_CITA[$estado])) {
 // Base de listado y totales (el filtro de estado solo aplica al listado).
 $codigo = trim((string) ($_GET['codigo'] ?? ''));
 if ($codigo !== '') {
-    $citaId = id_de_codigo($codigo);
-    if ($citaId === null) {
-        error_json(422, 'El código no es válido. Ejemplo: CI-000123.');
-    }
+    // A code that matches no cita (e.g. "CI-0" while still typing) just lists nothing, no error.
     $where  = 'c.id = ?';
-    $params = [$citaId];
+    $params = [id_de_codigo($codigo) ?? 0];
 } else {
-    $where  = 'c.fecha_hora_solicitada >= ? AND c.fecha_hora_solicitada < ?';
-    $params = [$desde . ' 00:00:00', (new DateTimeImmutable($hasta))->modify('+1 day')->format('Y-m-d') . ' 00:00:00'];
+    $where  = '1 = 1';
+    $params = [];
+    if ($desde !== '') {
+        $where   .= ' AND c.fecha_hora_solicitada >= ?';
+        $params[] = $desde . ' 00:00:00';
+    }
+    if ($hasta !== '') {
+        $where   .= ' AND c.fecha_hora_solicitada < ?';
+        $params[] = (new DateTimeImmutable($hasta))->modify('+1 day')->format('Y-m-d') . ' 00:00:00';
+    }
 }
 if ($sucursalId !== null) {
     $where   .= ' AND c.sucursal_id = ?';

@@ -48,39 +48,56 @@
         const divAcciones = document.createElement('div');
         divAcciones.className = 'acciones-solicitud';
 
-        const formConfirmar = document.createElement('form');
-        formConfirmar.className = 'form-confirmar-cita';
+        const botones = document.createElement('div');
+        botones.className = 'botones-solicitud';
+
         const btnConfirmar = document.createElement('button');
-        btnConfirmar.type = 'submit';
-        btnConfirmar.className = 'btn-primary btn-confirmar';
+        btnConfirmar.type = 'button';
+        btnConfirmar.className = 'btn-confirmar';
         btnConfirmar.textContent = 'Confirmar';
-        formConfirmar.appendChild(btnConfirmar);
-        formConfirmar.addEventListener('submit', (evento) => {
-            evento.preventDefault();
-            procesar(cita, 'confirmar', tr, undefined, csrf);
-        });
+        btnConfirmar.addEventListener('click', () => procesar(cita, 'confirmar', tr, undefined, csrf));
+
+        // "Rechazar" only reveals the reason box; the request is sent by "Confirmar rechazo".
+        const btnRechazar = document.createElement('button');
+        btnRechazar.type = 'button';
+        btnRechazar.className = 'btn-rechazar';
+        btnRechazar.textContent = 'Rechazar';
+        btnRechazar.setAttribute('aria-expanded', 'false');
+        btnRechazar.setAttribute('aria-controls', 'rechazo-' + cita.id);
+        botones.append(btnConfirmar, btnRechazar);
 
         const formRechazar = document.createElement('form');
         formRechazar.className = 'form-rechazar-cita';
+        formRechazar.id = 'rechazo-' + cita.id;
+        formRechazar.hidden = true;
         const labelNotas = document.createElement('label');
         labelNotas.htmlFor = 'notas-' + cita.id;
-        labelNotas.textContent = 'Motivo (opcional)';
+        labelNotas.textContent = 'Motivo';
         const textareaNotas = document.createElement('textarea');
         textareaNotas.id = 'notas-' + cita.id;
         textareaNotas.name = 'notas_admin';
         textareaNotas.maxLength = notasAdminMax;
         textareaNotas.rows = 2;
-        const btnRechazar = document.createElement('button');
-        btnRechazar.type = 'submit';
-        btnRechazar.className = 'btn-secundario btn-rechazar';
-        btnRechazar.textContent = 'Rechazar';
-        formRechazar.append(labelNotas, textareaNotas, btnRechazar);
+        const btnConfirmarRechazo = document.createElement('button');
+        btnConfirmarRechazo.type = 'submit';
+        btnConfirmarRechazo.className = 'btn-confirmar-rechazo';
+        btnConfirmarRechazo.textContent = 'Confirmar rechazo';
+        formRechazar.append(labelNotas, textareaNotas, btnConfirmarRechazo);
         formRechazar.addEventListener('submit', (evento) => {
             evento.preventDefault();
             procesar(cita, 'rechazar', tr, textareaNotas.value, csrf);
         });
 
-        divAcciones.append(formConfirmar, formRechazar);
+        btnRechazar.addEventListener('click', () => {
+            const abrir = formRechazar.hidden;
+            formRechazar.hidden = !abrir;
+            btnRechazar.setAttribute('aria-expanded', String(abrir));
+            if (abrir) {
+                textareaNotas.focus();
+            }
+        });
+
+        divAcciones.append(botones, formRechazar);
         tdAcciones.appendChild(divAcciones);
         tr.appendChild(tdAcciones);
         return tr;

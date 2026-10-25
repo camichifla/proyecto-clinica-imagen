@@ -25,12 +25,42 @@ if ($errores) {
 }
 
 $db = db();
+
+// A patient whose account was deleted gets it back by signing up again with the same CI and the email that account
+// had (pacientes.email_anterior): their data, citas and clinical history stay attached. Any other email is refused,
+// so knowing someone's CI is not enough to take over their history.
+$stmt = $db->prepare(
+    "SELECT p.id, p.email_anterior, c.id AS cuenta_id
+       FROM pacientes p
+       LEFT JOIN cuentas c ON c.rol = 'paciente' AND c.ref_id = p.id
+      WHERE p.ci = ?"
+);
+$stmt->execute([$valores['ci']]);
+$existente = $stmt->fetch() ?: null;
+if ($existente !== null
+    && ($existente['cuenta_id'] !== null
+        || $existente['email_anterior'] === null
+        || strcasecmp($existente['email_anterior'], $valores['email']) !== 0)) {
+    http_response_code(422);
+    $mensaje = $existente['cuenta_id'] !== null
+        ? 'Ya existe una cuenta registrada con esa cédula.'
+        : 'Ya hay un paciente con esa cédula. Registrate con el correo que usabas o contactá a la clínica.';
+    echo json_encode(['ok' => false, 'errores' => ['ci' => $mensaje]], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 try {
     $db->beginTransaction();
 
-    $stmt = $db->prepare('INSERT INTO pacientes (nombre, apellido, ci, direccion, numero) VALUES (?, ?, ?, ?, ?)');
-    $stmt->execute([$valores['nombre'], $valores['apellido'], $valores['ci'], $valores['direccion'], $valores['numero']]);
-    $pacienteId = (int) $db->lastInsertId();
+    if ($existente !== null) {
+        $pacienteId = (int) $existente['id'];
+        $db->prepare('UPDATE pacientes SET nombre = ?, apellido = ?, direccion = ?, numero = ?, email_anterior = NULL WHERE id = ?')
+            ->execute([$valores['nombre'], $valores['apellido'], $valores['direccion'], $valores['numero'], $pacienteId]);
+    } else {
+        $stmt = $db->prepare('INSERT INTO pacientes (nombre, apellido, ci, direccion, numero) VALUES (?, ?, ?, ?, ?)');
+        $stmt->execute([$valores['nombre'], $valores['apellido'], $valores['ci'], $valores['direccion'], $valores['numero']]);
+        $pacienteId = (int) $db->lastInsertId();
+    }
 
     $hash = password_hash((string) $_POST['contrasena'], PASSWORD_BCRYPT);
     $stmt = $db->prepare("INSERT INTO cuentas (email, password_hash, rol, ref_id, verificado) VALUES (?, ?, 'paciente', ?, 0)");
@@ -43,7 +73,7 @@ try {
 
     $db->commit();
 
-    registrar_evento('registro', 'cuenta=' . $cuentaId);
+    registrar_evento('registro', 'cuenta=' . $cuentaId . ($existente !== null ? ' paciente=' . $pacienteId . ' reactivado' : ''));
 
     $link = APP_URL . '/verify.html?token=' . $tokenRaw;
     enviar_verificacion($valores['email'], $link);

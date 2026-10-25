@@ -2,6 +2,9 @@
 // El <datalist> nunca lleva el atributo `list`: es solo fuente de datos (<option data-id value="etiqueta">).
 // El <input hidden> es el que viaja en el submit: etiqueta exacta, o vacio (rechazado server-side).
 (() => {
+  // Accents and case are ignored: "lopez" finds "López".
+  const normalizar = (texto) => texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase().trim();
+
   document.querySelectorAll('input[data-buscador-combo]').forEach((input) => {
     const datalist = document.getElementById(input.dataset.lista);
     const hidden = document.getElementById(input.dataset.buscadorCombo);
@@ -74,11 +77,14 @@
       cerrar();
     };
 
+    // No list until something is typed; then only the matches.
     const mostrarLista = () => {
-      const texto = input.value.trim().toLocaleLowerCase();
-      const coincidencias = texto === ''
-        ? opciones
-        : opciones.filter((opcion) => opcion.etiqueta.toLocaleLowerCase().includes(texto));
+      const texto = normalizar(input.value);
+      if (texto === '') {
+        cerrar();
+        return;
+      }
+      const coincidencias = opciones.filter((opcion) => normalizar(opcion.etiqueta).includes(texto));
 
       lista.innerHTML = '';
       if (!coincidencias.length) {
@@ -95,6 +101,9 @@
           li.addEventListener('mousedown', (evento) => {
             evento.preventDefault();
             elegir(opcion);
+            if (evento.isTrusted) {
+              input.blur(); // picked with the mouse: the box deselects (Enter, which fakes this event, keeps focus)
+            }
           });
           lista.appendChild(li);
         });

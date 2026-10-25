@@ -5,7 +5,7 @@ require_once __DIR__ . '/estudios.php';
 require_once __DIR__ . '/mailer.php';
 
 const MAX_TAMANIO_IMAGEN = 10 * 1024 * 1024;
-const MAX_TAMANIO_INFORME = 10 * 1024 * 1024; // 10MB, un PDF por resultado
+const MAX_TAMANIO_INFORME = 10 * 1024 * 1024; // 10MB, one PDF per result
 
 // Canonical extension derived from the REAL sniffed MIME type — never the
 // client-reported Content-Type and never the original filename's extension.
@@ -225,7 +225,7 @@ function procesar_post_resultado(array $usuario, callable $pacienteValido, ?int 
     $archivosValidados = [];
     $archivos = normalizar_archivos($_FILES['imagenes'] ?? null);
 
-    // Un solo PDF opcional (input name="informe"): se envuelve al formato de lista.
+    // A single optional PDF (input name="informe"): wrapped into the list format.
     $informe = null;
     $informes = isset($_FILES['informe']) && !is_array($_FILES['informe']['name'] ?? null)
         ? normalizar_archivos(array_map(static fn ($v) => [$v], $_FILES['informe']))

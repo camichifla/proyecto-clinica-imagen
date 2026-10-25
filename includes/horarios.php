@@ -7,7 +7,7 @@ require_once __DIR__ . '/estudios.php';
 
 const PASO_MINUTOS = 45;
 
-// Condicion SQL: el profesional de $columna no tiene la cuenta desactivada (toggle_activo solo toca cuentas.activo).
+// SQL condition: the professional in $columna doesn't have a deactivated account (toggle_activo only touches cuentas.activo).
 function sql_profesional_habilitado(string $columna): string
 {
     return "NOT EXISTS (SELECT 1 FROM cuentas cu WHERE cu.rol = 'profesional' AND cu.ref_id = {$columna} AND cu.activo = 0)";
@@ -29,10 +29,10 @@ function slots_de_turnos(array $turnos): array
 
 const MAX_TURNOS_HORARIO = 28;
 
-// Turnos [['dia'=>int,'apertura'=>'HH:MM','cierre'=>'HH:MM'], ...] ordenados, o el mensaje de error.
-// Comun a los horarios de sede y a los propios de un profesional. Cada turno genera
-// sus horas desde su apertura en pasos de PASO_MINUTOS (slots_de_turnos), asi que
-// cualquier HH:MM sirve; lo que no puede pasar es que dos turnos del mismo dia se pisen.
+// Sorted turnos [['dia'=>int,'apertura'=>'HH:MM','cierre'=>'HH:MM'], ...], or the error message.
+// Common to branch schedules and a professional's own. Each turno generates
+// its times from its opening in PASO_MINUTOS steps (slots_de_turnos), so
+// any HH:MM works; what can't happen is two turnos on the same day overlapping.
 function validar_turnos(mixed $crudo): array|string
 {
     $lista = is_string($crudo) ? json_decode($crudo, true) : null;
@@ -66,8 +66,8 @@ function validar_turnos(mixed $crudo): array|string
 }
 
 /**
- * Horario propio por profesional para el dia ISO $dia: id => lista de [apertura, cierre] 'HH:MM' (vacia = no trabaja ese dia).
- * Solo aparecen los que TIENEN horario propio; un profesional ausente no tiene restriccion. Requiere db.php.
+ * Own schedule per professional for ISO day $dia: id => list of [opening, closing] 'HH:MM' (empty = doesn't work that day).
+ * Only those WITH their own schedule appear; an absent professional has no restriction. Requires db.php.
  *
  * @param int[] $ids
  * @return array<int,array<int,array{0:string,1:string}>>
@@ -93,7 +93,7 @@ function horarios_propios(array $ids, int $dia): array
     return $propios;
 }
 
-// $hora 'HH:MM' cae dentro de algun turno (mismo criterio inclusivo que slots_de_turnos).
+// $hora 'HH:MM' falls inside some turno (same inclusive criterion as slots_de_turnos).
 function hora_en_turnos(array $turnos, string $hora): bool
 {
     foreach ($turnos as [$apertura, $cierre]) {
@@ -113,9 +113,9 @@ function rango_reserva(): array
 }
 
 /**
- * Horas 'HH:MM' de $fecha no reservables. Con profesional: las que ya tiene ocupadas mas las de la sede fuera de su horario
- * propio. Sin profesional: las de la sede en que NINGUN profesional elegible (sede + estudio) esta libre.
- * $ignorarCitaId: una cita cuyo propio horario no cuenta como ocupado (reprogramar). Requiere db.php.
+ * 'HH:MM' times of $fecha that can't be booked. With a professional: the ones they already have taken plus the branch's outside their
+ * own schedule. Without a professional: the branch's where NO eligible professional (branch + study) is free.
+ * $ignorarCitaId: a cita whose own time doesn't count as taken (rescheduling). Requires db.php.
  *
  * @return string[]
  */
@@ -184,7 +184,7 @@ function horas_ocupadas(int $sucursalId, string $fecha, ?int $profesionalId, str
         }
         return false;
     };
-    // Horas con cita aunque no esten en la grilla de la sede (datos historicos), mas la grilla.
+    // Times with a cita even if they aren't in the branch's grid (historical data), plus the grid.
     $ocupadas = [];
     foreach (array_unique([...array_keys($ocupadoPor), ...$slotsSede]) as $hora) {
         if (!$libreEn((string) $hora)) {

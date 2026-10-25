@@ -178,8 +178,8 @@
         }
     });
 
-    // El rol cambia el titulo y el mensaje de lista vacia; la lista de pacientes
-    // y los datos que se ven los decide la API.
+    // The role changes the title and the empty-list message; the patient list
+    // and the visible data are decided by the API.
     const TEXTOS_ROL = {
         administrador: { titulo: 'Buscar Resultados' },
         profesional: { titulo: 'Historial de Pacientes', sinPacientes: 'Todavía no tenés pacientes con citas asignadas.' },

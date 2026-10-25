@@ -240,8 +240,7 @@
             renderSemana(data);
         }
         if (selectSucursal) {
-            // Solo administrador y recepcionista reciben sedes; el profesional
-            // ve unicamente su propia agenda.
+            // Only administrators and receptionists get branches; the professional only sees their own agenda.
             formFiltro.hidden = !data.sucursales.length;
             renderOpcionesSucursal(data.sucursales, data.sucursalId);
         }

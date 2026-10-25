@@ -32,7 +32,7 @@
         titulo.textContent = 'Editar profesional: ' + profesional.apellido + ', ' + profesional.nombre;
         contenedorSucursales.replaceChildren(...catalogo.sucursales.map((s) =>
             casilla('sucursales[]', String(s.id), s.nombre + (s.activo ? '' : ' (inactiva)'), profesional.sucursales.includes(s.id))));
-        // Estudios activos, mas los inactivos que el profesional ya tenia (para no perderlos al guardar).
+        // Active studies, plus the inactive ones the professional already had (so they aren't lost on save).
         contenedorEstudios.replaceChildren(...catalogo.estudios
             .filter((e) => e.activo || profesional.especializacion.includes(e.clave))
             .map((e) => casilla('especializacion[]', e.clave, e.etiqueta + (e.activo ? '' : ' (inactivo)'), profesional.especializacion.includes(e.clave))));

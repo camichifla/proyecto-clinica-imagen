@@ -199,7 +199,7 @@ header {
     transform: translateY(0);
 }
 
-/* Un solo indicador de foco para todo control; los campos de texto lo reemplazan por su borde (abajo). */
+/* A single focus indicator for every control; text fields replace it with their border (below). */
 :focus-visible {
     outline: 3px solid var(--dark-neutral);
     outline-offset: 2px;
@@ -247,7 +247,7 @@ footer p {
     margin: 0;
 }
 
-/* Campo trampa del formulario de contacto: fuera de pantalla, no display:none. */
+/* Honeypot field of the contact form: off-screen, not display:none. */
 .campo-trampa {
     position: absolute;
     left: -10000px;
@@ -428,8 +428,8 @@ footer {
     }
 }
 
-/* Un control nunca debe ser mas ancho que su columna (360px): el ancho
-   intrinseco de un <input> empujaba el formulario fuera de la pantalla. */
+/* A control must never be wider than its column (360px): an <input>'s intrinsic
+   width used to push the form off the screen. */
 .campo,
 .buscador-combo {
     min-width: 0;

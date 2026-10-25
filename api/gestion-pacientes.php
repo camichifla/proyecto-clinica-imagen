@@ -120,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Alta en mostrador: cuenta verificada con clave inutilizable; el paciente elige la suya con el enlace de reset.
+    // Walk-in registration: verified account with an unusable password; the patient picks theirs via the reset link.
     try {
         $db->beginTransaction();
 

@@ -1,6 +1,6 @@
-// Tema claro/oscuro. Se carga sin defer en el <head> para fijar data-theme antes
-// del primer pintado (sin destello claro). Sin eleccion guardada sigue al sistema.
-// El interruptor del menu de usuario (sesion.js) usa window.tema para cambiarlo.
+// Light/dark theme. Loaded without defer in the <head> to set data-theme before
+// the first paint (no light flash). With no saved choice it follows the system.
+// The user menu's switch (sesion.js) uses window.tema to change it.
 (() => {
     const CLAVE = 'tema';
     const raiz = document.documentElement;
@@ -10,7 +10,7 @@
         try {
             return localStorage.getItem(CLAVE);
         } catch {
-            return null; // storage bloqueado: se sigue al sistema
+            return null; // storage blocked: follow the system
         }
     }
 
@@ -48,7 +48,7 @@
             try {
                 localStorage.setItem(CLAVE, tema);
             } catch {
-                // sin storage el cambio dura hasta recargar
+                // without storage the change lasts until reload
             }
             aplicarGradual(tema);
         },

@@ -1,6 +1,6 @@
 <?php
 
-// Un fallo de auditoria nunca rompe la peticion.
+// An audit failure never breaks the request.
 function registrar_evento(string $tipo, ?string $detalle = null, ?string $email = null): void
 {
     try {

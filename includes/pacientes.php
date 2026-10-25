@@ -1,8 +1,8 @@
 <?php
 
 /**
- * Vincula al paciente recien creado las citas y ordenes hechas por un medico cuando solo se conocia su correo ($email).
- * Va dentro de la transaccion del alta.
+ * Links to the newly created patient the citas and orders made by a doctor when only their email ($email) was known.
+ * Runs inside the registration transaction.
  */
 function vincular_citas_pendientes(PDO $db, int $pacienteId, string $email): void
 {

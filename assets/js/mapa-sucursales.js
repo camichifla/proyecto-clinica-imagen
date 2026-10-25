@@ -3,7 +3,7 @@
 
     const DIAS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
-    // Escapa texto de la base antes de armarlo como HTML.
+    // Escapes database text before building it as HTML.
     function esc(texto) {
         const div = document.createElement("div");
         div.textContent = texto == null ? "" : String(texto);

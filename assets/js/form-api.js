@@ -1,11 +1,11 @@
-// Helpers compartidos por las paginas autenticadas (globals de script clasico).
-// Las paginas que los usan cargan este archivo antes de su propio script.
+// Helpers shared by the authenticated pages (classic-script globals).
+// Pages using them load this file before their own script.
 
-// fetch + JSON. Devuelve el JSON parseado, null si no hubo conexion, o
-// { ok: false } si la respuesta no era JSON. Ante sesion vencida (401 o
-// redireccion al login) navega a login.html; ante un 403 en lecturas (rol sin
-// permiso) navega a index.html. En ambos casos NO resuelve: la pagina se esta
-// yendo y el llamador no debe seguir.
+// fetch + JSON. Returns the parsed JSON, null if there was no connection, or
+// { ok: false } if the response wasn't JSON. On an expired session (401 or
+// redirect to login) it navigates to login.html; on a 403 for reads (role without
+// permission) it navigates to index.html. In both cases it does NOT resolve: the page is
+// leaving and the caller must not continue.
 async function apiJson(url, opts = {}) {
     let respuesta;
     try {
@@ -87,16 +87,16 @@ function celda(etiqueta, texto) {
     return td;
 }
 
-// Errores de validacion { campo: mensaje } bajo el .campo del input con ese
-// name (o bajo #campo-<campo>). Devuelve los mensajes que no encontraron donde
-// mostrarse, para que el llamador los muestre como aviso general.
+// Validation errors { field: message } under the .campo of the input with that
+// name (or under #campo-<field>). Returns the messages that found nowhere to show,
+// so the caller can display them as a general notice.
 function limpiarErroresCampos(form) {
     form.querySelectorAll('.campo-error[data-dinamico]').forEach((p) => p.remove());
     form.querySelectorAll('[data-error-id]').forEach(desvincularError);
 }
 
-// Ata el mensaje de error al control para lectores de pantalla, sin pisar
-// la ayuda de formato que el control ya tenga en aria-describedby.
+// Ties the error message to the control for screen readers, without overwriting
+// the format hint the control may already have in aria-describedby.
 let contadorErrores = 0;
 function vincularError(p, control) {
     if (!control) {
@@ -186,8 +186,8 @@ function filtrarAlCambiar(form, demora = 400) {
     });
 }
 
-// Devuelve el contenedor .tabla-scroll con una <table class="tabla-datos">:
-// `encabezados` son los textos de <th>, `filas` ya son elementos <tr>.
+// Returns the .tabla-scroll container with a <table class="tabla-datos">:
+// `encabezados` are the <th> texts, `filas` are already <tr> elements.
 function tabla(encabezados, filas) {
     const scroll = document.createElement('div');
     scroll.className = 'tabla-scroll';

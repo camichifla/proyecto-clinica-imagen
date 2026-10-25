@@ -20,8 +20,8 @@
         }
     }
 
-    // El rol cambia el titulo y los mensajes de lista vacia; los permisos los
-    // decide la API.
+    // The role changes the title and the empty-list messages; permissions are
+    // decided by the API.
     const TEXTOS_PROFESIONAL = {
         titulo: 'Cargar Observaciones y Resultados',
         sinPacientes: 'Todavía no tenés pacientes con citas asignadas.',

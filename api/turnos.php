@@ -156,7 +156,7 @@ if ($estado !== '' && !isset(ESTADOS_CITA[$estado])) {
     error_json(422, 'Estado inválido.');
 }
 
-// Base de listado y totales (el filtro de estado solo aplica al listado).
+// Base for the listing and the totals (the state filter only applies to the listing).
 $codigo = trim((string) ($_GET['codigo'] ?? ''));
 if ($codigo !== '') {
     // A code that matches no cita (e.g. "CI-0" while still typing) just lists nothing, no error.
@@ -197,7 +197,7 @@ if ($estado !== '') {
     $whereLista   .= ' AND c.estado = ?';
     $paramsLista[] = $estado;
 }
-// ponytail: tope de filas sin paginacion; agregar paginacion si un rango supera MAX_FILAS_TURNOS
+// ponytail: row cap without pagination; add pagination if a range exceeds MAX_FILAS_TURNOS
 $stmt = db()->prepare(SQL_CITAS_CON_ETIQUETAS . " WHERE {$whereLista} ORDER BY c.fecha_hora_solicitada ASC LIMIT " . (MAX_FILAS_TURNOS + 1));
 $stmt->execute($paramsLista);
 $filas    = $stmt->fetchAll();

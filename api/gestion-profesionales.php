@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errores['sucursales'] = 'Elegí sedes válidas.';
     }
 
-    // Estudios activos; los inactivos que ya tenia se pueden conservar pero no sumar.
+    // Active studies; inactive ones the professional already had may be kept but not added.
     $enviados = $_POST['especializacion'] ?? [];
     $claves   = is_array($enviados) ? array_values(array_unique(array_map('strval', $enviados))) : [];
     $permitidos = array_merge(

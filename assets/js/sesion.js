@@ -1,8 +1,8 @@
-// Sesion del usuario. Por defecto exige login (redirige a login.html y expone
-// window.sesionLista). Con data-modo="publico" en el <script> no redirige,
-// alterna los elementos [data-sesion] y expone window.sesionPublica.
-// En modo no publico, si la vista actual no figura en el menu del rol,
-// redirige a index.html (el control real sigue en la API).
+// User session. By default it requires login (redirects to login.html and exposes
+// window.sesionLista). With data-modo="publico" on the <script> it doesn't redirect,
+// toggles the [data-sesion] elements and exposes window.sesionPublica.
+// In non-public mode, if the current view isn't in the role's menu,
+// it redirects to index.html (the real check stays in the API).
 // Role labels shared by every page (sesion.js loads first, so this is a global).
 const ROLES_ETIQUETA = { paciente: 'Paciente', medico: 'Médico', profesional: 'Profesional', administrador: 'Administrador', recepcionista: 'Recepcionista' };
 
@@ -22,8 +22,8 @@ const ROLES_ETIQUETA = { paciente: 'Paciente', medico: 'Médico', profesional: '
         try {
             respuesta = await fetch(url);
             if (publico && respuesta.status === 401) {
-                // La sesión vencida se destruye en esa respuesta; reintentar
-                // abre una nueva con su token CSRF.
+                // An expired session is destroyed in that response; retrying
+                // opens a new one with its CSRF token.
                 respuesta = await fetch(url);
             }
         } catch {

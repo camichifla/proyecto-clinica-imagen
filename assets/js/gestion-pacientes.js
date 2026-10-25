@@ -14,7 +14,7 @@
     const campoEmail = document.getElementById('campo-email');
     const CAMPOS = ['nombre', 'apellido', 'ci', 'direccion', 'numero'];
 
-    // paciente === null: alta; si no, edicion de sus datos personales (el correo no se edita aca).
+    // paciente === null: create; otherwise, edit their personal data (the email isn't edited here).
     function abrirForm(paciente) {
         limpiarErroresCampos(form);
         const editando = paciente !== null;

@@ -139,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(['ok' => false, 'error' => 'Cuenta no encontrada.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
-        // Las cuentas de pacientes quedan fuera en ambos sentidos.
+        // Patient accounts are excluded in both directions.
         if (!isset(ROLES_STAFF[$cuenta['rol']])) {
             echo json_encode(['ok' => false, 'error' => 'Las cuentas de pacientes no cambian de rol.'], JSON_UNESCAPED_UNICODE);
             exit;
@@ -155,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($nuevoRol === $cuenta['rol']) {
             $errores['rol'] = 'La cuenta ya tiene ese rol.';
         }
-        // Lo unico que la tabla de profesionales exige y las demas no: al menos una especializacion.
+        // The only thing the professionals table requires that the others don't: at least one specialization.
         if ($nuevoRol === 'profesional') {
             if (!$especializaciones) {
                 $errores['especializacion'] = 'Elegí al menos una especialización.';
@@ -174,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $tablaVieja = TABLA_POR_ROL[$rolViejo];
         $tablaNueva = TABLA_POR_ROL[$nuevoRol];
 
-        // Sin perfil de profesional nadie atenderia esas citas: hay que reasignarlas o cancelarlas antes.
+        // Without a professional profile nobody would attend those citas: reassign or cancel them first.
         if ($rolViejo === 'profesional') {
             $stmt = $db->prepare('SELECT COUNT(*) FROM citas WHERE profesional_id = ? AND slot_activo = 1 AND fecha_hora_solicitada > NOW()');
             $stmt->execute([$refViejo]);
@@ -189,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $db->beginTransaction();
 
-            // Un solo administrador activo: se lee con bloqueo para que dos cambios simultaneos no dejen cero.
+            // Only one active administrator: read with a lock so two simultaneous changes can't leave zero.
             if ($rolViejo === 'administrador' && (int) $cuenta['activo'] === 1) {
                 $activos = (int) $db->query("SELECT COUNT(*) FROM cuentas WHERE rol = 'administrador' AND activo = 1 FOR UPDATE")->fetchColumn();
                 if ($activos <= 1) {
@@ -218,8 +218,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $db->prepare('UPDATE cuentas SET rol = ?, ref_id = ? WHERE id = ?')->execute([$nuevoRol, $refNuevo, $cuenta['id']]);
 
-            // El perfil anterior se elimina salvo que tenga citas (historial). Las asignaciones medico_paciente
-            // se borran en cascada: sin cuenta de medico detras ya no darian acceso a nadie.
+            // The previous profile is deleted unless it has citas (history). The medico_paciente assignments
+            // are deleted in cascade: without a medico account behind them they would grant access to nobody.
             $referenciado = false;
             if ($rolViejo === 'profesional') {
                 $stmt = $db->prepare('SELECT 1 FROM citas WHERE profesional_id = ? LIMIT 1');
@@ -227,7 +227,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $referenciado = (bool) $stmt->fetchColumn();
             }
             if ($referenciado) {
-                // Queda como historial; un profesional sin sedes deja de ofrecerse para agendar.
+                // Kept as history; a professional without branches is no longer offered for booking.
                 if ($rolViejo === 'profesional') {
                     $db->prepare('DELETE FROM profesional_sucursal WHERE profesional_id = ?')->execute([$refViejo]);
                 }

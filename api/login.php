@@ -12,7 +12,7 @@ const DUMMY_HASH = '$2y$10$frrN.cZWEHqFbIH6xRp4R.WkE5mQDxy4sE35jd6QagOhrVYweahrS
 $email    = trim((string) ($_POST['email'] ?? ''));
 $password = (string) ($_POST['password'] ?? '');
 
-// El limite por email cuenta solo los fallos desde esta IP: un tercero no puede bloquear al duenio desde otra.
+// The per-email limit only counts failures from this IP: a third party cannot lock out the owner from elsewhere.
 $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
 if (demasiados_eventos('login_fallo', 'email', $email, MAX_FALLOS_EMAIL, VENTANA_MINUTOS, $ip)
     || demasiados_eventos('login_fallo', 'ip', $ip, MAX_FALLOS_IP, VENTANA_MINUTOS)) {

@@ -148,7 +148,7 @@
         });
     }
 
-    // Cuentas de personal que se pueden cambiar de rol (no la propia, no pacientes).
+    // Staff accounts whose role can be changed (not your own, not patients).
     function poblarCuentasCambioRol(data) {
         const select = document.getElementById('cambio-cuenta');
         const elegida = select.value;

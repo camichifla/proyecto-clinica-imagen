@@ -7,7 +7,7 @@
     const mensajeError = document.querySelector('[data-mensaje-error]');
     const mostrarMensaje = crearMostrarMensaje(mensajeOk, mensajeError);
 
-    // Texto plano siempre: el contenido lo escribio un visitante anonimo.
+    // Always plain text: the content was written by an anonymous visitor.
     function renderMensaje(m) {
         const card = document.createElement('article');
         card.className = 'mensaje-contacto' + (m.atendido ? ' mensaje-atendido' : '');

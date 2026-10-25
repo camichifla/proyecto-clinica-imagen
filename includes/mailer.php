@@ -81,8 +81,8 @@ function enviar_reset(string $email, string $link): bool
 }
 
 /**
- * Email del destinatario de las notificaciones de una cita: la cuenta del
- * paciente, o el email_pendiente si todavia no tiene cuenta. Null si no hay.
+ * Email of the recipient of a cita's notifications: the patient's account,
+ * or email_pendiente if they don't have an account yet. Null if there is none.
  */
 function email_notificacion_cita(?int $pacienteId, ?string $emailPendiente): ?string
 {

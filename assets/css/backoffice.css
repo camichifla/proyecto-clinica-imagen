@@ -111,7 +111,7 @@ a.tarjeta-resumen:hover {
 }
 
 .tabla-scroll.tabla-tarjetas {
-    /* Modo tarjeta: las acciones ocupan todo el ancho de la tarjeta. */
+    /* Card mode: actions take the full width of the card. */
     .acciones-turno {
         width: auto;
     }

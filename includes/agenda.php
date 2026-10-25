@@ -77,8 +77,8 @@ function cita_nombre_paciente(array $cita): string
     return $cita['paciente_apellido'] . ', ' . $cita['paciente_nombre'];
 }
 
-// SELECT compartido por agenda, panel y turnos: la cita + lo necesario para
-// cita_agenda_json() (paciente, profesional, sede). Cada caller agrega su WHERE.
+// SELECT shared by agenda, panel and turnos: the cita + what cita_agenda_json() needs
+// (patient, professional, branch). Each caller adds its WHERE.
 const SQL_CITAS_CON_ETIQUETAS =
     'SELECT c.*,
             p.nombre  AS paciente_nombre,  p.apellido  AS paciente_apellido,

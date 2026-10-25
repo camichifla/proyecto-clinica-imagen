@@ -3,29 +3,6 @@
     max-width: var(--max-width);
 }
 
-.campo-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.9rem var(--space-4);
-    background: var(--surface-alt);
-    border: 1px solid var(--border-subtle);
-    border-radius: 0.6rem;
-}
-
-.campo-checkbox input {
-    width: 1.15rem;
-    height: 1.15rem;
-    accent-color: var(--accent-color);
-    flex-shrink: 0;
-}
-
-.campo-checkbox label {
-    font-weight: var(--font-weight-semibold);
-    color: var(--dark-neutral);
-    cursor: pointer;
-}
-
 .orden-panel {
     display: flex;
     flex-direction: column;

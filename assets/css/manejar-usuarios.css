@@ -69,10 +69,6 @@
     font-style: italic;
 }
 
-.form-toggle-activo {
-    margin: 0;
-}
-
 .btn-secundario {
     display: inline-block;
     border: 1px solid var(--accent-secondary);

@@ -554,20 +554,6 @@
     gap: 4px;
 }
 
-.clinic-phone {
-    font-size: var(--font-size-xs);
-    color: var(--dark-neutral);
-    font-weight: var(--font-weight-medium);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.clinic-phone svg {
-    color: var(--accent-color);
-    flex-shrink: 0;
-}
-
 .clinic-hours {
     font-size: var(--font-size-xs);
     color: var(--text-secondary);

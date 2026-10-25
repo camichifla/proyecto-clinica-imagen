@@ -6,18 +6,11 @@
     }
     const mensajeOk = document.querySelector('[data-mensaje]');
     const mensajeError = document.querySelector('[data-mensaje-error]');
+    const mostrarMensaje = crearMostrarMensaje(mensajeOk, mensajeError);
     const titulo = document.getElementById('estudio-form-titulo');
     const botonNuevo = document.getElementById('estudio-nuevo');
     const activoLabel = document.getElementById('estudio-activo-label');
     const claveHint = document.getElementById('estudio-clave-hint');
-
-    function mostrarMensaje(texto, esError) {
-        const el = esError ? mensajeError : mensajeOk;
-        const otro = esError ? mensajeOk : mensajeError;
-        otro.hidden = true;
-        el.textContent = texto;
-        el.hidden = false;
-    }
 
     function prepararForm(estudio) {
         limpiarErroresCampos(form);
@@ -74,7 +67,7 @@
         const editando = form.elements.accion.value === 'editar';
         const data = await apiJson('api/gestion-estudios.php', { method: 'POST', body: new FormData(form) });
         if (!data) {
-            mostrarMensaje('No se pudo conectar. Intenta nuevamente.', true);
+            mostrarMensaje(ERROR_CONEXION, true);
             return;
         }
         if (data.errores) {

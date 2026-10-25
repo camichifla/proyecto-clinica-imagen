@@ -5,23 +5,16 @@
     }
     const mensajeOk = document.querySelector('[data-mensaje]');
     const mensajeError = document.querySelector('[data-mensaje-error]');
+    const mostrarMensaje = crearMostrarMensaje(mensajeOk, mensajeError);
 
-    function mostrarMensaje(texto, esError) {
-        const el = esError ? mensajeError : mensajeOk;
-        const otro = esError ? mensajeOk : mensajeError;
-        otro.hidden = true;
-        el.textContent = texto;
-        el.hidden = false;
-    }
-
-    async function procesar(cita, accion, fila, notasAdmin, csrf) {
-        const body = new URLSearchParams({ csrf, accion, cita_id: String(cita.id) });
+    async function procesar(cita, accion, fila, notasAdmin) {
+        const campos = { accion, cita_id: String(cita.id) };
         if (notasAdmin !== undefined) {
-            body.set('notas_admin', notasAdmin);
+            campos.notas_admin = notasAdmin;
         }
-        const data = await apiJson('api/solicitudes-cita.php', { method: 'POST', body });
+        const data = await enviarPost('api/solicitudes-cita.php', campos);
         if (!data) {
-            mostrarMensaje('No se pudo conectar. Intenta nuevamente.', true);
+            mostrarMensaje(ERROR_CONEXION, true);
             return;
         }
         if (!data.ok) {
@@ -35,7 +28,7 @@
         }
     }
 
-    function renderFila(cita, notasAdminMax, csrf) {
+    function renderFila(cita, notasAdminMax) {
         const tr = document.createElement('tr');
         tr.appendChild(celda('Fecha y hora solicitada', cita.fechaHoraSolicitada));
         tr.appendChild(celda('Paciente', cita.pacienteLabel));
@@ -55,7 +48,7 @@
         btnConfirmar.type = 'button';
         btnConfirmar.className = 'btn-confirmar';
         btnConfirmar.textContent = 'Confirmar';
-        btnConfirmar.addEventListener('click', () => procesar(cita, 'confirmar', tr, undefined, csrf));
+        btnConfirmar.addEventListener('click', () => procesar(cita, 'confirmar', tr));
 
         // "Rechazar" only reveals the reason box; the request is sent by "Confirmar rechazo".
         const btnRechazar = document.createElement('button');
@@ -85,7 +78,7 @@
         formRechazar.append(labelNotas, textareaNotas, btnConfirmarRechazo);
         formRechazar.addEventListener('submit', (evento) => {
             evento.preventDefault();
-            procesar(cita, 'rechazar', tr, textareaNotas.value, csrf);
+            procesar(cita, 'rechazar', tr, textareaNotas.value);
         });
 
         btnRechazar.addEventListener('click', () => {
@@ -110,7 +103,7 @@
         lista.appendChild(p);
     }
 
-    function renderTabla(data, csrf) {
+    function renderTabla(data) {
         if (!data.citas.length) {
             renderVacio();
             return;
@@ -118,7 +111,7 @@
         lista.innerHTML = '';
         lista.appendChild(tabla(
             ['Fecha y hora solicitada', 'Paciente', 'Estudio', 'Sede', 'Profesional', 'Acciones'],
-            data.citas.map((cita) => renderFila(cita, data.notasAdminMax, csrf))
+            data.citas.map((cita) => renderFila(cita, data.notasAdminMax))
         ));
     }
 
@@ -131,7 +124,7 @@
         if (!data) {
             return;
         }
-        renderTabla(data, sesion.csrf);
+        renderTabla(data);
     }
 
     init();

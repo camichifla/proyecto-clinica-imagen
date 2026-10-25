@@ -5,17 +5,10 @@
     }
     const mensajeOk = document.querySelector('[data-mensaje]');
     const mensajeError = document.querySelector('[data-mensaje-error]');
-
-    function mostrarMensaje(texto, esError) {
-        const el = esError ? mensajeError : mensajeOk;
-        const otro = esError ? mensajeOk : mensajeError;
-        otro.hidden = true;
-        el.textContent = texto;
-        el.hidden = false;
-    }
+    const mostrarMensaje = crearMostrarMensaje(mensajeOk, mensajeError);
 
     // Texto plano siempre: el contenido lo escribio un visitante anonimo.
-    function renderMensaje(m, csrf) {
+    function renderMensaje(m) {
         const card = document.createElement('article');
         card.className = 'mensaje-contacto' + (m.atendido ? ' mensaje-atendido' : '');
 
@@ -39,10 +32,7 @@
         boton.textContent = m.atendido ? 'Marcar como pendiente' : 'Marcar como atendido';
         boton.addEventListener('click', async () => {
             boton.disabled = true;
-            const data = await apiJson('api/mensajes-contacto.php', {
-                method: 'POST',
-                body: new URLSearchParams({ csrf, id: m.id, atendido: m.atendido ? '0' : '1' }),
-            });
+            const data = await enviarPost('api/mensajes-contacto.php', { id: m.id, atendido: m.atendido ? '0' : '1' });
             if (data && data.ok) {
                 mostrarMensaje('Mensaje actualizado.', false);
                 cargar();
@@ -73,7 +63,7 @@
             lista.replaceChildren(p);
             return;
         }
-        lista.replaceChildren(...data.mensajes.map((m) => renderMensaje(m, sesion.csrf)));
+        lista.replaceChildren(...data.mensajes.map((m) => renderMensaje(m)));
         if (data.mensajes.length >= data.max) {
             mostrarMensaje(`Se muestran los últimos ${data.max} mensajes.`, false);
         }

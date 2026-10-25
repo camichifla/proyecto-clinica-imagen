@@ -7,20 +7,13 @@
     const seccionForm = document.getElementById('seccion-profesional-form');
     const mensajeOk = document.querySelector('[data-mensaje]');
     const mensajeError = document.querySelector('[data-mensaje-error]');
+    const mostrarMensaje = crearMostrarMensaje(mensajeOk, mensajeError);
     const titulo = document.getElementById('profesional-form-titulo');
     const contenedorSucursales = document.getElementById('profesional-sucursales');
     const contenedorEstudios = document.getElementById('profesional-estudios');
     const contenedorHorarios = document.getElementById('profesional-horarios');
     let catalogo = { estudios: [], sucursales: [] };
     let etiquetas = {};
-
-    function mostrarMensaje(texto, esError) {
-        const el = esError ? mensajeError : mensajeOk;
-        const otro = esError ? mensajeOk : mensajeError;
-        otro.hidden = true;
-        el.textContent = texto;
-        el.hidden = false;
-    }
 
     function casilla(nombre, valor, texto, marcada) {
         const label = document.createElement('label');
@@ -98,7 +91,7 @@
         cuerpo.set('horarios', JSON.stringify(turnosDeContenedor(contenedorHorarios)));
         const data = await apiJson('api/gestion-profesionales.php', { method: 'POST', body: cuerpo });
         if (!data) {
-            mostrarMensaje('No se pudo conectar. Intenta nuevamente.', true);
+            mostrarMensaje(ERROR_CONEXION, true);
             return;
         }
         if (data.errores) {

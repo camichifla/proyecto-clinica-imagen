@@ -30,6 +30,35 @@ async function apiJson(url, opts = {}) {
     }
 }
 
+const ERROR_CONEXION = 'No se pudo conectar. Intenta nuevamente.';
+
+// POST with the session's CSRF token added. Same return contract as apiJson.
+async function enviarPost(url, campos) {
+    const sesion = await window.sesionLista;
+    return apiJson(url, { method: 'POST', body: new URLSearchParams({ csrf: sesion.csrf, ...campos }) });
+}
+
+// Shows `texto` in the success ([data-mensaje]) or error ([data-mensaje-error]) element and hides the other.
+function mostrarMensajeEn(ok, error, texto, esError) {
+    const el = esError ? error : ok;
+    const otro = esError ? ok : error;
+    otro.hidden = true;
+    el.textContent = texto;
+    el.hidden = false;
+}
+
+function crearMostrarMensaje(ok, error) {
+    return (texto, esError) => mostrarMensajeEn(ok, error, texto, esError);
+}
+
+// Error text of an API response: validation errors joined, its error message, or the connection fallback.
+function textoErrores(data) {
+    if (data && data.errores) {
+        return Object.values(data.errores).join(' ');
+    }
+    return (data && data.error) || ERROR_CONEXION;
+}
+
 function cargarScript(src) {
     return new Promise((resolve) => {
         const script = document.createElement('script');

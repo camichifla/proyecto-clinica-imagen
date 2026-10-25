@@ -3,9 +3,11 @@
 // alterna los elementos [data-sesion] y expone window.sesionPublica.
 // En modo no publico, si la vista actual no figura en el menu del rol,
 // redirige a index.html (el control real sigue en la API).
+// Role labels shared by every page (sesion.js loads first, so this is a global).
+const ROLES_ETIQUETA = { paciente: 'Paciente', medico: 'Médico', profesional: 'Profesional', administrador: 'Administrador', recepcionista: 'Recepcionista' };
+
 (() => {
     const publico = document.currentScript.dataset.modo === 'publico';
-    const ROLES = { paciente: 'Paciente', medico: 'Médico', profesional: 'Profesional', administrador: 'Administrador', recepcionista: 'Recepcionista' };
     // Without a session the public nav moves into the hamburger (the header only keeps the logo).
     const MENU_ANONIMO = [
         { href: 'login.html', label: 'Iniciar sesión' },
@@ -78,7 +80,7 @@
             const rol = document.createElement('span');
             rol.className = 'menu-usuario-rol';
             nombre.textContent = logueado ? sesion.nombre : 'Bienvenido';
-            rol.textContent = logueado ? (ROLES[sesion.rol] || '') : 'Ingresá o creá tu cuenta';
+            rol.textContent = logueado ? (ROLES_ETIQUETA[sesion.rol] || '') : 'Ingresá o creá tu cuenta';
             textos.append(nombre, rol);
             const cuenta = menu.find((item) => item.cuenta);
             if (cuenta) {

@@ -22,9 +22,8 @@
         }
     }
 
-    async function cancelarCita(cita, csrf) {
-        const body = new URLSearchParams({ csrf, accion: 'cancelar', cita_id: String(cita.id) });
-        const data = await apiJson('api/agendar-cita.php', { method: 'POST', body });
+    async function cancelarCita(cita) {
+        const data = await enviarPost('api/agendar-cita.php', { accion: 'cancelar', cita_id: String(cita.id) });
         if (!data) {
             return;
         }
@@ -33,7 +32,7 @@
         }
     }
 
-    function renderFilaCita(cita, csrf) {
+    function renderFilaCita(cita) {
         const tr = document.createElement('tr');
         tr.appendChild(celda('Código', cita.codigo));
         tr.appendChild(celda('Fecha y hora de la cita', cita.fechaHoraSolicitada));
@@ -58,7 +57,7 @@
         btnCancelar.textContent = 'Cancelar';
         btnCancelar.addEventListener('click', () => {
             if (window.confirm('¿Cancelar la cita ' + cita.codigo + ' del ' + cita.fechaHoraSolicitada + '?')) {
-                cancelarCita(cita, csrf);
+                cancelarCita(cita);
             }
         });
         tdAcciones.appendChild(btnCancelar);
@@ -66,7 +65,7 @@
         return tr;
     }
 
-    function renderMisCitas(citas, csrf) {
+    function renderMisCitas(citas) {
         if (!citas.length) {
             const p = document.createElement('p');
             p.textContent = 'No tenés citas próximas.';
@@ -75,7 +74,7 @@
         }
         misCitas.appendChild(tabla(
             ['Código', 'Fecha y hora de la cita', 'Sede', 'Estudio', 'Estado', ''],
-            citas.map((cita) => renderFilaCita(cita, csrf))
+            citas.map((cita) => renderFilaCita(cita))
         ));
     }
 
@@ -99,7 +98,7 @@
         poblarEstudios(document.getElementById('estudio'), data.estudios);
         poblarProfesionales(selectProfesional, data.profesionales, '', data.etiquetasEstudio);
 
-        renderMisCitas(data.citas, sesion.csrf);
+        renderMisCitas(data.citas);
 
         window.SUCURSALES = data.sucursales;
         window.HORA_ELEGIDA = '';

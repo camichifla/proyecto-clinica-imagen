@@ -10,9 +10,6 @@
         return;
     }
 
-    const ROLES_TODOS = { paciente: 'Paciente', medico: 'Médico', profesional: 'Profesional', administrador: 'Administrador', recepcionista: 'Recepcionista' };
-
-    let csrf = '';
     let buscadorComboCargado = false;
 
     function badge(si) {
@@ -23,19 +20,12 @@
     }
 
     function mostrarMensaje(seccion, texto, esError) {
-        const ok = seccion.querySelector('[data-mensaje]');
-        const error = seccion.querySelector('[data-mensaje-error]');
-        const el = esError ? error : ok;
-        const otro = esError ? ok : error;
-        otro.hidden = true;
-        el.textContent = texto;
-        el.hidden = false;
+        mostrarMensajeEn(seccion.querySelector('[data-mensaje]'), seccion.querySelector('[data-mensaje-error]'), texto, esError);
     }
 
     async function accionFila(campos) {
-        const body = new URLSearchParams({ csrf, ...campos });
-        return (await apiJson('api/manejar-usuarios.php', { method: 'POST', body }))
-            || { ok: false, error: 'No se pudo conectar. Intenta nuevamente.' };
+        return (await enviarPost('api/manejar-usuarios.php', campos))
+            || { ok: false, error: ERROR_CONEXION };
     }
 
     function renderCuentas(data) {
@@ -51,7 +41,7 @@
             const tr = document.createElement('tr');
             tr.appendChild(celda('Nombre', `${cuenta.apellido} ${cuenta.nombre}`.trim()));
             tr.appendChild(celda('Email', cuenta.email));
-            tr.appendChild(celda('Rol', ROLES_TODOS[cuenta.rol] || cuenta.rol));
+            tr.appendChild(celda('Rol', ROLES_ETIQUETA[cuenta.rol] || cuenta.rol));
 
             const tdVerificado = document.createElement('td');
             tdVerificado.dataset.label = 'Verificado';
@@ -168,7 +158,7 @@
             .forEach((c) => {
                 const opcion = document.createElement('option');
                 opcion.value = String(c.cuenta_id);
-                opcion.textContent = `${c.apellido} ${c.nombre}`.trim() + ' — ' + (ROLES_TODOS[c.rol] || c.rol);
+                opcion.textContent = `${c.apellido} ${c.nombre}`.trim() + ' — ' + (ROLES_ETIQUETA[c.rol] || c.rol);
                 select.appendChild(opcion);
             });
         select.value = elegida;
@@ -248,7 +238,6 @@
         if (!sesion) {
             return;
         }
-        csrf = sesion.csrf;
         mostrarAvisoStaff();
         cargarDatos();
     })();

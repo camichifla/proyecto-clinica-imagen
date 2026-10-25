@@ -6,33 +6,18 @@
     }
     const mensajeOk = document.querySelector('[data-mensaje]');
     const mensajeError = document.querySelector('[data-mensaje-error]');
+    const mostrarMensaje = crearMostrarMensaje(mensajeOk, mensajeError);
     const totalesEl = document.getElementById('turnos-totales');
     const avisoTruncado = document.getElementById('turnos-truncado');
     const selectSucursal = document.getElementById('filtro-sucursal');
     const selectProfesional = document.getElementById('filtro-profesional');
     const filtrosActivos = document.getElementById('turnos-filtros-activos');
 
-    let csrf = '';
     let primeraCarga = true;
-
-    function mostrarMensaje(texto, esError) {
-        const el = esError ? mensajeError : mensajeOk;
-        const otro = esError ? mensajeOk : mensajeError;
-        otro.hidden = true;
-        el.textContent = texto;
-        el.hidden = false;
-    }
-
-    function textoErrores(data) {
-        if (data && data.errores) {
-            return Object.values(data.errores).join(' ');
-        }
-        return (data && data.error) || 'No se pudo conectar. Intenta nuevamente.';
-    }
 
     // Pending citas are confirmed/rejected through the solicitudes API, the rest through turnos.
     async function enviarAccion(cuerpo, textoOk, api = 'api/turnos.php') {
-        const data = await apiJson(api, { method: 'POST', body: new URLSearchParams({ csrf, ...cuerpo }) });
+        const data = await enviarPost(api, cuerpo);
         if (!data || !data.ok) {
             mostrarMensaje(textoErrores(data), true);
             return;
@@ -284,7 +269,6 @@
         if (!sesion) {
             return;
         }
-        csrf = sesion.csrf;
         cargar();
     }
 

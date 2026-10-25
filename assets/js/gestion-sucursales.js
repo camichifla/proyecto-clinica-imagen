@@ -6,18 +6,11 @@
     }
     const mensajeOk = document.querySelector('[data-mensaje]');
     const mensajeError = document.querySelector('[data-mensaje-error]');
+    const mostrarMensaje = crearMostrarMensaje(mensajeOk, mensajeError);
     const titulo = document.getElementById('sucursal-form-titulo');
     const botonNueva = document.getElementById('sucursal-nueva');
     const contenedorEstudios = document.getElementById('sucursal-estudios');
     const contenedorHorarios = document.getElementById('sucursal-horarios');
-
-    function mostrarMensaje(texto, esError) {
-        const el = esError ? mensajeError : mensajeOk;
-        const otro = esError ? mensajeOk : mensajeError;
-        otro.hidden = true;
-        el.textContent = texto;
-        el.hidden = false;
-    }
 
     function poblarEstudios(estudios) {
         contenedorEstudios.replaceChildren(...estudios.map((estudio) => {
@@ -89,7 +82,7 @@
         cuerpo.set('horarios', JSON.stringify(turnosDeContenedor(contenedorHorarios)));
         const data = await apiJson('api/gestion-sucursales.php', { method: 'POST', body: cuerpo });
         if (!data) {
-            mostrarMensaje('No se pudo conectar. Intenta nuevamente.', true);
+            mostrarMensaje(ERROR_CONEXION, true);
             return;
         }
         if (data.errores) {

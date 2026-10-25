@@ -43,8 +43,6 @@
         destino.appendChild(tabla(['Fecha y hora solicitada', 'Sede', 'Estudio', 'Estado', 'Confirmación', 'Notas'], filas));
     }
 
-    const ROLES = { medico: 'Médico', profesional: 'Profesional' };
-
     function renderNotas(destino, notas, pacienteId) {
         const h3 = document.createElement('h3');
         h3.textContent = 'Historia clínica';
@@ -73,13 +71,9 @@
         form.append(campo, error, boton);
         form.addEventListener('submit', async (evento) => {
             evento.preventDefault();
-            const sesion = await window.sesionLista;
             error.hidden = true;
             boton.disabled = true;
-            const data = await apiJson('api/notas-clinicas.php', {
-                method: 'POST',
-                body: new URLSearchParams({ csrf: sesion.csrf, paciente_id: pacienteId, texto: area.value }),
-            });
+            const data = await enviarPost('api/notas-clinicas.php', { paciente_id: pacienteId, texto: area.value });
             boton.disabled = false;
             if (data && data.ok) {
                 buscarResultados(pacienteId);
@@ -103,7 +97,7 @@
             item.className = 'nota-clinica';
             const meta = document.createElement('p');
             meta.className = 'nota-clinica-meta';
-            meta.textContent = `${nota.creado_en} - ${nota.autor} (${ROLES[nota.rol] || nota.rol})`;
+            meta.textContent = `${nota.creado_en} - ${nota.autor} (${ROLES_ETIQUETA[nota.rol] || nota.rol})`;
             const texto = document.createElement('p');
             texto.className = 'nota-clinica-texto';
             texto.textContent = nota.texto;

@@ -8,18 +8,11 @@
     const seccionForm = document.getElementById('seccion-paciente-form');
     const mensajeOk = document.querySelector('[data-mensaje]');
     const mensajeError = document.querySelector('[data-mensaje-error]');
+    const mostrarMensaje = crearMostrarMensaje(mensajeOk, mensajeError);
     const titulo = document.getElementById('paciente-form-titulo');
     const ayuda = document.getElementById('paciente-form-ayuda');
     const campoEmail = document.getElementById('campo-email');
     const CAMPOS = ['nombre', 'apellido', 'ci', 'direccion', 'numero'];
-
-    function mostrarMensaje(texto, esError) {
-        const el = esError ? mensajeError : mensajeOk;
-        const otro = esError ? mensajeOk : mensajeError;
-        otro.hidden = true;
-        el.textContent = texto;
-        el.hidden = false;
-    }
 
     // paciente === null: alta; si no, edicion de sus datos personales (el correo no se edita aca).
     function abrirForm(paciente) {
@@ -155,7 +148,7 @@
         const editando = form.elements.accion.value === 'guardar';
         const data = await apiJson('api/gestion-pacientes.php', { method: 'POST', body: new FormData(form) });
         if (!data) {
-            mostrarMensaje('No se pudo conectar. Intenta nuevamente.', true);
+            mostrarMensaje(ERROR_CONEXION, true);
             return;
         }
         if (data.errores) {

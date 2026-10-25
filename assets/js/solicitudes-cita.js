@@ -46,14 +46,14 @@
 
         const btnConfirmar = document.createElement('button');
         btnConfirmar.type = 'button';
-        btnConfirmar.className = 'btn-confirmar';
+        btnConfirmar.className = 'btn-exito';
         btnConfirmar.textContent = 'Confirmar';
         btnConfirmar.addEventListener('click', () => procesar(cita, 'confirmar', tr));
 
         // "Rechazar" only reveals the reason box; the request is sent by "Confirmar rechazo".
         const btnRechazar = document.createElement('button');
         btnRechazar.type = 'button';
-        btnRechazar.className = 'btn-rechazar';
+        btnRechazar.className = 'btn-peligro';
         btnRechazar.textContent = 'Rechazar';
         btnRechazar.setAttribute('aria-expanded', 'false');
         btnRechazar.setAttribute('aria-controls', 'rechazo-' + cita.id);
@@ -73,7 +73,7 @@
         textareaNotas.rows = 2;
         const btnConfirmarRechazo = document.createElement('button');
         btnConfirmarRechazo.type = 'submit';
-        btnConfirmarRechazo.className = 'btn-confirmar-rechazo';
+        btnConfirmarRechazo.className = 'btn-peligro-suave';
         btnConfirmarRechazo.textContent = 'Confirmar rechazo';
         formRechazar.append(labelNotas, textareaNotas, btnConfirmarRechazo);
         formRechazar.addEventListener('submit', (evento) => {

@@ -42,42 +42,6 @@
     border-color: var(--color-danger);
 }
 
-/* Locked until the previous step is chosen: faded and without the arrow. */
-.campo select:disabled,
-.selector-combo-boton:disabled,
-.selector-combo-buscar:disabled,
-.selector-fecha-boton:disabled {
-    background-color: var(--light-neutral);
-    color: var(--text-muted);
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.selector-combo-boton:disabled::after,
-.selector-fecha-boton:disabled::after {
-    display: none;
-}
-
-.btn-secundario {
-    display: inline-block;
-    border: 1px solid var(--accent-secondary);
-    border-radius: 999px;
-    color: var(--accent-secondary);
-    font-weight: var(--font-weight-semibold);
-    background: transparent;
-    padding: var(--space-2) var(--space-4);
-    font-family: inherit;
-    font-size: var(--font-size-md);
-    cursor: pointer;
-    transition: background var(--transition-fast);
-}
-
-.btn-secundario:hover {
-    background: var(--light-neutral);
-}
-
-
-
 .tabla-scroll {
     overflow-x: auto;
 }
@@ -100,32 +64,6 @@
     font-size: var(--font-size-sm);
     text-transform: uppercase;
     letter-spacing: 0.03em;
-}
-
-.estado-badge {
-    display: inline-block;
-    padding: var(--space-1) 0.7rem;
-    border-radius: 999px;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
-    background: var(--light-neutral);
-    color: var(--dark-neutral);
-}
-
-.estado-pendiente {
-    background: rgba(var(--accent-rgb), 0.15);
-    color: var(--accent-secondary);
-}
-
-.estado-confirmada {
-    background: rgba(var(--success-rgb), 0.15);
-    color: var(--color-success);
-}
-
-.estado-rechazada,
-.estado-cancelada {
-    background: rgba(var(--danger-rgb), 0.12);
-    color: var(--color-danger);
 }
 
 .tabla-scroll.tabla-tarjetas {

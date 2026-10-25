@@ -1163,7 +1163,7 @@ body.menu-abierto {
 }
 
 /* Buttons inside tables are a size smaller than form buttons. */
-.tabla-datos td :is(.btn-primary, .btn-secundario, .btn-peligro, .btn-peligro-suave, .btn-exito, .btn-confirmar, .btn-rechazar, .btn-confirmar-rechazo) {
+.tabla-datos td :is(.btn-primary, .btn-secundario, .btn-peligro, .btn-peligro-suave, .btn-exito) {
     padding: 0.35rem 0.9rem;
     font-size: var(--font-size-sm);
 }
@@ -1244,4 +1244,70 @@ body.menu-abierto {
     .menu-usuario-panel {
         padding: var(--space-4);
     }
+}
+
+/* Locked until the previous step is chosen: faded and without the arrow. */
+.campo select:disabled,
+.selector-combo-boton:disabled,
+.selector-combo-buscar:disabled,
+.selector-fecha-boton:disabled {
+    background-color: var(--light-neutral);
+    color: var(--text-muted);
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.selector-combo-boton:disabled::after,
+.selector-fecha-boton:disabled::after {
+    display: none;
+}
+
+.btn-secundario {
+    display: inline-block;
+    border: 1px solid var(--accent-secondary);
+    border-radius: 999px;
+    color: var(--accent-secondary);
+    font-weight: var(--font-weight-semibold);
+    background: transparent;
+    padding: var(--space-2) var(--space-4);
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.btn-secundario:hover:not(:disabled) {
+    background: var(--light-neutral);
+}
+
+.btn-secundario:disabled {
+    color: var(--text-muted);
+    border-color: var(--border-subtle);
+    cursor: not-allowed;
+}
+
+.estado-badge {
+    display: inline-block;
+    padding: var(--space-1) 0.7rem;
+    border-radius: 999px;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    background: var(--light-neutral);
+    color: var(--dark-neutral);
+}
+
+:is(.estado-badge, .agenda-cita-pill, .agenda-cita-card).estado-pendiente {
+    background: rgba(var(--accent-rgb), 0.15);
+    color: var(--accent-secondary);
+}
+
+:is(.estado-badge, .agenda-cita-pill, .agenda-cita-card).estado-confirmada {
+    background: rgba(var(--success-rgb), 0.15);
+    color: var(--color-success);
+}
+
+:is(.estado-badge, .agenda-cita-pill, .agenda-cita-card).estado-rechazada,
+:is(.estado-badge, .agenda-cita-pill, .agenda-cita-card).estado-cancelada {
+    background: rgba(var(--danger-rgb), 0.12);
+    color: var(--color-danger);
 }

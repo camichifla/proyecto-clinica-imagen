@@ -43,16 +43,6 @@
     letter-spacing: 0.03em;
 }
 
-.estado-badge {
-    display: inline-block;
-    padding: var(--space-1) 0.7rem;
-    border-radius: 999px;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
-    background: var(--light-neutral);
-    color: var(--dark-neutral);
-}
-
 .estado-si {
     background: rgba(var(--success-rgb), 0.15);
     color: var(--color-success);
@@ -67,30 +57,6 @@
     color: var(--text-secondary);
     font-size: var(--font-size-sm);
     font-style: italic;
-}
-
-.btn-secundario {
-    display: inline-block;
-    border: 1px solid var(--accent-secondary);
-    border-radius: 999px;
-    color: var(--accent-secondary);
-    font-weight: var(--font-weight-semibold);
-    background: transparent;
-    padding: var(--space-2) var(--space-4);
-    font-family: inherit;
-    font-size: var(--font-size-md);
-    cursor: pointer;
-    transition: background var(--transition-fast);
-}
-
-.btn-secundario:hover:not(:disabled) {
-    background: var(--light-neutral);
-}
-
-.btn-secundario:disabled {
-    color: var(--text-muted);
-    border-color: var(--border-subtle);
-    cursor: not-allowed;
 }
 
 .tabla-scroll.tabla-tarjetas {

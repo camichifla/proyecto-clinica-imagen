@@ -234,40 +234,18 @@ button.agenda-cita-card {
     display: none;
 }
 
-/* Estados: el color del estado tiñe la pastilla del mes y las tarjetas. */
-
-.agenda-cita-pill.estado-pendiente {
-    background: rgba(var(--accent-rgb), 0.15);
-    color: var(--accent-secondary);
-}
-
-.agenda-cita-pill.estado-confirmada {
-    background: rgba(var(--success-rgb), 0.15);
-    color: var(--color-success);
-}
-
-.agenda-cita-pill.estado-rechazada,
-.agenda-cita-pill.estado-cancelada {
-    background: rgba(var(--danger-rgb), 0.12);
-    color: var(--color-danger);
-}
+/* Estados: the colors come from base.css; cards also tint their border. */
 
 .agenda-cita-card.estado-pendiente {
-    background: rgba(var(--accent-rgb), 0.15);
-    color: var(--accent-secondary);
     border-color: rgba(var(--accent-rgb), 0.3);
 }
 
 .agenda-cita-card.estado-confirmada {
-    background: rgba(var(--success-rgb), 0.15);
-    color: var(--color-success);
     border-color: rgba(var(--success-rgb), 0.3);
 }
 
 .agenda-cita-card.estado-rechazada,
 .agenda-cita-card.estado-cancelada {
-    background: rgba(var(--danger-rgb), 0.12);
-    color: var(--color-danger);
     border-color: rgba(var(--danger-rgb), 0.25);
 }
 

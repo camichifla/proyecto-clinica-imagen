@@ -17,13 +17,6 @@
     border-color: var(--accent-secondary);
 }
 
-.campo select:disabled,
-.selector-combo-boton:disabled {
-    background-color: var(--light-neutral);
-    color: var(--text-muted);
-    cursor: not-allowed;
-}
-
 @media (width <= 480px) {
     .seccion-cargar-resultados {
         padding: var(--space-4);

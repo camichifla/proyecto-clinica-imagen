@@ -1,7 +1,16 @@
-@import url("./variables.css");
+/*
+ * Cascade precedence, lowest to highest: variables < base < paginas.
+ * A later layer wins regardless of selector specificity or <link> order.
+ * Files linked per view (agenda.css, backoffice.css, ...) wrap their rules in
+ * @layer paginas, so they override the shared files below.
+ * Leaflet (index.html) is unlayered, so it beats all of these.
+ */
+@layer variables, base, paginas;
 
-@import url(./base.css);
+@import url("./variables.css") layer(variables);
+@import url("./base.css") layer(base);
 
-@import url("./index.css");
-@import url("./agendar-cita.css");
-@import url("./ver-resultados.css");
+/* Loaded on every view and cascading after base.css, so they share its layer. */
+@import url("./index.css") layer(base);
+@import url("./agendar-cita.css") layer(base);
+@import url("./ver-resultados.css") layer(base);

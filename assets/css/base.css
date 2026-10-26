@@ -1300,6 +1300,11 @@ body.menu-abierto {
     color: var(--dark-neutral);
 }
 
+.agenda-cita-pill {
+    background: var(--light-neutral);
+    color: var(--dark-neutral);
+}
+
 :is(.estado-badge, .agenda-cita-pill, .agenda-cita-card).estado-pendiente {
     background: rgba(var(--accent-rgb), 0.15);
     color: var(--accent-secondary);

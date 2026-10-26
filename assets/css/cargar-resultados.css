@@ -1,24 +1,27 @@
+/* Page styles: the paginas layer (declared in styles.css) wins over base. */
+@layer paginas {
 
-.seccion-cargar-resultados {
-    max-width: 560px;
-}
-
-.campo input[type="file"] {
-    padding: 0.6rem 0.7rem;
-    border: 1px dashed var(--border-subtle);
-    border-radius: 0.6rem;
-    font-family: inherit;
-    font-size: var(--font-size-md);
-    background: var(--surface-alt);
-    color: var(--dark-neutral);
-}
-
-.campo input[type="file"][aria-invalid="true"] {
-    border-color: var(--accent-secondary);
-}
-
-@media (width <= 480px) {
     .seccion-cargar-resultados {
-        padding: var(--space-4);
+        max-width: 560px;
+    }
+
+    .campo input[type="file"] {
+        padding: 0.6rem 0.7rem;
+        border: 1px dashed var(--border-subtle);
+        border-radius: 0.6rem;
+        font-family: inherit;
+        font-size: var(--font-size-md);
+        background: var(--surface-alt);
+        color: var(--dark-neutral);
+    }
+
+    .campo input[type="file"][aria-invalid="true"] {
+        border-color: var(--accent-secondary);
+    }
+
+    @media (width <= 480px) {
+        .seccion-cargar-resultados {
+            padding: var(--space-4);
+        }
     }
 }

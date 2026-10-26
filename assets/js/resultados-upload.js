@@ -8,33 +8,24 @@
         return;
     }
 
-    function mostrarAviso() {
+    function avisoDeUrl() {
         const id = new URL(window.location.href).searchParams.get('ok');
-        if (!id) {
-            return;
-        }
-        const aviso = document.querySelector('[data-aviso="ok"]');
-        if (aviso) {
-            aviso.textContent = `Resultado #${id} guardado correctamente.`;
-            aviso.hidden = false;
+        if (id) {
+            mostrarAviso('ok', `Resultado #${id} enviado correctamente.`);
         }
     }
 
-    // The role changes the title and the empty-list messages; permissions are
-    // decided by the API.
+    // The role changes the empty-list messages; permissions are decided by the API.
     const TEXTOS_PROFESIONAL = {
-        titulo: 'Cargar Observaciones y Resultados',
-        sinPacientes: 'Todavía no tenés pacientes con citas asignadas.',
+        sinPacientes: 'No hay pacientes con citas asignadas.',
         sinCitas: 'Este paciente no tiene citas confirmadas con vos',
     };
 
     async function init() {
-        mostrarAviso();
+        avisoDeUrl();
 
         const sesion = await window.sesionLista;
         if (sesion && sesion.rol === 'profesional') {
-            document.getElementById('titulo-vista').textContent = TEXTOS_PROFESIONAL.titulo;
-            document.title = TEXTOS_PROFESIONAL.titulo + ' - Clínica Imagen';
             inputBuscar.dataset.mensajeSinPacientes = TEXTOS_PROFESIONAL.sinPacientes;
             selectCita.dataset.mensajeSinCitas = TEXTOS_PROFESIONAL.sinCitas;
         }

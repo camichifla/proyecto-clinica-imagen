@@ -18,7 +18,7 @@
             return;
         }
         if (!data.ok) {
-            mostrarMensaje(data.error || 'Ocurrio un error inesperado.', true);
+            mostrarMensaje(data.error || 'Ocurrió un error inesperado.', true);
             return;
         }
         mostrarMensaje(data.mensaje, false);
@@ -30,7 +30,7 @@
 
     function renderFila(cita, notasAdminMax) {
         const tr = document.createElement('tr');
-        tr.appendChild(celda('Fecha y hora solicitada', cita.fechaHoraSolicitada));
+        tr.appendChild(celda('Fecha y hora solicitada', fechaHora(cita.fechaHoraSolicitada)));
         tr.appendChild(celda('Paciente', cita.pacienteLabel));
         tr.appendChild(celda('Estudio', cita.estudioLabel));
         tr.appendChild(celda('Sede', cita.sucursalNombre || '-'));
@@ -98,9 +98,7 @@
 
     function renderVacio() {
         lista.innerHTML = '';
-        const p = document.createElement('p');
-        p.textContent = 'No hay solicitudes de cita pendientes.';
-        lista.appendChild(p);
+        lista.appendChild(parrafo('No hay solicitudes de cita pendientes.'));
     }
 
     function renderTabla(data) {

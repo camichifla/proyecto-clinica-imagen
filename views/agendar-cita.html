@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Agendar Cita - Clínica Imagen</title>
+  <title>Agendar cita - Clínica Imagen</title>
   <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,10 +39,10 @@
   <main id="contenido">
     <div class="layout-agendar-citas">
       <section class="seccion-auth">
-        <h1>Agendar Cita</h1>
+        <h1>Agendar cita</h1>
 
-        <p class="aviso-exito" data-aviso="ok" hidden>Tu solicitud de cita fue enviada. <span data-codigo hidden>Código de seguimiento: <span data-codigo-valor></span>. </span>Te avisaremos cuando sea confirmada.</p>
-        <p class="aviso-exito" data-aviso="cancelado" hidden>La cita fue cancelada.</p>
+        <p class="aviso-exito" data-aviso="ok" hidden role="status">Solicitud enviada. <span data-codigo hidden>Código de seguimiento: <span data-codigo-valor></span>. </span>La clínica la va a confirmar y te avisamos por correo.</p>
+        <p class="aviso-exito" data-aviso="cancelado" hidden role="status">La cita fue cancelada.</p>
         <p class="campo-error" data-general hidden></p>
 
         <form method="post" action="api/agendar-cita.php" data-api="api/agendar-cita.php" novalidate>
@@ -65,10 +65,11 @@
 
           <div class="campo">
             <label for="profesional_id">Profesional</label>
-            <select id="profesional_id" name="profesional_id" class="selector-combo" data-buscable>
-              <option value="">Cualquiera disponible</option>
+            <select id="profesional_id" name="profesional_id" class="selector-combo" required>
+              <option value="">Elegí un profesional</option>
+              <option value="cualquiera">Cualquier profesional</option>
             </select>
-            <p class="campo-error" data-mensaje-sin-profesionales hidden>Todavía no hay profesionales cargados.</p>
+            <p class="campo-error" data-mensaje-sin-profesionales hidden>No hay profesionales cargados.</p>
           </div>
 
           <div class="campo">
@@ -88,7 +89,7 @@
       </section>
 
       <section class="seccion-panel">
-        <h2>Mis Citas</h2>
+        <h2>Mis citas</h2>
         <div id="mis-citas"></div>
       </section>
     </div>

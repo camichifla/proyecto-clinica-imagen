@@ -1,7 +1,7 @@
 <?php
-// includes/notas.php — append-only clinical record. Rows are only ever
-// inserted and read, never updated or deleted. Visible to medico/profesional
-// accounts that already have access to the patient.
+// includes/notas.php — clinical record for a patient, visible to medico/profesional
+// accounts that already have access. Notes are inserted and read; only the author
+// may delete their own note (see api/notas-clinicas.php).
 
 require_once __DIR__ . '/cifrado.php';
 
@@ -10,12 +10,14 @@ const NOTA_MAX = 2000;
 /**
  * Newest first. The caller has already checked that the session may see this patient.
  *
- * @return array<int,array{id:int,texto:string,creado_en:string,autor:string,rol:string}>
+ * $cuentaIdActual marks each note as the viewer's own (so only those get a delete option).
+ *
+ * @return array<int,array{id:int,texto:string,creado_en:string,autor:string,rol:string,propia:bool}>
  */
-function notas_de_paciente(PDO $db, int $pacienteId): array
+function notas_de_paciente(PDO $db, int $pacienteId, ?int $cuentaIdActual = null): array
 {
     $stmt = $db->prepare(
-        'SELECT n.id, n.texto, n.creado_en, u.rol,
+        'SELECT n.id, n.texto, n.creado_en, u.rol, n.cuenta_id,
                 COALESCE(CONCAT(m.apellido, \', \', m.nombre), CONCAT(p.apellido, \', \', p.nombre)) AS autor
            FROM notas_clinicas n
            JOIN cuentas u ON u.id = n.cuenta_id
@@ -31,5 +33,6 @@ function notas_de_paciente(PDO $db, int $pacienteId): array
         'creado_en' => $f['creado_en'],
         'autor'     => $f['autor'] ?? '-',
         'rol'       => $f['rol'],
+        'propia'    => $cuentaIdActual !== null && (int) $f['cuenta_id'] === $cuentaIdActual,
     ], $stmt->fetchAll());
 }

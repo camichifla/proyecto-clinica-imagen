@@ -15,7 +15,7 @@
     .orden-card {
         background: var(--surface-alt);
         border: 1px solid var(--border-subtle);
-        border-radius: 0.9rem;
+        border-radius: var(--radius-sm);
         padding: 1.6rem 1.75rem;
         display: flex;
         flex-direction: column;
@@ -40,6 +40,15 @@
         font-size: var(--font-size-lg);
         font-weight: var(--font-weight-bold);
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-2);
+        list-style: none;
+    }
+
+    .orden-card summary::-webkit-details-marker {
+        display: none;
     }
 
     .orden-card[open] summary {
@@ -73,11 +82,6 @@
         }
     }
 
-    .orden-grid-2 .campo,
-    .orden-card .campo {
-        gap: 0.3rem;
-    }
-
     .orden-grid-2 > label,
     .orden-card > label,
     .orden-fieldset > label {
@@ -91,7 +95,7 @@
 
     .orden-fieldset {
         border: 1px solid var(--border-subtle);
-        border-radius: 0.6rem;
+        border-radius: var(--radius-md);
         padding: var(--space-3) 0.9rem 0.9rem;
         margin: 0;
         display: flex;
@@ -113,7 +117,7 @@
     }
 
     .radio-row label,
-    .orden-fieldset label {
+    .orden-fieldset > label {
         display: flex;
         align-items: center;
         gap: 0.4rem;
@@ -133,7 +137,7 @@
     }
 
     .orden-fieldset input[type="checkbox"] {
-        border-radius: 0.3rem;
+        border-radius: var(--radius-xs);
     }
 
     .teeth-grid {
@@ -159,7 +163,7 @@
         padding: var(--space-2) 0.2rem;
         background: var(--surface);
         border: 1px solid var(--border-subtle);
-        border-radius: 0.5rem;
+        border-radius: var(--radius-md);
         font-size: var(--font-size-sm);
         font-weight: var(--font-weight-semibold);
         color: var(--dark-neutral);
@@ -175,31 +179,9 @@
         accent-color: var(--accent-color);
     }
 
-    .orden-card textarea {
-        padding: 0.7rem 0.9rem;
-        border: 1px solid var(--border-subtle);
-        border-radius: 0.6rem;
-        font-family: inherit;
-        font-size: var(--font-size-md);
-        background: var(--surface);
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .orden-card label > input[type="text"],
-    .orden-card label > input[type="date"],
-    .orden-card label > input[type="email"],
-    .orden-card label > textarea {
-        margin-top: 0.3rem;
-    }
-
-    .orden-card .campo input,
-    .orden-card .campo select {
-        padding: 0.7rem 0.9rem;
-        border: 1px solid var(--border-subtle);
-        border-radius: 0.6rem;
-        font-family: inherit;
-        font-size: var(--font-size-md);
+    /* Cards are --surface-alt, so their fields are white to stand out. */
+    .orden-card .campo :is(input, textarea, select) {
         background-color: var(--surface);
+        font-size: var(--font-size-md);
     }
 }

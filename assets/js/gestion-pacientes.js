@@ -38,7 +38,7 @@
 
     // Only the login account goes away; the patient and their history stay ("Sin cuenta").
     async function borrarCuenta(paciente, boton) {
-        if (!window.confirm('¿Deseás borrar la cuenta?')) {
+        if (!window.confirm('¿Borrar la cuenta de ' + paciente.apellido + ', ' + paciente.nombre + '? El paciente y su historial se conservan.')) {
             return;
         }
         boton.disabled = true;
@@ -57,7 +57,7 @@
 
     async function cambiarActivo(paciente, boton) {
         const accion = paciente.activo ? 'dar de baja' : 'reactivar';
-        if (!window.confirm('Seguro que querés ' + accion + ' la cuenta de ' + paciente.apellido + ', ' + paciente.nombre + '?')) {
+        if (!window.confirm('¿Querés ' + accion + ' la cuenta de ' + paciente.apellido + ', ' + paciente.nombre + '?')) {
             return;
         }
         boton.disabled = true;
@@ -80,6 +80,7 @@
         tr.appendChild(celda('Cédula', paciente.ci));
         tr.appendChild(celda('Teléfono', paciente.numero));
         tr.appendChild(celda('Correo', paciente.email || '-'));
+        tr.appendChild(celda('Resultados', String(paciente.resultados)));
         tr.appendChild(celda('Cuenta', paciente.email ? (paciente.activo ? 'Activa' : 'Inactiva') : 'Sin cuenta'));
         const td = document.createElement('td');
         td.dataset.label = 'Acciones';
@@ -117,16 +118,14 @@
             return;
         }
         if (!data.pacientes.length) {
-            const p = document.createElement('p');
-            p.textContent = 'No se encontraron pacientes.';
-            lista.replaceChildren(p);
+            lista.replaceChildren(parrafo('No hay pacientes.'));
             return;
         }
-        const nodos = [tabla(['Nombre', 'Cédula', 'Teléfono', 'Correo', 'Cuenta', 'Acciones'], data.pacientes.map(renderFila))];
+        const nodos = [tabla(['Nombre', 'Cédula', 'Teléfono', 'Correo', 'Resultados', 'Cuenta', 'Acciones'], data.pacientes.map(renderFila))];
         if (data.truncado) {
             const p = document.createElement('p');
             p.className = 'campo-hint';
-            p.textContent = 'Se muestran los primeros ' + data.max + ' resultados. Afina la busqueda para ver el resto.';
+            p.textContent = 'Se muestran los primeros ' + data.max + ' resultados. Afiná la búsqueda para ver el resto.';
             nodos.push(p);
         }
         lista.replaceChildren(...nodos);
@@ -159,7 +158,7 @@
             return;
         }
         if (!data.ok) {
-            mostrarMensaje(data.error || 'Ocurrio un error inesperado.', true);
+            mostrarMensaje(data.error || 'Ocurrió un error inesperado.', true);
             return;
         }
         mostrarMensaje(editando ? 'Paciente actualizado.' : 'Paciente registrado. Se le envió un correo para elegir su contraseña.', false);

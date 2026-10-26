@@ -10,6 +10,18 @@
     }
     window.selectorComboActivo = true;
 
+    // Fixed position under (or above, if there is no room) the anchor.
+    function ubicarLista(lista, ancla) {
+        const r = ancla.getBoundingClientRect();
+        const alto = lista.offsetHeight;
+        const arriba = r.bottom + 5 + alto > window.innerHeight && r.top - 5 - alto > 0;
+        lista.style.position = 'fixed';
+        lista.style.top = (arriba ? r.top - 5 - alto : r.bottom + 5) + 'px';
+        lista.style.left = r.left + 'px';
+        lista.style.right = 'auto';
+        lista.style.width = r.width + 'px';
+    }
+
     const widgets = [];
     const resincronizarTodos = () => widgets.forEach((w) => w.actualizar());
     let contador = 0;
@@ -59,16 +71,7 @@
             return opcion && opcion.value !== '' ? opcion.textContent.trim() : '';
         };
 
-        const ubicar = () => {
-            const r = input.getBoundingClientRect();
-            const alto = lista.offsetHeight;
-            const arriba = r.bottom + 5 + alto > window.innerHeight && r.top - 5 - alto > 0;
-            lista.style.position = 'fixed';
-            lista.style.top = (arriba ? r.top - 5 - alto : r.bottom + 5) + 'px';
-            lista.style.left = r.left + 'px';
-            lista.style.right = 'auto';
-            lista.style.width = r.width + 'px';
-        };
+        const ubicar = () => ubicarLista(lista, input);
 
         const cerrar = () => {
             lista.hidden = true;
@@ -241,17 +244,7 @@
 
         const opcionesVisibles = () => Array.from(select.options).filter((o) => !o.hidden);
 
-        // Fixed position under (or above, if there is no room) the button.
-        const ubicar = () => {
-            const r = boton.getBoundingClientRect();
-            const alto = lista.offsetHeight;
-            const arriba = r.bottom + 5 + alto > window.innerHeight && r.top - 5 - alto > 0;
-            lista.style.position = 'fixed';
-            lista.style.top = (arriba ? r.top - 5 - alto : r.bottom + 5) + 'px';
-            lista.style.left = r.left + 'px';
-            lista.style.right = 'auto';
-            lista.style.width = r.width + 'px';
-        };
+        const ubicar = () => ubicarLista(lista, boton);
 
         const cerrar = () => {
             lista.hidden = true;
@@ -266,10 +259,10 @@
             const elegida = select.options[select.selectedIndex];
             boton.textContent = elegida ? elegida.textContent.trim() : '';
             boton.disabled = select.disabled;
-            // A filter's "Todos"/"Todas" default is shown as a real choice; other '' options ("Elegí ...") are hints.
+            // Defaults like "Todos/Todas" or "Cualquier ..." are shown as a real choice; other '' options ("Elegí ...") are hints.
             const enDefault = select.value === '';
             boton.classList.toggle('selector-combo-en-default', enDefault);
-            boton.classList.toggle('selector-combo-placeholder', enDefault && !/^tod[ao]s$/i.test(boton.textContent));
+            boton.classList.toggle('selector-combo-placeholder', enDefault && !/^(tod[ao]s|cualquier)/i.test(boton.textContent));
             if (select.hasAttribute('aria-invalid')) {
                 boton.setAttribute('aria-invalid', 'true');
             } else {

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Agendar Cita para Paciente - Clínica Imagen</title>
+  <title>Agendar cita para paciente - Clínica Imagen</title>
   <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,10 +39,10 @@
 
   <main id="contenido">
     <section class="seccion-auth seccion-ancha">
-      <h1>Agendar Cita para Paciente</h1>
+      <h1>Agendar cita para paciente</h1>
 
-      <p class="aviso-exito" data-aviso="ok-pendiente" hidden>Cita creada. Se vinculara automáticamente cuando ese email se registre.</p>
-      <p class="aviso-exito" data-aviso="ok" hidden>La cita fue creada correctamente.</p>
+      <p class="aviso-exito" data-aviso="ok-pendiente" hidden role="status">Solicitud enviada. La clínica la va a confirmar y la cita se vincula sola cuando ese email se registre.</p>
+      <p class="aviso-exito" data-aviso="ok" hidden role="status">Solicitud enviada. La clínica la va a confirmar y se le avisa al paciente por correo.</p>
       <p class="campo-error" data-general hidden></p>
 
       <form method="post" action="api/agendar-cita-medico.php" data-api="api/agendar-cita-medico.php" novalidate>
@@ -62,7 +62,7 @@
                  autocomplete="off" placeholder="Buscar por apellido, nombre o CI">
           <datalist id="paciente_id_lista"></datalist>
           <input type="hidden" id="paciente_id" name="paciente_id" value="">
-          <p class="campo-hint" data-mensaje-sin-pacientes hidden>Todavía no tenés pacientes conectados. Usa "Paciente nuevo".</p>
+          <p class="campo-hint" data-mensaje-sin-pacientes hidden>No hay pacientes conectados. Usá "Paciente nuevo".</p>
         </div>
 
         <div id="panel-paciente-nuevo" class="campo" hidden>
@@ -99,10 +99,11 @@
 
         <div class="campo">
           <label for="profesional_id">Profesional</label>
-          <select id="profesional_id" name="profesional_id" class="selector-combo" data-buscable>
-            <option value="">Cualquiera disponible</option>
+          <select id="profesional_id" name="profesional_id" class="selector-combo" required>
+            <option value="">Elegí un profesional</option>
+            <option value="cualquiera">Cualquier profesional</option>
           </select>
-          <p class="campo-error" data-mensaje-sin-profesionales hidden>Todavía no hay profesionales cargados.</p>
+          <p class="campo-error" data-mensaje-sin-profesionales hidden>No hay profesionales cargados.</p>
         </div>
 
         <div class="campo">
@@ -122,14 +123,14 @@
 
             <div class="orden-card orden-aviso">
               <h3>AVISO IMPORTANTE</h3>
-              <p>Todos los estudios indicados en esta orden requieren coordinacion previa.</p>
+              <p>Todos los estudios indicados en esta orden requieren coordinación previa.</p>
               <p>Es necesario venir a la clínica sin nada de metal del cuello hacia arriba.</p>
-              <p>Los presupuestos dados por teléfono se confirman con la presentacion de este formulario.</p>
+              <p>Los presupuestos dados por teléfono se confirman con la presentación de este formulario.</p>
             </div>
 
-            <details class="orden-card">
-              <summary>Radiografías Intrabucales</summary>
-              <label id="teeth-radio-intra-label">Indicar region de interes</label>
+            <details class="orden-card" data-estudios="placa radiografia">
+              <summary>Radiografías intrabucales</summary>
+              <label id="teeth-radio-intra-label">Indicar región de interés</label>
               <div class="teeth-grid" id="teeth-radio-intra" role="group" aria-labelledby="teeth-radio-intra-label"></div>
               <div class="check-grid inline">
                 <label><input type="checkbox" name="radio_intra_tipo[]" value="Con conductimetría"> Con conductimetría</label>
@@ -140,7 +141,7 @@
               </div>
             </details>
 
-            <details class="orden-card">
+            <details class="orden-card" data-estudios="placa radiografia">
               <summary>Otros estudios extraorales</summary>
               <div class="check-grid">
                 <label><input type="checkbox" name="otros_estudios_extraorales[]" value="ATM"> ATM</label>
@@ -149,14 +150,18 @@
               </div>
             </details>
 
-            <details class="orden-card">
+            <details class="orden-card" data-estudios="placa radiografia modelo_3d alineadores">
               <summary>Documentación para ortodoncia</summary>
 
+              <div class="orden-sub" data-estudios="placa radiografia">
               <h4>Radiografías extraorales</h4>
               <div class="orden-grid-2">
                 <fieldset class="orden-fieldset orden-textogrupo">
                   <label><input type="checkbox" class="orden-check-texto" name="radio_extraoral[]" value="Panorámica (OPT)">Panorámica (OPT)</label>
-                  <label>Indicacion <input type="text" name="opt_indicacion"></label>
+                  <div class="campo">
+                    <label for="orden_opt_indicacion">Indicación</label>
+                    <input type="text" id="orden_opt_indicacion" name="opt_indicacion">
+                  </div>
                 </fieldset>
                 <fieldset class="orden-fieldset orden-grupo">
                   <label><input type="checkbox" class="orden-padre" name="radio_extraoral[]" value="Telerradiografía Perfil">Telerradiografía Perfil</label>
@@ -167,10 +172,12 @@
                 </fieldset>
                 <fieldset class="orden-fieldset orden-grupo">
                   <label><input type="checkbox" class="orden-padre" name="radio_extraoral[]" value="Telerradiografía Frontal">Telerradiografía Frontal</label>
-                  <label><input type="checkbox" class="orden-hijo" name="telerradio_frontal_analisis" value="Con analisis">Con analisis</label>
+                  <label><input type="checkbox" class="orden-hijo" name="telerradio_frontal_analisis" value="Con analisis">Con análisis</label>
                 </fieldset>
               </div>
 
+              </div>
+              <div class="orden-sub" data-estudios="">
               <h4>Estudios cefalométricos computarizados</h4>
               <div class="check-grid">
                 <label><input type="checkbox" name="estudio_cefalo_compu[]" value="Ricketts"> Ricketts</label>
@@ -183,20 +190,25 @@
                 <label><input type="checkbox" name="estudio_cefalo_compu[]" value="Steiner Tweed"> Steiner Tweed</label>
                 <label><input type="checkbox" name="estudio_cefalo_compu[]" value="VTO"> VTO</label>
               </div>
-              <label>Otros <input type="text" name="estudio_cefalo_compu_otros"></label>
+              <div class="campo">
+                <label for="orden_estudio_cefalo_compu_otros">Otros</label>
+                <input type="text" id="orden_estudio_cefalo_compu_otros" name="estudio_cefalo_compu_otros">
+              </div>
 
+              </div>
+              <div class="orden-sub" data-estudios="">
               <h4>Fotografías</h4>
               <div class="check-grid"><label><input type="checkbox" name="fotografias[]" value="Todas las fotografías">Todas las fotografías</label></div>
               <div class="orden-grid-2">
                 <fieldset class="orden-fieldset">
-                  <legend>Fotografias faciales</legend>
+                  <legend>Fotografías faciales</legend>
                   <label><input type="checkbox" name="fotografias[]" value="Rostro frente">Rostro frente</label>
                   <label><input type="checkbox" name="fotografias[]" value="Perfil">Perfil</label>
                   <label><input type="checkbox" name="fotografias[]" value="Rostro sonrisa ">Rostro sonrisa </label>
                   <label><input type="checkbox" name="fotografias[]" value="3/4 perfil">3/4 perfil</label>
                 </fieldset>
                 <fieldset class="orden-fieldset">
-                  <legend>Fotografias bucales</legend>
+                  <legend>Fotografías bucales</legend>
                   <label><input type="checkbox" name="fotografias[]" value="2 oclusales ">2 oclusales </label>
                   <label><input type="checkbox" name="fotografias[]" value="2 llaves de oclusión ">2 llaves de oclusión </label>
                   <label><input type="checkbox" name="fotografias[]" value="2 overjet/overbite ">2 overjet/overbite </label>
@@ -207,9 +219,14 @@
               <div class="check-grid"><label><input type="checkbox" name="fotografias[]" value="con contacto oclusales">con contacto oclusales</label></div>
               <fieldset class="orden-fieldset orden-textogrupo">
                 <label><input type="checkbox" class="orden-check-texto" name="fotografias[]" value="foto en dinámica">foto en dinámica</label>
-                <label>Indique su interes <input type="text" name="fotografia_interes"></label>
+                <div class="campo">
+                  <label for="orden_fotografia_interes">Indique su interés</label>
+                  <input type="text" id="orden_fotografia_interes" name="fotografia_interes">
+                </div>
               </fieldset>
 
+              </div>
+              <div class="orden-sub" data-estudios="modelo_3d">
               <h4>Modelos digitales (con visualizador 3D)</h4>
               <div class="orden-grid-2">
                 <fieldset class="orden-fieldset">
@@ -230,19 +247,28 @@
                 </fieldset>
               </div>
 
+              </div>
+              <div class="orden-sub" data-estudios="alineadores">
               <h4>Ortodoncia invisible (alineadores)</h4>
-              <label>Marca o sistema <input type="text" name="ortodoncia_marca"></label>
+              <div class="campo">
+                <label for="orden_ortodoncia_marca">Marca o sistema</label>
+                <input type="text" id="orden_ortodoncia_marca" name="ortodoncia_marca">
+              </div>
               <div class="check-grid inline">
                 <label><input type="checkbox" name="ortodoncia_tipo[]" value="Bimaxilar"> Bimaxilar</label>
                 <label><input type="checkbox" name="ortodoncia_tipo[]" value="Maxilar"> Maxilar</label>
                 <label><input type="checkbox" name="ortodoncia_tipo[]" value="Mandíbula"> Mandíbula</label>
               </div>
-              <label>Información clínica <textarea name="ortodoncia_info_clinica" rows="3"></textarea></label>
+              <div class="campo">
+                <label for="orden_ortodoncia_info_clinica">Información clínica</label>
+                <textarea id="orden_ortodoncia_info_clinica" name="ortodoncia_info_clinica" rows="3"></textarea>
+              </div>
+              </div>
             </details>
 
-            <details class="orden-card">
-              <summary>Tomografía Computarizada Volumétrica CONE BEAM</summary>
-              <label>Indicar region de interes</label>
+            <details class="orden-card" data-estudios="tomografia">
+              <summary>Tomografía computarizada volumétrica CONE BEAM</summary>
+              <label>Indicar región de interés</label>
               <div class="check-grid inline">
                 <label><input type="checkbox" name="tomo_cone_beam[]" value="Maxilar completo">Maxilar completo</label>
                 <label><input type="checkbox" name="tomo_cone_beam[]" value="Mandíbula completa">Mandíbula completa</label>
@@ -253,7 +279,10 @@
                 <label><input type="checkbox" name="tomo_cone_beam_tipo[]" value="1 a 3 piezas"> 1 a 3 piezas</label>
                 <label><input type="checkbox" name="tomo_cone_beam_tipo[]" value="Sin separación de tejidos blandos"> Sin separación de tejidos blandos</label>
               </div>
-              <label>Elementos sueltos <input type="text" name="tomo_elementos_sueltos"></label>
+              <div class="campo">
+                <label for="orden_tomo_elementos_sueltos">Elementos sueltos</label>
+                <input type="text" id="orden_tomo_elementos_sueltos" name="tomo_elementos_sueltos">
+              </div>
 
               <h4>Indique estudio para</h4>
               <div class="check-grid inline">
@@ -264,10 +293,13 @@
                 <label><input type="checkbox" name="tomo_tipo_estudio[]" value="Periodoncia"> Periodoncia</label>
                 <label><input type="checkbox" name="tomo_tipo_estudio[]" value="ATM"> ATM</label>
               </div>
-              <label>Interés del estudio <textarea name="interes_estudio_tomo" rows="3"></textarea></label>
+              <div class="campo">
+                <label for="orden_interes_estudio_tomo">Interés del estudio</label>
+                <textarea id="orden_interes_estudio_tomo" name="interes_estudio_tomo" rows="3"></textarea>
+              </div>
             </details>
 
-            <details class="orden-card">
+            <details class="orden-card" data-estudios="tomografia">
               <summary>CIRUGÍA GUIADA PARA IMPLANTES</summary>
               <div class="check-grid inline">
                 <label><input type="checkbox" name="guia_implantes_servicio[]" value="Tomografía"> Tomografía</label>
@@ -277,19 +309,28 @@
               <div class="orden-grid-2">
                 <fieldset class="orden-fieldset orden-textogrupo">
                   <label><input type="checkbox" class="orden-check-texto" name="guia_implante_tipo[]" value="Guía de precisión">Guía de precisión</label>
-                  <label>Marca de implante <input type="text" name="implante_marca"></label>
+                  <div class="campo">
+                    <label for="orden_implante_marca">Marca de implante</label>
+                    <input type="text" id="orden_implante_marca" name="implante_marca">
+                  </div>
                 </fieldset>
                 <fieldset class="orden-fieldset">
                   <label><input type="checkbox" name="guia_implante_tipo[]" value="Guía de fresa iniciadora">Guía de fresa iniciadora</label>
                 </fieldset>
               </div>
               <div class="orden-grid-2">
-                <label>Indique la ubicación del implante a colocar <input type="text" name="implante_ubicacion"></label>
-                <label>Fecha probable de cirugia <input type="date" name="implante_fecha_cirugia"></label>
+                <div class="campo">
+                  <label for="orden_implante_ubicacion">Indique la ubicación del implante a colocar</label>
+                  <input type="text" id="orden_implante_ubicacion" name="implante_ubicacion">
+                </div>
+                <div class="campo">
+                  <label for="orden_implante_fecha_cirugia">Fecha probable de cirugía</label>
+                  <input type="date" id="orden_implante_fecha_cirugia" name="implante_fecha_cirugia">
+                </div>
               </div>
             </details>
 
-            <details class="orden-card">
+            <details class="orden-card" data-estudios="tomografia">
               <summary>REALIDAD VIRTUAL M3DMIX</summary>
               <div class="check-grid">
                 <label><input type="checkbox" name="realidad_virtual_m3dmix[]" value="Tercer molar"> Tercer molar</label>
@@ -299,21 +340,27 @@
               </div>
             </details>
 
-            <details class="orden-card">
+            <details class="orden-card" data-estudios="">
               <summary>Ecografías</summary>
               <div class="check-grid inline">
                 <label><input type="checkbox" name="ecografias[]" value="ATM"> ATM</label>
                 <label><input type="checkbox" name="ecografias[]" value="Partes blandas"> Partes blandas</label>
               </div>
-              <label>Indicar interes del estudio <input type="text" name="eco_interes"></label>
+              <div class="campo">
+                <label for="orden_eco_interes">Indicar interés del estudio</label>
+                <input type="text" id="orden_eco_interes" name="eco_interes">
+              </div>
             </details>
 
-            <details class="orden-card">
+            <details class="orden-card" data-estudios="">
               <summary>Otros servicios</summary>
 
               <fieldset class="orden-fieldset orden-textogrupo">
                 <label><input type="checkbox" class="orden-check-texto" name="otros_servicios[]" value="Sólo escaneo">Sólo escaneo</label>
-                <label>Indicar interes del estudio <input type="text" name="solo_escaneo_interes"></label>
+                <div class="campo">
+                  <label for="orden_solo_escaneo_interes">Indicar interés del estudio</label>
+                  <input type="text" id="orden_solo_escaneo_interes" name="solo_escaneo_interes">
+                </div>
               </fieldset>
 
               <div class="check-grid">
@@ -355,7 +402,10 @@
 
               <fieldset class="orden-fieldset orden-textogrupo">
                 <label><input type="checkbox" class="orden-check-texto" name="otros_servicios[]" value="Protector bucal">Protector bucal</label>
-                <label>Color <input type="text" name="protector_bucal_color"></label>
+                <div class="campo">
+                  <label for="orden_protector_bucal_color">Color</label>
+                  <input type="text" id="orden_protector_bucal_color" name="protector_bucal_color">
+                </div>
               </fieldset>
             </details>
 
@@ -364,6 +414,11 @@
 
         <button type="submit" class="btn-primary">Solicitar cita</button>
       </form>
+    </section>
+
+    <section class="seccion-panel">
+      <h2>Mis citas</h2>
+      <div id="mis-citas"></div>
     </section>
   </main>
 

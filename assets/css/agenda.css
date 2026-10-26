@@ -13,7 +13,7 @@
     .agenda-toggle {
         display: inline-flex;
         border: 1px solid var(--border-subtle);
-        border-radius: 999px;
+        border-radius: var(--radius-pill);
         overflow: hidden;
     }
 
@@ -80,7 +80,7 @@
         min-height: 6.5rem;
         padding: 0.4rem;
         border: 1px solid var(--border-subtle);
-        border-radius: 0.6rem;
+        border-radius: var(--radius-md);
         background: var(--surface-alt);
         display: flex;
         flex-direction: column;
@@ -109,7 +109,7 @@
         font-size: var(--font-size-xs);
         font-weight: var(--font-weight-semibold);
         padding: 0.15rem 0.4rem;
-        border-radius: 0.4rem;
+        border-radius: var(--radius-xs);
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -171,7 +171,7 @@
 
     .agenda-dia-semana {
         border: 1px solid var(--border-subtle);
-        border-radius: 0.6rem;
+        border-radius: var(--radius-md);
         background: var(--surface-alt);
         padding: 0.6rem;
         display: flex;
@@ -205,7 +205,7 @@
         text-align: left;
         font-family: inherit;
         padding: var(--space-2) 0.6rem;
-        border-radius: 0.4rem;
+        border-radius: var(--radius-xs);
         background: var(--surface);
         border: 1px solid var(--border-subtle);
         font-size: var(--font-size-sm);
@@ -238,15 +238,18 @@
 
     .agenda-cita-card.estado-pendiente {
         border-color: rgba(var(--accent-rgb), 0.3);
+        background: rgba(var(--accent-rgb), 0.12);
     }
 
     .agenda-cita-card.estado-confirmada {
         border-color: rgba(var(--success-rgb), 0.3);
+        background: rgba(var(--success-rgb), 0.15);
     }
 
     .agenda-cita-card.estado-rechazada,
     .agenda-cita-card.estado-cancelada {
         border-color: rgba(var(--danger-rgb), 0.25);
+        background: rgba(var(--danger-rgb), 0.1);
     }
 
     @media (width <= 720px) {

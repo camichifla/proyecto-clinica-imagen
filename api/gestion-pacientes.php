@@ -2,11 +2,13 @@
 require_once __DIR__ . '/../includes/session_bootstrap.php';
 require_once __DIR__ . '/../includes/auth_guard.php';
 require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/recepcion.php';
 require_once __DIR__ . '/../includes/validation.php';
 require_once __DIR__ . '/../includes/mailer.php';
 require_once __DIR__ . '/../includes/pacientes.php';
 
-requerir_rol_json(['administrador', 'recepcionista']);
+$usuario  = requerir_rol_json(['administrador', 'recepcionista']);
+$sucRecep = filtro_sucursal_recepcion($usuario);
 
 const MAX_FILAS_PACIENTES = 50;
 const CAMPOS_PACIENTE     = ['nombre', 'apellido', 'ci', 'direccion', 'numero'];
@@ -37,6 +39,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $accion = $_POST['accion'] ?? '';
     if (!in_array($accion, ['crear', 'guardar', 'toggle_activo', 'borrar_cuenta'], true)) {
         respuesta_pacientes(400, ['ok' => false, 'error' => 'Acción inválida.']);
+    }
+
+    // A receptionist may only act on patients with a cita at their branch (new patients are allowed).
+    if ($sucRecep !== null && in_array($accion, ['guardar', 'toggle_activo', 'borrar_cuenta'], true)) {
+        $idGuard = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+        $g = db()->prepare('SELECT 1 FROM citas WHERE paciente_id = ? AND sucursal_id = ? LIMIT 1');
+        $g->execute([$idGuard ?: 0, $sucRecep]);
+        if (!$g->fetchColumn()) {
+            respuesta_pacientes(404, ['ok' => false, 'error' => 'Paciente no encontrado.']);
+        }
     }
 
     // Baja/alta of the patient's login account; the patient record and history are kept.
@@ -143,15 +155,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $unico = error_unico_paciente($e);
         if ($unico === null) {
             error_log('gestion-pacientes: ' . $e->getMessage());
-            respuesta_pacientes(500, ['ok' => false, 'error' => 'No se pudo registrar al paciente. Intenta nuevamente.']);
+            respuesta_pacientes(500, ['ok' => false, 'error' => 'No se pudo registrar al paciente. Intentá nuevamente.']);
         }
         respuesta_pacientes(422, ['ok' => false, 'errores' => $unico]);
     }
 
     registrar_evento('paciente_alta', 'paciente=' . $pacienteId . ' cuenta=' . $cuentaId);
 
-    $tokenRaw = emitir_token_reset($db, $cuentaId);
-    enviar_reset($valores['email'], APP_URL . '/reset-confirm.html?token=' . $tokenRaw);
+    $tokenRaw = emitir_token_reset($db, $cuentaId, 24);
+    enviar_bienvenida_paciente($valores['email'], APP_URL . '/reset-confirm.html?token=' . $tokenRaw);
 
     echo json_encode(['ok' => true, 'id' => $pacienteId], JSON_UNESCAPED_UNICODE);
     exit;
@@ -166,8 +178,13 @@ foreach (array_slice($palabras, 0, 5) as $palabra) {
     array_push($params, $like, $like, $like);
 }
 
+if ($sucRecep !== null) {
+    $where   .= ' AND EXISTS (SELECT 1 FROM citas ci WHERE ci.paciente_id = p.id AND ci.sucursal_id = ?)';
+    $params[] = $sucRecep;
+}
 $stmt = db()->prepare(
-    "SELECT p.id, p.nombre, p.apellido, p.ci, p.direccion, p.numero, c.email, c.verificado, c.activo
+    "SELECT p.id, p.nombre, p.apellido, p.ci, p.direccion, p.numero, c.email, c.verificado, c.activo,
+            (SELECT COUNT(*) FROM resultados r WHERE r.paciente_id = p.id) AS total_resultados
        FROM pacientes p
        JOIN cuentas c ON c.rol = 'paciente' AND c.ref_id = p.id -- patients whose account was deleted are not listed
       WHERE {$where}
@@ -189,6 +206,7 @@ echo json_encode([
         'direccion'  => $p['direccion'],
         'numero'     => $p['numero'],
         'email'      => $p['email'],
+        'resultados' => (int) $p['total_resultados'],
         'verificado' => $p['verificado'] !== null && (int) $p['verificado'] === 1,
         'activo'     => $p['activo'] !== null && (int) $p['activo'] === 1,
     ], array_slice($filas, 0, MAX_FILAS_PACIENTES)),

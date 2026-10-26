@@ -7,13 +7,38 @@
         return;
     }
 
-    function mostrarAviso() {
+    function avisoDeUrl() {
         const params = new URL(window.location.href).searchParams;
         if (params.get('ok') === 'pendiente') {
-            document.querySelector('[data-aviso="ok-pendiente"]').hidden = false;
+            mostrarAviso('ok-pendiente');
         } else if (params.has('ok')) {
-            document.querySelector('[data-aviso="ok"]').hidden = false;
+            mostrarAviso('ok');
         }
+    }
+
+    // Read-only: the cita belongs to the patient; cancelling goes through reception, with a reason.
+    function renderFilaCita(cita) {
+        const tr = document.createElement('tr');
+        tr.appendChild(celda('Código', cita.codigo));
+        tr.appendChild(celda('Fecha y hora de la cita', fechaHora(cita.fechaHoraSolicitada)));
+        tr.appendChild(celda('Paciente', cita.pacienteLabel));
+        tr.appendChild(celda('Estudio', cita.estudioLabel));
+        tr.appendChild(celda('Sede', cita.sucursalNombre || '-'));
+        tr.appendChild(celdaEstado(cita.estado, cita.estadoLabel));
+        tr.appendChild(celda('Motivo', cita.motivo || '-'));
+        return tr;
+    }
+
+    function renderMisCitas(citas) {
+        const contenedor = document.getElementById('mis-citas');
+        if (!citas.length) {
+            contenedor.appendChild(parrafo('No hay citas agendadas.'));
+            return;
+        }
+        contenedor.appendChild(tabla(
+            ['Código', 'Fecha y hora de la cita', 'Paciente', 'Estudio', 'Sede', 'Estado', 'Motivo'],
+            citas.map(renderFilaCita)
+        ));
     }
 
     function poblarPacientesConectados(pacientes) {
@@ -72,7 +97,12 @@
             return;
         }
         function aplicar() {
-            panelEstudio.hidden = estudioSelect.value === '';
+            const est = estudioSelect.value;
+            panelEstudio.hidden = est === '';
+            // Show only the cards and subsections that serve the chosen study (data-estudios); AVISO has none, so it always shows.
+            panelEstudio.querySelectorAll('[data-estudios]').forEach((el) => {
+                el.hidden = est === '' || !el.dataset.estudios.split(/\s+/).filter(Boolean).includes(est);
+            });
         }
         estudioSelect.addEventListener('change', aplicar);
         aplicar();
@@ -107,7 +137,7 @@
     }
 
     async function init() {
-        mostrarAviso();
+        avisoDeUrl();
 
         const sesion = await window.sesionLista;
         if (!sesion) {
@@ -124,8 +154,9 @@
 
         poblarSucursales(selectSucursal, data.sucursalesOrden);
         poblarEstudios(document.getElementById('estudio'), data.estudios);
-        poblarProfesionales(selectProfesional, data.profesionales, '', data.etiquetasEstudio);
+        poblarProfesionales(selectProfesional, data.profesionales, '', data.etiquetasEstudio, true);
         poblarPacientesConectados(data.pacientesConectados);
+        renderMisCitas(data.citas);
         renderGridDientes(document.getElementById('teeth-radio-intra'), 'radio_intra', data.dientes);
         renderGridDientes(document.getElementById('teeth-tomo-cone-beam'), 'tomo_cone_beam', data.dientes);
 

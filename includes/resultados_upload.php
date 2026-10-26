@@ -112,6 +112,11 @@ function guardar_resultado_con_imagenes(
         $stmt->execute([$pacienteId, $citaId, $nombreEstudio, $fechaEstudio, $observaciones, $informeArchivo, $informeOriginal, $creadoPor]);
         $resultadoId = (int) db()->lastInsertId();
 
+        // Uploading a result for a confirmed cita marks that cita as done.
+        if ($citaId !== null) {
+            db()->prepare("UPDATE citas SET estado = 'realizada' WHERE id = ? AND estado = 'confirmada'")->execute([$citaId]);
+        }
+
         if ($informe) {
             $destinoInforme = STORAGE_RESULTADOS_DIR . '/' . $informeArchivo;
             if (!move_uploaded_file($informe['tmp_name'], $destinoInforme)) {
@@ -198,7 +203,7 @@ function procesar_post_resultado(array $usuario, callable $pacienteValido, ?int 
             $stmt = db()->prepare($sql);
             $stmt->execute($params);
             if (!$stmt->fetch()) {
-                $errores['cita_id'] = 'La cita elegida no pertenece a este paciente o no esta confirmada.';
+                $errores['cita_id'] = 'La cita elegida no pertenece a este paciente o no está confirmada.';
             } else {
                 $citaId = $citaIdCandidato;
             }
@@ -241,7 +246,7 @@ function procesar_post_resultado(array $usuario, callable $pacienteValido, ?int 
     }
 
     if (!$archivos && !$informe && !isset($errores['informe'])) {
-        $errores['imagenes'] = 'Subi al menos una imagen o un informe PDF.';
+        $errores['imagenes'] = 'Subí al menos una imagen o un informe PDF.';
     } else {
         foreach ($archivos as $archivo) {
             $extension   = null;
@@ -274,7 +279,7 @@ function procesar_post_resultado(array $usuario, callable $pacienteValido, ?int 
         notificar_resultado_listo($pacienteId);
         echo json_encode(['ok' => true, 'redirect' => $redirectBase . '?ok=' . $resultadoId], JSON_UNESCAPED_UNICODE);
     } catch (Throwable $e) {
-        echo json_encode(['ok' => false, 'errores' => ['general' => 'No se pudo guardar el resultado. Intenta nuevamente.']], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['ok' => false, 'errores' => ['general' => 'No se pudo guardar el resultado. Intentá nuevamente.']], JSON_UNESCAPED_UNICODE);
     }
 }
 

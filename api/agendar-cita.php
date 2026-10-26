@@ -5,6 +5,7 @@ require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/horarios.php';
 require_once __DIR__ . '/../includes/estudios.php';
 require_once __DIR__ . '/../includes/validar_reserva.php';
+require_once __DIR__ . '/../includes/mailer.php';
 
 $usuario = requerir_rol_json(['paciente']);
 
@@ -67,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $citaId = (int) db()->lastInsertId();
         registrar_evento('cita_crear', 'cita=' . $citaId);
+        avisar_solicitud_recibida($citaId);
         echo json_encode(['ok' => true, 'redirect' => 'agendar-cita.html?ok=1&codigo=' . codigo_cita($citaId)], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -80,7 +82,9 @@ $stmt = db()->prepare(
     "SELECT c.*, s.nombre AS sucursal_nombre
      FROM citas c
      LEFT JOIN sucursales s ON s.id = c.sucursal_id
-     WHERE c.paciente_id = ? AND c.estado IN ('pendiente', 'confirmada') AND c.fecha_hora_solicitada >= NOW()
+     WHERE c.paciente_id = ?
+       AND ((c.estado IN ('pendiente', 'confirmada') AND c.fecha_hora_solicitada >= NOW())
+         OR (c.estado IN ('rechazada', 'cancelada') AND c.fecha_hora_solicitada >= DATE_SUB(NOW(), INTERVAL 30 DAY)))
      ORDER BY c.fecha_hora_solicitada ASC"
 );
 $stmt->execute([$usuario['ref_id']]);
@@ -93,6 +97,7 @@ $citas = array_map(static function (array $cita): array {
         'estudioLabel'        => estudios_etiquetas()[$cita['estudio']] ?? $cita['estudio'],
         'estado'              => $cita['estado'],
         'estadoLabel'         => ESTADOS_CITA[$cita['estado']] ?? $cita['estado'],
+        'motivo'              => in_array($cita['estado'], ['rechazada', 'cancelada'], true) ? $cita['notas_admin'] : null,
     ];
 }, $stmt->fetchAll());
 

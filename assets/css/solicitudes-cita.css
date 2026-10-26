@@ -29,7 +29,7 @@
         box-sizing: border-box;
         padding: var(--space-2) 0.7rem;
         border: 1px solid var(--border-subtle);
-        border-radius: 0.5rem;
+        border-radius: var(--radius-md);
         font-family: inherit;
         font-size: var(--font-size-md);
         background: var(--surface-alt);

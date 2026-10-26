@@ -50,6 +50,14 @@ const ROLES_ETIQUETA = { paciente: 'Paciente', medico: 'Médico', profesional: '
             }
         }
 
+        if (sesion.sinSede) {
+            const aviso = document.createElement('p');
+            aviso.className = 'aviso-error';
+            aviso.setAttribute('role', 'alert');
+            aviso.textContent = 'No tenés una sede asignada. Pedile a un administrador que te asigne una.';
+            document.querySelector('main').prepend(aviso);
+        }
+
         document.querySelectorAll('input[name="csrf"]').forEach((input) => {
             input.value = sesion.csrf;
         });

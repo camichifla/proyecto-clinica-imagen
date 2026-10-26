@@ -15,7 +15,7 @@
         padding: var(--space-4);
         background: var(--surface-alt);
         border: 1px solid var(--border-subtle);
-        border-radius: 0.5rem;
+        border-radius: var(--radius-md);
         color: var(--dark-neutral);
         text-decoration: none;
     }
@@ -52,7 +52,7 @@
         width: 100%;
         padding: var(--space-2) 0.7rem;
         border: 1px solid var(--border-subtle);
-        border-radius: 0.5rem;
+        border-radius: var(--radius-md);
         font-family: inherit;
         font-size: var(--font-size-md);
         background: var(--surface-alt);
@@ -66,6 +66,13 @@
         flex-direction: column;
         gap: var(--space-2);
         width: 20rem;
+    }
+
+    .horas-libres {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+        margin-bottom: var(--space-4);
     }
 
     .accion-turno {
@@ -83,27 +90,10 @@
     .accion-turno input[type="date"] {
         padding: var(--space-2) 0.7rem;
         border: 1px solid var(--border-subtle);
-        border-radius: 0.5rem;
+        border-radius: var(--radius-md);
         font-family: inherit;
         background: var(--surface-alt);
         color: var(--dark-neutral);
-    }
-
-    .totales-turnos {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-2) var(--space-4);
-        margin: var(--space-3) 0;
-        padding: 0;
-        list-style: none;
-    }
-
-    .barra-turnos {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-3);
-        align-items: center;
-        justify-content: space-between;
     }
 
     @media (width <= 760px) {
@@ -120,28 +110,6 @@
 
         #turnos-lista & .tabla-datos td:last-child {
             flex-direction: column;
-        }
-    }
-
-    .solo-impresion {
-        display: none;
-    }
-
-    @media print {
-        .solo-impresion {
-            display: block;
-        }
-
-        header,
-        footer,
-        .skip-link,
-        .aviso-exito,
-        .aviso-error,
-        .filtros-turnos,
-        .barra-turnos button,
-        #turnos-lista .tabla-datos th:last-child,
-        #turnos-lista .tabla-datos td:last-child {
-            display: none !important;
         }
     }
 

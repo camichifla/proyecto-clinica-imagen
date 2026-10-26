@@ -63,7 +63,7 @@
     async function cargar() {
         const data = await apiJson('api/gestion-sucursales.php');
         if (!data || !data.sucursales) {
-            mostrarMensaje('No se pudieron cargar las sucursales.', true);
+            mostrarMensaje('No se pudieron cargar las sedes.', true);
             return;
         }
         if (!contenedorEstudios.children.length) {
@@ -93,7 +93,7 @@
             return;
         }
         if (!data.ok) {
-            mostrarMensaje(data.error || 'Ocurrio un error inesperado.', true);
+            mostrarMensaje(data.error || 'Ocurrió un error inesperado.', true);
             return;
         }
         mostrarMensaje(editando ? 'Sede actualizada.' : 'Sede creada.', false);

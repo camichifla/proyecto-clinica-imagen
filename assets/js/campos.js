@@ -33,7 +33,7 @@
     // It fires the same events a manual change would, so filters, cascades and search boxes react as usual.
     const TEXTO = 'input:is([type="text"], [type="search"], [type="email"], [type="tel"]):not([hidden])'; // [hidden]: value holders (search boxes' ids)
     const agregarLimpiar = (contenedor, simbolo, etiqueta, limpiar) => {
-        if (contenedor.querySelector(':scope > .campo-limpiar')) {
+        if (contenedor.querySelector(':scope > .campo-limpiar') || contenedor.closest('[data-sin-limpiar]')) {
             return;
         }
         const boton = document.createElement('button');
@@ -236,5 +236,29 @@
         const revisar = () => items.forEach((li) => li.classList.toggle('cumplido', new RegExp(li.dataset.regla, 'u').test(campo.value)));
         campo.addEventListener('input', revisar);
         revisar();
+    });
+
+    // Eye toggle on every password field: shows/hides the characters. Keeps the field type="password" by default.
+    const OJO = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+    const OJO_TACHADO = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7c2 0 3.8.65 5.3 1.6M22 12s-3.5 7-10 7c-2 0-3.8-.65-5.3-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m3 3 18 18"/></svg>';
+    document.querySelectorAll('input[type="password"]').forEach((input) => {
+        const boton = document.createElement('button');
+        boton.type = 'button';
+        boton.className = 'campo-ojo';
+        boton.innerHTML = OJO;
+        boton.title = 'Mostrar contraseña';
+        boton.setAttribute('aria-label', 'Mostrar contraseña');
+        boton.setAttribute('aria-pressed', 'false');
+        boton.addEventListener('mousedown', (evento) => evento.preventDefault()); // keep the caret in the field
+        boton.addEventListener('click', () => {
+            const ver = input.type === 'password';
+            input.type = ver ? 'text' : 'password';
+            boton.innerHTML = ver ? OJO_TACHADO : OJO;
+            const etiqueta = ver ? 'Ocultar contraseña' : 'Mostrar contraseña';
+            boton.title = etiqueta;
+            boton.setAttribute('aria-label', etiqueta);
+            boton.setAttribute('aria-pressed', String(ver));
+        });
+        input.after(boton);
     });
 })();

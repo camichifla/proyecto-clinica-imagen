@@ -2,10 +2,13 @@
 require_once __DIR__ . '/../includes/session_bootstrap.php';
 require_once __DIR__ . '/../includes/auth_guard.php';
 require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/recepcion.php';
 require_once __DIR__ . '/../includes/agenda.php';
 require_once __DIR__ . '/../includes/mailer.php';
 
 $usuario = requerir_rol_json(['administrador', 'recepcionista']);
+require_once __DIR__ . '/../includes/recepcion.php';
+$sucRecep = filtro_sucursal_recepcion($usuario);
 
 const MENSAJE_SOLICITUD_NO_PROCESADA = 'No se pudo procesar la solicitud (puede que ya haya sido resuelta).';
 
@@ -19,10 +22,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $notas     = $confirmar ? '' : mb_substr(trim((string) ($_POST['notas_admin'] ?? '')), 0, NOTAS_ADMIN_MAX);
 
         $datosCita = db()->prepare(
-            'SELECT paciente_id, email_pendiente, fecha_hora_solicitada FROM citas WHERE id = ?'
+            'SELECT id, paciente_id, email_pendiente, fecha_hora_solicitada, sucursal_id FROM citas WHERE id = ?'
         );
         $datosCita->execute([$citaId]);
         $cita = $datosCita->fetch();
+        if ($cita && $sucRecep !== null && (int) $cita['sucursal_id'] !== $sucRecep) {
+            $cita = false; // not this receptionist's branch
+        }
 
         if ($confirmar) {
             $stmt = db()->prepare(
@@ -46,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($email !== null) {
                 enviar_notificacion_cita($email, $confirmar ? 'confirmada' : 'rechazada', $cita['fecha_hora_solicitada'], $notas);
             }
+            avisar_medico_cita((int) $cita['id'], $confirmar ? 'confirmada' : 'rechazada', $cita['fecha_hora_solicitada'], $notas);
             echo json_encode(['ok' => true, 'mensaje' => 'La cita fue ' . ($confirmar ? 'confirmada.' : 'rechazada.')], JSON_UNESCAPED_UNICODE);
             exit;
         }
@@ -60,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-$citas = db()->query(
+$stmtCitas = db()->prepare(
     "SELECT c.id, c.fecha_hora_solicitada, c.estudio, c.paciente_id, c.email_pendiente,
             c.nombre_pendiente, c.apellido_pendiente,
             pa.nombre AS paciente_nombre, pa.apellido AS paciente_apellido,
@@ -70,9 +77,11 @@ $citas = db()->query(
        LEFT JOIN pacientes pa ON pa.id = c.paciente_id
        JOIN profesionales pr ON pr.id = c.profesional_id
        LEFT JOIN sucursales s ON s.id = c.sucursal_id
-      WHERE c.estado = 'pendiente'
+      WHERE c.estado = 'pendiente'" . ($sucRecep !== null ? ' AND c.sucursal_id = ?' : '') . "
       ORDER BY c.fecha_hora_solicitada ASC"
-)->fetchAll();
+);
+$stmtCitas->execute($sucRecep !== null ? [$sucRecep] : []);
+$citas = $stmtCitas->fetchAll();
 
 echo json_encode([
     'notasAdminMax' => NOTAS_ADMIN_MAX,

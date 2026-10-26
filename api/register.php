@@ -88,7 +88,7 @@ try {
     } elseif ($e->getCode() === '23000' && str_contains($e->getMessage(), 'uq_cuentas_email')) {
         $errores['email'] = 'Ya existe una cuenta registrada con ese correo.';
     } else {
-        $errores['general'] = 'No se pudo completar el registro. Intenta nuevamente.';
+        $errores['general'] = 'No se pudo completar el registro. Intentá nuevamente.';
     }
     http_response_code(422);
     echo json_encode(['ok' => false, 'errores' => $errores], JSON_UNESCAPED_UNICODE);

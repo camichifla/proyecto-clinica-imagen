@@ -47,7 +47,7 @@
     width: 100%;
     height: auto;
     object-fit: cover;
-    border-radius: 0.6rem;
+    border-radius: var(--radius-md);
     border: 1px solid var(--border-subtle);
     cursor: zoom-in;
 }
@@ -165,6 +165,11 @@
     box-sizing: border-box;
 }
 
+/* Space between the note field and the "Agregar nota" button. */
+.form-nota button[type="submit"] {
+    margin-top: var(--space-3);
+}
+
 .nota-clinica {
     border-left: 3px solid var(--dark-neutral);
     padding: 0.25rem 0.75rem;
@@ -184,9 +189,15 @@
     overflow-wrap: anywhere;
 }
 
+.nota-clinica-borrar {
+    margin-top: var(--space-2);
+    padding: 0.2rem 0.7rem;
+    font-size: var(--font-size-sm);
+}
+
 .orden-propia {
     border: 1px solid var(--border-subtle);
-    border-radius: 6px;
+    border-radius: var(--radius-xs);
     padding: 0.75rem;
     margin-bottom: 0.75rem;
     overflow-wrap: anywhere;

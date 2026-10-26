@@ -27,7 +27,7 @@
     padding: 0.7rem 0.9rem;
     padding-right: 2.2rem;
     border: 1px solid var(--border-subtle);
-    border-radius: 0.6rem;
+    border-radius: var(--radius-md);
     font-family: inherit;
     font-size: var(--font-size-base);
     background-color: var(--surface-alt);
@@ -42,57 +42,6 @@
     border-color: var(--color-danger);
 }
 
-.tabla-scroll {
-    overflow-x: auto;
-}
-
-.tabla-datos {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.tabla-datos th,
-.tabla-datos td {
-    text-align: left;
-    padding: var(--space-3);
-    border-bottom: 1px solid var(--border-subtle);
-    vertical-align: top;
-}
-
-.tabla-datos th {
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-}
-
-.tabla-scroll.tabla-tarjetas {
-    .tabla-datos thead {
-        display: none;
-    }
-
-    .tabla-datos tr {
-        display: block;
-        margin-bottom: var(--space-4);
-        border-bottom: 2px solid var(--border-subtle);
-    }
-
-    .tabla-datos td {
-        display: flex;
-        justify-content: space-between;
-        gap: var(--space-3);
-        border-bottom: none;
-        padding: 0.4rem var(--space-3);
-    }
-
-    .tabla-datos td[data-label]:not([data-label=""])::before {
-        content: attr(data-label);
-        font-weight: var(--font-weight-semibold);
-        color: var(--text-secondary);
-        margin-right: var(--space-3);
-    }
-}
-
 .selector-fecha {
     position: relative;
 }
@@ -105,7 +54,7 @@
     gap: var(--space-2);
     padding: 0.7rem 0.9rem;
     border: 1px solid var(--border-subtle);
-    border-radius: 0.6rem;
+    border-radius: var(--radius-md);
     background: var(--surface-alt);
     color: var(--dark-neutral);
     font-family: inherit;
@@ -123,7 +72,9 @@
 
 .selector-combo-boton::after,
 .selector-fecha-boton::after,
-.menu-grupo summary::after {
+.menu-grupo summary::after,
+.mensaje-contacto summary::after,
+.orden-card summary::after {
     content: '';
     width: 0.5rem;
     height: 0.5rem;
@@ -131,7 +82,7 @@
     border-bottom: 2px solid var(--text-secondary);
     transform: translateY(0.15rem) rotate(-135deg);
     flex-shrink: 0;
-    transition: transform 0.2s ease;
+    transition: transform var(--transition-fast);
 }
 
 /* The arrow is pinned to the right edge (the clear button sits to its left). */
@@ -148,14 +99,18 @@
 
 .selector-combo-boton[aria-expanded="true"]::after,
 .selector-fecha-boton[aria-expanded="true"]::after,
-.menu-grupo[open] summary::after {
+.menu-grupo[open] summary::after,
+.mensaje-contacto details[open] summary::after,
+.orden-card[open] summary::after {
     transform: translateY(-0.15rem) rotate(45deg);
 }
 
 @media (prefers-reduced-motion: reduce) {
     .selector-combo-boton::after,
     .selector-fecha-boton::after,
-    .menu-grupo summary::after {
+    .menu-grupo summary::after,
+    .mensaje-contacto summary::after,
+    .orden-card summary::after {
         transition: none;
     }
 }
@@ -173,7 +128,7 @@
     margin: var(--space-3) 0 0 auto;
     padding: var(--space-1) var(--space-3);
     border: none;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: none;
     color: var(--accent-secondary);
     font-family: inherit;
@@ -248,7 +203,7 @@
 .calendario-dia {
     aspect-ratio: 1;
     border: 1px solid transparent;
-    border-radius: 0.5rem;
+    border-radius: var(--radius-md);
     background: none;
     color: var(--dark-neutral);
     font-family: inherit;

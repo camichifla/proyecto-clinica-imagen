@@ -4,3 +4,4 @@ includes/config.php
 storage/mail.log
 storage/resultados/*
 !storage/resultados/.htaccess
+docs/

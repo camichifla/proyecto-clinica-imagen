@@ -7,6 +7,8 @@ require_once __DIR__ . '/../includes/validation.php';
 require_once __DIR__ . '/../includes/estudios.php';
 require_once __DIR__ . '/../includes/validar_reserva.php';
 require_once __DIR__ . '/../includes/pacientes_medico.php';
+require_once __DIR__ . '/../includes/agenda.php';
+require_once __DIR__ . '/../includes/mailer.php';
 
 $usuario = requerir_rol_json(['medico']);
 
@@ -125,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $emailNuevo = trim((string) ($_POST['paciente_email_nuevo'] ?? ''));
         if (!filter_var($emailNuevo, FILTER_VALIDATE_EMAIL)) {
-            $errores['paciente_email_nuevo'] = 'Ingresa un email válido.';
+            $errores['paciente_email_nuevo'] = 'Ingresá un email válido.';
         } else {
             $stmt = db()->prepare("SELECT ref_id FROM cuentas WHERE rol = 'paciente' AND email = ?");
             $stmt->execute([$emailNuevo]);
@@ -205,6 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         db()->commit();
         registrar_evento('cita_crear', 'cita=' . $citaId);
+        avisar_solicitud_recibida($citaId);
         echo json_encode([
             'ok'       => true,
             'redirect' => 'agendar-cita-medico.html?ok=' . ($emailPendiente !== null ? 'pendiente' : '1') . '&codigo=' . codigo_cita($citaId),
@@ -217,14 +220,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (es_hora_ocupada($e)) {
             hora_ocupada_json($e);
         }
-        echo json_encode(['ok' => false, 'errores' => ['general' => 'No se pudo guardar la cita. Intenta nuevamente.']], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['ok' => false, 'errores' => ['general' => 'No se pudo guardar la cita. Intentá nuevamente.']], JSON_UNESCAPED_UNICODE);
         exit;
     }
 }
 
 $pacientesConectados = pacientes_de_medico($usuario['cuenta_id'], $usuario['ref_id']);
 
+// Citas this medico booked (an orden of theirs points at the cita): upcoming plus the last 30 days.
+$stmt = db()->prepare(
+    SQL_CITAS_CON_ETIQUETAS . "
+     WHERE EXISTS (SELECT 1 FROM ordenes o WHERE o.cita_id = c.id AND o.creado_por = ?)
+       AND c.fecha_hora_solicitada >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+     ORDER BY c.fecha_hora_solicitada DESC"
+);
+$stmt->execute([$usuario['cuenta_id']]);
+
 echo json_encode([
+    'citas' => array_map(static fn (array $c): array => [
+        'codigo'              => codigo_cita((int) $c['id']),
+        'fechaHoraSolicitada' => $c['fecha_hora_solicitada'],
+        'motivo'              => in_array($c['estado'], ['rechazada', 'cancelada'], true) ? $c['notas_admin'] : null,    ] + cita_agenda_json($c), $stmt->fetchAll()),
     'fechaMin'            => $fechaMin,
     'fechaMax'            => $fechaMax,
     'dientes'             => DIENTES_COMPLETO,

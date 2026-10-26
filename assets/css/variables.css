@@ -14,7 +14,6 @@
 
     --accent-color: var(--color-acento);
     --accent-rgb: 14, 165, 233;
-    --accent-light: #7dd3fc;
     --accent-secondary: #457B9D;
 
     --color-success: #1b7a4a;
@@ -57,9 +56,14 @@
     --space-7: 2rem;
     --space-8: 3rem;
 
+    --radius-xs: 0.35rem;
+    --radius-md: 0.6rem;
+    --radius-lg: 0.75rem;
     --radius-sm: 1rem;
+    --radius-pill: 999px;
     --max-width: 1400px;
     --transition-fast: 0.2s ease;
+    --transition-base: 0.3s ease;
 }
 
 /* Set by assets/js/tema.js from the saved choice or the system preference.

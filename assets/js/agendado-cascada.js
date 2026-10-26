@@ -37,7 +37,7 @@
             return false;
         }
         return opcionesProfesional.some(function (opcion) {
-            if (opcion.value === '') {
+            if (opcion.value === '' || opcion.value === 'cualquiera') {
                 return false;
             }
             var especializaciones = JSON.parse(opcion.dataset.especializaciones || '[]');
@@ -69,8 +69,12 @@
         var estudio = estudioSelect.value;
         var seleccionValida = false;
         opcionesProfesional.forEach(function (opcion) {
-            if (opcion.value === '') {
+            // The placeholder ('') and "Cualquier profesional" are always offered.
+            if (opcion.value === '' || opcion.value === 'cualquiera') {
                 opcion.hidden = false;
+                if (opcion.value === profesionalSelect.value) {
+                    seleccionValida = true;
+                }
                 return;
             }
             var coincideEstudio = !estudio || JSON.parse(opcion.dataset.especializaciones || '[]').indexOf(estudio) !== -1;

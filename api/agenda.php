@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../includes/session_bootstrap.php';
 require_once __DIR__ . '/../includes/auth_guard.php';
 require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/recepcion.php';
 require_once __DIR__ . '/../includes/agenda.php';
 
 $usuario = requerir_rol_json(['administrador', 'recepcionista', 'profesional']);
@@ -17,8 +18,10 @@ $fechaRef->setTime(0, 0, 0);
 
 $rango = calcular_rango_agenda($vista, $fechaRef);
 
-$sucursales = [];
-$sucursalId = null;
+$sucursales    = [];
+$sucursalId    = null;
+$profesionales = [];
+$profesionalId = null;
 $condicion  = '';
 $parametros = [];
 
@@ -29,9 +32,31 @@ if (in_array($usuario['rol'], ['administrador', 'recepcionista'], true)) {
     if ($sucursalId !== null && !in_array($sucursalId, array_column($sucursales, 'id'), true)) {
         $sucursalId = null;
     }
+    // A receptionist is locked to their own branch (ignores the filter); 0 = none assigned yet, shows nothing.
+    $sucRecep = filtro_sucursal_recepcion($usuario);
+    if ($sucRecep !== null) {
+        $sucursalId  = $sucRecep;
+        $sucursales  = array_values(array_filter($sucursales, static fn (array $s): bool => (int) $s['id'] === $sucRecep));
+    }
     if ($sucursalId !== null) {
         $condicion    = 'c.sucursal_id = ? AND ';
         $parametros[] = $sucursalId;
+    }
+
+    // Professionals to filter by: a receptionist's list is limited to those working at their branch.
+    $sqlProf = 'SELECT p.id, p.nombre, p.apellido FROM profesionales p'
+        . ($sucRecep !== null ? ' JOIN profesional_sucursal ps ON ps.profesional_id = p.id AND ps.sucursal_id = ?' : '')
+        . ' ORDER BY p.apellido, p.nombre';
+    $stmt = db()->prepare($sqlProf);
+    $stmt->execute($sucRecep !== null ? [$sucRecep] : []);
+    $profesionales = $stmt->fetchAll();
+    $profesionalId = filter_input(INPUT_GET, 'profesional_id', FILTER_VALIDATE_INT) ?: null;
+    if ($profesionalId !== null && !in_array($profesionalId, array_map('intval', array_column($profesionales, 'id')), true)) {
+        $profesionalId = null;
+    }
+    if ($profesionalId !== null) {
+        $condicion    .= 'c.profesional_id = ? AND ';
+        $parametros[] = $profesionalId;
     }
 } else {
 
@@ -39,10 +64,10 @@ if (in_array($usuario['rol'], ['administrador', 'recepcionista'], true)) {
     $parametros[] = $usuario['ref_id'];
 }
 
-// The agenda shows confirmed citas only; pending ones are handled in solicitudes-cita.
+// Confirmed and pending citas (the badge tells them apart).
 $stmt = db()->prepare(
     SQL_CITAS_CON_ETIQUETAS . "
-     WHERE c.estado = 'confirmada' AND {$condicion}DATE(c.fecha_hora_solicitada) BETWEEN ? AND ?
+     WHERE c.estado IN ('confirmada', 'pendiente') AND {$condicion}DATE(c.fecha_hora_solicitada) BETWEEN ? AND ?
      ORDER BY c.fecha_hora_solicitada ASC"
 );
 $stmt->execute([...$parametros, $rango['rangoInicio']->format('Y-m-d'), $rango['rangoFin']->format('Y-m-d')]);
@@ -75,5 +100,7 @@ echo json_encode([
     'hoy'            => $hoy,
     'sucursales'     => array_map(static fn (array $s): array => ['id' => (int) $s['id'], 'nombre' => $s['nombre']], $sucursales),
     'sucursalId'     => $sucursalId,
+    'profesionales'  => array_map(static fn (array $p): array => ['id' => (int) $p['id'], 'nombre' => $p['apellido'] . ', ' . $p['nombre']], $profesionales),
+    'profesionalId'  => $profesionalId,
     'dias'           => $dias,
 ], JSON_UNESCAPED_UNICODE);

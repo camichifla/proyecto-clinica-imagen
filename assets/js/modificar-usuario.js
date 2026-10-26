@@ -1,6 +1,16 @@
 (() => {
     const form = document.querySelector('form[data-api]');
     const contenedor = document.getElementById('campos-usuario');
+    const btnCancelar = document.getElementById('cancelar-edicion');
+    if (btnCancelar) {
+        btnCancelar.addEventListener('click', () => {
+            if (history.length > 1) {
+                history.back();
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+    }
     if (!form || !contenedor) {
         return;
     }
@@ -36,9 +46,7 @@
         }
         if (!data.campos) {
             form.hidden = true;
-            const p = document.createElement('p');
-            p.textContent = 'Esta seccion esta en construccion.';
-            form.insertAdjacentElement('beforebegin', p);
+            form.insertAdjacentElement('beforebegin', parrafo('Esta sección está en construcción.'));
             return;
         }
 

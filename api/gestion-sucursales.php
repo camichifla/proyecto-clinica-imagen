@@ -97,13 +97,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errores['longitud'] = 'La longitud debe estar entre -180 y 180.';
     }
     if (!$errores && ($latitud === null) !== ($longitud === null)) {
-        $errores['latitud'] = 'Completa latitud y longitud, o deja ambas vacias.';
+        $errores['latitud'] = 'Completá latitud y longitud, o dejá ambas vacías.';
     }
 
     $enviados = $_POST['estudios'] ?? [];
     $claves   = is_array($enviados) ? array_values(array_unique(array_map('strval', $enviados))) : [];
     if (array_diff($claves, array_keys(estudios_etiquetas()))) {
-        $errores['estudios'] = 'Elegí estudios validos.';
+        $errores['estudios'] = 'Elegí estudios válidos.';
     }
 
     $turnos = validar_turnos($_POST['horarios'] ?? '');
@@ -144,7 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             db()->rollBack();
         }
         error_log('gestion-sucursales: ' . $e->getMessage());
-        respuesta_sucursales(500, ['ok' => false, 'error' => 'No se pudo guardar la sede. Intenta nuevamente.']);
+        respuesta_sucursales(500, ['ok' => false, 'error' => 'No se pudo guardar la sede. Intentá nuevamente.']);
     }
 
     registrar_evento($esAlta ? 'sucursal_alta' : 'sucursal_cambio', 'sucursal=' . $id . ' activo=' . $activo);

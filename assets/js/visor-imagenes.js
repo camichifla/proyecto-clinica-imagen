@@ -49,7 +49,7 @@
         document.querySelector('.comparar-abrir').disabled = n !== MAX;
         document.querySelector('.comparar-aviso').textContent = n === MAX
             ? 'Listo: 2 imágenes seleccionadas.'
-            : 'Marca 2 imágenes con "Comparar" para verlas lado a lado (' + n + ' de ' + MAX + ').';
+            : 'Marcá 2 imágenes con "Comparar" para verlas lado a lado (' + n + ' de ' + MAX + ').';
     }
 
     document.addEventListener('change', function (evento) {
@@ -59,7 +59,7 @@
         }
         if (marcadas().length > MAX) {
             check.checked = false;
-            document.querySelector('.comparar-aviso').textContent = 'Solo se pueden comparar 2 imágenes. Desmarca una antes de elegir otra.';
+            document.querySelector('.comparar-aviso').textContent = 'Solo se pueden comparar 2 imágenes. Desmarcá una antes de elegir otra.';
             return;
         }
         actualizarBarra();

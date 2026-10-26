@@ -102,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             db()->rollBack();
         }
         error_log('gestion-profesionales: ' . $e->getMessage());
-        respuesta_profesionales(500, ['ok' => false, 'error' => 'No se pudo guardar el profesional. Intenta nuevamente.']);
+        respuesta_profesionales(500, ['ok' => false, 'error' => 'No se pudo guardar el profesional. Intentá nuevamente.']);
     }
 
     registrar_evento('profesional_cambio', 'profesional=' . $id);

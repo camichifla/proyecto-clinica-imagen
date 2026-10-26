@@ -11,13 +11,13 @@
             return;
         }
         if (!notas.length) {
-            destino.replaceChildren(parrafo('Todavía no hay notas en tu historial.'));
+            destino.replaceChildren(parrafo('No hay notas en tu historial.'));
             return;
         }
         destino.replaceChildren(...notas.map((nota) => {
             const item = document.createElement('article');
             item.className = 'nota-clinica';
-            const meta = parrafo(`${nota.fecha} - ${nota.autor}`);
+            const meta = parrafo(`${fechaHora(nota.fecha)} - ${nota.autor}`);
             meta.className = 'nota-clinica-meta';
             const texto = parrafo(nota.texto);
             texto.className = 'nota-clinica-texto';
@@ -29,12 +29,12 @@
     function renderCitas(citas) {
         const destino = document.getElementById('historial-citas');
         if (!citas.length) {
-            destino.replaceChildren(parrafo('Todavía no tenés citas.'));
+            destino.replaceChildren(parrafo('No hay citas.'));
             return;
         }
         const filas = citas.map((cita) => {
             const tr = document.createElement('tr');
-            tr.appendChild(celda('Fecha y hora', cita.fecha));
+            tr.appendChild(celda('Fecha y hora', fechaHora(cita.fecha)));
             tr.appendChild(celda('Estudio', cita.estudio));
             tr.appendChild(celda('Sede', cita.sede || '-'));
             const td = document.createElement('td');
@@ -59,7 +59,7 @@
             return;
         }
 
-        renderListaResultados(contenedor, data.resultados, 'Todavía no tenés resultados cargados.');
+        renderListaResultados(contenedor, data.resultados, 'No hay resultados cargados.');
         renderNotas(data.notas);
         renderCitas(data.citas || []);
     }

@@ -86,11 +86,14 @@ CREATE TABLE administradores (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE recepcionistas (
-  id        INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  nombre    VARCHAR(60) NOT NULL,
-  apellido  VARCHAR(60) NOT NULL,
-  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id)
+  id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  nombre      VARCHAR(60) NOT NULL,
+  apellido    VARCHAR(60) NOT NULL,
+  sucursal_id INT UNSIGNED NULL,                  -- the branch this receptionist is in charge of
+  creado_en   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY ix_recepcionistas_sucursal (sucursal_id),
+  CONSTRAINT fk_recepcionistas_sucursal FOREIGN KEY (sucursal_id) REFERENCES sucursales(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE tokens_verificacion (
@@ -192,7 +195,7 @@ CREATE TABLE citas (                                  -- patient requests a slot
   sucursal_id           INT UNSIGNED NULL,              -- NULL = sede no registrada (dato historico)
   fecha_hora_solicitada DATETIME NOT NULL,
   estudio               VARCHAR(30) NOT NULL,            -- estudios.clave
-  estado                ENUM('pendiente','confirmada','rechazada','cancelada') NOT NULL DEFAULT 'pendiente',
+  estado                ENUM('pendiente','confirmada','rechazada','cancelada','realizada') NOT NULL DEFAULT 'pendiente',
   fecha_hora_confirmada DATETIME NULL,                 -- set by admin on confirm; may differ from solicitada
   notas_admin           VARCHAR(255) NULL,
   creado_en             DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -241,7 +244,7 @@ CREATE TABLE resultado_imagenes (                     -- 1..N images per resulta
   CONSTRAINT fk_resultado_imagenes_resultado FOREIGN KEY (resultado_id) REFERENCES resultados(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE notas_clinicas (                         -- append-only clinical record: the app never updates or deletes rows
+CREATE TABLE notas_clinicas (                         -- clinical record: never updated; only the note's author can delete it
   id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
   paciente_id INT UNSIGNED NOT NULL,
   cuenta_id   INT UNSIGNED NOT NULL,                  -- author (medico or profesional account)
@@ -316,13 +319,9 @@ CREATE TABLE mensajes_contacto (
   email        VARCHAR(254)  NOT NULL,
   telefono     VARCHAR(25)   NULL,
   mensaje      VARCHAR(2000) NOT NULL,                -- plain text; always rendered as text, never HTML
-  atendido     TINYINT(1)    NOT NULL DEFAULT 0,
-  atendido_por INT UNSIGNED  NULL,                    -- cuentas.id of the staff member who marked it
-  atendido_en  DATETIME      NULL,
-  creado_en    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  creado_en    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,   -- pending only: attended rows are deleted
   PRIMARY KEY (id),
-  KEY ix_mensajes_contacto_creado (creado_en),
-  CONSTRAINT fk_mensajes_contacto_cuenta FOREIGN KEY (atendido_por) REFERENCES cuentas(id) ON DELETE SET NULL
+  KEY ix_mensajes_contacto_creado (creado_en)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- The 5 estudios (catalogue). Must come

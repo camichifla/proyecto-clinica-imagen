@@ -18,6 +18,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check($_POST['csrf'] ?? null);
     $accion = $_POST['accion'] ?? '';
 
+    if ($accion === 'asignar_sucursal') {
+        $cuentaId   = filter_input(INPUT_POST, 'cuenta_id', FILTER_VALIDATE_INT);
+        $sucursalId = filter_input(INPUT_POST, 'sucursal_id', FILTER_VALIDATE_INT) ?: null;
+        $stmt = db()->prepare("SELECT ref_id FROM cuentas WHERE id = ? AND rol = 'recepcionista'");
+        $stmt->execute([$cuentaId ?: 0]);
+        $refId = $stmt->fetchColumn();
+        if ($refId === false) {
+            echo json_encode(['ok' => false, 'error' => 'La cuenta no es de un recepcionista.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+        if ($sucursalId !== null) {
+            $existe = db()->prepare('SELECT 1 FROM sucursales WHERE id = ?');
+            $existe->execute([$sucursalId]);
+            if (!$existe->fetchColumn()) {
+                echo json_encode(['ok' => false, 'error' => 'Sede inválida.'], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+        }
+        db()->prepare('UPDATE recepcionistas SET sucursal_id = ? WHERE id = ?')->execute([$sucursalId, (int) $refId]);
+        registrar_evento('recepcion_sucursal', 'recepcionista=' . (int) $refId . ' sucursal=' . ($sucursalId ?? 'ninguna'));
+        echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     if ($accion === 'toggle_activo') {
         $cuentaId = filter_input(INPUT_POST, 'cuenta_id', FILTER_VALIDATE_INT);
 
@@ -69,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pacienteId = filter_input(INPUT_POST, 'paciente_id', FILTER_VALIDATE_INT);
 
         if (!$medicoId || !$pacienteId) {
-            echo json_encode(['ok' => false, 'error' => 'Elegí un médico y un paciente validos.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'error' => 'Elegí un médico y un paciente válidos.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -77,14 +101,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $db->prepare('SELECT id FROM medicos WHERE id = ?');
         $stmt->execute([$medicoId]);
         if (!$stmt->fetch()) {
-            echo json_encode(['ok' => false, 'error' => 'Elegí un médico y un paciente validos.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'error' => 'Elegí un médico y un paciente válidos.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
         $stmt = $db->prepare('SELECT id FROM pacientes WHERE id = ?');
         $stmt->execute([$pacienteId]);
         if (!$stmt->fetch()) {
-            echo json_encode(['ok' => false, 'error' => 'Elegí un médico y un paciente validos.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'error' => 'Elegí un médico y un paciente válidos.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -96,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } catch (PDOException $e) {
             $mensaje = $e->getCode() === '23000'
                 ? 'Ese paciente ya está asignado a ese médico.'
-                : 'No se pudo crear la asignación. Intenta nuevamente.';
+                : 'No se pudo crear la asignación. Intentá nuevamente.';
             echo json_encode(['ok' => false, 'error' => $mensaje], JSON_UNESCAPED_UNICODE);
         }
         exit;
@@ -242,7 +266,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             error_log('manejar-usuarios cambiar_rol: ' . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['ok' => false, 'error' => 'No se pudo cambiar el rol. Intenta nuevamente.'], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['ok' => false, 'error' => 'No se pudo cambiar el rol. Intentá nuevamente.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
 
@@ -326,7 +350,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($e->getCode() === '23000' && str_contains($e->getMessage(), 'uq_cuentas_email')) {
                 echo json_encode(['ok' => false, 'errores' => ['email' => 'Ya existe una cuenta registrada con ese correo.']], JSON_UNESCAPED_UNICODE);
             } else {
-                echo json_encode(['ok' => false, 'errores' => ['general' => 'No se pudo crear la cuenta. Intenta nuevamente.']], JSON_UNESCAPED_UNICODE);
+                echo json_encode(['ok' => false, 'errores' => ['general' => 'No se pudo crear la cuenta. Intentá nuevamente.']], JSON_UNESCAPED_UNICODE);
             }
         }
         exit;
@@ -350,7 +374,7 @@ $asignacionesFilas = db()->query(
 )->fetchAll();
 
 $stmt = db()->query(
-    "SELECT c.id AS cuenta_id, c.email, c.rol, c.verificado, c.activo,
+    "SELECT c.id AS cuenta_id, c.email, c.rol, c.verificado, c.activo, r.sucursal_id AS recep_sucursal_id,
             COALESCE(p.nombre, m.nombre, pr.nombre, a.nombre, r.nombre)       AS nombre,
             COALESCE(p.apellido, m.apellido, pr.apellido, a.apellido, r.apellido) AS apellido
        FROM cuentas c
@@ -382,9 +406,11 @@ echo json_encode([
             'activo'     => (int) $fila['activo'] === 1,
             'nombre'     => (string) $fila['nombre'],
             'apellido'   => (string) $fila['apellido'],
+            'sucursalId' => $fila['recep_sucursal_id'] !== null ? (int) $fila['recep_sucursal_id'] : null,
         ];
     }, $cuentasFilas),
     'medicos'      => $medicos,
+    'sucursales'   => db()->query('SELECT id, nombre FROM sucursales ORDER BY nombre')->fetchAll(PDO::FETCH_ASSOC),
     'pacientes'    => $pacientes,
     'asignaciones' => $asignacionesFilas,
     'estudios'     => array_map(static fn (string $clave, string $etiqueta): array => ['clave' => $clave, 'etiqueta' => $etiqueta], array_keys(estudios_activos()), estudios_activos()),

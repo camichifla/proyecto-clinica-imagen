@@ -254,7 +254,7 @@
 }
 
 .sucursales {
-    padding: 60px 20px;
+    padding: 60px var(--space-5);
     background: linear-gradient(180deg, var(--surface) 0%, var(--surface-alt) 100%);
 }
 
@@ -278,7 +278,7 @@
     font-size: clamp(1.8rem, 4vw, 2.5rem);
     font-weight: var(--font-weight-bold);
     color: var(--heading-muted);
-    margin-bottom: 12px;
+    margin-bottom: var(--space-3);
     line-height: 1.2;
 }
 
@@ -289,7 +289,7 @@
 .search-input-wrapper {
     position: relative;
     max-width: 550px;
-    margin: 0 auto 16px;
+    margin: 0 auto var(--space-4);
 }
 
 .search-icon {
@@ -304,14 +304,14 @@
 #clinicSearch {
     width: 100%;
     box-sizing: border-box;
-    padding: 14px 18px 14px 48px;
+    padding: var(--space-4) var(--space-4) var(--space-4) var(--space-8);
     font-size: var(--font-size-md);
     font-family: inherit;
     border: 2px solid var(--border-subtle);
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     background: var(--surface);
     color: var(--dark-neutral);
-    transition: all 0.3s ease;
+    transition: all var(--transition-base);
 }
 
 #clinicSearch:hover:not(:focus) {
@@ -331,7 +331,7 @@
 .consultorios-grid {
     display: grid;
     grid-template-columns: 1.3fr 0.7fr;
-    gap: 20px;
+    gap: var(--space-5);
     align-items: start;
 }
 
@@ -343,7 +343,7 @@
 
 .map-container {
     position: relative;
-    border-radius: 16px;
+    border-radius: var(--radius-sm);
     overflow: hidden;
     background: var(--surface);
 }
@@ -364,17 +364,17 @@
 .map-badge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
     background: var(--surface);
-    border-radius: 50px;
+    border-radius: var(--radius-pill);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
     color: var(--dark-neutral);
 }
 
 .leaflet-popup-content-wrapper {
-    border-radius: 12px;
+    border-radius: var(--radius-lg);
     padding: 0;
     overflow: hidden;
 }
@@ -385,26 +385,26 @@
 }
 
 .popup-clinic {
-    padding: 14px;
+    padding: var(--space-4);
 }
 
 .popup-clinic h4 {
     font-size: var(--font-size-md);
     color: var(--dark-neutral);
-    margin-bottom: 4px;
+    margin-bottom: var(--space-1);
     font-weight: var(--font-weight-semibold);
 }
 
 .popup-clinic p {
     font-size: var(--font-size-sm);
     color: var(--text-secondary);
-    margin-bottom: 6px;
+    margin-bottom: var(--space-2);
 }
 
 .popup-clinic .popup-meta {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: var(--space-1);
     font-size: var(--font-size-xs);
     color: var(--accent-secondary);
     font-weight: var(--font-weight-medium);
@@ -413,7 +413,7 @@
 .popup-clinic .popup-meta span {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--space-1);
 }
 
 .custom-marker {
@@ -426,7 +426,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: all var(--transition-base);
 }
 
 .custom-marker::after {
@@ -443,7 +443,7 @@
 
 .clinics-list-container {
     background: var(--surface);
-    border-radius: 16px;
+    border-radius: var(--radius-sm);
     overflow: hidden;
     max-height: 520px;
     display: flex;
@@ -451,7 +451,7 @@
 }
 
 .clinics-header {
-    padding: 16px 20px;
+    padding: var(--space-4) var(--space-5);
     border-bottom: 1px solid var(--border-subtle);
     display: flex;
     justify-content: space-between;
@@ -474,7 +474,7 @@
 
 .clinics-list {
     overflow-y: auto;
-    padding: 6px;
+    padding: var(--space-2);
     flex: 1;
 }
 
@@ -492,12 +492,12 @@
 }
 
 .clinic-card {
-    padding: 14px;
-    border-radius: 10px;
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-base);
     border: 1.5px solid transparent;
-    margin-bottom: 3px;
+    margin-bottom: var(--space-1);
 }
 
 .clinic-card:hover {
@@ -514,8 +514,8 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 5px;
-    gap: 8px;
+    margin-bottom: var(--space-1);
+    gap: var(--space-2);
 }
 
 .clinic-name {
@@ -528,10 +528,10 @@
 .clinic-address {
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
-    margin-bottom: 6px;
+    margin-bottom: var(--space-2);
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: var(--space-1);
     line-height: 1.4;
 }
 
@@ -551,7 +551,7 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: var(--space-1);
 }
 
 .clinic-hours {
@@ -562,19 +562,19 @@
 
 .clinics-empty {
     text-align: center;
-    padding: 40px 20px;
+    padding: 40px var(--space-5);
     color: var(--text-secondary);
 }
 
 .clinics-empty svg {
-    margin-bottom: 10px;
+    margin-bottom: var(--space-2);
     opacity: 0.4;
 }
 
 .clinics-empty h4 {
     font-size: var(--font-size-md);
     color: var(--dark-neutral);
-    margin-bottom: 4px;
+    margin-bottom: var(--space-1);
 }
 
 .clinics-empty p {
@@ -583,7 +583,7 @@
 
 @media (width <= 640px) {
     .sucursales {
-        padding: 40px 12px;
+        padding: 40px var(--space-3);
     }
 
     /* Phones get the list only: the map is hidden and the list grows with its content. */
@@ -596,3 +596,10 @@
     }
 }
 
+
+/* Dark theme: invert the light map tiles (same data-theme switch as variables.css). */
+@media screen {
+    :root[data-theme="dark"] .leaflet-tile-pane {
+        filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+    }
+}

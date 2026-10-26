@@ -8,7 +8,7 @@
         return;
     }
 
-    function mostrarAviso() {
+    function avisoDeUrl() {
         const params = new URL(window.location.href).searchParams;
         if (params.has('ok')) {
             const codigo = params.get('codigo') || '';
@@ -16,9 +16,9 @@
                 document.querySelector('[data-codigo-valor]').textContent = codigo;
                 document.querySelector('[data-codigo]').hidden = false;
             }
-            document.querySelector('[data-aviso="ok"]').hidden = false;
+            mostrarAviso('ok');
         } else if (params.has('cancelado')) {
-            document.querySelector('[data-aviso="cancelado"]').hidden = false;
+            mostrarAviso('cancelado');
         }
     }
 
@@ -35,7 +35,7 @@
     function renderFilaCita(cita) {
         const tr = document.createElement('tr');
         tr.appendChild(celda('Código', cita.codigo));
-        tr.appendChild(celda('Fecha y hora de la cita', cita.fechaHoraSolicitada));
+        tr.appendChild(celda('Fecha y hora de la cita', fechaHora(cita.fechaHoraSolicitada)));
         tr.appendChild(celda('Sede', cita.sucursalNombre || '-'));
         tr.appendChild(celda('Estudio', cita.estudioLabel));
 
@@ -46,17 +46,22 @@
         badge.textContent = cita.estadoLabel;
         tdEstado.appendChild(badge);
         tr.appendChild(tdEstado);
+        tr.appendChild(celda('Motivo', cita.motivo || '-'));
 
         const tdAcciones = document.createElement('td');
         tdAcciones.dataset.label = '';
-        // Every listed cita (upcoming, pending or confirmed) can be cancelled: confirmation only, no reason asked.
+        // Pending or confirmed citas can be cancelled (rejected/cancelled ones only show their reason): confirmation only, no reason asked.
         // To change the date the patient cancels and books a new cita.
+        if (cita.estado === 'rechazada' || cita.estado === 'cancelada') {
+            tr.appendChild(tdAcciones);
+            return tr;
+        }
         const btnCancelar = document.createElement('button');
         btnCancelar.type = 'button';
         btnCancelar.className = 'btn-peligro';
         btnCancelar.textContent = 'Cancelar';
         btnCancelar.addEventListener('click', () => {
-            if (window.confirm('¿Cancelar la cita ' + cita.codigo + ' del ' + cita.fechaHoraSolicitada + '?')) {
+            if (window.confirm('¿Cancelar la cita ' + cita.codigo + ' del ' + fechaHora(cita.fechaHoraSolicitada) + '?')) {
                 cancelarCita(cita);
             }
         });
@@ -67,19 +72,17 @@
 
     function renderMisCitas(citas) {
         if (!citas.length) {
-            const p = document.createElement('p');
-            p.textContent = 'No tenés citas próximas.';
-            misCitas.appendChild(p);
+            misCitas.appendChild(parrafo('No hay citas próximas ni recientes.'));
             return;
         }
         misCitas.appendChild(tabla(
-            ['Código', 'Fecha y hora de la cita', 'Sede', 'Estudio', 'Estado', ''],
+            ['Código', 'Fecha y hora de la cita', 'Sede', 'Estudio', 'Estado', 'Motivo', ''],
             citas.map((cita) => renderFilaCita(cita))
         ));
     }
 
     async function init() {
-        mostrarAviso();
+        avisoDeUrl();
 
         const sesion = await window.sesionLista;
         if (!sesion) {
@@ -96,7 +99,7 @@
 
         poblarSucursales(selectSucursal, data.sucursalesOrden, '');
         poblarEstudios(document.getElementById('estudio'), data.estudios);
-        poblarProfesionales(selectProfesional, data.profesionales, '', data.etiquetasEstudio);
+        poblarProfesionales(selectProfesional, data.profesionales, '', data.etiquetasEstudio, true);
 
         renderMisCitas(data.citas);
 

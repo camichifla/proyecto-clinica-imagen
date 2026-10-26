@@ -28,7 +28,7 @@ if ($nombre === '' || mb_strlen($nombre) > 80) {
     $errores['nombre'] = 'El nombre es obligatorio (máximo 80 caracteres).';
 }
 if ($email === '' || mb_strlen($email) > 254 || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-    $errores['email'] = 'Ingresa un correo válido (nombre@dominio.com).';
+    $errores['email'] = 'Ingresá un correo válido (nombre@dominio.com).';
 }
 if ($telefono !== '' && !preg_match(REGLAS_PACIENTE['numero']['pattern'], $telefono)) {
     $errores['telefono'] = 'Formato de Teléfono inválido. ' . REGLAS_PACIENTE['numero']['hint'];

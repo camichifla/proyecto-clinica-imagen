@@ -5,7 +5,7 @@
         padding: 0.7rem 0.9rem;
         padding-right: 2.2rem;
         border: 1px solid var(--border-subtle);
-        border-radius: 0.6rem;
+        border-radius: var(--radius-md);
         font-family: inherit;
         font-size: var(--font-size-base);
         background-color: var(--surface-alt);
@@ -19,28 +19,9 @@
         border-color: var(--accent-secondary);
     }
 
-    .tabla-scroll {
-        overflow-x: auto;
-    }
-
-    .tabla-datos {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
     .tabla-datos th,
     .tabla-datos td {
-        text-align: left;
-        padding: var(--space-3);
-        border-bottom: 1px solid var(--border-subtle);
         vertical-align: middle;
-    }
-
-    .tabla-datos th {
-        color: var(--text-secondary);
-        font-size: var(--font-size-sm);
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
     }
 
     .estado-si {
@@ -59,35 +40,8 @@
         font-style: italic;
     }
 
-    .tabla-scroll.tabla-tarjetas {
-        .tabla-datos thead {
-            display: none;
-        }
-
-        .tabla-datos tr {
-            display: block;
-            margin-bottom: var(--space-4);
-            border-bottom: 2px solid var(--border-subtle);
-        }
-
-        .tabla-datos td {
-            display: flex;
-            justify-content: space-between;
-            gap: var(--space-3);
-            border-bottom: none;
-            padding: 0.4rem var(--space-3);
-        }
-
-        /* :not(:has()) keeps action cells on base.css's stretch, which a layered rule would otherwise override. */
-        .tabla-datos td:not(:has(form, button)) {
-            align-items: center;
-        }
-
-        .tabla-datos td[data-label]:not([data-label=""])::before {
-            content: attr(data-label);
-            font-weight: var(--font-weight-semibold);
-            color: var(--text-secondary);
-            margin-right: var(--space-3);
-        }
+    /* :not(:has()) keeps action cells on base.css's stretch, which a layered rule would otherwise override. */
+    .tabla-scroll.tabla-tarjetas .tabla-datos td:not(:has(form, button)) {
+        align-items: center;
     }
 }

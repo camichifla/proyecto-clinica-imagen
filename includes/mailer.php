@@ -5,6 +5,7 @@
 // storage/mail.log so the flow completes end-to-end without a mail server.
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/estudios.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
@@ -66,8 +67,8 @@ function enviar_verificacion(string $email, string $link): bool
 {
     return enviar_correo(
         $email,
-        'Verifica tu cuenta - Clínica Imagen',
-        "Gracias por registrarte. Confirma tu cuenta visitando el siguiente enlace:\n\n{$link}\n\nEl enlace vence en 24 horas."
+        'Verificá tu cuenta - Clínica Imagen',
+        "Gracias por registrarte. Confirmá tu cuenta visitando el siguiente enlace:\n\n{$link}\n\nEl enlace vence en 24 horas."
     );
 }
 
@@ -76,7 +77,17 @@ function enviar_reset(string $email, string $link): bool
     return enviar_correo(
         $email,
         'Restablecer contraseña - Clínica Imagen',
-        "Solicitaste restablecer tu contraseña. Visita el siguiente enlace para elegir una nueva:\n\n{$link}\n\nEl enlace vence en 1 hora. Si no fuiste vos, ignora este mensaje."
+        "Solicitaste restablecer tu contraseña. Visitá el siguiente enlace para elegir una nueva:\n\n{$link}\n\nEl enlace vence en 1 hora. Si no fuiste vos, ignorá este mensaje."
+    );
+}
+
+/** Patient registered by staff: the reset link sets their first password. */
+function enviar_bienvenida_paciente(string $email, string $link): bool
+{
+    return enviar_correo(
+        $email,
+        'Tu cuenta en Clínica Imagen',
+        "La clínica creó tu cuenta de paciente. Visitá el siguiente enlace para elegir tu contraseña:\n\n{$link}\n\nEl enlace vence en 24 horas. Si vence, pedí uno nuevo desde \"Olvidé mi contraseña\"."
     );
 }
 
@@ -96,8 +107,28 @@ function email_notificacion_cita(?int $pacienteId, ?string $emailPendiente): ?st
     return $emailPendiente !== null && $emailPendiente !== '' ? $emailPendiente : null;
 }
 
+/** Email of the medico account that booked the cita (ordenes.creado_por), or null if no medico did. */
+function email_medico_cita(int $citaId): ?string
+{
+    $stmt = db()->prepare(
+        "SELECT cu.email FROM ordenes o JOIN cuentas cu ON cu.id = o.creado_por
+          WHERE o.cita_id = ? AND cu.rol = 'medico' LIMIT 1"
+    );
+    $stmt->execute([$citaId]);
+    $email = $stmt->fetchColumn();
+    return $email !== false ? $email : null;
+}
+
+/** "2026-03-09 14:30:00" -> "09/03/2026 14:30"; anything else is returned as is. */
+function fecha_hora_legible(string $fechaHora): string
+{
+    $f = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $fechaHora);
+    return $f !== false ? $f->format('d/m/Y H:i') : $fechaHora;
+}
+
 function enviar_notificacion_cita(string $email, string $estado, string $fechaHora, string $notas = ''): bool
 {
+    $fechaHora = fecha_hora_legible($fechaHora);
     if ($estado === 'confirmada') {
         return enviar_correo(
             $email,
@@ -130,13 +161,79 @@ function enviar_notificacion_cita(string $email, string $estado, string $fechaHo
     return enviar_correo($email, 'Tu cita fue rechazada - Clínica Imagen', $cuerpo);
 }
 
+/**
+ * Acknowledges a just-booked (pending) cita to the patient. Best effort: a mail failure never fails the booking.
+ */
+function avisar_solicitud_recibida(int $citaId): void
+{
+    try {
+        $stmt = db()->prepare(
+            'SELECT c.paciente_id, c.email_pendiente, c.fecha_hora_solicitada, s.nombre AS sede
+               FROM citas c LEFT JOIN sucursales s ON s.id = c.sucursal_id WHERE c.id = ?'
+        );
+        $stmt->execute([$citaId]);
+        $c = $stmt->fetch();
+        $email = $c ? email_notificacion_cita($c['paciente_id'] !== null ? (int) $c['paciente_id'] : null, $c['email_pendiente']) : null;
+        if ($email === null) {
+            return;
+        }
+        enviar_correo(
+            $email,
+            'Recibimos tu solicitud de cita - Clínica Imagen',
+            'Recibimos tu solicitud de cita ' . codigo_cita($citaId) . ' para el ' . fecha_hora_legible($c['fecha_hora_solicitada'])
+                . ' en ' . ($c['sede'] ?? 'la sede elegida') . ".\n\nLa clínica la va a confirmar y te avisamos por correo."
+        );
+    } catch (Throwable $e) {
+        error_log('avisar_solicitud_recibida: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Tells the medico who booked a cita how it ended up (for a reprogramada, $fechaHora is the new date).
+ * Does nothing if no medico booked it or the medico's address is the patient's own (they get the patient email).
+ */
+function avisar_medico_cita(int $citaId, string $estado, string $fechaHora, string $notas = ''): void
+{
+    $emailMedico = email_medico_cita($citaId);
+    if ($emailMedico === null) {
+        return;
+    }
+
+    $stmt = db()->prepare(
+        'SELECT c.paciente_id, c.email_pendiente, p.nombre, p.apellido, c.nombre_pendiente, c.apellido_pendiente
+           FROM citas c LEFT JOIN pacientes p ON p.id = c.paciente_id WHERE c.id = ?'
+    );
+    $stmt->execute([$citaId]);
+    $c = $stmt->fetch();
+    if (!$c) {
+        return;
+    }
+
+    $emailPaciente = email_notificacion_cita($c['paciente_id'] !== null ? (int) $c['paciente_id'] : null, $c['email_pendiente']);
+    if ($emailPaciente !== null && strcasecmp($emailPaciente, $emailMedico) === 0) {
+        return;
+    }
+
+    $paciente = trim(($c['nombre'] ?? $c['nombre_pendiente'] ?? '') . ' ' . ($c['apellido'] ?? $c['apellido_pendiente'] ?? ''));
+    $paciente = $paciente !== '' ? $paciente : 'tu paciente';
+    $fecha    = fecha_hora_legible($fechaHora);
+    $cuerpo   = $estado === 'reprogramada'
+        ? "La cita que agendaste para {$paciente} fue reprogramada para el {$fecha}."
+        : "La cita que agendaste para {$paciente} el {$fecha} fue {$estado}.";
+    if ($notas !== '' && in_array($estado, ['cancelada', 'rechazada'], true)) {
+        $cuerpo .= "\n\nMotivo: {$notas}";
+    }
+
+    enviar_correo($emailMedico, "La cita de {$paciente} fue {$estado} - Clínica Imagen", $cuerpo);
+}
+
 /** No clinical content, just the link. */
 function enviar_aviso_resultado(string $email, string $link): bool
 {
     return enviar_correo(
         $email,
         'Tenés un nuevo resultado - Clínica Imagen',
-        "Hay un nuevo resultado disponible en tu portal. Ingresa para verlo:\n\n{$link}"
+        "Hay un nuevo resultado disponible en tu portal. Ingresá para verlo:\n\n{$link}"
     );
 }
 
@@ -156,7 +253,7 @@ function emitir_token_verificacion(PDO $db, int $cuentaId): string
 }
 
 /** Same as emitir_token_verificacion, but separate table/lifetime/scope; invalidates prior reset tokens. */
-function emitir_token_reset(PDO $db, int $cuentaId): string
+function emitir_token_reset(PDO $db, int $cuentaId, int $horas = 1): string
 {
     $raw  = bin2hex(random_bytes(32));
     $hash = hash('sha256', $raw);
@@ -164,8 +261,8 @@ function emitir_token_reset(PDO $db, int $cuentaId): string
     $db->prepare('UPDATE tokens_reset SET usado_en = NOW() WHERE cuenta_id = ? AND usado_en IS NULL')
         ->execute([$cuentaId]);
 
-    $db->prepare('INSERT INTO tokens_reset (cuenta_id, token_hash, expira_en) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 1 HOUR))')
-        ->execute([$cuentaId, $hash]);
+    $db->prepare('INSERT INTO tokens_reset (cuenta_id, token_hash, expira_en) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL ? HOUR))')
+        ->execute([$cuentaId, $hash, $horas]);
 
     return $raw;
 }

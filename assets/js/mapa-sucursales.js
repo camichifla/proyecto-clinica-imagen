@@ -125,7 +125,7 @@
         const vacio = el("div", "clinics-empty");
         vacio.append(
             icono(32, [["circle", { cx: 11, cy: 11, r: 8 }], ["path", { d: "m21 21-4.3-4.3" }]]),
-            el("h4", "", "No se encontraron sucursales"),
+            el("h4", "", "No se encontraron sedes"),
             el("p", "", "Probá con otro nombre, ciudad o dirección.")
         );
         return vacio;
@@ -180,6 +180,6 @@
             renderList(clinics);
         })
         .catch(() => {
-            listEl.textContent = "No se pudieron cargar las sucursales.";
+            listEl.textContent = "No se pudieron cargar las sedes.";
         });
 })();

@@ -78,7 +78,7 @@
             return;
         }
         if (!data.ok) {
-            mostrarMensaje(data.error || 'Ocurrio un error inesperado.', true);
+            mostrarMensaje(data.error || 'Ocurrió un error inesperado.', true);
             return;
         }
         mostrarMensaje(editando ? 'Estudio actualizado.' : 'Estudio creado.', false);

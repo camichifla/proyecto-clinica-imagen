@@ -8,7 +8,7 @@
     .campo input[type="file"] {
         padding: 0.6rem 0.7rem;
         border: 1px dashed var(--border-subtle);
-        border-radius: 0.6rem;
+        border-radius: var(--radius-md);
         font-family: inherit;
         font-size: var(--font-size-md);
         background: var(--surface-alt);

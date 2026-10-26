@@ -75,7 +75,7 @@ function csrf_check(?string $token): void
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(['ok' => false, 'error' => $excedido
             ? 'Los archivos superan el tamaño máximo permitido.'
-            : 'La sesión cambió. Recarga la página e intenta nuevamente.'], JSON_UNESCAPED_UNICODE);
+            : 'La sesión cambió. Recargá la página e intentá nuevamente.'], JSON_UNESCAPED_UNICODE);
         exit;
     }
 }

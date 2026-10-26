@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errores       = [];
 
     if (!preg_match('/^[a-z][a-z0-9_]{1,29}$/', $clave)) {
-        $errores['clave'] = 'La clave usa 2 a 30 letras minusculas, numeros o guion bajo, y empieza con una letra.';
+        $errores['clave'] = 'La clave usa 2 a 30 letras minúsculas, números o guion bajo, y empieza con una letra.';
     }
     if ($etiqueta === '' || mb_strlen($etiqueta) > ETIQUETA_ESTUDIO_MAX) {
         $errores['etiqueta'] = 'La etiqueta es obligatoria (máximo ' . ETIQUETA_ESTUDIO_MAX . ' caracteres).';

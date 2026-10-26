@@ -23,17 +23,17 @@
 
   <main id="contenido">
     <section class="seccion-auth">
-      <h1>Verificación de cuenta</h1>
+      <h1>Verificar cuenta</h1>
 
       <div data-exito-panel hidden>
-        <p class="aviso-exito">Si la cuenta existe y aún no fue verificada, te enviamos un nuevo enlace (revisa tu correo o <code>storage/mail.log</code>).</p>
+        <p class="aviso-exito" role="status">Si la cuenta existe y aún no fue verificada, te enviamos un nuevo enlace (revisá tu correo).</p>
         <p><a href="login.html">Volver a iniciar sesión</a></p>
       </div>
 
       <div data-token-invalido hidden>
         <p class="campo-error">El enlace de verificación es inválido o venció.</p>
 
-        <p>Solicita un nuevo enlace:</p>
+        <p>Solicitá un nuevo enlace:</p>
         <p class="campo-error" data-general hidden></p>
         <form method="post" action="api/verify.php" data-api="api/verify.php" data-exito="[data-exito-panel]" novalidate>
           <input type="hidden" name="csrf" value="">
@@ -46,7 +46,7 @@
         </form>
       </div>
 
-      <p data-default>Usa el enlace enviado a tu correo para verificar tu cuenta.</p>
+      <p data-default>Usá el enlace enviado a tu correo para verificar tu cuenta.</p>
     </section>
   </main>
 

@@ -60,7 +60,7 @@ $respuesta = [
 
 // Clinical notes: medico and profesional only (the administrator never sees them).
 if ($usuario['rol'] !== 'administrador') {
-    $respuesta['notas'] = notas_de_paciente(db(), (int) $paciente['id']);
+    $respuesta['notas'] = notas_de_paciente(db(), (int) $paciente['id'], (int) $usuario['cuenta_id']);
 }
 
 if ($usuario['rol'] === 'profesional') {

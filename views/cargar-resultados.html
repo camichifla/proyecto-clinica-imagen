@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cargar Resultados - Clínica Imagen</title>
+  <title>Cargar resultados - Clínica Imagen</title>
   <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,9 +39,9 @@
 
   <main id="contenido">
     <section class="seccion-auth seccion-cargar-resultados">
-      <h1 id="titulo-vista">Cargar Resultados</h1>
+      <h1 id="titulo-vista">Cargar resultados</h1>
 
-      <p class="aviso-exito" data-aviso="ok" hidden></p>
+      <p class="aviso-exito" data-aviso="ok" hidden role="status"></p>
       <p class="campo-error" data-general hidden></p>
 
       <form method="post" action="api/cargar-resultados.php" data-api="api/cargar-resultados.php" enctype="multipart/form-data" novalidate>
@@ -50,7 +50,7 @@
         <div class="campo">
           <label for="paciente_id_buscar">Paciente</label>
           <input type="text" id="paciente_id_buscar" data-lista="paciente_id_lista" data-buscador-combo="paciente_id"
-                 data-mensaje-sin-pacientes="Todavia no hay pacientes registrados."
+                 data-mensaje-sin-pacientes="No hay pacientes registrados."
                  autocomplete="off" placeholder="Buscar por apellido, nombre o CI">
           <datalist id="paciente_id_lista"></datalist>
           <input type="hidden" id="paciente_id" name="paciente_id" value="" required>
@@ -70,7 +70,7 @@
         </div>
 
         <div class="campo">
-          <label for="fecha_estudio">Fecha del estudio</label>
+          <label for="fecha_estudio">Fecha de envío</label>
           <input type="date" id="fecha_estudio" name="fecha_estudio" required>
         </div>
 
@@ -89,7 +89,7 @@
           <input type="file" id="informe" name="informe" accept="application/pdf">
         </div>
 
-        <button type="submit" class="btn-primary">Guardar resultado</button>
+        <button type="submit" class="btn-primary">Enviar resultado</button>
       </form>
     </section>
   </main>

@@ -38,13 +38,13 @@ function validar_reserva(array $datos, array $estudiosPermitidos, string $fechaM
         $stmt->execute([$sucursalId]);
         $activa = $stmt->fetchColumn();
         if ($activa === false || (int) $activa !== 1) {
-            $errores['sucursal_id'] = $activa === false ? 'Elegí una sede válida.' : 'La sede elegida no esta disponible.';
+            $errores['sucursal_id'] = $activa === false ? 'Elegí una sede válida.' : 'La sede elegida no está disponible.';
             $sucursalId = null;
         }
     }
 
     // Empty = "any available": assigned at the end, with everything else validated.
-    $autoAsignar   = $datos['profesional_id'] === '';
+    $autoAsignar   = $datos['profesional_id'] === '' || $datos['profesional_id'] === 'cualquiera';
     $profesionalId = $autoAsignar ? null : filter_var($datos['profesional_id'], FILTER_VALIDATE_INT);
     if (!$autoAsignar && !$profesionalId) {
         $errores['profesional_id'] = 'Elegí un profesional.';
@@ -81,7 +81,7 @@ function validar_reserva(array $datos, array $estudiosPermitidos, string $fechaM
         if (!$turnosDelDia) {
             $errores['fecha'] = 'La sede elegida no atiende ese día.';
         } elseif (!in_array($datos['hora'], slots_de_turnos($turnosDelDia), true)) {
-            $errores['hora'] = 'Esa hora no esta disponible en la sede elegida.';
+            $errores['hora'] = 'Esa hora no está disponible en la sede elegida.';
         }
     }
 

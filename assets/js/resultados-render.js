@@ -9,7 +9,7 @@ function crearTarjetaResultado(resultado, comparable = false) {
     h2.textContent = resultado.nombre_estudio;
     const fecha = document.createElement('span');
     fecha.className = 'tarjeta-resultado-fecha';
-    fecha.textContent = resultado.fecha_estudio;
+    fecha.textContent = fechaHora(resultado.fecha_estudio);
     header.append(h2, fecha);
     articulo.appendChild(header);
 
@@ -32,7 +32,12 @@ function crearTarjetaResultado(resultado, comparable = false) {
         enlace.target = '_blank';
         enlace.rel = 'noopener';
         enlace.textContent = 'Ver informe (PDF)';
-        articulo.appendChild(enlace);
+        const descarga = document.createElement('a');
+        descarga.className = 'tarjeta-resultado-informe';
+        descarga.href = resultado.informe.url;
+        descarga.download = 'informe-' + resultado.id + '.pdf';
+        descarga.textContent = 'Descargar informe';
+        articulo.append(enlace, ' · ', descarga);
     }
 
     if (resultado.imagenes.length) {
@@ -42,9 +47,9 @@ function crearTarjetaResultado(resultado, comparable = false) {
         resultado.imagenes.forEach((imagen, i) => {
             const img = document.createElement('img');
             img.src = imagen.url;
-            img.alt = `Imagen de ${resultado.nombre_estudio} del ${resultado.fecha_estudio}` + (total > 1 ? ` (${i + 1} de ${total})` : '');
+            img.alt = `Imagen de ${resultado.nombre_estudio} del ${fechaHora(resultado.fecha_estudio)}` + (total > 1 ? ` (${i + 1} de ${total})` : '');
             img.dataset.estudio = resultado.nombre_estudio;
-            img.dataset.fecha = resultado.fecha_estudio;
+            img.dataset.fecha = fechaHora(resultado.fecha_estudio);
             img.loading = 'lazy';
             if (!comparable) {
                 divImagenes.appendChild(img);
@@ -68,9 +73,7 @@ function crearTarjetaResultado(resultado, comparable = false) {
 
 function renderListaResultados(destino, resultados, mensajeVacio, comparable = false) {
     if (!resultados.length) {
-        const p = document.createElement('p');
-        p.textContent = mensajeVacio;
-        destino.appendChild(p);
+        destino.appendChild(parrafo(mensajeVacio));
         return;
     }
     const lista = document.createElement('div');
@@ -86,7 +89,7 @@ function renderListaResultados(destino, resultados, mensajeVacio, comparable = f
         const aviso = document.createElement('p');
         aviso.className = 'campo-hint comparar-aviso';
         aviso.setAttribute('role', 'status');
-        aviso.textContent = 'Marca 2 imágenes con "Comparar" para verlas lado a lado.';
+        aviso.textContent = 'Marcá 2 imágenes con "Comparar" para verlas lado a lado.';
         barra.append(boton, aviso);
         lista.appendChild(barra);
     }

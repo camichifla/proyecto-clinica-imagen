@@ -24,7 +24,7 @@
         const enlace = document.createElement('a');
         enlace.className = 'btn-primary';
         if (estudio.autoagendable) {
-            modo.textContent = 'Podes agendarlo en línea.';
+            modo.textContent = 'Podés agendarlo en línea.';
             if (sesion && sesion.logueado) {
                 if (sesion.rol !== 'paciente') {
                     card.appendChild(modo);
@@ -55,7 +55,7 @@
             return;
         }
         if (!respuesta.estudios.length) {
-            contenedor.textContent = 'Por ahora no hay estudios publicados.';
+            contenedor.textContent = 'No hay estudios publicados.';
             return;
         }
         contenedor.replaceChildren(...respuesta.estudios.map((e) => tarjeta(e, sesion)));

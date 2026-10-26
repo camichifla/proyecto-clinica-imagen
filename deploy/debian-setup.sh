@@ -76,6 +76,8 @@ SQL
 else
   # Existing databases: columns added after the first install (idempotent).
   mariadb "$DB_NAME" -e "ALTER TABLE pacientes ADD COLUMN IF NOT EXISTS email_anterior VARCHAR(254) NULL AFTER numero"
+  mariadb "$DB_NAME" -e "ALTER TABLE recepcionistas ADD COLUMN IF NOT EXISTS sucursal_id INT UNSIGNED NULL"
+  mariadb "$DB_NAME" -e "ALTER TABLE citas MODIFY estado ENUM('pendiente','confirmada','rechazada','cancelada','realizada') NOT NULL DEFAULT 'pendiente'"
 fi
 
 chown -R root:root "$DEST"

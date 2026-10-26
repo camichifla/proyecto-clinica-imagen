@@ -37,7 +37,7 @@ function validar_turnos(mixed $crudo): array|string
 {
     $lista = is_string($crudo) ? json_decode($crudo, true) : null;
     if (!is_array($lista) || count($lista) > MAX_TURNOS_HORARIO) {
-        return 'Los horarios no son validos.';
+        return 'Los horarios no son válidos.';
     }
     $hora   = '/^([01]\d|2[0-3]):[0-5]\d$/';
     $turnos = [];
@@ -108,13 +108,14 @@ const RANGO_MESES = 3;
 
 function rango_reserva(): array
 {
-    $hoy = new DateTimeImmutable('today');
-    return [$hoy->format('Y-m-d'), $hoy->modify('+' . RANGO_MESES . ' months')->format('Y-m-d')];
+    // Earliest bookable day is tomorrow: a cita is never for the current day.
+    $desde = new DateTimeImmutable('tomorrow');
+    return [$desde->format('Y-m-d'), $desde->modify('+' . RANGO_MESES . ' months')->format('Y-m-d')];
 }
 
 /**
  * 'HH:MM' times of $fecha that can't be booked. With a professional: the ones they already have taken plus the branch's outside their
- * own schedule. Without a professional: the branch's where NO eligible professional (branch + study) is free.
+ * own schedule. Without a professional: the branch's where NO eligible professional (branch + study; any study if $estudio is '') is free.
  * $ignorarCitaId: a cita whose own time doesn't count as taken (rescheduling). Requires db.php.
  *
  * @return string[]
@@ -151,12 +152,12 @@ function horas_ocupadas(int $sucursalId, string $fecha, ?int $profesionalId, str
     }
 
     $stmt = db()->prepare(
-        'SELECT ps.profesional_id
+        'SELECT DISTINCT ps.profesional_id
            FROM profesional_sucursal ps
-           JOIN profesional_especializacion pe ON pe.profesional_id = ps.profesional_id AND pe.especializacion = ?
+           JOIN profesional_especializacion pe ON pe.profesional_id = ps.profesional_id AND (? = \'\' OR pe.especializacion = ?)
           WHERE ps.sucursal_id = ? AND ' . sql_profesional_habilitado('ps.profesional_id')
     );
-    $stmt->execute([$estudio, $sucursalId]);
+    $stmt->execute([$estudio, $estudio, $sucursalId]);
     $elegibles = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
     if (!$elegibles) {
         return [];
@@ -192,6 +193,26 @@ function horas_ocupadas(int $sucursalId, string $fecha, ?int $profesionalId, str
         }
     }
     return $ocupadas;
+}
+
+/**
+ * Bookable 'HH:MM' times of $fecha: the branch's slots minus horas_ocupadas(), and none already past. Requires db.php.
+ *
+ * @return string[]
+ */
+function horas_libres(int $sucursalId, string $fecha, ?int $profesionalId, string $estudio, int $ignorarCitaId = 0): array
+{
+    $dia  = (int) (new DateTimeImmutable($fecha))->format('N');
+    $stmt = db()->prepare('SELECT hora_apertura, hora_cierre FROM sucursal_horarios WHERE sucursal_id = ? AND dia_semana = ? ORDER BY hora_apertura');
+    $stmt->execute([$sucursalId, $dia]);
+    $slots    = slots_de_turnos($stmt->fetchAll());
+    $ocupadas = horas_ocupadas($sucursalId, $fecha, $profesionalId, $estudio, $ignorarCitaId);
+    $ahora    = new DateTimeImmutable();
+
+    return array_values(array_filter(
+        $slots,
+        static fn (string $h): bool => !in_array($h, $ocupadas, true) && new DateTimeImmutable($fecha . ' ' . $h) > $ahora
+    ));
 }
 
 /**

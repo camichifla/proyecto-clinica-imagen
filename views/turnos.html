@@ -39,14 +39,64 @@
 
   <main id="contenido">
     <section class="seccion-panel">
-      <div class="barra-turnos">
-        <h1>Turnos</h1>
-        <button type="button" class="btn-secundario" id="btn-imprimir">Imprimir reporte</button>
-      </div>
+      <h1>Turnos</h1>
 
       <p class="aviso-exito" data-mensaje role="status" hidden></p>
       <p class="aviso-error" data-mensaje-error role="alert" hidden></p>
 
+      <button type="button" class="btn-secundario" id="btn-nueva-cita" aria-expanded="false" aria-controls="form-nueva-cita">Nueva cita</button>
+      <form class="filtros-turnos" id="form-nueva-cita" novalidate hidden>
+        <div class="campo">
+          <label for="nueva-paciente">Paciente</label>
+          <select class="selector-combo" id="nueva-paciente" name="paciente_id" data-buscable></select>
+        </div>
+        <div class="campo">
+          <label for="nueva-sucursal">Sede</label>
+          <select class="selector-combo" id="nueva-sucursal" name="sucursal_id"></select>
+        </div>
+        <div class="campo">
+          <label for="nueva-estudio">Estudio</label>
+          <select class="selector-combo" id="nueva-estudio" name="estudio"></select>
+        </div>
+        <div class="campo">
+          <label for="nueva-profesional">Profesional (opcional)</label>
+          <select class="selector-combo" id="nueva-profesional" name="profesional_id"></select>
+        </div>
+        <div class="campo">
+          <label for="nueva-fecha">Fecha</label>
+          <input type="date" id="nueva-fecha" name="fecha">
+        </div>
+        <div class="campo">
+          <label for="nueva-hora">Hora</label>
+          <select class="selector-combo" id="nueva-hora" name="hora"></select>
+        </div>
+        <div class="campo">
+          <button type="submit" class="btn-primary">Crear cita</button>
+        </div>
+      </form>
+
+      <h2>Turnos disponibles</h2>
+      <form class="filtros-turnos" id="form-disponibles" novalidate>
+        <div class="campo">
+          <label for="disp-sucursal">Sede</label>
+          <select class="selector-combo" id="disp-sucursal" name="sucursal_id"></select>
+        </div>
+        <div class="campo">
+          <label for="disp-fecha">Fecha</label>
+          <input type="date" id="disp-fecha" name="fecha">
+        </div>
+        <div class="campo">
+          <label for="disp-profesional">Profesional</label>
+          <select class="selector-combo" id="disp-profesional" name="profesional_id"></select>
+        </div>
+        <div class="campo">
+          <label for="disp-estudio">Estudio</label>
+          <select class="selector-combo" id="disp-estudio" name="estudio"></select>
+        </div>
+      </form>
+      <div id="disponibles-horas" class="horas-libres" aria-live="polite"></div>
+
+      <h2>Citas</h2>
       <form class="filtros-turnos" id="filtros-turnos" novalidate>
         <div class="campo">
           <label for="filtro-desde">Desde</label>
@@ -69,6 +119,10 @@
           </select>
         </div>
         <div class="campo">
+          <label for="filtro-paciente">Paciente</label>
+          <input type="search" id="filtro-paciente" name="paciente" placeholder="Nombre, apellido o CI" maxlength="80" autocomplete="off">
+        </div>
+        <div class="campo">
           <label for="filtro-estado">Estado</label>
           <select class="selector-combo" id="filtro-estado" name="estado">
             <option value="">Todos</option>
@@ -84,9 +138,8 @@
         </div>
       </form>
 
-      <p class="solo-impresion" id="turnos-filtros-activos"></p>
-      <ul class="totales-turnos" id="turnos-totales" aria-label="Totales por estado (rango filtrado)"></ul>
-      <p class="campo-hint" id="turnos-truncado" hidden>Se muestran las primeras 500 citas. Acota el rango de fechas para ver el resto.</p>
+      <p id="turnos-totales" role="status"></p>
+      <p class="campo-hint" id="turnos-truncado" hidden>Se muestran las primeras 500 citas. Acotá el rango de fechas para ver el resto.</p>
 
       <div id="turnos-lista"></div>
     </section>

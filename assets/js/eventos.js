@@ -33,7 +33,7 @@
         lista.replaceChildren(data.eventos.length
             ? tabla(['Fecha', 'Tipo', 'Correo', 'IP', 'Cuenta', 'Detalle'], data.eventos.map((e) => {
                 const tr = document.createElement('tr');
-                [['Fecha', e.creado_en], ['Tipo', e.tipo], ['Correo', e.email || '-'], ['IP', e.ip],
+                [['Fecha', fechaHora(e.creado_en)], ['Tipo', e.tipo], ['Correo', e.email || '-'], ['IP', e.ip],
                     ['Cuenta', e.cuenta_id == null ? '-' : e.cuenta_id], ['Detalle', e.detalle || '-']]
                     .forEach(([etiqueta, valor]) => tr.appendChild(celda(etiqueta, String(valor))));
                 return tr;

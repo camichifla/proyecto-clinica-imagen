@@ -31,9 +31,7 @@
     function renderCuentas(data) {
         tablaCuentasContenedor.innerHTML = '';
         if (!data.cuentas.length) {
-            const p = document.createElement('p');
-            p.textContent = 'Todavía no hay cuentas registradas.';
-            tablaCuentasContenedor.appendChild(p);
+            tablaCuentasContenedor.appendChild(parrafo('No hay cuentas.'));
             return;
         }
 
@@ -53,6 +51,36 @@
             tdActivo.appendChild(badge(cuenta.activo));
             tr.appendChild(tdActivo);
 
+            const tdSucursal = document.createElement('td');
+            tdSucursal.dataset.label = 'Sede';
+            if (cuenta.rol === 'recepcionista') {
+                const sel = document.createElement('select');
+                const vacia = document.createElement('option');
+                vacia.value = '';
+                vacia.textContent = 'Sin asignar';
+                sel.appendChild(vacia);
+                (data.sucursales || []).forEach((suc) => {
+                    const o = document.createElement('option');
+                    o.value = String(suc.id);
+                    o.textContent = suc.nombre;
+                    sel.appendChild(o);
+                });
+                sel.value = cuenta.sucursalId != null ? String(cuenta.sucursalId) : '';
+                sel.addEventListener('change', async () => {
+                    const resultado = await accionFila({ accion: 'asignar_sucursal', cuenta_id: String(cuenta.cuenta_id), sucursal_id: sel.value });
+                    if (resultado.ok) {
+                        mostrarMensaje(seccionCuentas, 'Sede a cargo actualizada.', false);
+                    } else if (resultado.error) {
+                        mostrarMensaje(seccionCuentas, resultado.error, true);
+                        cargarDatos();
+                    }
+                });
+                tdSucursal.appendChild(sel);
+            } else {
+                tdSucursal.textContent = '—';
+            }
+            tr.appendChild(tdSucursal);
+
             const tdAcciones = document.createElement('td');
             tdAcciones.dataset.label = '';
             if (cuenta.cuenta_id === data.cuenta_actual_id) {
@@ -70,6 +98,10 @@
                     boton.title = 'No se puede desactivar el último administrador activo.';
                 }
                 boton.addEventListener('click', async () => {
+                    const nombre = `${cuenta.apellido} ${cuenta.nombre}`.trim() || cuenta.email;
+                    if (cuenta.activo && !window.confirm(`¿Desactivar la cuenta de ${nombre}? No va a poder iniciar sesión.`)) {
+                        return;
+                    }
                     const resultado = await accionFila({ accion: 'toggle_activo', cuenta_id: String(cuenta.cuenta_id) });
                     if (resultado.ok) {
                         mostrarMensaje(seccionCuentas, 'Estado de la cuenta actualizado.', false);
@@ -83,7 +115,7 @@
             tr.appendChild(tdAcciones);
             return tr;
         });
-        tablaCuentasContenedor.appendChild(tabla(['Nombre', 'Email', 'Rol', 'Verificado', 'Activo', ''], filas));
+        tablaCuentasContenedor.appendChild(tabla(['Nombre', 'Email', 'Rol', 'Verificado', 'Activo', 'Sede', ''], filas));
     }
 
     function renderAsignaciones(data) {
@@ -94,9 +126,7 @@
 
         asignacionesContenedor.innerHTML = '';
         if (!data.asignaciones.length) {
-            const p = document.createElement('p');
-            p.textContent = 'Todavía no hay asignaciones.';
-            asignacionesContenedor.appendChild(p);
+            asignacionesContenedor.appendChild(parrafo('No hay asignaciones.'));
             return;
         }
 
@@ -112,6 +142,11 @@
             boton.className = 'btn-secundario';
             boton.textContent = 'Quitar';
             boton.addEventListener('click', async () => {
+                const medico = `${asignacion.medico_apellido}, ${asignacion.medico_nombre}`;
+                const paciente = `${asignacion.paciente_apellido}, ${asignacion.paciente_nombre}`;
+                if (!window.confirm(`¿Quitar a ${paciente} de la lista de pacientes de ${medico}?`)) {
+                    return;
+                }
                 const resultado = await accionFila({
                     accion: 'quitar_asignacion',
                     medico_id: String(asignacion.medico_id),
@@ -185,7 +220,7 @@
         const medicoId = document.getElementById('asignar-medico-id').value;
         const pacienteId = document.getElementById('asignar-paciente-id').value;
         if (!medicoId || !pacienteId) {
-            mostrarMensaje(seccionAsignaciones, 'Elegí un médico y un paciente validos.', true);
+            mostrarMensaje(seccionAsignaciones, 'Elegí un médico y un paciente válidos.', true);
             return;
         }
         const resultado = await accionFila({ accion: 'asignar_paciente', medico_id: medicoId, paciente_id: pacienteId });

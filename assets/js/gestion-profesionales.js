@@ -74,9 +74,7 @@
         catalogo = data;
         etiquetas = Object.fromEntries(data.estudios.map((e) => [e.clave, e.etiqueta]));
         if (!data.profesionales.length) {
-            const p = document.createElement('p');
-            p.textContent = 'Todavía no hay profesionales. Crea una cuenta de rol Profesional en Manejar Usuarios.';
-            lista.replaceChildren(p);
+            lista.replaceChildren(parrafo('No hay profesionales. Creá una cuenta de rol Profesional en Usuarios del sistema.'));
             return;
         }
         lista.replaceChildren(tabla(['Nombre', 'Sedes', 'Estudios', 'Horarios propios', 'Acciones'], data.profesionales.map(renderFila)));
@@ -102,7 +100,7 @@
             return;
         }
         if (!data.ok) {
-            mostrarMensaje(data.error || 'Ocurrio un error inesperado.', true);
+            mostrarMensaje(data.error || 'Ocurrió un error inesperado.', true);
             return;
         }
         mostrarMensaje('Profesional actualizado.', false);

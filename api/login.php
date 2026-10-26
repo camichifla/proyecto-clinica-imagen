@@ -32,9 +32,9 @@ if (!$cuenta) {
 } elseif (!password_verify($password, $cuenta['password_hash'])) {
     $error = 'Correo o contraseña inválidos.';
 } elseif ((int) $cuenta['verificado'] === 0) {
-    $error = 'Debes verificar tu correo antes de iniciar sesión.';
+    $error = 'Tenés que verificar tu correo antes de iniciar sesión.';
 } elseif ((int) $cuenta['activo'] === 0) {
-    $error = 'Tu cuenta fue desactivada. Contacta a la clínica.';
+    $error = 'Tu cuenta fue desactivada. Contactá a la clínica.';
 }
 
 if ($error !== null) {

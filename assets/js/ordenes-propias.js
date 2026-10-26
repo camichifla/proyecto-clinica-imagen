@@ -9,12 +9,12 @@
         articulo.className = 'orden-propia';
 
         const h3 = document.createElement('h3');
-        h3.textContent = `${orden.tipo_label} - ${orden.fecha}`;
+        h3.textContent = `${orden.tipo_label} - ${fechaHora(orden.fecha)}`;
         articulo.appendChild(h3);
 
         const datos = [];
         if (orden.cita_estudio) {
-            datos.push(['Estudio de la cita', `${orden.cita_estudio} (${orden.cita_fecha})`]);
+            datos.push(['Estudio de la cita', `${orden.cita_estudio} (${fechaHora(orden.cita_fecha)})`]);
         }
         datos.push(['Indicada por', orden.medico ? orden.medico + (orden.medico_email ? ` (${orden.medico_email})` : '') : '-']);
         datos.push(...orden.detalle.map((d) => [d.etiqueta, d.valor]));
@@ -41,9 +41,7 @@
             return;
         }
         if (!data.ordenes || !data.ordenes.length) {
-            const p = document.createElement('p');
-            p.textContent = 'Todavía no tenés órdenes de estudio.';
-            contenedor.appendChild(p);
+            contenedor.appendChild(parrafo('No hay órdenes de estudio.'));
             return;
         }
         data.ordenes.forEach((orden) => contenedor.appendChild(crearOrden(orden)));

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Manejar Usuarios - Clínica Imagen</title>
+  <title>Usuarios del sistema - Clínica Imagen</title>
   <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,19 +39,19 @@
 
   <main id="contenido">
     <section class="seccion-panel" id="seccion-cuentas">
-      <h1>Manejar Usuarios</h1>
+      <h1>Usuarios del sistema</h1>
 
-      <p class="aviso-exito" data-mensaje hidden></p>
-      <p class="aviso-error" data-mensaje-error hidden></p>
+      <p class="aviso-exito" data-mensaje hidden role="status"></p>
+      <p class="aviso-error" data-mensaje-error hidden role="alert"></p>
 
       <div id="cuentas-lista"></div>
     </section>
 
     <section class="seccion-panel" id="seccion-asignaciones">
-      <h2>Asignar Paciente a Médico</h2>
+      <h2>Asignar paciente a médico</h2>
 
-      <p class="aviso-exito" data-mensaje hidden></p>
-      <p class="aviso-error" data-mensaje-error hidden></p>
+      <p class="aviso-exito" data-mensaje hidden role="status"></p>
+      <p class="aviso-error" data-mensaje-error hidden role="alert"></p>
 
       <form class="campo-fila form-asignar-paciente">
         <div class="campo">
@@ -118,7 +118,7 @@
     <section class="seccion-panel" id="seccion-crear-staff">
       <h2>Crear cuenta de personal</h2>
 
-      <p class="aviso-exito" data-mensaje hidden></p>
+      <p class="aviso-exito" data-mensaje hidden role="status"></p>
       <p class="campo-error" data-general hidden></p>
 
       <form method="post" action="api/manejar-usuarios.php" data-api="api/manejar-usuarios.php" id="form-crear-staff" novalidate>

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Modificar Usuario - Clínica Imagen</title>
+  <title>Mi cuenta - Clínica Imagen</title>
   <link rel="icon" type="image/png" href="./assets/imagenes/icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,17 +38,20 @@
 
   <main id="contenido">
     <section class="seccion-auth">
-      <h1>Modificar Usuario</h1>
+      <h1>Mi cuenta</h1>
 
-      <p class="aviso-exito" data-aviso hidden>Datos actualizados correctamente.</p>
+      <p class="aviso-exito" data-aviso hidden role="status">Datos actualizados correctamente.</p>
       <p class="campo-error" data-general hidden></p>
 
-      <form method="post" action="api/modificar-usuario.php" data-api="api/modificar-usuario.php" novalidate>
+      <form method="post" action="api/modificar-usuario.php" data-api="api/modificar-usuario.php" data-sin-limpiar novalidate>
         <input type="hidden" name="csrf" value="">
 
         <div id="campos-usuario"></div>
 
-        <button type="submit" class="btn-primary">Guardar cambios</button>
+        <div class="acciones-form">
+          <button type="submit" class="btn-primary">Guardar cambios</button>
+          <button type="button" class="btn-peligro" id="cancelar-edicion">Cancelar</button>
+        </div>
       </form>
     </section>
   </main>

@@ -30,7 +30,7 @@ async function apiJson(url, opts = {}) {
     }
 }
 
-const ERROR_CONEXION = 'No se pudo conectar. Intenta nuevamente.';
+const ERROR_CONEXION = 'No se pudo conectar. Intentá nuevamente.';
 
 // POST with the session's CSRF token added. Same return contract as apiJson.
 async function enviarPost(url, campos) {
@@ -78,6 +78,24 @@ function parrafo(texto) {
     const p = document.createElement('p');
     p.textContent = texto;
     return p;
+}
+
+// "YYYY-MM-DD HH:MM[:SS]" -> "DD/MM/YYYY HH:MM"; "YYYY-MM-DD" -> "DD/MM/YYYY". Anything else is returned unchanged.
+function fechaHora(texto) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}:\d{2})(?::\d{2})?)?$/.exec(String(texto ?? ''));
+    return m ? `${m[3]}/${m[2]}/${m[1]}` + (m[4] ? ' ' + m[4] : '') : texto;
+}
+
+// Reveals the [data-aviso="<clave>"] notice (optionally with new text).
+function mostrarAviso(clave, texto) {
+    const aviso = document.querySelector(`[data-aviso="${clave}"]`);
+    if (!aviso) {
+        return;
+    }
+    if (texto) {
+        aviso.textContent = texto;
+    }
+    aviso.hidden = false;
 }
 
 function celda(etiqueta, texto) {
@@ -212,7 +230,11 @@ function filtrarAlCambiar(form, demora = 400) {
 
 // Returns the .tabla-scroll container with a <table class="tabla-datos">:
 // `encabezados` are the <th> texts, `filas` are already <tr> elements.
-function tabla(encabezados, filas) {
+const CHEVRON_DER = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>';
+const CHEVRON_IZQ = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>';
+
+// opciones.porPagina (e.g. 5): splits the rows into pages with a prev/next bar below the table.
+function tabla(encabezados, filas, opciones = {}) {
     const scroll = document.createElement('div');
     scroll.className = 'tabla-scroll';
     const table = document.createElement('table');
@@ -230,12 +252,51 @@ function tabla(encabezados, filas) {
     table.appendChild(thead);
 
     const tbody = document.createElement('tbody');
-    filas.forEach((fila) => tbody.appendChild(fila));
     table.appendChild(tbody);
-
     scroll.appendChild(table);
     observadorTablas.observe(scroll);
-    return scroll;
+
+    // Every row stays in the DOM (hidden off-page) so printing and the card-fit observer see them all.
+    filas.forEach((fila) => tbody.appendChild(fila));
+    const porPagina = opciones.porPagina ?? 5;
+    if (porPagina <= 0 || filas.length <= porPagina) {
+        return scroll;
+    }
+
+    // Paginated: show one page of rows at a time with a prev/next bar.
+    const paginas = Math.ceil(filas.length / porPagina);
+    let actual = 0;
+    const contenedor = document.createElement('div');
+    contenedor.appendChild(scroll);
+
+    const barra = document.createElement('div');
+    barra.className = 'paginacion';
+    const anterior = document.createElement('button');
+    anterior.type = 'button';
+    anterior.className = 'paginacion-flecha';
+    anterior.innerHTML = CHEVRON_IZQ;
+    anterior.setAttribute('aria-label', 'Página anterior');
+    const indicador = document.createElement('span');
+    indicador.className = 'paginacion-info';
+    const siguiente = document.createElement('button');
+    siguiente.type = 'button';
+    siguiente.className = 'paginacion-flecha';
+    siguiente.innerHTML = CHEVRON_DER;
+    siguiente.setAttribute('aria-label', 'Página siguiente');
+    barra.append(anterior, indicador, siguiente);
+    contenedor.appendChild(barra);
+
+    const mostrar = () => {
+        filas.forEach((fila, i) => { fila.classList.toggle('pagina-oculta', i < actual * porPagina || i >= (actual + 1) * porPagina); });
+        indicador.textContent = (actual + 1) + '/' + paginas;
+        // Hidden (not just disabled) at the ends; visibility keeps the number centered.
+        anterior.classList.toggle('oculto', actual === 0);
+        siguiente.classList.toggle('oculto', actual === paginas - 1);
+    };
+    anterior.addEventListener('click', () => { if (actual > 0) { actual--; mostrar(); } });
+    siguiente.addEventListener('click', () => { if (actual < paginas - 1) { actual++; mostrar(); } });
+    mostrar();
+    return contenedor;
 }
 
 function poblarDatalist(datalist, filas, etiquetaFn) {
@@ -253,7 +314,7 @@ function poblarPacientes(datalist, pacientes, inputBuscar) {
     if (!pacientes.length && inputBuscar) {
         const mensaje = document.createElement('p');
         mensaje.className = 'campo-error';
-        mensaje.textContent = inputBuscar.dataset.mensajeSinPacientes || 'Todavía no hay pacientes registrados.';
+        mensaje.textContent = inputBuscar.dataset.mensajeSinPacientes || 'No hay pacientes registrados.';
         inputBuscar.closest('.campo').appendChild(mensaje);
     }
 }
@@ -279,13 +340,15 @@ function poblarSucursales(select, sucursalesOrden, seleccionada = '') {
     });
 }
 
-function poblarProfesionales(select, profesionales, seleccionado = '', etiquetasEstudio = {}) {
+function poblarProfesionales(select, profesionales, seleccionado = '', etiquetasEstudio = {}, soloNombre = false) {
     profesionales.forEach((profesional) => {
         const opcion = document.createElement('option');
         opcion.value = String(profesional.id);
         opcion.dataset.especializaciones = JSON.stringify(profesional.especializaciones);
         const etiquetas = profesional.especializaciones.map((e) => etiquetasEstudio[e] || e).join(', ');
-        opcion.textContent = profesional.apellido + ', ' + profesional.nombre + ' — ' + etiquetas;
+        opcion.textContent = soloNombre
+            ? profesional.apellido + ', ' + profesional.nombre
+            : profesional.apellido + ', ' + profesional.nombre + ' — ' + etiquetas;
         if (String(profesional.id) === seleccionado) {
             opcion.selected = true;
         }
@@ -418,7 +481,7 @@ function turnosDeContenedor(contenedor) {
 
         const data = await apiJson(url, { method: 'POST', body: new FormData(form) });
         if (!data) {
-            mostrarError(form, 'general', 'No se pudo conectar. Intenta nuevamente.');
+            mostrarError(form, 'general', ERROR_CONEXION);
             return;
         }
 
@@ -429,7 +492,7 @@ function turnosDeContenedor(contenedor) {
         }
 
         if (!data.ok) {
-            mostrarError(form, 'general', data.error || 'Ocurrio un error inesperado.');
+            mostrarError(form, 'general', data.error || 'Ocurrió un error inesperado.');
             form.dispatchEvent(new CustomEvent('form-api:respuesta', { detail: data }));
             return;
         }

@@ -212,4 +212,29 @@
     }))).observe(document.body, { childList: true, subtree: true });
     new MutationObserver((cambios) => cambios.forEach((cambio) => cambio.addedNodes.forEach(ponerPlaceholder)))
         .observe(document.body, { childList: true, subtree: true });
+
+    // data-permitidos="<regex character class body>": characters outside it are dropped while typing or pasting
+    // (e.g. letters only in names, digits only in the cédula). The field's pattern still validates the format.
+    document.addEventListener('input', (evento) => {
+        const campo = evento.target;
+        if (!campo.dataset || campo.dataset.permitidos === undefined) {
+            return;
+        }
+        const fuera = new RegExp(`[^${campo.dataset.permitidos}]`, 'gu');
+        if (fuera.test(campo.value)) {
+            const cursor = campo.selectionStart - (campo.value.slice(0, campo.selectionStart).match(fuera) || []).length;
+            campo.value = campo.value.replace(fuera, '');
+            campo.setSelectionRange(cursor, cursor);
+        }
+    });
+
+    // Requirement checklists (<ul class="requisitos" data-para="<input id>"> with <li data-regla="<regex>">):
+    // each item is ticked (.cumplido) live while the value matches its rule.
+    document.querySelectorAll('.requisitos[data-para]').forEach((lista) => {
+        const campo = document.getElementById(lista.dataset.para);
+        const items = Array.from(lista.querySelectorAll('li[data-regla]'));
+        const revisar = () => items.forEach((li) => li.classList.toggle('cumplido', new RegExp(li.dataset.regla, 'u').test(campo.value)));
+        campo.addEventListener('input', revisar);
+        revisar();
+    });
 })();

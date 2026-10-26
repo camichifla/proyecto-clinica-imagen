@@ -141,6 +141,30 @@ function mostrarErroresCampos(form, errores) {
     return sueltos;
 }
 
+// A field's error ("Este campo es obligatorio.", format errors) goes away as soon as the user selects the field:
+// clicking/tapping it, tabbing into it, or editing it. The focus validation itself moves to the first invalid
+// field is not the user's, so it keeps its error.
+function limpiarErrorDe(evento) {
+    const contenedor = evento.target.closest && evento.target.closest('.campo');
+    if (!contenedor || !contenedor.querySelector('.campo-error[data-dinamico], [aria-invalid]')) {
+        return;
+    }
+    contenedor.querySelectorAll('.campo-error[data-dinamico]').forEach((p) => p.remove());
+    contenedor.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
+    contenedor.querySelectorAll('[data-error-id]').forEach(desvincularError);
+}
+let tabulando = false;
+document.addEventListener('keydown', (evento) => {
+    tabulando = evento.key === 'Tab';
+});
+document.addEventListener('focusin', (evento) => {
+    if (tabulando) {
+        limpiarErrorDe(evento);
+    }
+    tabulando = false;
+});
+['pointerdown', 'input', 'change'].forEach((tipo) => document.addEventListener(tipo, limpiarErrorDe));
+
 function celdaEstado(estado, etiqueta) {
     const td = document.createElement('td');
     td.dataset.label = 'Estado';

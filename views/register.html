@@ -32,47 +32,46 @@
 
       <p class="campo-error" data-general hidden></p>
 
-      <form class="ayuda-al-foco" method="post" action="api/register.php" data-api="api/register.php" data-exito="[data-exito-panel]" novalidate>
+      <form method="post" action="api/register.php" data-api="api/register.php" data-exito="[data-exito-panel]" novalidate>
         <input type="hidden" name="csrf" value="">
 
         <div class="campo-fila">
           <div class="campo">
             <label for="nombre">Nombre</label>
-            <input type="text" id="nombre" name="nombre" required pattern="\p{L}[\p{L}\s'\-]{1,59}" aria-describedby="ayuda-nombre">
-            <p class="campo-hint" id="ayuda-nombre">Solo letras y espacios, 2 a 60 caracteres.</p>
+            <input type="text" id="nombre" name="nombre" required pattern="\p{L}[\p{L}\s'\-]{1,59}" maxlength="60" data-permitidos="\p{L}\s'\-">
           </div>
           <div class="campo">
             <label for="apellido">Apellido</label>
-            <input type="text" id="apellido" name="apellido" required pattern="\p{L}[\p{L}\s'\-]{1,59}" aria-describedby="ayuda-apellido">
-            <p class="campo-hint" id="ayuda-apellido">Solo letras y espacios, 2 a 60 caracteres.</p>
+            <input type="text" id="apellido" name="apellido" required pattern="\p{L}[\p{L}\s'\-]{1,59}" maxlength="60" data-permitidos="\p{L}\s'\-">
           </div>
         </div>
 
         <div class="campo">
           <label for="ci">Cédula</label>
-          <input type="text" id="ci" name="ci" required pattern="\d{7,8}" inputmode="numeric" aria-describedby="ayuda-ci">
-          <p class="campo-hint" id="ayuda-ci">7 u 8 dígitos, sin puntos ni guion. Ej: 12345678</p>
+          <input type="text" id="ci" name="ci" required pattern="\d{7,8}" inputmode="numeric" maxlength="8" data-permitidos="\d" placeholder="12345678">
         </div>
         <div class="campo">
           <label for="direccion">Dirección</label>
-          <input type="text" id="direccion" name="direccion" required minlength="5" maxlength="160" aria-describedby="ayuda-direccion">
-          <p class="campo-hint" id="ayuda-direccion">Calle y número, 5 a 160 caracteres.</p>
+          <input type="text" id="direccion" name="direccion" required minlength="5" maxlength="160" placeholder="Av. Italia 1234">
         </div>
         <div class="campo">
           <label for="numero">Teléfono</label>
-          <input type="tel" id="numero" name="numero" required pattern="\+?\d[\d\s\-]{7,24}" aria-describedby="ayuda-numero">
-          <p class="campo-hint" id="ayuda-numero">8 a 25 dígitos; se permite + inicial. Ej: 099123456</p>
+          <input type="tel" id="numero" name="numero" required pattern="\+?\d[\d\s\-]{7,24}" maxlength="25" data-permitidos="\d\s+\-" placeholder="099123456">
         </div>
         <div class="campo">
           <label for="email">Correo</label>
-          <input type="email" id="email" name="email" required aria-describedby="ayuda-email">
-          <p class="campo-hint" id="ayuda-email">Formato nombre@dominio.com.</p>
+          <input type="email" id="email" name="email" required placeholder="nombre@dominio.com">
         </div>
 
         <div class="campo">
           <label for="contrasena">Contraseña</label>
-          <input type="password" id="contrasena" name="contrasena" required pattern="(?=.*\p{L})(?=.*\d).{8,72}" value="" aria-describedby="ayuda-contrasena">
-          <p class="campo-hint" id="ayuda-contrasena">Mínimo 8 caracteres, con al menos una letra y un número.</p>
+          <input type="password" id="contrasena" name="contrasena" required pattern="(?=.*\p{L})(?=.*\d)(?=.*[^\p{L}\d\s]).{8,72}" maxlength="72" value="" aria-describedby="requisitos-contrasena">
+          <ul class="requisitos" id="requisitos-contrasena" data-para="contrasena">
+            <li data-regla=".{8,}">Mínimo 8 caracteres</li>
+            <li data-regla="\p{L}">Al menos una letra</li>
+            <li data-regla="\d">Al menos un número</li>
+            <li data-regla="[^\p{L}\d\s]">Al menos un carácter especial (!, ?, #, ...)</li>
+          </ul>
         </div>
 
         <button type="submit" class="btn-primary">Registrarme</button>

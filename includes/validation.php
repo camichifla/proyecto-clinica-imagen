@@ -10,7 +10,7 @@ const REGLAS_PACIENTE = [
     'direccion'  => ['label' => 'Dirección',  'pattern' => '/^.{5,160}\z/u',                             'hint' => 'Calle y número, 5 a 160 caracteres.'],
     'numero'     => ['label' => 'Teléfono',   'pattern' => '/^\+?\d[\d\s-]{7,24}\z/',                    'hint' => '8 a 25 dígitos; se permite + inicial.'],
     'email'      => ['label' => 'Correo',     'filter'  => FILTER_VALIDATE_EMAIL,                       'hint' => 'Formato nombre@dominio.com.'],
-    'contrasena' => ['label' => 'Contraseña', 'pattern' => '/^(?=.*\p{L})(?=.*\d).{8,72}\z/u',           'hint' => 'Mínimo 8 caracteres, con al menos una letra y un número.', 'maxbytes' => 72],
+    'contrasena' => ['label' => 'Contraseña', 'pattern' => '/^(?=.*\p{L})(?=.*\d)(?=.*[^\p{L}\d\s]).{8,72}\z/u', 'hint' => 'Mínimo 8 caracteres, con al menos una letra, un número y un carácter especial.', 'maxbytes' => 72],
 ];
 
 // Reuses REGLAS_PACIENTE's nombre/apellido/email/contrasena rules for staff accounts (manejar-usuarios.php).

@@ -741,43 +741,47 @@ select.selector-combo {
     font-size: var(--font-size-sm);
 }
 
-/* Format help floats over the fields below while focused: red until the value matches the input's native rules,
-   green once it does. Screen readers get it via aria-describedby. */
-.ayuda-al-foco .campo {
+/* Requirement checklist (campos.js) floating under its field while focused; met items turn green with a ✓. */
+.campo:has(> .requisitos) {
     position: relative;
-    --validez: var(--color-danger);
-    --validez-rgb: var(--danger-rgb);
 }
 
-.ayuda-al-foco .campo:has(:valid) {
-    --validez: var(--color-success);
-    --validez-rgb: var(--success-rgb);
-}
-
-.ayuda-al-foco .campo input:focus {
-    outline: none;
-    border-color: var(--validez);
-    box-shadow: 0 0 0 1px var(--validez);
-    background: rgba(var(--validez-rgb), 0.08);
-}
-
-.ayuda-al-foco .campo-hint {
+.requisitos {
     position: absolute;
     top: 100%;
     left: 0;
     right: 0;
     z-index: 2;
+    display: grid;
+    gap: var(--space-1);
     margin: var(--space-1) 0 0;
     padding: var(--space-2) var(--space-3);
+    list-style: none;
     background: var(--surface);
-    border-left: 4px solid var(--validez);
+    border: 1px solid var(--border-subtle);
     border-radius: 0.5rem;
     box-shadow: 0 4px 12px rgba(var(--overlay-rgb), 0.12);
-    color: var(--validez);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    pointer-events: none; /* clicks reach what it covers (e.g. the submit button) */
 }
 
-.ayuda-al-foco .campo:not(:focus-within) .campo-hint {
+.campo:not(:focus-within) > .requisitos {
     display: none;
+}
+
+.requisitos li::before {
+    content: '○';
+    display: inline-block;
+    width: 1.2em;
+}
+
+.requisitos li.cumplido {
+    color: var(--color-success);
+}
+
+.requisitos li.cumplido::before {
+    content: '✓';
 }
 
 .campo-error {

@@ -3,11 +3,30 @@
 
     const DIAS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
-    // Escapes database text before building it as HTML.
-    function esc(texto) {
-        const div = document.createElement("div");
-        div.textContent = texto == null ? "" : String(texto);
-        return div.innerHTML;
+    function el(tag, className, texto) {
+        const nodo = document.createElement(tag);
+        if (className) {
+            nodo.className = className;
+        }
+        if (texto != null) {
+            nodo.textContent = texto;
+        }
+        return nodo;
+    }
+
+    const SVG_NS = "http://www.w3.org/2000/svg";
+
+    // Line icon: <svg> with the given child shapes, e.g. ["path", { d: "..." }].
+    function icono(size, formas) {
+        const svg = document.createElementNS(SVG_NS, "svg");
+        const atributos = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", "stroke-width": 2, "stroke-linecap": "round", "stroke-linejoin": "round" };
+        Object.entries(atributos).forEach(([k, v]) => svg.setAttribute(k, v));
+        formas.forEach(([tag, attrs]) => {
+            const forma = document.createElementNS(SVG_NS, tag);
+            Object.entries(attrs).forEach(([k, v]) => forma.setAttribute(k, v));
+            svg.append(forma);
+        });
+        return svg;
     }
 
     // [[dia, apertura, cierre], ...] -> "Lun a Vie 08:00-20:00 · Sáb 08:00-13:00"
@@ -58,71 +77,66 @@
                 return; // listed, not pinned
             }
             const marker = L.marker([clinic.latitud, clinic.longitud], { icon: markerIcon }).addTo(map);
-            marker.bindPopup(popupTemplate(clinic));
+            marker.bindPopup(popupElement(clinic));
             marker.on("click", () => setActiveClinic(clinic.id));
             markers.set(clinic.id, marker);
         });
     }
 
-    // Equipamiento is free text, one item per line; esc() keeps it safe inside the template.
+    // Equipamiento is free text, one item per line.
     function equipamientoLista(texto) {
-        const items = texto.split("\n").map((l) => l.trim()).filter(Boolean);
-        return `<ul class="equipamiento-lista">${items.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>`;
+        const ul = el("ul", "equipamiento-lista");
+        texto.split("\n").map((l) => l.trim()).filter(Boolean).forEach((item) => ul.append(el("li", "", item)));
+        return ul;
     }
 
-    function popupTemplate(clinic) {
-        return `
-            <div class="popup-clinic">
-                <h4>${esc(clinic.nombre)}</h4>
-                <p>${esc(clinic.direccion)}</p>
-                <div class="popup-meta">
-                    ${clinic.equipamiento ? equipamientoLista(clinic.equipamiento) : ""}
-                    <span>${esc(horariosTexto(clinic.horarios))}</span>
-                </div>
-            </div>
-        `;
+    function popupElement(clinic) {
+        const meta = el("div", "popup-meta");
+        if (clinic.equipamiento) {
+            meta.append(equipamientoLista(clinic.equipamiento));
+        }
+        meta.append(el("span", "", horariosTexto(clinic.horarios)));
+        const popup = el("div", "popup-clinic");
+        popup.append(el("h4", "", clinic.nombre), el("p", "", clinic.direccion), meta);
+        return popup;
     }
 
-    function clinicCardTemplate(clinic) {
-        return `
-            <div class="clinic-card" data-id="${clinic.id}">
-                <div class="clinic-card-header">
-                    <span class="clinic-name">${esc(clinic.nombre)}</span>
-                </div>
-                <div class="clinic-address">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
-                        <circle cx="12" cy="10" r="3"></circle>
-                    </svg>
-                    ${esc(clinic.direccion)}
-                </div>
-                ${clinic.equipamiento ? equipamientoLista(clinic.equipamiento) : ""}
-                <div class="clinic-footer">
-                    <span class="clinic-hours">${esc(horariosTexto(clinic.horarios))}</span>
-                </div>
-            </div>
-        `;
+    function clinicCardElement(clinic) {
+        const card = el("div", "clinic-card");
+        card.dataset.id = clinic.id;
+        const header = el("div", "clinic-card-header");
+        header.append(el("span", "clinic-name", clinic.nombre));
+        const address = el("div", "clinic-address");
+        address.append(
+            icono(14, [["path", { d: "M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" }], ["circle", { cx: 12, cy: 10, r: 3 }]]),
+            " " + clinic.direccion
+        );
+        const footer = el("div", "clinic-footer");
+        footer.append(el("span", "clinic-hours", horariosTexto(clinic.horarios)));
+        card.append(header, address);
+        if (clinic.equipamiento) {
+            card.append(equipamientoLista(clinic.equipamiento));
+        }
+        card.append(footer);
+        return card;
     }
 
-    const emptyStateTemplate = `
-        <div class="clinics-empty">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.3-4.3"></path>
-            </svg>
-            <h4>No se encontraron sucursales</h4>
-            <p>Probá con otro nombre, ciudad o dirección.</p>
-        </div>
-    `;
+    function emptyStateElement() {
+        const vacio = el("div", "clinics-empty");
+        vacio.append(
+            icono(32, [["circle", { cx: 11, cy: 11, r: 8 }], ["path", { d: "m21 21-4.3-4.3" }]]),
+            el("h4", "", "No se encontraron sucursales"),
+            el("p", "", "Probá con otro nombre, ciudad o dirección.")
+        );
+        return vacio;
+    }
 
     const listEl = document.getElementById("clinicsList");
     const resultsCountEl = document.getElementById("resultsCount");
     const searchEl = document.getElementById("clinicSearch");
 
     function renderList(items) {
-        listEl.innerHTML = items.length
-            ? items.map(clinicCardTemplate).join("")
-            : emptyStateTemplate;
+        listEl.replaceChildren(...(items.length ? items.map(clinicCardElement) : [emptyStateElement()]));
 
         // Count only while a search filters the list.
         resultsCountEl.textContent = items.length === clinics.length

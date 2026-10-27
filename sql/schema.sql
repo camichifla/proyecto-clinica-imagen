@@ -92,6 +92,19 @@ CREATE TABLE administradores (
   UNIQUE KEY uq_administradores_ci (ci)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE sucursales (
+  id        INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  nombre    VARCHAR(80)  NOT NULL,
+  direccion VARCHAR(160) NULL,                    -- NULL allowed (branch added without an address)
+  activo       TINYINT(1)   NOT NULL DEFAULT 1,   -- 0 = not offered for booking and hidden from the public map; existing citas keep the name
+  equipamiento VARCHAR(1000) NULL,                -- one item per line
+  latitud      DECIMAL(9,6) NULL,                 -- map pin; NULL (either one) = listed but not pinned
+  longitud     DECIMAL(9,6) NULL,
+  creado_en DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_sucursales_nombre (nombre)        -- seeds are name-matched; duplicates must be impossible
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE recepcionistas (
   id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
   nombre      VARCHAR(60) NOT NULL,
@@ -129,19 +142,6 @@ CREATE TABLE tokens_reset (                           -- identical shape, separa
   UNIQUE KEY uq_tr_hash   (token_hash),
   KEY         ix_tr_cuenta (cuenta_id),
   CONSTRAINT fk_tr_cuenta FOREIGN KEY (cuenta_id) REFERENCES cuentas(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE sucursales (
-  id        INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  nombre    VARCHAR(80)  NOT NULL,
-  direccion VARCHAR(160) NULL,                    -- NULL allowed (branch added without an address)
-  activo       TINYINT(1)   NOT NULL DEFAULT 1,   -- 0 = not offered for booking and hidden from the public map; existing citas keep the name
-  equipamiento VARCHAR(1000) NULL,                -- one item per line
-  latitud      DECIMAL(9,6) NULL,                 -- map pin; NULL (either one) = listed but not pinned
-  longitud     DECIMAL(9,6) NULL,
-  creado_en DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  UNIQUE KEY uq_sucursales_nombre (nombre)        -- seeds are name-matched; duplicates must be impossible
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE sucursal_horarios (                  -- one row per contiguous shift

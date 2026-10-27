@@ -506,7 +506,7 @@ menu_configuracion() {
          if instalar_dependencias && (umask 022; git clone --depth 1 "$REPO_URL" "$instdir"); then
            # debian-setup.sh expects to run from the project root
            (umask 022; cd "$instdir" && bash deploy/debian-setup.sh) && ok "Aplicación desplegada en $APP_DIR"
-           DEPLOY_DIR=$instdir/deploy
+           DEPLOY_DIR=$instdir/deploy/config
            configurar_firewall; configurar_ssh; configurar_fail2ban
            instalar_script "$instdir/deploy/operador.sh"
          else

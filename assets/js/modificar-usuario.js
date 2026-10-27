@@ -42,10 +42,18 @@
     const formEmail = document.getElementById('form-email');
     const formContrasena = document.getElementById('form-contrasena');
 
+    // Persistent note while a change waits for confirmation (the current email stays active until then).
+    function mostrarPendiente(email) {
+        const p = document.getElementById('email-pendiente');
+        p.hidden = !email;
+        p.textContent = email ? `Pendiente de confirmación: ${email}. Revisá esa casilla para completar el cambio.` : '';
+    }
+
     formEmail.addEventListener('form-api:respuesta', (evento) => {
         if (!evento.detail.ok) {
             return;
         }
+        mostrarPendiente(evento.detail.email_pendiente);
         mostrarAviso('email', evento.detail.email_pendiente
             ? `Te enviamos un correo a ${evento.detail.email_pendiente}. El cambio se aplica cuando confirmes la nueva dirección (vence en 24 horas); hasta entonces seguís usando el correo actual.`
             : 'Correo actualizado correctamente.');
@@ -66,6 +74,7 @@
             return;
         }
         formEmail.elements.email.value = data.email || '';
+        mostrarPendiente(data.email_pendiente);
         if (!data.campos) {
             form.hidden = true;
             form.insertAdjacentElement('beforebegin', parrafo('Esta sección está en construcción.'));

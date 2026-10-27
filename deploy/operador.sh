@@ -28,17 +28,62 @@ log() {  # log LEVEL message
 
 pausa() { echo; read -rp "Presione Enter para continuar..." _; }
 
+# Clinic logo, drawn to the left of every menu (50 columns wide).
+mapfile -t LOGO <<'EOF'
+                 ...::.....:.::..
+
+                              .
+                               ---:
+                               :-:::::
+                                -:::::.:
+                                :-:::::: .
+                                ::::::::::.    .
+ ..                            ::::::::::::.   ..
+ :.                             :::::::::::::   ::
+::                               .-:::::::::::  .:
+::                                 .::::::::::   :
+:.                                  :=::::::::.  :
+:.                                 -=====::::::  :
+:.                                -========:.::  :
+-:                                -=========-:. .:
+::                               .===========-  ::
+ :.         .                    :===========.  ::
+ ::          ..                  ===========:  ::
+  ::       ..  ::.               ==========-  .:
+   ::        :.   ::-++++===:::===========:  .:
+    .:     .   ::: :++++++++++++++=======   ..
+      ..    .:.   -*++++++++++++++++++=    ..
+        .      ::=*++**++++++++++++=:    ..
+          ..     .-=********+++=:      .
+              .                    .
+                  .             ..
+EOF
+
 # Arrow-key menu: menu TITLE "N) label"...; sets $op to the chosen N. Typing a digit still selects directly.
 menu() {
   local title=$1; shift
   local items=("$@") sel=0 i key n=$#
   while true; do
     clear
-    echo "$title"
+    local lineas
+    mapfile -t lineas <<< "$title" # a multi-line title (main menu) takes one row per line
     for i in "${!items[@]}"; do
-      if [ "$i" -eq "$sel" ]; then printf '\e[7m> %s\e[0m\n' "${items[i]}"; else printf '  %s\n' "${items[i]}"; fi
+      if [ "$i" -eq "$sel" ]; then lineas+=("$(printf '\e[7m> %s\e[0m' "${items[i]}")"); else lineas+=("  ${items[i]}"); fi
     done
-    echo; echo "↑/↓ para moverse, Enter para elegir"
+    lineas+=("" "↑/↓ para moverse, Enter para elegir")
+    # Logo on the left when the terminal is wide enough; menu alone otherwise.
+    if [ "$(tput cols 2>/dev/null || echo 80)" -ge 110 ]; then # 50 logo + 3 gap + the widest menu line
+      local filas=$(( ${#LOGO[@]} > ${#lineas[@]} ? ${#LOGO[@]} : ${#lineas[@]} ))
+      local desde=$(( (${#LOGO[@]} - ${#lineas[@]}) / 2 )) # menu vertically centered on the logo
+      (( desde < 0 )) && desde=0
+      for (( i = 0; i < filas; i++ )); do
+        local linea=''
+        (( i >= desde )) && linea=${lineas[i - desde]}
+        printf '%-50s   %s\n' "${LOGO[i]}" "$linea"
+      done
+    else
+      printf '%s\n' "${lineas[@]}"
+    fi
     IFS= read -rsn1 key
     case $key in
       $'\e') read -rsn2 -t 0.1 key
@@ -154,8 +199,6 @@ menu_red() {
       "5) Estado de fail2ban" \
       "6) Configurar dominio (hostname y /etc/hosts)" \
       "7) Probar resolución DNS" \
-      "8) Publicar en internet (Cloudflare Tunnel, URL temporal)" \
-      "9) Dejar de publicar en internet" \
       "0) Volver"
     case $op in
       1) log ACTION "Consulta IP del servidor"; ip -br address ;;
@@ -183,8 +226,6 @@ menu_red() {
          nombre=${nombre:-$(hostname -f 2>/dev/null || hostname)}
          log ACTION "Prueba de resolución DNS de $nombre"
          getent hosts "$nombre" || warn "getent no resolvió $nombre" ;;
-      8) publicar_tunel ;;
-      9) detener_tunel ;;
       0) return ;;
       *) echo "Opción inválida" ;;
     esac
@@ -444,10 +485,12 @@ instalar_script() {
 menu_configuracion() {
   log INFO "Entrando al menú de configuración"
   while true; do
-    menu "--- Configuración / Instalación ---" \
+    menu "--- EXTRA ---" \
       "1) Configurar manualmente el sistema" \
       "2) Instalar automáticamente desde GitHub" \
       "3) Actualizar script desde GitHub" \
+      "4) Publicar en internet (Cloudflare Tunnel, URL temporal)" \
+      "5) Dejar de publicar en internet" \
       "0) Volver"
     case $op in
       1) instalar_dependencias && configurar_firewall && configurar_ssh && configurar_fail2ban && ok "Configuración manual completada" ;;
@@ -473,6 +516,8 @@ menu_configuracion() {
          else
            warn "No se pudo descargar la actualización"
          fi ;;
+      4) publicar_tunel ;;
+      5) detener_tunel ;;
       0) return ;;
       *) echo "Opción inválida" ;;
     esac
@@ -492,7 +537,7 @@ while true; do
     "6) Gestión de bases de datos" \
     "7) Monitoreo y registros del sistema" \
     "8) Log interno del script" \
-    "9) Configuración / Instalación" \
+    "9) EXTRA" \
     "0) Salir"
   case $op in
     1) menu_servicios ;;

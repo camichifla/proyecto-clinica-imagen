@@ -497,7 +497,10 @@ menu_configuracion() {
       2) echo "ℹ Descargando instalador automático desde GitHub..."
          read -rp "Dominio para HTTPS (vacío = solo HTTP): " DOMAIN
          if [ -n "$DOMAIN" ]; then read -rp "Email de contacto para Let's Encrypt: " CERTBOT_EMAIL; fi
-         export DOMAIN CERTBOT_EMAIL
+         read -rp "¿Borrar la base de datos y empezar de cero? Se pierden TODOS los pacientes, citas y resultados (s/N): " c
+         if [[ $c =~ ^[sS]$ ]]; then RESET_DB=1; log ACTION "Reinstalación con reseteo de base"; else RESET_DB=0; fi
+         CRED_FILE=$(mktemp) # debian-setup.sh writes the new admin's credentials here (only when the DB is created)
+         export DOMAIN CERTBOT_EMAIL RESET_DB CRED_FILE
          instdir=$(mktemp -d)
          # the operator runs with umask 077; the clone becomes Apache's document root
          if instalar_dependencias && (umask 022; git clone --depth 1 "$REPO_URL" "$instdir"); then
@@ -508,7 +511,11 @@ menu_configuracion() {
            instalar_script "$instdir/deploy/operador.sh"
          else
            warn "Falló la instalación automática"
-         fi ;;
+         fi
+         if [ -s "$CRED_FILE" ]; then
+           echo; echo "==============================================="; cat "$CRED_FILE"; echo "==============================================="
+         fi
+         rm -f "$CRED_FILE" ;;
       3) rm -rf /tmp/operador_update
          if git clone --depth 1 "$REPO_URL" /tmp/operador_update; then
            instalar_script /tmp/operador_update/deploy/operador.sh

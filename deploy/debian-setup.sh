@@ -4,6 +4,8 @@
 #   sudo bash deploy/debian-setup.sh [APP_URL]
 # HTTPS (Let's Encrypt): DOMAIN=clinica.example.com CERTBOT_EMAIL=you@example.com sudo -E bash deploy/debian-setup.sh
 # Safe to re-run: it updates the code and leaves the database, config.php and uploads alone.
+# RESET_DB=1 instead drops the database and uploaded results and starts from a fresh schema + new admin.
+# CRED_FILE=<path> also writes the new admin's credentials there (operador.sh prints them at the very end).
 set -euo pipefail
 # Callers may run with a restrictive umask (operador.sh uses 077); everything created here must be readable by Apache.
 umask 022
@@ -42,6 +44,11 @@ rsync -a --chmod=D755,F644 \
   --include='storage/resultados/.htaccess' --exclude='storage/resultados/*' \
   ./ "$DEST/"
 
+if [ "${RESET_DB:-0}" = 1 ]; then
+  echo "RESET_DB=1: dropping database $DB_NAME and uploaded results."
+  mariadb -e "DROP DATABASE IF EXISTS \`$DB_NAME\`"
+  find "$DEST/storage/resultados" -mindepth 1 ! -name '.htaccess' -delete 2>/dev/null || true
+fi
 mariadb -e "CREATE DATABASE IF NOT EXISTS \`$DB_NAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 
 if [ ! -f "$DEST/includes/config.php" ]; then
@@ -68,17 +75,21 @@ if [ "$TABLES" -eq 0 ]; then
   ADMIN_PASS=$(openssl rand -hex 8)
   ADMIN_HASH=$(php -r 'echo password_hash($argv[1], PASSWORD_BCRYPT);' "$ADMIN_PASS")
   mariadb "$DB_NAME" <<SQL
-INSERT INTO administradores (nombre, apellido) VALUES ('Admin', 'Inicial');
+INSERT INTO administradores (nombre, apellido, ci) VALUES ('Admin', 'Inicial', '11111111');
 INSERT INTO cuentas (email, password_hash, rol, ref_id, verificado, activo)
 VALUES ('$ADMIN_EMAIL', '$ADMIN_HASH', 'administrador', LAST_INSERT_ID(), 1, 1);
 SQL
-  echo "First administrator: $ADMIN_EMAIL / $ADMIN_PASS  (shown once, change it after logging in)"
+  ADMIN_CRED="Administrador: $ADMIN_EMAIL / $ADMIN_PASS  (se muestra una sola vez, cambiala al entrar)"
+  [ -z "${CRED_FILE:-}" ] || echo "$ADMIN_CRED" > "$CRED_FILE"
 else
   # Existing databases: columns added after the first install (idempotent).
   mariadb "$DB_NAME" -e "ALTER TABLE pacientes ADD COLUMN IF NOT EXISTS email_anterior VARCHAR(254) NULL AFTER numero"
   mariadb "$DB_NAME" -e "ALTER TABLE cuentas ADD COLUMN IF NOT EXISTS email_anterior VARCHAR(254) NULL AFTER verificado"
   mariadb "$DB_NAME" -e "ALTER TABLE recepcionistas ADD COLUMN IF NOT EXISTS sucursal_id INT UNSIGNED NULL"
   mariadb "$DB_NAME" -e "ALTER TABLE citas MODIFY estado ENUM('pendiente','confirmada','rechazada','cancelada','realizada') NOT NULL DEFAULT 'pendiente'"
+  for t in medicos profesionales administradores recepcionistas; do
+    mariadb "$DB_NAME" -e "ALTER TABLE $t ADD COLUMN IF NOT EXISTS ci VARCHAR(15) NULL AFTER apellido, ADD UNIQUE KEY IF NOT EXISTS uq_${t}_ci (ci)"
+  done
 fi
 
 chown -R root:root "$DEST"
@@ -152,3 +163,4 @@ done
 [ "$fallo" -eq 0 ] || exit 1
 
 echo "Done: $APP_URL"
+[ -z "${ADMIN_CRED:-}" ] || echo "$ADMIN_CRED"

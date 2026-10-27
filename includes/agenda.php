@@ -36,6 +36,16 @@ function calcular_rango_agenda(string $vista, DateTime $fechaRef): array
         ];
     }
 
+    if ($vista === 'dia') {
+        return [
+            'rangoInicio'    => clone $fechaRef,
+            'rangoFin'       => clone $fechaRef,
+            'inicioMes'      => null,
+            'fechaAnterior'  => (clone $fechaRef)->modify('-1 day')->format('Y-m-d'),
+            'fechaSiguiente' => (clone $fechaRef)->modify('+1 day')->format('Y-m-d'),
+        ];
+    }
+
     $rangoInicio = clone $fechaRef;
     $rangoInicio->modify('-' . ((int) $rangoInicio->format('N') - 1) . ' days');
     $rangoFin = (clone $rangoInicio)->modify('+6 days');

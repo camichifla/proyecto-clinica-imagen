@@ -13,10 +13,11 @@ const REGLAS_PACIENTE = [
     'contrasena' => ['label' => 'Contraseña', 'pattern' => '/^(?=.*\p{L})(?=.*\d)(?=.*[^\p{L}\d\s]).{8,72}\z/u', 'hint' => 'Mínimo 8 caracteres, con al menos una letra, un número y un carácter especial.', 'maxbytes' => 72],
 ];
 
-// Reuses REGLAS_PACIENTE's nombre/apellido/email/contrasena rules for staff accounts (manejar-usuarios.php).
+// Reuses REGLAS_PACIENTE's nombre/apellido/ci/email/contrasena rules for staff accounts (manejar-usuarios.php).
 const REGLAS_STAFF = [
     'nombre'     => REGLAS_PACIENTE['nombre'],
     'apellido'   => REGLAS_PACIENTE['apellido'],
+    'ci'         => REGLAS_PACIENTE['ci'],
     'email'      => REGLAS_PACIENTE['email'],
     'contrasena' => REGLAS_PACIENTE['contrasena'],
 ];

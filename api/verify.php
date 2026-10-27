@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['token'])) {
 
     if ($fila) {
         $db->beginTransaction();
-        $db->prepare('UPDATE cuentas SET verificado = 1 WHERE id = ?')->execute([$fila['cuenta_id']]);
+        $db->prepare('UPDATE cuentas SET verificado = 1, email_anterior = NULL WHERE id = ?')->execute([$fila['cuenta_id']]);
         $db->prepare('UPDATE tokens_verificacion SET usado_en = NOW() WHERE id = ?')->execute([$fila['id']]);
         $db->commit();
 

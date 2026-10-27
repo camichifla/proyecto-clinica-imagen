@@ -39,11 +39,33 @@
         }
     });
 
+    const formEmail = document.getElementById('form-email');
+    const formContrasena = document.getElementById('form-contrasena');
+
+    formEmail.addEventListener('form-api:respuesta', (evento) => {
+        if (!evento.detail.ok) {
+            return;
+        }
+        mostrarAviso('email', evento.detail.email_pendiente
+            ? `Te enviamos un correo a ${evento.detail.email_pendiente} para confirmar la nueva dirección. Si no la confirmás en 24 horas, la cuenta vuelve al correo anterior.`
+            : 'Correo actualizado correctamente.');
+        formEmail.elements.contrasena_actual.value = '';
+    });
+
+    formContrasena.addEventListener('form-api:respuesta', (evento) => {
+        if (evento.detail.ok) {
+            mostrarAviso('contrasena');
+            formContrasena.reset();
+            formContrasena.elements.contrasena.dispatchEvent(new Event('input'));
+        }
+    });
+
     async function init() {
         const data = await apiJson('api/modificar-usuario.php');
         if (!data) {
             return;
         }
+        formEmail.elements.email.value = data.email || '';
         if (!data.campos) {
             form.hidden = true;
             form.insertAdjacentElement('beforebegin', parrafo('Esta sección está en construcción.'));

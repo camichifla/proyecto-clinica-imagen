@@ -33,6 +33,13 @@
     --btn-exito: #16a34a;
     --btn-peligro: #e5484d;
 
+    /* Per-state counts in the Turnos summary line. */
+    --conteo-total: #1D3557;
+    --conteo-confirmada: #1b7a4a;
+    --conteo-realizada: #0b6fa4;
+    --conteo-rechazada: #b3372f;
+    --conteo-cancelada: #8a5a00;
+
     color-scheme: light;
 
     --font-family: 'Poppins', sans-serif;
@@ -87,5 +94,11 @@
 
         --color-success: #5fd394;
         --color-danger: #f78b84;
+
+        --conteo-total: #e2e8f0;
+        --conteo-confirmada: #5fd394;
+        --conteo-realizada: #6cc4f2;
+        --conteo-rechazada: #f78b84;
+        --conteo-cancelada: #f2b95f;
     }
 }

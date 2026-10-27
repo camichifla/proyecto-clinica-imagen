@@ -7,7 +7,7 @@ require_once __DIR__ . '/../includes/agenda.php';
 
 $usuario = requerir_rol_json(['administrador', 'recepcionista', 'profesional']);
 
-$vista = ($_GET['vista'] ?? 'mes') === 'semana' ? 'semana' : 'mes';
+$vista = in_array($_GET['vista'] ?? '', ['semana', 'dia'], true) ? $_GET['vista'] : 'mes';
 
 $fechaRefTexto = (string) ($_GET['fecha'] ?? '');
 $fechaRef = DateTime::createFromFormat('Y-m-d', $fechaRefTexto) ?: null;
@@ -20,8 +20,6 @@ $rango = calcular_rango_agenda($vista, $fechaRef);
 
 $sucursales    = [];
 $sucursalId    = null;
-$profesionales = [];
-$profesionalId = null;
 $condicion  = '';
 $parametros = [];
 
@@ -42,32 +40,16 @@ if (in_array($usuario['rol'], ['administrador', 'recepcionista'], true)) {
         $condicion    = 'c.sucursal_id = ? AND ';
         $parametros[] = $sucursalId;
     }
-
-    // Professionals to filter by: a receptionist's list is limited to those working at their branch.
-    $sqlProf = 'SELECT p.id, p.nombre, p.apellido FROM profesionales p'
-        . ($sucRecep !== null ? ' JOIN profesional_sucursal ps ON ps.profesional_id = p.id AND ps.sucursal_id = ?' : '')
-        . ' ORDER BY p.apellido, p.nombre';
-    $stmt = db()->prepare($sqlProf);
-    $stmt->execute($sucRecep !== null ? [$sucRecep] : []);
-    $profesionales = $stmt->fetchAll();
-    $profesionalId = filter_input(INPUT_GET, 'profesional_id', FILTER_VALIDATE_INT) ?: null;
-    if ($profesionalId !== null && !in_array($profesionalId, array_map('intval', array_column($profesionales, 'id')), true)) {
-        $profesionalId = null;
-    }
-    if ($profesionalId !== null) {
-        $condicion    .= 'c.profesional_id = ? AND ';
-        $parametros[] = $profesionalId;
-    }
 } else {
 
     $condicion    = 'c.profesional_id = ? AND ';
     $parametros[] = $usuario['ref_id'];
 }
 
-// Confirmed and pending citas (the badge tells them apart).
+// Confirmed citas only: pending requests are handled in Solicitudes de cita.
 $stmt = db()->prepare(
     SQL_CITAS_CON_ETIQUETAS . "
-     WHERE c.estado IN ('confirmada', 'pendiente') AND {$condicion}DATE(c.fecha_hora_solicitada) BETWEEN ? AND ?
+     WHERE c.estado = 'confirmada' AND {$condicion}DATE(c.fecha_hora_solicitada) BETWEEN ? AND ?
      ORDER BY c.fecha_hora_solicitada ASC"
 );
 $stmt->execute([...$parametros, $rango['rangoInicio']->format('Y-m-d'), $rango['rangoFin']->format('Y-m-d')]);
@@ -94,13 +76,13 @@ echo json_encode([
     'fecha'          => $fechaRef->format('Y-m-d'),
     'tituloRango'    => $vista === 'mes'
         ? nombre_mes($rango['inicioMes'])
-        : $rango['rangoInicio']->format('d/m') . ' - ' . $rango['rangoFin']->format('d/m/Y'),
+        : ($vista === 'dia'
+            ? $rango['rangoInicio']->format('d/m/Y')
+            : $rango['rangoInicio']->format('d/m') . ' - ' . $rango['rangoFin']->format('d/m/Y')),
     'fechaAnterior'  => $rango['fechaAnterior'],
     'fechaSiguiente' => $rango['fechaSiguiente'],
     'hoy'            => $hoy,
     'sucursales'     => array_map(static fn (array $s): array => ['id' => (int) $s['id'], 'nombre' => $s['nombre']], $sucursales),
     'sucursalId'     => $sucursalId,
-    'profesionales'  => array_map(static fn (array $p): array => ['id' => (int) $p['id'], 'nombre' => $p['apellido'] . ', ' . $p['nombre']], $profesionales),
-    'profesionalId'  => $profesionalId,
     'dias'           => $dias,
 ], JSON_UNESCAPED_UNICODE);

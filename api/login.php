@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/session_bootstrap.php';
 require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/mailer.php';
 
 require_post_json();
 
@@ -20,6 +21,8 @@ if (demasiados_eventos('login_fallo', 'email', $email, MAX_FALLOS_EMAIL, VENTANA
     echo json_encode(['ok' => false, 'error' => 'Demasiados intentos. Probá de nuevo en 15 minutos.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
+
+revertir_emails_vencidos(db());
 
 $stmt = db()->prepare('SELECT id, password_hash, rol, ref_id, verificado, activo FROM cuentas WHERE email = ?');
 $stmt->execute([$email]);

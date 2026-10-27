@@ -54,6 +54,50 @@
         </div>
       </form>
     </section>
+
+    <section class="seccion-auth">
+      <h2>Cambiar correo</h2>
+      <p class="aviso-exito" data-aviso="email" hidden role="status"></p>
+      <p class="campo-error" data-general hidden></p>
+      <form method="post" action="api/modificar-usuario.php" data-api="api/modificar-usuario.php" id="form-email" novalidate>
+        <input type="hidden" name="csrf" value="">
+        <input type="hidden" name="accion" value="email">
+        <div class="campo">
+          <label for="email">Correo</label>
+          <input type="email" id="email" name="email" required>
+        </div>
+        <div class="campo">
+          <label for="email-contrasena-actual">Contraseña actual</label>
+          <input type="password" id="email-contrasena-actual" name="contrasena_actual" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn-primary">Cambiar correo</button>
+      </form>
+    </section>
+
+    <section class="seccion-auth">
+      <h2>Cambiar contraseña</h2>
+      <p class="aviso-exito" data-aviso="contrasena" hidden role="status">Contraseña actualizada correctamente.</p>
+      <p class="campo-error" data-general hidden></p>
+      <form method="post" action="api/modificar-usuario.php" data-api="api/modificar-usuario.php" id="form-contrasena" novalidate>
+        <input type="hidden" name="csrf" value="">
+        <input type="hidden" name="accion" value="contrasena">
+        <div class="campo">
+          <label for="contrasena-actual">Contraseña actual</label>
+          <input type="password" id="contrasena-actual" name="contrasena_actual" required autocomplete="current-password">
+        </div>
+        <div class="campo">
+          <label for="contrasena">Nueva contraseña</label>
+          <input type="password" id="contrasena" name="contrasena" required pattern="(?=.*\p{L})(?=.*\d)(?=.*[^\p{L}\d\s]).{8,72}" maxlength="72" autocomplete="new-password" aria-describedby="requisitos-contrasena">
+          <ul class="requisitos" id="requisitos-contrasena" data-para="contrasena">
+            <li data-regla=".{8,}">Mínimo 8 caracteres</li>
+            <li data-regla="\p{L}">Al menos una letra</li>
+            <li data-regla="\d">Al menos un número</li>
+            <li data-regla="[^\p{L}\d\s]">Al menos un carácter especial (!, ?, #, ...)</li>
+          </ul>
+        </div>
+        <button type="submit" class="btn-primary">Cambiar contraseña</button>
+      </form>
+    </section>
   </main>
 
   <footer>

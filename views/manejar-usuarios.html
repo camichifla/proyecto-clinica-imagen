@@ -44,7 +44,98 @@
       <p class="aviso-exito" data-mensaje hidden role="status"></p>
       <p class="aviso-error" data-mensaje-error hidden role="alert"></p>
 
+      <form class="filtros-turnos" id="filtros-cuentas" novalidate>
+        <div class="campo">
+          <label for="filtro-cuentas-rol">Rol</label>
+          <select class="selector-combo" id="filtro-cuentas-rol" name="rol">
+            <option value="">Elegí un rol</option>
+            <option value="paciente">Paciente</option>
+            <option value="medico">Médico</option>
+            <option value="profesional">Profesional</option>
+            <option value="administrador">Administrador</option>
+            <option value="recepcionista">Recepcionista</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="filtro-cuentas-q">Buscar</label>
+          <input type="search" id="filtro-cuentas-q" name="q" placeholder="Nombre, correo o cédula" maxlength="80" autocomplete="off" disabled>
+        </div>
+      </form>
+
       <div id="cuentas-lista"></div>
+
+      <!-- Opens inside the list box, under a divider (same as the agenda day details). -->
+      <div class="detalle-expandido" id="seccion-editar-cuenta" hidden>
+        <h2 id="editar-titulo">Editar cuenta</h2>
+
+        <form id="form-editar-cuenta" novalidate>
+          <input type="hidden" name="csrf" value="">
+          <input type="hidden" name="accion" value="editar_cuenta">
+          <input type="hidden" name="cuenta_id" value="">
+
+          <div class="campo-fila">
+            <div class="campo">
+              <label for="editar-nombre">Nombre</label>
+              <input type="text" id="editar-nombre" name="nombre" required maxlength="60" data-permitidos="\p{L}\s'\-">
+            </div>
+            <div class="campo">
+              <label for="editar-apellido">Apellido</label>
+              <input type="text" id="editar-apellido" name="apellido" required maxlength="60" data-permitidos="\p{L}\s'\-">
+            </div>
+          </div>
+
+          <div class="campo">
+            <label for="editar-ci">Cédula</label>
+            <input type="text" id="editar-ci" name="ci" required inputmode="numeric" maxlength="8" data-permitidos="\d">
+          </div>
+
+          <div class="campo">
+            <label for="editar-email">Correo</label>
+            <input type="email" id="editar-email" name="email" required>
+          </div>
+
+          <div id="editar-paciente" hidden>
+            <div class="campo">
+              <label for="editar-direccion">Dirección</label>
+              <input type="text" id="editar-direccion" name="direccion" required maxlength="160">
+            </div>
+            <div class="campo">
+              <label for="editar-numero">Teléfono</label>
+              <input type="tel" id="editar-numero" name="numero" required maxlength="25" data-permitidos="\d\s+\-">
+            </div>
+          </div>
+
+          <div class="campo" id="editar-recepcionista" hidden>
+            <label for="editar-sucursal">Sede a cargo</label>
+            <select id="editar-sucursal" name="sucursal_id" class="selector-combo"></select>
+          </div>
+
+          <div id="editar-profesional" hidden>
+            <div class="campo">
+              <label id="editar-sedes-label">Sedes donde trabaja</label>
+              <div class="check-grid" id="editar-sedes" role="group" aria-labelledby="editar-sedes-label"></div>
+              <p class="campo-hint">Sin sedes, el profesional no se ofrece para agendar.</p>
+            </div>
+
+            <div class="campo">
+              <label id="editar-estudios-label">Estudios que realiza</label>
+              <div class="check-grid" id="editar-estudios" role="group" aria-labelledby="editar-estudios-label"></div>
+            </div>
+
+            <div class="campo" id="campo-horarios">
+              <label id="editar-horarios-label">Horarios propios</label>
+              <div id="editar-horarios" role="group" aria-labelledby="editar-horarios-label"></div>
+              <p class="campo-hint">Sin horarios propios, el profesional atiende siempre que la sede esté abierta. Con horarios, solo se puede agendar dentro de ellos (y dentro del horario de la sede); un día sin horarios es un día que no atiende. Los cambios no mueven las citas ya agendadas.</p>
+              <button type="button" class="btn-secundario" id="horario-agregar">Agregar horario</button>
+            </div>
+          </div>
+
+          <div class="acciones-formulario">
+            <button type="submit" class="btn-primary">Guardar</button>
+            <button type="button" class="btn-peligro" id="editar-cancelar">Cancelar edición</button>
+          </div>
+        </form>
+      </div>
     </section>
 
     <section class="seccion-panel" id="seccion-asignaciones">
@@ -53,27 +144,31 @@
       <p class="aviso-exito" data-mensaje hidden role="status"></p>
       <p class="aviso-error" data-mensaje-error hidden role="alert"></p>
 
-      <form class="campo-fila form-asignar-paciente">
-        <div class="campo">
-          <label for="asignar-medico-id-buscar">Médico</label>
-          <input type="text" id="asignar-medico-id-buscar" data-lista="asignar-medico-id-lista" data-buscador-combo="asignar-medico-id"
-                 autocomplete="off" placeholder="Buscar por apellido o nombre">
-          <datalist id="asignar-medico-id-lista"></datalist>
-          <input type="hidden" id="asignar-medico-id" name="medico_id">
+      <!-- Step 1: pick a médico. Step 2 (after picking): check the patients linked to that médico. -->
+      <div id="asignacion-paso-medico">
+        <form class="filtros-turnos" id="filtros-medicos" novalidate>
+          <div class="campo">
+            <label for="filtro-medicos-q">Buscar médico</label>
+            <input type="search" id="filtro-medicos-q" name="q" placeholder="Nombre, correo o cédula" maxlength="80" autocomplete="off">
+          </div>
+        </form>
+        <div id="medicos-lista"></div>
+      </div>
+
+      <div id="asignacion-paso-pacientes" hidden>
+        <p class="asignacion-medico"><strong id="asignacion-medico-titulo"></strong>
+          <button type="button" class="btn-secundario" id="asignacion-cambiar">Cambiar</button></p>
+        <form class="filtros-turnos" id="filtros-pacientes" novalidate>
+          <div class="campo">
+            <label for="filtro-pacientes-q">Buscar paciente</label>
+            <input type="search" id="filtro-pacientes-q" name="q" placeholder="Nombre, correo o cédula" maxlength="80" autocomplete="off">
+          </div>
+        </form>
+        <div id="pacientes-lista"></div>
+        <div class="acciones-formulario">
+          <button type="button" class="btn-primary" id="asignacion-guardar" disabled>Guardar cambios</button>
         </div>
-
-        <div class="campo">
-          <label for="asignar-paciente-id-buscar">Paciente</label>
-          <input type="text" id="asignar-paciente-id-buscar" data-lista="asignar-paciente-id-lista" data-buscador-combo="asignar-paciente-id"
-                 autocomplete="off" placeholder="Buscar por apellido, nombre o CI">
-          <datalist id="asignar-paciente-id-lista"></datalist>
-          <input type="hidden" id="asignar-paciente-id" name="paciente_id">
-        </div>
-
-        <button type="submit" class="btn-primary">Asignar</button>
-      </form>
-
-      <div id="asignaciones-lista"></div>
+      </div>
     </section>
 
     <section class="seccion-panel" id="seccion-cambiar-rol">
@@ -108,7 +203,7 @@
         <div class="campo" id="campo-especializacion-cambio" hidden>
           <label id="especializacion-cambio-label">Especialización</label>
           <div class="check-grid" role="group" aria-labelledby="especializacion-cambio-label"></div>
-          <p class="campo-hint">Las sedes y horarios del nuevo profesional se configuran en Profesionales.</p>
+          <p class="campo-hint">Las sedes y horarios del nuevo profesional se configuran editando su cuenta en la lista de arriba.</p>
         </div>
 
         <button type="submit" class="btn-primary">Cambiar rol</button>
@@ -116,7 +211,7 @@
     </section>
 
     <section class="seccion-panel" id="seccion-crear-staff">
-      <h2>Crear cuenta de personal</h2>
+      <h2>Crear cuenta</h2>
 
       <p class="aviso-exito" data-mensaje hidden role="status"></p>
       <p class="campo-error" data-general hidden></p>
@@ -129,6 +224,7 @@
           <label for="rol">Rol</label>
           <select id="rol" name="rol" class="selector-combo">
             <option value="">Elegí un rol</option>
+            <option value="paciente">Paciente</option>
             <option value="medico">Médico</option>
             <option value="profesional">Profesional</option>
             <option value="administrador">Administrador</option>
@@ -136,34 +232,53 @@
           </select>
         </div>
 
-        <div class="campo-fila">
+        <!-- Hidden (and disabled) until a role is chosen: manejar-usuarios-form.js. -->
+        <div id="campos-cuenta" hidden>
+          <div class="campo-fila">
+            <div class="campo">
+              <label for="nombre">Nombre</label>
+              <input type="text" id="nombre" name="nombre" required maxlength="60" data-permitidos="\p{L}\s'\-">
+            </div>
+            <div class="campo">
+              <label for="apellido">Apellido</label>
+              <input type="text" id="apellido" name="apellido" required maxlength="60" data-permitidos="\p{L}\s'\-">
+            </div>
+          </div>
+
           <div class="campo">
-            <label for="nombre">Nombre</label>
-            <input type="text" id="nombre" name="nombre">
+            <label for="ci">Cédula</label>
+            <input type="text" id="ci" name="ci" required inputmode="numeric" maxlength="8" data-permitidos="\d" placeholder="12345678">
           </div>
+
+          <div id="campos-paciente" hidden>
+            <div class="campo">
+              <label for="direccion">Dirección</label>
+              <input type="text" id="direccion" name="direccion" required maxlength="160" placeholder="Av. Italia 1234">
+            </div>
+            <div class="campo">
+              <label for="numero">Teléfono</label>
+              <input type="tel" id="numero" name="numero" required maxlength="25" data-permitidos="\d\s+\-" placeholder="099123456">
+            </div>
+          </div>
+
+          <div class="campo" id="campo-especializacion" hidden>
+            <label id="especializacion-label">Especialización</label>
+            <div class="check-grid" role="group" aria-labelledby="especializacion-label">
+            </div>
+          </div>
+
           <div class="campo">
-            <label for="apellido">Apellido</label>
-            <input type="text" id="apellido" name="apellido">
+            <label for="email">Correo</label>
+            <input type="email" id="email" name="email" required>
           </div>
-        </div>
 
-        <div class="campo" id="campo-especializacion" hidden>
-          <label id="especializacion-label">Especialización</label>
-          <div class="check-grid" role="group" aria-labelledby="especializacion-label">
+          <div class="campo">
+            <label for="contrasena">Contraseña</label>
+            <input type="password" id="contrasena" name="contrasena" required maxlength="72" value="">
           </div>
-        </div>
 
-        <div class="campo">
-          <label for="email">Correo</label>
-          <input type="email" id="email" name="email">
+          <button type="submit" class="btn-primary">Crear cuenta</button>
         </div>
-
-        <div class="campo">
-          <label for="contrasena">Contraseña</label>
-          <input type="password" id="contrasena" name="contrasena" value="">
-        </div>
-
-        <button type="submit" class="btn-primary">Crear cuenta</button>
       </form>
     </section>
   </main>

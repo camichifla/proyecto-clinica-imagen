@@ -58,7 +58,7 @@
 
     .agenda-mes-dias-semana {
         display: grid;
-        grid-template-columns: repeat(7, 1fr);
+        grid-template-columns: repeat(7, minmax(0, 1fr));
         gap: 0.4rem;
         text-align: center;
         margin-bottom: 0.4rem;
@@ -72,12 +72,16 @@
 
     .agenda-mes-grid {
         display: grid;
-        grid-template-columns: repeat(7, 1fr);
+        grid-template-columns: repeat(7, minmax(0, 1fr));
         gap: 0.4rem;
     }
 
     .agenda-dia-mes {
-        min-height: 6.5rem;
+        /* Fixed size whatever the content: anything that does not fit is clipped inside the cell. */
+        height: 8rem;
+        min-width: 0;
+        overflow: hidden;
+        box-sizing: border-box;
         padding: 0.4rem;
         border: 1px solid var(--border-subtle);
         border-radius: var(--radius-md);
@@ -106,6 +110,7 @@
 
     .agenda-cita-pill {
         display: block;
+        flex: none;
         font-size: var(--font-size-xs);
         font-weight: var(--font-weight-semibold);
         padding: 0.15rem 0.4rem;
@@ -165,8 +170,17 @@
 
     .agenda-semana-grid {
         display: grid;
-        grid-template-columns: repeat(7, 1fr);
+        grid-template-columns: repeat(7, minmax(0, 1fr));
         gap: 0.6rem;
+    }
+
+    /* Day view: a single, wider column. */
+    .agenda-semana-grid.agenda-dia-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .agenda-dia-grid .agenda-dia-semana {
+        height: 28rem;
     }
 
     .agenda-dia-semana {
@@ -177,7 +191,11 @@
         display: flex;
         flex-direction: column;
         gap: var(--space-2);
-        min-height: 12rem;
+        /* Fixed size: long lists scroll inside the day instead of stretching it. */
+        height: 16rem;
+        min-width: 0;
+        overflow-y: auto;
+        box-sizing: border-box;
     }
 
     .agenda-dia-semana-header {
@@ -210,6 +228,9 @@
         border: 1px solid var(--border-subtle);
         font-size: var(--font-size-sm);
         color: var(--dark-neutral);
+        flex: none;
+        min-width: 0;
+        overflow-wrap: anywhere;
     }
 
     .agenda-cita-resumen {
@@ -234,33 +255,23 @@
         display: none;
     }
 
-    /* Estados: the colors come from base.css; cards also tint their border. */
-
-    .agenda-cita-card.estado-pendiente {
-        border-color: rgba(var(--accent-rgb), 0.3);
-        background: rgba(var(--accent-rgb), 0.12);
-    }
-
+    /* The agenda only lists confirmed citas: light blue instead of the green state color from base.css. */
+    .agenda-cita-pill.estado-confirmada,
     .agenda-cita-card.estado-confirmada {
-        border-color: rgba(var(--success-rgb), 0.3);
-        background: rgba(var(--success-rgb), 0.15);
-    }
-
-    .agenda-cita-card.estado-rechazada,
-    .agenda-cita-card.estado-cancelada {
-        border-color: rgba(var(--danger-rgb), 0.25);
-        background: rgba(var(--danger-rgb), 0.1);
+        border-color: rgba(var(--accent-rgb), 0.3);
+        background: rgba(var(--accent-rgb), 0.15);
+        color: var(--accent-secondary);
     }
 
     @media (width <= 720px) {
         .agenda-mes-grid,
         .agenda-mes-dias-semana {
-            grid-template-columns: repeat(7, minmax(2.2rem, 1fr));
+            grid-template-columns: repeat(7, minmax(0, 1fr));
             font-size: var(--font-size-xs);
         }
 
         .agenda-dia-mes {
-            min-height: 4.5rem;
+            height: 5.5rem;
             padding: 0.3rem;
         }
 

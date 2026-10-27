@@ -8,6 +8,7 @@ CREATE TABLE cuentas (
   rol            ENUM('paciente','medico','profesional','administrador','recepcionista') NOT NULL,
   ref_id         INT UNSIGNED NOT NULL,              -- polymorphic pointer
   verificado     TINYINT(1) NOT NULL DEFAULT 0,
+  email_anterior VARCHAR(254) NULL,                  -- email before an unconfirmed change; restored if the confirmation token expires
   activo         TINYINT(1) NOT NULL DEFAULT 1,      -- 0 = desactivada por un administrador; login rejects it
   creado_en      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   actualizado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -36,8 +37,10 @@ CREATE TABLE medicos (
   id        INT UNSIGNED NOT NULL AUTO_INCREMENT,
   nombre    VARCHAR(60) NOT NULL,
   apellido  VARCHAR(60) NOT NULL,
+  ci VARCHAR(15) NULL,  -- required by the app for every new account; NULL only for rows created before this column existed
   creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_medicos_ci (ci)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE medico_paciente (                        -- admin-assigned link, on top of the organic "medico already
@@ -53,8 +56,10 @@ CREATE TABLE profesionales (                          -- distinct role: imaging 
   id              INT UNSIGNED NOT NULL AUTO_INCREMENT,
   nombre          VARCHAR(60) NOT NULL,
   apellido        VARCHAR(60) NOT NULL,
+  ci VARCHAR(15) NULL,  -- required by the app for every new account; NULL only for rows created before this column existed
   creado_en       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_profesionales_ci (ci)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE estudios (                               -- catalogue of imaging studies
@@ -81,17 +86,21 @@ CREATE TABLE administradores (
   id        INT UNSIGNED NOT NULL AUTO_INCREMENT,
   nombre    VARCHAR(60) NOT NULL,
   apellido  VARCHAR(60) NOT NULL,
+  ci VARCHAR(15) NULL,  -- required by the app for every new account; NULL only for rows created before this column existed
   creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_administradores_ci (ci)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE recepcionistas (
   id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
   nombre      VARCHAR(60) NOT NULL,
   apellido    VARCHAR(60) NOT NULL,
+  ci VARCHAR(15) NULL,  -- required by the app for every new account; NULL only for rows created before this column existed
   sucursal_id INT UNSIGNED NULL,                  -- the branch this receptionist is in charge of
   creado_en   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
+  UNIQUE KEY uq_recepcionistas_ci (ci),
   KEY ix_recepcionistas_sucursal (sucursal_id),
   CONSTRAINT fk_recepcionistas_sucursal FOREIGN KEY (sucursal_id) REFERENCES sucursales(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

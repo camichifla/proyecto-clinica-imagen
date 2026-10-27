@@ -72,6 +72,35 @@ function enviar_verificacion(string $email, string $link): bool
     );
 }
 
+/** Email change: asks the NEW address to confirm, and tells the old one. Best effort. */
+function enviar_confirmacion_email(string $nuevo, string $anterior, string $link): void
+{
+    enviar_correo(
+        $nuevo,
+        'Confirmá tu nuevo correo - Clínica Imagen',
+        "El correo de tu cuenta fue cambiado a esta dirección. Confirmalo visitando el siguiente enlace:\n\n{$link}\n\nEl enlace vence en 24 horas; si no lo confirmás, la cuenta vuelve a su correo anterior."
+    );
+    enviar_correo(
+        $anterior,
+        'El correo de tu cuenta fue cambiado - Clínica Imagen',
+        "El correo de tu cuenta fue cambiado a {$nuevo}. Si no se confirma en 24 horas, la cuenta vuelve a esta dirección."
+    );
+}
+
+/**
+ * Pending email changes (cuentas.email_anterior set, no live confirmation token) are undone: the account gets its previous
+ * email back, unless another account took it meanwhile, in which case the new one stays. Either way nothing stays pending.
+ */
+function revertir_emails_vencidos(PDO $db): void
+{
+    $vencido = 'c.email_anterior IS NOT NULL AND NOT EXISTS (SELECT 1 FROM tokens_verificacion t
+                 WHERE t.cuenta_id = c.id AND t.usado_en IS NULL AND t.expira_en > NOW())';
+    $db->exec("UPDATE cuentas c LEFT JOIN cuentas o ON o.email = c.email_anterior AND o.id <> c.id
+                  SET c.email = c.email_anterior, c.email_anterior = NULL
+                WHERE o.id IS NULL AND {$vencido}");
+    $db->exec("UPDATE cuentas c SET c.email_anterior = NULL WHERE {$vencido}");
+}
+
 function enviar_reset(string $email, string $link): bool
 {
     return enviar_correo(
@@ -235,6 +264,26 @@ function enviar_aviso_resultado(string $email, string $link): bool
         'Tenés un nuevo resultado - Clínica Imagen',
         "Hay un nuevo resultado disponible en tu portal. Ingresá para verlo:\n\n{$link}"
     );
+}
+
+/**
+ * Applies an email change to an account row (id, email, email_anterior). The new email applies now, but the previous one
+ * is kept until the new one is confirmed (see revertir_emails_vencidos). Returns the confirmation token to mail with
+ * enviar_confirmacion_email, or null when nothing needs confirming. Call inside the caller's transaction.
+ */
+function aplicar_cambio_email(PDO $db, array $cuenta, string $email): ?string
+{
+    if (strcasecmp($cuenta['email'], $email) === 0) {
+        $db->prepare('UPDATE cuentas SET email = ? WHERE id = ?')->execute([$email, $cuenta['id']]);
+        return null;
+    }
+    if ($cuenta['email_anterior'] !== null && strcasecmp($cuenta['email_anterior'], $email) === 0) {
+        $db->prepare('UPDATE cuentas SET email = ?, email_anterior = NULL WHERE id = ?')->execute([$email, $cuenta['id']]);
+        return null;
+    }
+    $db->prepare('UPDATE cuentas SET email = ?, email_anterior = COALESCE(email_anterior, ?) WHERE id = ?')
+        ->execute([$email, $cuenta['email'], $cuenta['id']]);
+    return emitir_token_verificacion($db, (int) $cuenta['id']);
 }
 
 /** Issues a fresh verification token: stores only its sha256 hash and invalidates any prior outstanding one. Shared by registration and verify-resend. */

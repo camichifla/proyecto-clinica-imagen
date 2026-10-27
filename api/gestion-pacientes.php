@@ -2,13 +2,13 @@
 require_once __DIR__ . '/../includes/session_bootstrap.php';
 require_once __DIR__ . '/../includes/auth_guard.php';
 require_once __DIR__ . '/../includes/db.php';
-require_once __DIR__ . '/../includes/recepcion.php';
 require_once __DIR__ . '/../includes/validation.php';
 require_once __DIR__ . '/../includes/mailer.php';
 require_once __DIR__ . '/../includes/pacientes.php';
 
-$usuario  = requerir_rol_json(['administrador', 'recepcionista']);
-$sucRecep = filtro_sucursal_recepcion($usuario);
+$usuario = requerir_rol_json(['administrador', 'recepcionista']);
+// A receptionist may only create patient accounts (same fields as the public sign-up): no listing, no edits.
+$soloAlta = $usuario['rol'] === 'recepcionista';
 
 const MAX_FILAS_PACIENTES = 50;
 const CAMPOS_PACIENTE     = ['nombre', 'apellido', 'ci', 'direccion', 'numero'];
@@ -37,18 +37,11 @@ function error_unico_paciente(PDOException $e): ?array
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check($_POST['csrf'] ?? null);
     $accion = $_POST['accion'] ?? '';
+    if ($soloAlta && $accion !== 'crear') {
+        respuesta_pacientes(403, ['ok' => false, 'error' => 'No tenés permiso para esta acción.']);
+    }
     if (!in_array($accion, ['crear', 'guardar', 'toggle_activo', 'borrar_cuenta'], true)) {
         respuesta_pacientes(400, ['ok' => false, 'error' => 'Acción inválida.']);
-    }
-
-    // A receptionist may only act on patients with a cita at their branch (new patients are allowed).
-    if ($sucRecep !== null && in_array($accion, ['guardar', 'toggle_activo', 'borrar_cuenta'], true)) {
-        $idGuard = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-        $g = db()->prepare('SELECT 1 FROM citas WHERE paciente_id = ? AND sucursal_id = ? LIMIT 1');
-        $g->execute([$idGuard ?: 0, $sucRecep]);
-        if (!$g->fetchColumn()) {
-            respuesta_pacientes(404, ['ok' => false, 'error' => 'Paciente no encontrado.']);
-        }
     }
 
     // Baja/alta of the patient's login account; the patient record and history are kept.
@@ -99,6 +92,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($accion === 'crear') {
         $valores['email'] = trim((string) ($_POST['email'] ?? ''));
         $reglas['email']  = REGLAS_PACIENTE['email'];
+        if ($soloAlta) {
+            $reglas['contrasena'] = REGLAS_PACIENTE['contrasena'];
+        }
     }
     $errores = validar($reglas, $_POST);
     if ($errores) {
@@ -140,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ->execute([$valores['nombre'], $valores['apellido'], $valores['ci'], $valores['direccion'], $valores['numero']]);
         $pacienteId = (int) $db->lastInsertId();
 
-        $hash = password_hash(bin2hex(random_bytes(32)), PASSWORD_BCRYPT);
+        $hash = password_hash($soloAlta ? (string) $_POST['contrasena'] : bin2hex(random_bytes(32)), PASSWORD_BCRYPT);
         $db->prepare("INSERT INTO cuentas (email, password_hash, rol, ref_id, verificado, activo) VALUES (?, ?, 'paciente', ?, 1, 1)")
             ->execute([$valores['email'], $hash, $pacienteId]);
         $cuentaId = (int) $db->lastInsertId();
@@ -162,11 +158,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     registrar_evento('paciente_alta', 'paciente=' . $pacienteId . ' cuenta=' . $cuentaId);
 
-    $tokenRaw = emitir_token_reset($db, $cuentaId, 24);
-    enviar_bienvenida_paciente($valores['email'], APP_URL . '/reset-confirm.html?token=' . $tokenRaw);
+    // The receptionist set the password at the desk; the admin flow lets the patient pick it from an emailed link.
+    if (!$soloAlta) {
+        $tokenRaw = emitir_token_reset($db, $cuentaId, 24);
+        enviar_bienvenida_paciente($valores['email'], APP_URL . '/reset-confirm.html?token=' . $tokenRaw);
+    }
 
     echo json_encode(['ok' => true, 'id' => $pacienteId], JSON_UNESCAPED_UNICODE);
     exit;
+}
+
+if ($soloAlta) {
+    respuesta_pacientes(403, ['ok' => false, 'error' => 'No tenés permiso para listar pacientes.']);
 }
 
 $where   = '1';
@@ -178,10 +181,6 @@ foreach (array_slice($palabras, 0, 5) as $palabra) {
     array_push($params, $like, $like, $like);
 }
 
-if ($sucRecep !== null) {
-    $where   .= ' AND EXISTS (SELECT 1 FROM citas ci WHERE ci.paciente_id = p.id AND ci.sucursal_id = ?)';
-    $params[] = $sucRecep;
-}
 $stmt = db()->prepare(
     "SELECT p.id, p.nombre, p.apellido, p.ci, p.direccion, p.numero, c.email, c.verificado, c.activo,
             (SELECT COUNT(*) FROM resultados r WHERE r.paciente_id = p.id) AS total_resultados

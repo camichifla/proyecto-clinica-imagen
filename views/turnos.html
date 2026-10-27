@@ -44,58 +44,6 @@
       <p class="aviso-exito" data-mensaje role="status" hidden></p>
       <p class="aviso-error" data-mensaje-error role="alert" hidden></p>
 
-      <button type="button" class="btn-secundario" id="btn-nueva-cita" aria-expanded="false" aria-controls="form-nueva-cita">Nueva cita</button>
-      <form class="filtros-turnos" id="form-nueva-cita" novalidate hidden>
-        <div class="campo">
-          <label for="nueva-paciente">Paciente</label>
-          <select class="selector-combo" id="nueva-paciente" name="paciente_id" data-buscable></select>
-        </div>
-        <div class="campo">
-          <label for="nueva-sucursal">Sede</label>
-          <select class="selector-combo" id="nueva-sucursal" name="sucursal_id"></select>
-        </div>
-        <div class="campo">
-          <label for="nueva-estudio">Estudio</label>
-          <select class="selector-combo" id="nueva-estudio" name="estudio"></select>
-        </div>
-        <div class="campo">
-          <label for="nueva-profesional">Profesional (opcional)</label>
-          <select class="selector-combo" id="nueva-profesional" name="profesional_id"></select>
-        </div>
-        <div class="campo">
-          <label for="nueva-fecha">Fecha</label>
-          <input type="date" id="nueva-fecha" name="fecha">
-        </div>
-        <div class="campo">
-          <label for="nueva-hora">Hora</label>
-          <select class="selector-combo" id="nueva-hora" name="hora"></select>
-        </div>
-        <div class="campo">
-          <button type="submit" class="btn-primary">Crear cita</button>
-        </div>
-      </form>
-
-      <h2>Turnos disponibles</h2>
-      <form class="filtros-turnos" id="form-disponibles" novalidate>
-        <div class="campo">
-          <label for="disp-sucursal">Sede</label>
-          <select class="selector-combo" id="disp-sucursal" name="sucursal_id"></select>
-        </div>
-        <div class="campo">
-          <label for="disp-fecha">Fecha</label>
-          <input type="date" id="disp-fecha" name="fecha">
-        </div>
-        <div class="campo">
-          <label for="disp-profesional">Profesional</label>
-          <select class="selector-combo" id="disp-profesional" name="profesional_id"></select>
-        </div>
-        <div class="campo">
-          <label for="disp-estudio">Estudio</label>
-          <select class="selector-combo" id="disp-estudio" name="estudio"></select>
-        </div>
-      </form>
-      <div id="disponibles-horas" class="horas-libres" aria-live="polite"></div>
-
       <h2>Citas</h2>
       <form class="filtros-turnos" id="filtros-turnos" novalidate>
         <div class="campo">
@@ -126,7 +74,6 @@
           <label for="filtro-estado">Estado</label>
           <select class="selector-combo" id="filtro-estado" name="estado">
             <option value="">Todos</option>
-            <option value="pendiente">Pendiente</option>
             <option value="confirmada">Confirmada</option>
             <option value="rechazada">Rechazada</option>
             <option value="cancelada">Cancelada</option>
@@ -138,7 +85,7 @@
         </div>
       </form>
 
-      <p id="turnos-totales" role="status"></p>
+      <p id="turnos-totales" class="turnos-totales" role="status"></p>
       <p class="campo-hint" id="turnos-truncado" hidden>Se muestran las primeras 500 citas. Acotá el rango de fechas para ver el resto.</p>
 
       <div id="turnos-lista"></div>

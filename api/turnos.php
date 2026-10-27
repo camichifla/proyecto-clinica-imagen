@@ -231,6 +231,12 @@ if (isset($_GET['disponibles'])) {
     exit;
 }
 
+// Booking catalog only (Nueva cita page), without the list.
+if (isset($_GET['catalogo'])) {
+    echo json_encode(['reserva' => catalogo_staff($sucRecep), 'rangoReserva' => ['min' => rango_reserva()[0], 'max' => rango_reserva()[1]]], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 $hoy   = new DateTimeImmutable('today');
 // Absent (first load): today .. +30 days. Sent empty (cleared with ✕): that end of the range stays open.
 $desde = (string) ($_GET['desde'] ?? $hoy->format('Y-m-d'));
@@ -249,7 +255,7 @@ if ($sucRecep !== null) {
 }
 $profesionalId = filter_input(INPUT_GET, 'profesional_id', FILTER_VALIDATE_INT) ?: null;
 $estado     = (string) ($_GET['estado'] ?? '');
-if ($estado !== '' && !isset(ESTADOS_CITA[$estado])) {
+if ($estado !== '' && (!isset(ESTADOS_CITA[$estado]) || $estado === 'pendiente')) {
     error_json(422, 'Estado inválido.');
 }
 
@@ -271,6 +277,8 @@ if ($codigo !== '') {
         $params[] = (new DateTimeImmutable($hasta))->modify('+1 day')->format('Y-m-d') . ' 00:00:00';
     }
 }
+// Pending citas are handled in Solicitudes de cita, never listed or counted here.
+$where .= " AND c.estado <> 'pendiente'";
 if ($sucursalId !== null) {
     $where   .= ' AND c.sucursal_id = ?';
     $params[] = $sucursalId;
@@ -291,6 +299,7 @@ foreach (array_slice($palabras, 0, 5) as $palabra) {
 $stmt = db()->prepare("SELECT c.estado, COUNT(*) FROM citas c WHERE {$where} GROUP BY c.estado");
 $stmt->execute($params);
 $totales = array_fill_keys(array_keys(ESTADOS_CITA), 0);
+unset($totales['pendiente']);
 foreach ($stmt->fetchAll(PDO::FETCH_NUM) as [$e, $n]) {
     $totales[$e] = (int) $n;
 }
@@ -320,7 +329,6 @@ echo json_encode([
     ] + cita_agenda_json($c), array_slice($filas, 0, MAX_FILAS_TURNOS)),
     'sucursales'    => array_map(static fn (array $s): array => ['id' => (int) $s['id'], 'nombre' => $s['nombre']], $sucursales),
     'profesionales' => array_map(static fn (array $p): array => ['id' => (int) $p['id'], 'label' => $p['apellido'] . ', ' . $p['nombre']], $profesionales),
-    'reserva'       => isset($_GET['catalogo']) ? catalogo_staff($sucRecep) : null,
     'rangoReserva'  => ['min' => rango_reserva()[0], 'max' => rango_reserva()[1]],
     'notasAdminMax' => NOTAS_ADMIN_MAX,
     'truncado'      => $truncado,

@@ -34,6 +34,27 @@
         color: var(--text-secondary);
     }
 
+    .turnos-totales {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+    }
+
+    .conteo {
+        padding: var(--space-1) 0.7rem;
+        border-radius: var(--radius-pill);
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-semibold);
+        color: var(--conteo-color);
+        background: color-mix(in srgb, var(--conteo-color) 14%, transparent);
+    }
+
+    .conteo-total { --conteo-color: var(--conteo-total); }
+    .conteo-confirmada { --conteo-color: var(--conteo-confirmada); }
+    .conteo-realizada { --conteo-color: var(--conteo-realizada); }
+    .conteo-rechazada { --conteo-color: var(--conteo-rechazada); }
+    .conteo-cancelada { --conteo-color: var(--conteo-cancelada); }
+
     .filtros-turnos {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -68,11 +89,23 @@
         width: 20rem;
     }
 
-    .horas-libres {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-2);
-        margin-bottom: var(--space-4);
+    /* Nueva cita: a narrow panel, one field per row, unlocked top to bottom (nueva-cita.js). */
+    .seccion-cita {
+        max-width: 34rem;
+    }
+
+    .form-cita {
+        display: grid;
+        gap: var(--space-4);
+        margin-top: var(--space-4);
+    }
+
+    .form-cita .campo {
+        margin: 0;
+    }
+
+    .form-cita .acciones-formulario {
+        align-items: center;
     }
 
     .accion-turno {

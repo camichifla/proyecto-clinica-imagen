@@ -285,7 +285,8 @@ main {
     cursor: pointer;
 }
 
-.check-grid input {
+.check-grid input,
+.check-celda {
     width: 1.15rem;
     height: 1.15rem;
     border-radius: var(--radius-xs);
@@ -828,17 +829,17 @@ select.selector-combo {
 .aviso-exito {
     color: var(--dark-neutral);
     background: var(--light-neutral);
-    border-left: 4px solid var(--accent-color);
-    padding: 0.85rem var(--space-4);
-    border-radius: var(--radius-md);
+    border: 1px solid var(--accent-color);
+    padding: 0.85rem var(--space-5);
+    border-radius: var(--radius-pill);
 }
 
 .aviso-error {
     color: var(--color-danger);
     background: var(--light-neutral);
-    border-left: 4px solid var(--accent-secondary);
-    padding: 0.85rem var(--space-4);
-    border-radius: var(--radius-md);
+    border: 1px solid var(--accent-secondary);
+    padding: 0.85rem var(--space-5);
+    border-radius: var(--radius-pill);
 }
 
 .seccion-auth .btn-primary {

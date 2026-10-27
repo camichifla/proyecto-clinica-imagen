@@ -6,13 +6,12 @@
 
     const formFiltro = document.querySelector('.form-buscar-paciente');
     const selectSucursal = formFiltro ? document.getElementById('sucursal_id') : null;
-    const selectProfesional = formFiltro ? document.getElementById('profesional_id') : null;
 
     const NOMBRES_DIA_SEMANA_COMPLETO = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
     const NOMBRES_DIA_SEMANA = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
     const MAX_CITAS_VISIBLES_MES = 3;
 
-    function urlAgenda(vista, fecha, sucursalId, profesionalId) {
+    function urlAgenda(vista, fecha, sucursalId) {
         const url = new URL(window.location.href);
         url.searchParams.set('vista', vista);
         url.searchParams.set('fecha', fecha);
@@ -20,11 +19,6 @@
             url.searchParams.set('sucursal_id', sucursalId);
         } else {
             url.searchParams.delete('sucursal_id');
-        }
-        if (profesionalId) {
-            url.searchParams.set('profesional_id', profesionalId);
-        } else {
-            url.searchParams.delete('profesional_id');
         }
         return url;
     }
@@ -45,19 +39,20 @@
         toggle.className = 'agenda-toggle';
         toggle.setAttribute('role', 'group');
         toggle.setAttribute('aria-label', 'Vista de agenda');
-        toggle.appendChild(enlace('Mes', urlAgenda('mes', data.fecha, data.sucursalId, data.profesionalId), 'agenda-toggle-opcion' + (data.vista === 'mes' ? ' agenda-toggle-activa' : '')));
-        toggle.appendChild(enlace('Semana', urlAgenda('semana', data.fecha, data.sucursalId, data.profesionalId), 'agenda-toggle-opcion' + (data.vista === 'semana' ? ' agenda-toggle-activa' : '')));
+        toggle.appendChild(enlace('Mes', urlAgenda('mes', data.fecha, data.sucursalId), 'agenda-toggle-opcion' + (data.vista === 'mes' ? ' agenda-toggle-activa' : '')));
+        toggle.appendChild(enlace('Semana', urlAgenda('semana', data.fecha, data.sucursalId), 'agenda-toggle-opcion' + (data.vista === 'semana' ? ' agenda-toggle-activa' : '')));
+        toggle.appendChild(enlace('Día', urlAgenda('dia', data.fecha, data.sucursalId), 'agenda-toggle-opcion' + (data.vista === 'dia' ? ' agenda-toggle-activa' : '')));
 
         const nav = document.createElement('div');
         nav.className = 'agenda-nav';
-        const prev = enlace('‹', urlAgenda(data.vista, data.fechaAnterior, data.sucursalId, data.profesionalId), 'calendario-nav');
+        const prev = enlace('‹', urlAgenda(data.vista, data.fechaAnterior, data.sucursalId), 'calendario-nav');
         prev.setAttribute('aria-label', 'Anterior');
         const titulo = document.createElement('span');
         titulo.className = 'agenda-nav-titulo';
         titulo.textContent = data.tituloRango;
-        const next = enlace('›', urlAgenda(data.vista, data.fechaSiguiente, data.sucursalId, data.profesionalId), 'calendario-nav');
+        const next = enlace('›', urlAgenda(data.vista, data.fechaSiguiente, data.sucursalId), 'calendario-nav');
         next.setAttribute('aria-label', 'Siguiente');
-        const hoy = enlace('Hoy', urlAgenda(data.vista, data.hoy, data.sucursalId, data.profesionalId), 'btn-secundario agenda-hoy');
+        const hoy = enlace('Hoy', urlAgenda(data.vista, data.hoy, data.sucursalId), 'btn-secundario agenda-hoy');
         nav.append(prev, titulo, next, hoy);
 
         controles.append(toggle, nav);
@@ -94,7 +89,7 @@
         data.dias.forEach((dia) => {
             const divDia = document.createElement('div');
             divDia.className = 'agenda-dia-mes' + (!dia.esMesActual ? ' agenda-dia-fuera-mes' : '') + (dia.esHoy ? ' agenda-dia-hoy' : '');
-            divDia.appendChild(enlace(String(dia.dia), urlAgenda('semana', dia.fecha, data.sucursalId, data.profesionalId), 'agenda-dia-numero'));
+            divDia.appendChild(enlace(String(dia.dia), urlAgenda('semana', dia.fecha, data.sucursalId), 'agenda-dia-numero'));
 
             dia.citas.slice(0, MAX_CITAS_VISIBLES_MES).forEach((cita) => divDia.appendChild(renderPillCita(cita)));
 
@@ -182,10 +177,6 @@
             span.textContent = texto;
             detalle.appendChild(span);
         });
-        const estadoBadge = document.createElement('span');
-        estadoBadge.className = 'estado-badge estado-' + cita.estado;
-        estadoBadge.textContent = cita.estadoLabel;
-        detalle.appendChild(estadoBadge);
 
         tarjeta.append(resumen, detalle);
         return tarjeta;
@@ -193,7 +184,7 @@
 
     function renderSemana(data) {
         const grid = document.createElement('div');
-        grid.className = 'agenda-semana-grid';
+        grid.className = 'agenda-semana-grid' + (data.vista === 'dia' ? ' agenda-dia-grid' : '');
 
         data.dias.forEach((dia) => {
             const divDia = document.createElement('div');
@@ -213,7 +204,7 @@
                 vacio.textContent = 'Sin citas';
                 divDia.appendChild(vacio);
             } else {
-                dia.citas.forEach((cita) => divDia.appendChild(renderTarjetaCita(cita, true)));
+                dia.citas.forEach((cita) => divDia.appendChild(renderTarjetaCita(cita, data.vista !== 'dia')));
             }
 
             grid.appendChild(divDia);
@@ -237,35 +228,26 @@
         selectSucursal.value = sucursalId || '';
     }
 
-    function renderOpcionesProfesional(profesionales, profesionalId) {
-        const opciones = profesionales.map((p) => new Option(p.nombre, String(p.id)));
-        selectProfesional.replaceChildren(new Option('Todos', ''), ...opciones);
-        selectProfesional.value = profesionalId ? String(profesionalId) : '';
-    }
-
     function render(data) {
         calendario.innerHTML = '';
         renderControles(data);
         if (data.vista === 'mes') {
             renderMes(data);
         } else {
-            renderSemana(data);
+            renderSemana(data); // 'semana' and 'dia' share it: the day view is a one-column week
         }
         if (selectSucursal) {
             // Only administrators and receptionists get branches; the professional only sees their own agenda.
             // A receptionist only gets their own branch: nothing to choose, so no Sede filter.
             formFiltro.hidden = data.sucursales.length <= 1;
-            renderOpcionesSucursal(data.sucursales, data.sucursalId, data.profesionalId);
+            renderOpcionesSucursal(data.sucursales, data.sucursalId);
         }
     }
 
-    async function cargar(vista, fecha, sucursalId, profesionalId, agregarHistorial) {
+    async function cargar(vista, fecha, sucursalId, agregarHistorial) {
         const params = new URLSearchParams({ vista: vista || 'mes', fecha: fecha || '' });
         if (sucursalId) {
             params.set('sucursal_id', sucursalId);
-        }
-        if (profesionalId) {
-            params.set('profesional_id', profesionalId);
         }
         const data = await apiJson('api/agenda.php?' + params.toString());
         if (!data) {
@@ -273,7 +255,7 @@
         }
         render(data);
         if (agregarHistorial) {
-            history.pushState(null, '', urlAgenda(data.vista, data.fecha, data.sucursalId, data.profesionalId));
+            history.pushState(null, '', urlAgenda(data.vista, data.fecha, data.sucursalId));
         }
     }
 
@@ -284,23 +266,23 @@
         }
         evento.preventDefault();
         const url = new URL(link.href);
-        cargar(url.searchParams.get('vista'), url.searchParams.get('fecha'), url.searchParams.get('sucursal_id'), url.searchParams.get('profesional_id'), true);
+        cargar(url.searchParams.get('vista'), url.searchParams.get('fecha'), url.searchParams.get('sucursal_id'), true);
     });
 
     window.addEventListener('popstate', () => {
         const params = new URL(window.location.href).searchParams;
-        cargar(params.get('vista'), params.get('fecha'), params.get('sucursal_id'), params.get('profesional_id'), false);
+        cargar(params.get('vista'), params.get('fecha'), params.get('sucursal_id'), false);
     });
 
     if (formFiltro) {
         formFiltro.addEventListener('submit', (evento) => {
             evento.preventDefault();
             const params = new URL(window.location.href).searchParams;
-            cargar(params.get('vista'), params.get('fecha'), selectSucursal.value, selectProfesional.value, true);
+            cargar(params.get('vista'), params.get('fecha'), selectSucursal.value, true);
         });
         filtrarAlCambiar(formFiltro);
     }
 
     const inicial = new URL(window.location.href).searchParams;
-    cargar(inicial.get('vista'), inicial.get('fecha'), inicial.get('sucursal_id'), inicial.get('profesional_id'), false);
+    cargar(inicial.get('vista'), inicial.get('fecha'), inicial.get('sucursal_id'), false);
 })();

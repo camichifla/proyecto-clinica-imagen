@@ -1,6 +1,26 @@
 /* Page styles: the paginas layer (declared in styles.css) wins over base. */
 @layer paginas {
 
+    /* The form's flex gap only reaches direct children: the role-dependent
+       wrappers need their own so the fields inside keep the same spacing. */
+    .filtros-turnos,
+    #campos-cuenta:not([hidden]),
+    #campos-paciente:not([hidden]) {
+        display: flex;
+        flex-direction: column;
+        gap: 1.1rem;
+    }
+
+    /* backoffice.css (where .filtros-turnos normally lives) isn't loaded on this page. */
+    .filtros-turnos {
+        margin: var(--space-4) 0;
+    }
+
+    /* Editar, then Desactivar / "Tu cuenta": margin instead of flex so the cell stays a table cell. */
+    .acciones-cuenta > * + * {
+        margin-left: var(--space-2);
+    }
+
     .campo select {
         padding: 0.7rem 0.9rem;
         padding-right: 2.2rem;
@@ -43,5 +63,41 @@
     /* :not(:has()) keeps action cells on base.css's stretch, which a layered rule would otherwise override. */
     .tabla-scroll.tabla-tarjetas .tabla-datos td:not(:has(form, button)) {
         align-items: center;
+    }
+
+    .fila-horario {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+        gap: var(--space-2);
+        align-items: center;
+        margin-bottom: var(--space-2);
+    }
+
+    /* Day, opening and closing are selector-combo dropdowns (same widget as the booking hour). */
+    .fila-horario .buscador-combo {
+        min-width: 0;
+    }
+
+    #campo-horarios > .btn-secundario {
+        align-self: flex-start;
+        margin-top: var(--space-2);
+    }
+
+    @media (max-width: 480px) {
+        .fila-horario {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        }
+
+        .fila-horario > .buscador-combo:first-child,
+        .fila-horario .btn-secundario {
+            grid-column: 1 / -1;
+        }
+    }
+
+    .asignacion-medico {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        margin: var(--space-3) 0;
     }
 }

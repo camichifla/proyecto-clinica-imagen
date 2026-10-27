@@ -4,6 +4,8 @@ require_once __DIR__ . '/../includes/auth_guard.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/validation.php';
 require_once __DIR__ . '/../includes/estudios.php';
+require_once __DIR__ . '/../includes/horarios.php';
+require_once __DIR__ . '/../includes/mailer.php';
 
 $usuario = requerir_rol_json(['administrador']);
 
@@ -14,33 +16,29 @@ const ROLES_STAFF = [
     'recepcionista' => 'Recepcionista',
 ];
 
+// Roles "Crear cuenta" offers: the staff ones plus paciente.
+const ROLES_CREABLES = ROLES_STAFF + ['paciente' => 'Paciente'];
+
+function columna_de(string $sql, int $id): array
+{
+    $stmt = db()->prepare($sql);
+    $stmt->execute([$id]);
+    return $stmt->fetchAll(PDO::FETCH_COLUMN);
+}
+
+function turnos_propios_de(int $id): array
+{
+    $stmt = db()->prepare(
+        "SELECT dia_semana AS dia, TIME_FORMAT(hora_apertura, '%H:%i') AS apertura, TIME_FORMAT(hora_cierre, '%H:%i') AS cierre
+           FROM profesional_horarios WHERE profesional_id = ? ORDER BY dia_semana, hora_apertura"
+    );
+    $stmt->execute([$id]);
+    return array_map(static fn (array $t): array => ['dia' => (int) $t['dia'], 'apertura' => $t['apertura'], 'cierre' => $t['cierre']], $stmt->fetchAll());
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check($_POST['csrf'] ?? null);
     $accion = $_POST['accion'] ?? '';
-
-    if ($accion === 'asignar_sucursal') {
-        $cuentaId   = filter_input(INPUT_POST, 'cuenta_id', FILTER_VALIDATE_INT);
-        $sucursalId = filter_input(INPUT_POST, 'sucursal_id', FILTER_VALIDATE_INT) ?: null;
-        $stmt = db()->prepare("SELECT ref_id FROM cuentas WHERE id = ? AND rol = 'recepcionista'");
-        $stmt->execute([$cuentaId ?: 0]);
-        $refId = $stmt->fetchColumn();
-        if ($refId === false) {
-            echo json_encode(['ok' => false, 'error' => 'La cuenta no es de un recepcionista.'], JSON_UNESCAPED_UNICODE);
-            exit;
-        }
-        if ($sucursalId !== null) {
-            $existe = db()->prepare('SELECT 1 FROM sucursales WHERE id = ?');
-            $existe->execute([$sucursalId]);
-            if (!$existe->fetchColumn()) {
-                echo json_encode(['ok' => false, 'error' => 'Sede inválida.'], JSON_UNESCAPED_UNICODE);
-                exit;
-            }
-        }
-        db()->prepare('UPDATE recepcionistas SET sucursal_id = ? WHERE id = ?')->execute([$sucursalId, (int) $refId]);
-        registrar_evento('recepcion_sucursal', 'recepcionista=' . (int) $refId . ' sucursal=' . ($sucursalId ?? 'ninguna'));
-        echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);
-        exit;
-    }
 
     if ($accion === 'toggle_activo') {
         $cuentaId = filter_input(INPUT_POST, 'cuenta_id', FILTER_VALIDATE_INT);
@@ -223,14 +221,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            $stmt = $db->prepare("SELECT nombre, apellido FROM {$tablaVieja} WHERE id = ?");
+            $stmt = $db->prepare("SELECT nombre, apellido, ci FROM {$tablaVieja} WHERE id = ?");
             $stmt->execute([$refViejo]);
             $perfil = $stmt->fetch();
             if (!$perfil) {
                 throw new RuntimeException('perfil de origen inexistente');
             }
 
-            $db->prepare("INSERT INTO {$tablaNueva} (nombre, apellido) VALUES (?, ?)")->execute([$perfil['nombre'], $perfil['apellido']]);
+            $db->prepare("INSERT INTO {$tablaNueva} (nombre, apellido, ci) VALUES (?, ?, ?)")->execute([$perfil['nombre'], $perfil['apellido'], $perfil['ci']]);
             $refNuevo = (int) $db->lastInsertId();
 
             if ($nuevoRol === 'profesional') {
@@ -275,11 +273,148 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    if ($accion === 'editar_cuenta') {
+        $cuentaId = filter_input(INPUT_POST, 'cuenta_id', FILTER_VALIDATE_INT);
+        $db   = db();
+        $stmt = $db->prepare('SELECT id, rol, ref_id, email, email_anterior FROM cuentas WHERE id = ?');
+        $stmt->execute([$cuentaId ?: 0]);
+        $cuenta = $stmt->fetch();
+        if (!$cuenta) {
+            echo json_encode(['ok' => false, 'error' => 'Cuenta no encontrada.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+        $rol   = $cuenta['rol'];
+        $refId = (int) $cuenta['ref_id'];
+
+        // The same rules as creating the account, minus the password (not editable here).
+        $reglas = $rol === 'paciente' ? REGLAS_PACIENTE : REGLAS_STAFF;
+        unset($reglas['contrasena']);
+        $errores = validar($reglas, $_POST);
+
+        $sucursalRecep = null;
+        if ($rol === 'recepcionista') {
+            $sucursalRecep = filter_input(INPUT_POST, 'sucursal_id', FILTER_VALIDATE_INT) ?: null;
+            if ($sucursalRecep !== null) {
+                $existe = $db->prepare('SELECT 1 FROM sucursales WHERE id = ?');
+                $existe->execute([$sucursalRecep]);
+                if (!$existe->fetchColumn()) {
+                    $errores['sucursal_id'] = 'Sede inválida.';
+                }
+            }
+        }
+
+        $sucursales = $claves = $turnos = [];
+        if ($rol === 'profesional') {
+            $enviadas   = $_POST['sucursales'] ?? [];
+            $sucursales = is_array($enviadas) ? array_values(array_unique(array_map('strval', $enviadas))) : [];
+            $validas    = array_map('strval', $db->query('SELECT id FROM sucursales')->fetchAll(PDO::FETCH_COLUMN));
+            if (array_diff($sucursales, $validas)) {
+                $errores['sucursales'] = 'Elegí sedes válidas.';
+            }
+
+            // Active studies; inactive ones the professional already had may be kept but not added.
+            $enviados   = $_POST['especializacion'] ?? [];
+            $claves     = is_array($enviados) ? array_values(array_unique(array_map('strval', $enviados))) : [];
+            $permitidos = array_merge(
+                array_keys(estudios_activos()),
+                columna_de('SELECT especializacion FROM profesional_especializacion WHERE profesional_id = ?', $refId)
+            );
+            if (!$claves) {
+                $errores['especializacion'] = 'Elegí al menos una especialización.';
+            } elseif (array_diff($claves, $permitidos)) {
+                $errores['especializacion'] = 'Elegí especializaciones válidas.';
+            }
+
+            $turnos = validar_turnos($_POST['horarios'] ?? '');
+            if (is_string($turnos)) {
+                $errores['horarios'] = $turnos;
+                $turnos = [];
+            }
+        }
+
+        if ($errores) {
+            http_response_code(422);
+            echo json_encode(['ok' => false, 'errores' => $errores], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $nombre   = trim((string) $_POST['nombre']);
+        $apellido = trim((string) $_POST['apellido']);
+        $ci       = trim((string) $_POST['ci']);
+        $email    = trim((string) $_POST['email']);
+        $tabla    = TABLA_POR_ROL[$rol];
+        $horariosCambiaron = $rol === 'profesional' && turnos_propios_de($refId) !== $turnos;
+
+        try {
+            $db->beginTransaction();
+            if ($rol === 'paciente') {
+                $db->prepare('UPDATE pacientes SET nombre = ?, apellido = ?, ci = ?, direccion = ?, numero = ? WHERE id = ?')
+                    ->execute([$nombre, $apellido, $ci, trim((string) $_POST['direccion']), trim((string) $_POST['numero']), $refId]);
+            } elseif ($rol === 'recepcionista') {
+                $db->prepare('UPDATE recepcionistas SET nombre = ?, apellido = ?, ci = ?, sucursal_id = ? WHERE id = ?')
+                    ->execute([$nombre, $apellido, $ci, $sucursalRecep, $refId]);
+            } else {
+                $db->prepare("UPDATE {$tabla} SET nombre = ?, apellido = ?, ci = ? WHERE id = ?")->execute([$nombre, $apellido, $ci, $refId]);
+            }
+            $tokenEmail = aplicar_cambio_email($db, $cuenta, $email);
+
+            if ($rol === 'profesional') {
+                foreach (['profesional_sucursal', 'profesional_especializacion', 'profesional_horarios'] as $t) {
+                    $db->prepare("DELETE FROM {$t} WHERE profesional_id = ?")->execute([$refId]);
+                }
+                $stmt = $db->prepare('INSERT INTO profesional_sucursal (profesional_id, sucursal_id) VALUES (?, ?)');
+                foreach ($sucursales as $sucursalId) {
+                    $stmt->execute([$refId, (int) $sucursalId]);
+                }
+                $stmt = $db->prepare('INSERT INTO profesional_especializacion (profesional_id, especializacion) VALUES (?, ?)');
+                foreach ($claves as $clave) {
+                    $stmt->execute([$refId, $clave]);
+                }
+                $stmt = $db->prepare('INSERT INTO profesional_horarios (profesional_id, dia_semana, hora_apertura, hora_cierre) VALUES (?, ?, ?, ?)');
+                foreach ($turnos as $t) {
+                    $stmt->execute([$refId, $t['dia'], $t['apertura'] . ':00', $t['cierre'] . ':00']);
+                }
+            }
+            $db->commit();
+        } catch (PDOException $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            if ($e->getCode() === '23000' && str_contains($e->getMessage(), 'uq_cuentas_email')) {
+                $errores = ['email' => 'Ya existe una cuenta registrada con ese correo.'];
+            } elseif ($e->getCode() === '23000' && str_contains($e->getMessage(), '_ci')) {
+                $errores = ['ci' => 'Ya existe una cuenta registrada con esa cédula.'];
+            } else {
+                error_log('manejar-usuarios editar_cuenta: ' . $e->getMessage());
+                http_response_code(500);
+                echo json_encode(['ok' => false, 'error' => 'No se pudo guardar la cuenta. Intentá nuevamente.'], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+            http_response_code(422);
+            echo json_encode(['ok' => false, 'errores' => $errores], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        registrar_evento('cuenta_edicion', 'cuenta=' . $cuenta['id']);
+        if ($tokenEmail !== null) {
+            enviar_confirmacion_email($email, $cuenta['email'], APP_URL . '/verify.html?token=' . $tokenEmail);
+        }
+        if ($rol === 'profesional') {
+            registrar_evento('profesional_cambio', 'profesional=' . $refId);
+            if ($horariosCambiaron) {
+                registrar_evento('profesional_horarios', 'profesional=' . $refId);
+            }
+        }
+        echo json_encode(['ok' => true, 'email_pendiente' => $tokenEmail !== null ? $email : null], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     if ($accion === 'crear_staff') {
         $valores = [
             'rol'      => trim((string) ($_POST['rol'] ?? '')),
             'nombre'   => trim((string) ($_POST['nombre'] ?? '')),
             'apellido' => trim((string) ($_POST['apellido'] ?? '')),
+            'ci'       => trim((string) ($_POST['ci'] ?? '')),
             'email'    => trim((string) ($_POST['email'] ?? '')),
         ];
 
@@ -290,11 +425,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $especializaciones = array_values(array_unique(array_map('strval', $especializacionesEnviadas)));
 
         $errores = [];
-        if (!isset(ROLES_STAFF[$valores['rol']])) {
+        if (!isset(ROLES_CREABLES[$valores['rol']])) {
             $errores['rol'] = 'Elegí un rol válido.';
         }
 
-        $errores = array_merge($errores, validar(REGLAS_STAFF, $_POST));
+        // Same rules as the public sign-up for a paciente (adds dirección and teléfono); staff need nombre, apellido, CI, email, password.
+        $errores = array_merge($errores, validar($valores['rol'] === 'paciente' ? REGLAS_PACIENTE : REGLAS_STAFF, $_POST));
 
         if ($valores['rol'] === 'profesional') {
             if (!$especializaciones) {
@@ -321,8 +457,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $db->beginTransaction();
 
             $tabla = TABLA_POR_ROL[$valores['rol']];
-            $stmt  = $db->prepare("INSERT INTO {$tabla} (nombre, apellido) VALUES (?, ?)");
-            $stmt->execute([$valores['nombre'], $valores['apellido']]);
+            if ($valores['rol'] === 'paciente') {
+                $stmt = $db->prepare('INSERT INTO pacientes (nombre, apellido, ci, direccion, numero) VALUES (?, ?, ?, ?, ?)');
+                $stmt->execute([$valores['nombre'], $valores['apellido'], $valores['ci'], trim((string) $_POST['direccion']), trim((string) $_POST['numero'])]);
+            } else {
+                $stmt = $db->prepare("INSERT INTO {$tabla} (nombre, apellido, ci) VALUES (?, ?, ?)");
+                $stmt->execute([$valores['nombre'], $valores['apellido'], $valores['ci']]);
+            }
             $refId = (int) $db->lastInsertId();
 
             if ($valores['rol'] === 'profesional') {
@@ -349,6 +490,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             if ($e->getCode() === '23000' && str_contains($e->getMessage(), 'uq_cuentas_email')) {
                 echo json_encode(['ok' => false, 'errores' => ['email' => 'Ya existe una cuenta registrada con ese correo.']], JSON_UNESCAPED_UNICODE);
+            } elseif ($e->getCode() === '23000' && str_contains($e->getMessage(), '_ci')) {
+                echo json_encode(['ok' => false, 'errores' => ['ci' => 'Ya existe una cuenta registrada con esa cédula.']], JSON_UNESCAPED_UNICODE);
             } else {
                 echo json_encode(['ok' => false, 'errores' => ['general' => 'No se pudo crear la cuenta. Intentá nuevamente.']], JSON_UNESCAPED_UNICODE);
             }
@@ -361,12 +504,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-$medicos   = db()->query('SELECT id, nombre, apellido FROM medicos ORDER BY apellido, nombre')->fetchAll();
-$pacientes = db()->query('SELECT id, nombre, apellido, ci FROM pacientes ORDER BY apellido, nombre')->fetchAll();
+$medicos   = db()->query("SELECT id, nombre, apellido, ci, (SELECT email FROM cuentas WHERE rol = 'medico' AND ref_id = medicos.id LIMIT 1) AS email FROM medicos ORDER BY apellido, nombre")->fetchAll();
+$pacientes = db()->query("SELECT id, nombre, apellido, ci, (SELECT email FROM cuentas WHERE rol = 'paciente' AND ref_id = pacientes.id LIMIT 1) AS email FROM pacientes ORDER BY apellido, nombre")->fetchAll();
 
 $asignacionesFilas = db()->query(
     "SELECT mp.medico_id, m.nombre AS medico_nombre, m.apellido AS medico_apellido,
-            mp.paciente_id, p.nombre AS paciente_nombre, p.apellido AS paciente_apellido
+            mp.paciente_id, p.nombre AS paciente_nombre, p.apellido AS paciente_apellido, p.ci AS paciente_ci
        FROM medico_paciente mp
        JOIN medicos m ON m.id = mp.medico_id
        JOIN pacientes p ON p.id = mp.paciente_id
@@ -374,7 +517,8 @@ $asignacionesFilas = db()->query(
 )->fetchAll();
 
 $stmt = db()->query(
-    "SELECT c.id AS cuenta_id, c.email, c.rol, c.verificado, c.activo, r.sucursal_id AS recep_sucursal_id,
+    "SELECT c.id AS cuenta_id, c.email, c.rol, c.verificado, c.activo, c.ref_id, r.sucursal_id AS recep_sucursal_id, p.direccion, p.numero,
+            COALESCE(p.ci, m.ci, pr.ci, a.ci, r.ci) AS ci,
             COALESCE(p.nombre, m.nombre, pr.nombre, a.nombre, r.nombre)       AS nombre,
             COALESCE(p.apellido, m.apellido, pr.apellido, a.apellido, r.apellido) AS apellido
        FROM cuentas c
@@ -398,20 +542,33 @@ echo json_encode([
     'cuenta_actual_id'    => $usuario['cuenta_id'],
     'admin_activos_count' => $adminActivosCount,
     'cuentas'             => array_map(static function (array $fila): array {
-        return [
+        $extra = [];
+        if ($fila['rol'] === 'profesional') {
+            $id = (int) $fila['ref_id'];
+            $extra = [
+                'sedes'           => array_map('intval', columna_de('SELECT sucursal_id FROM profesional_sucursal WHERE profesional_id = ? ORDER BY sucursal_id', $id)),
+                'especializacion' => columna_de('SELECT especializacion FROM profesional_especializacion WHERE profesional_id = ? ORDER BY especializacion', $id),
+                'horarios'        => turnos_propios_de($id),
+            ];
+        }
+        return $extra + [
             'cuenta_id'  => (int) $fila['cuenta_id'],
+            'direccion'  => (string) $fila['direccion'],
+            'numero'     => (string) $fila['numero'],
             'email'      => $fila['email'],
             'rol'        => $fila['rol'],
             'verificado' => (int) $fila['verificado'] === 1,
             'activo'     => (int) $fila['activo'] === 1,
             'nombre'     => (string) $fila['nombre'],
             'apellido'   => (string) $fila['apellido'],
+            'ci'         => (string) $fila['ci'],
             'sucursalId' => $fila['recep_sucursal_id'] !== null ? (int) $fila['recep_sucursal_id'] : null,
         ];
     }, $cuentasFilas),
     'medicos'      => $medicos,
-    'sucursales'   => db()->query('SELECT id, nombre FROM sucursales ORDER BY nombre')->fetchAll(PDO::FETCH_ASSOC),
+    'sucursales'   => db()->query('SELECT id, nombre, activo FROM sucursales ORDER BY nombre')->fetchAll(PDO::FETCH_ASSOC),
     'pacientes'    => $pacientes,
     'asignaciones' => $asignacionesFilas,
+    'estudios_catalogo' => array_map(static fn (array $e): array => ['clave' => $e['clave'], 'etiqueta' => $e['etiqueta'], 'activo' => (int) $e['activo'] === 1], estudios_catalogo()),
     'estudios'     => array_map(static fn (string $clave, string $etiqueta): array => ['clave' => $clave, 'etiqueta' => $etiqueta], array_keys(estudios_activos()), estudios_activos()),
 ], JSON_UNESCAPED_UNICODE);

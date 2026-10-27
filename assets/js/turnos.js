@@ -180,194 +180,6 @@
         return tr;
     }
 
-    // Staff booking ("Nueva cita") and the live free-hours list ("Turnos disponibles"), fed by the catalog of the first load.
-    const btnNueva = document.getElementById('btn-nueva-cita');
-    const formNueva = document.getElementById('form-nueva-cita');
-    const formDisp = document.getElementById('form-disponibles');
-    const listaHoras = document.getElementById('disponibles-horas');
-    const nueva = formNueva.elements;
-    const disp = formDisp.elements;
-    let reserva = null;
-    let sincronizando = false; // programmatic updates must not re-trigger the change listeners
-
-    const opcion = (valor, texto) => new Option(texto, valor);
-    const notificar = (select) => select.dispatchEvent(new Event('change', { bubbles: true }));
-
-    function abrirNueva(abrir) {
-        formNueva.hidden = !abrir;
-        btnNueva.setAttribute('aria-expanded', String(abrir));
-    }
-
-    // Professionals of the branch (and, if given, doing the study).
-    function poblarProfesionalesDe(select, sedeId, estudio, vacio) {
-        const sede = reserva.sucursales[sedeId];
-        const validos = reserva.profesionales.filter((p) => sede && sede.profesionales.includes(p.id)
-            && (!estudio || p.especializaciones.includes(estudio)));
-        const previo = select.value;
-        select.replaceChildren(opcion('', vacio), ...validos.map((p) => opcion(String(p.id), p.apellido + ', ' + p.nombre)));
-        select.value = validos.some((p) => String(p.id) === previo) ? previo : '';
-    }
-
-    async function horasLibres(f) {
-        const data = await apiJson('api/turnos.php?' + new URLSearchParams({
-            disponibles: '1',
-            sucursal_id: f.sucursal_id.value,
-            fecha: f.fecha.value,
-            profesional_id: f.profesional_id.value,
-            estudio: f.estudio.value,
-        }));
-        if (!data || !data.horas) {
-            mostrarMensaje(textoErrores(data), true);
-            return null;
-        }
-        return data.horas;
-    }
-
-    let pedidoNueva = 0;
-    async function refrescarHorasNueva(elegir = '') {
-        const actual = ++pedidoNueva;
-        const mostrar = (texto, horas = []) => {
-            nueva.hora.replaceChildren(opcion('', texto), ...horas.map((h) => opcion(h, h)));
-            nueva.hora.disabled = !horas.length;
-            nueva.hora.value = horas.includes(elegir) ? elegir : '';
-        };
-        if (!nueva.sucursal_id.value || !nueva.estudio.value || !nueva.fecha.value) {
-            mostrar('Elegí sede, estudio y fecha primero');
-            return;
-        }
-        nueva.hora.disabled = true;
-        const horas = await horasLibres(nueva);
-        if (actual !== pedidoNueva || !horas) {
-            return;
-        }
-        mostrar(horas.length ? 'Elegí un horario' : 'Sin horarios disponibles ese día', horas);
-    }
-
-    let pedidoDisp = 0;
-    async function refrescarDisponibles() {
-        const actual = ++pedidoDisp;
-        if (!disp.sucursal_id.value || !disp.fecha.value) {
-            listaHoras.replaceChildren(parrafo('Elegí una sede y una fecha para ver los turnos libres.'));
-            return;
-        }
-        const horas = await horasLibres(disp);
-        if (actual !== pedidoDisp || !horas) {
-            return;
-        }
-        listaHoras.replaceChildren(...(horas.length ? horas.map(botonHora) : [parrafo('No hay turnos libres ese día.')]));
-    }
-
-    function botonHora(hora) {
-        const boton = document.createElement('button');
-        boton.type = 'button';
-        boton.className = 'btn-secundario';
-        boton.textContent = hora;
-        boton.addEventListener('click', () => prellenarNueva(hora));
-        return boton;
-    }
-
-    // A free hour was picked: open "Nueva cita" with the list's filters and that hour.
-    async function prellenarNueva(hora) {
-        abrirNueva(true);
-        sincronizando = true;
-        nueva.sucursal_id.value = disp.sucursal_id.value;
-        nueva.estudio.value = disp.estudio.value;
-        nueva.fecha.value = disp.fecha.value;
-        poblarProfesionalesDe(nueva.profesional_id, nueva.sucursal_id.value, nueva.estudio.value, 'Cualquiera');
-        nueva.profesional_id.value = disp.profesional_id.value;
-        [nueva.sucursal_id, nueva.estudio, nueva.profesional_id, nueva.fecha].forEach(notificar);
-        sincronizando = false;
-        await refrescarHorasNueva(hora);
-        sincronizando = true;
-        notificar(nueva.hora);
-        sincronizando = false;
-        formNueva.scrollIntoView({ block: 'nearest' });
-    }
-
-    function limpiarNueva() {
-        sincronizando = true;
-        ['paciente_id', 'estudio', 'profesional_id', 'fecha'].forEach((n) => {
-            nueva[n].value = '';
-            notificar(nueva[n]);
-        });
-        sincronizando = false;
-        poblarProfesionalesDe(nueva.profesional_id, nueva.sucursal_id.value, '', 'Cualquiera');
-        refrescarHorasNueva();
-        abrirNueva(false);
-    }
-
-    function iniciarAlta(catalogo, rango) {
-        reserva = catalogo;
-        const sedes = catalogo.sucursalesOrden;
-        [nueva.sucursal_id, disp.sucursal_id].forEach((select) => {
-            if (sedes.length > 1) {
-                select.appendChild(opcion('', 'Elegí una sede'));
-            }
-            poblarSucursales(select, sedes);
-            // A receptionist only has their own branch: nothing to choose.
-            select.closest('.campo').hidden = sedes.length <= 1;
-        });
-        nueva.paciente_id.replaceChildren(opcion('', 'Elegí un paciente'), ...catalogo.pacientes.map((p) => opcion(String(p.id), p.etiqueta)));
-        nueva.estudio.appendChild(opcion('', 'Elegí un estudio'));
-        disp.estudio.appendChild(opcion('', 'Todos'));
-        poblarEstudios(nueva.estudio, catalogo.estudios);
-        poblarEstudios(disp.estudio, catalogo.estudios);
-        poblarProfesionalesDe(nueva.profesional_id, nueva.sucursal_id.value, '', 'Cualquiera');
-        poblarProfesionalesDe(disp.profesional_id, disp.sucursal_id.value, '', 'Todos');
-        [nueva.fecha, disp.fecha].forEach((f) => {
-            f.setAttribute('min', rango.min);
-            f.setAttribute('max', rango.max);
-        });
-        // Today can't be booked (see rango_reserva), so the list starts at the first bookable day.
-        disp.fecha.value = rango.min;
-        refrescarHorasNueva();
-        refrescarDisponibles();
-    }
-
-    btnNueva.addEventListener('click', () => abrirNueva(formNueva.hidden));
-
-    formNueva.addEventListener('change', (evento) => {
-        if (sincronizando) {
-            return;
-        }
-        if (evento.target === nueva.sucursal_id || evento.target === nueva.estudio) {
-            poblarProfesionalesDe(nueva.profesional_id, nueva.sucursal_id.value, nueva.estudio.value, 'Cualquiera');
-        }
-        if (evento.target !== nueva.paciente_id && evento.target !== nueva.hora) {
-            refrescarHorasNueva();
-        }
-    });
-
-    formNueva.addEventListener('submit', async (evento) => {
-        evento.preventDefault();
-        limpiarErroresCampos(formNueva);
-        const data = await enviarPost('api/turnos.php', { accion: 'crear', ...Object.fromEntries(new FormData(formNueva)) });
-        if (!data || !data.ok) {
-            const sueltos = data && data.errores ? mostrarErroresCampos(formNueva, data.errores) : [textoErrores(data)];
-            mostrarMensaje(sueltos.length ? sueltos.join(' ') : 'Revisá los datos de la cita.', true);
-            if (data && data.errores && data.errores.hora) {
-                refrescarHorasNueva();
-                refrescarDisponibles();
-            }
-            return;
-        }
-        mostrarMensaje(`Cita ${data.codigo} creada y confirmada.`, false);
-        limpiarNueva();
-        cargar();
-        refrescarDisponibles();
-    });
-
-    formDisp.addEventListener('change', (evento) => {
-        if (evento.target === disp.sucursal_id || evento.target === disp.estudio) {
-            poblarProfesionalesDe(disp.profesional_id, disp.sucursal_id.value, disp.estudio.value, 'Todos');
-        }
-    });
-    formDisp.addEventListener('submit', (evento) => {
-        evento.preventDefault();
-        refrescarDisponibles();
-    });
-    filtrarAlCambiar(formDisp);
-
     function poblarFiltros(data) {
         if (!primeraCarga) {
             return;
@@ -386,7 +198,6 @@
         });
         formFiltros.elements.desde.value = data.desde;
         formFiltros.elements.hasta.value = data.hasta;
-        iniciarAlta(data.reserva, data.rangoReserva);
     }
 
     async function cargar() {
@@ -400,8 +211,6 @@
         if (!primeraCarga) {
             params.set('desde', formFiltros.elements.desde.value);
             params.set('hasta', formFiltros.elements.hasta.value);
-        } else {
-            params.set('catalogo', '1');
         }
         const data = await apiJson('api/turnos.php?' + params.toString());
         if (!data || !data.citas) {
@@ -411,8 +220,15 @@
         poblarFiltros(data);
         // Basic report: totals per state for the current filters (the Estado filter doesn't narrow them).
         const t = data.totales;
-        document.getElementById('turnos-totales').textContent = `Total: ${t.total} · Pendientes: ${t.pendiente} · `
-            + `Confirmadas: ${t.confirmada} · Realizadas: ${t.realizada} · Rechazadas: ${t.rechazada} · Canceladas: ${t.cancelada}`;
+        document.getElementById('turnos-totales').replaceChildren(...[
+            ['total', 'Total', t.total], ['confirmada', 'Confirmadas', t.confirmada], ['realizada', 'Realizadas', t.realizada],
+            ['rechazada', 'Rechazadas', t.rechazada], ['cancelada', 'Canceladas', t.cancelada],
+        ].map(([clase, etiqueta, n]) => {
+            const span = document.createElement('span');
+            span.className = 'conteo conteo-' + clase;
+            span.textContent = `${etiqueta}: ${n}`;
+            return span;
+        }));
         avisoTruncado.hidden = !data.truncado;
         if (!data.citas.length) {
             lista.replaceChildren(parrafo('No hay citas para esos filtros.'));

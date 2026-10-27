@@ -482,15 +482,74 @@ instalar_script() {
   ok "Script instalado en $INSTALL_PATH (comando: sudo operador)"
 }
 
+# Uruguayan CI: 7 digits + check digit (weights 2987634), so the generated accounts pass the app's validation.
+ci_valida() {
+  local base i suma=0 pesos=(2 9 8 7 6 3 4)
+  base=$(printf '%07d' "$1")
+  for i in {0..6}; do suma=$(( suma + pesos[i] * ${base:i:1} )); done
+  echo "$base$(( (10 - suma % 10) % 10 ))"
+}
+
+# 20 test accounts per role (rol01..rol20@clinica-imagen.local), all with one random password shown at the end.
+generar_cuentas() {
+  local db=clinica_imagen dominio=clinica-imagen.local
+  if [ -n "$(mariadb -N "$db" -e "SELECT 1 FROM cuentas WHERE email = 'paciente01@$dominio'" 2>/dev/null)" ]; then
+    warn "Las cuentas de prueba ya existen (paciente01@$dominio)"; return 1
+  fi
+  local nombres=(Lucía Mateo Sofía Santiago Valentina Joaquín Martina Benjamín Camila Facundo Agustina Nicolás
+                 Florencia Tomás Julieta Bruno Micaela Diego Carolina Gonzalo Paula Federico Ana Martín Rocío Andrés)
+  local apellidos=(González Rodríguez Fernández López Martínez Pérez García Sosa Silva Pereira Díaz Álvarez Romero
+                   Suárez Benítez Acosta Méndez Cabrera Núñez Olivera Castro Ramos Vázquez Correa Torres Viera)
+  local calles=("Av. Italia" "Bv. Artigas" "Av. 18 de Julio" "Av. Rivera" "Colonia" "Canelones" "Av. Brasil" "Durazno")
+  local -A tablas=([paciente]=pacientes [medico]=medicos [profesional]=profesionales [administrador]=administradores [recepcionista]=recepcionistas)
+  local clave hash sql rol r=0 i d nombre apellido ci desde
+  clave=$(openssl rand -hex 6)
+  hash=$(php -r 'echo password_hash($argv[1], PASSWORD_BCRYPT);' "$clave")
+  sql="START TRANSACTION; SET @hash = '$hash';"
+  for rol in paciente medico profesional administrador recepcionista; do
+    r=$(( r + 1 ))
+    for i in {1..20}; do
+      nombre=${nombres[RANDOM % ${#nombres[@]}]}; apellido=${apellidos[RANDOM % ${#apellidos[@]}]}
+      ci=$(ci_valida $(( 5000000 + r * 1000 + i )))
+      case $rol in
+        paciente)      sql+="INSERT INTO pacientes (nombre, apellido, ci, direccion, numero) VALUES ('$nombre', '$apellido', '$ci', '${calles[RANDOM % ${#calles[@]}]} $(( 100 + RANDOM % 4000 ))', '09$(( 1000000 + RANDOM % 9000000 ))');" ;;
+        recepcionista) sql+="INSERT INTO recepcionistas (nombre, apellido, ci, sucursal_id) VALUES ('$nombre', '$apellido', '$ci', (SELECT id FROM sucursales WHERE activo = 1 ORDER BY RAND() LIMIT 1));" ;;
+        *)             sql+="INSERT INTO ${tablas[$rol]} (nombre, apellido, ci) VALUES ('$nombre', '$apellido', '$ci');" ;;
+      esac
+      sql+="SET @ref = LAST_INSERT_ID();"
+      sql+="INSERT INTO cuentas (email, password_hash, rol, ref_id, verificado) VALUES ('$rol$(printf '%02d' "$i")@$dominio', @hash, '$rol', @ref, 1);"
+      if [ "$rol" = profesional ]; then
+        # 1-3 random active studies and sedes; one shift on 3-5 random weekdays (start 8-12 h, 4-6 h long).
+        sql+="INSERT INTO profesional_especializacion (profesional_id, especializacion) SELECT @ref, clave FROM estudios WHERE activo = 1 ORDER BY RAND() LIMIT $(( 1 + RANDOM % 3 ));"
+        sql+="INSERT INTO profesional_sucursal (profesional_id, sucursal_id) SELECT @ref, id FROM sucursales WHERE activo = 1 ORDER BY RAND() LIMIT $(( 1 + RANDOM % 3 ));"
+        for d in $(shuf -i 1-6 -n $(( 3 + RANDOM % 3 ))); do
+          desde=$(( 8 + RANDOM % 5 ))
+          sql+="INSERT INTO profesional_horarios (profesional_id, dia_semana, hora_apertura, hora_cierre) VALUES (@ref, $d, '$desde:00', '$(( desde + 4 + RANDOM % 3 )):00');"
+        done
+      fi
+    done
+  done
+  sql+="COMMIT;"
+  # One session: any error aborts and the open transaction is rolled back, so it is all or nothing.
+  if mariadb --default-character-set=utf8mb4 "$db" -e "$sql"; then
+    ok "100 cuentas generadas (20 por rol)"
+    echo "Correos: paciente01..20, medico01..20, profesional01..20, administrador01..20, recepcionista01..20 @$dominio"
+    echo "Contraseña de todas: $clave"
+  else
+    warn "No se pudieron generar las cuentas"
+  fi
+}
+
 menu_configuracion() {
   log INFO "Entrando al menú de configuración"
   while true; do
-    menu "--- EXTRA ---" \
+    menu "--- Extras ---" \
       "1) Configurar manualmente el sistema" \
       "2) Instalar automáticamente desde GitHub" \
       "3) Actualizar script desde GitHub" \
       "4) Publicar en internet (Cloudflare Tunnel, URL temporal)" \
       "5) Dejar de publicar en internet" \
+      "6) Generar Cuentas" \
       "0) Volver"
     case $op in
       1) instalar_dependencias && configurar_firewall && configurar_ssh && configurar_fail2ban && ok "Configuración manual completada" ;;
@@ -525,6 +584,7 @@ menu_configuracion() {
          fi ;;
       4) publicar_tunel ;;
       5) detener_tunel ;;
+      6) generar_cuentas ;;
       0) return ;;
       *) echo "Opción inválida" ;;
     esac
@@ -544,7 +604,7 @@ while true; do
     "6) Gestión de bases de datos" \
     "7) Monitoreo y registros del sistema" \
     "8) Log interno del script" \
-    "9) EXTRA" \
+    "9) Extras" \
     "0) Salir"
   case $op in
     1) menu_servicios ;;

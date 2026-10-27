@@ -7,7 +7,8 @@ require_once __DIR__ . '/../includes/pacientes.php';
 
 require_post_json();
 
-if (demasiados_eventos('registro', 'ip', (string) ($_SERVER['REMOTE_ADDR'] ?? ''), 10, 60)) {
+// Throttles attempts, not just successes, so probing with existing emails/CIs is capped too.
+if (demasiados_eventos('registro_intento', 'ip', (string) ($_SERVER['REMOTE_ADDR'] ?? ''), 10, 60)) {
     http_response_code(429);
     echo json_encode(['ok' => false, 'errores' => ['general' => 'Demasiados registros desde esta conexión. Probá de nuevo más tarde.']], JSON_UNESCAPED_UNICODE);
     exit;
@@ -26,11 +27,30 @@ if ($errores) {
 
 $db = db();
 
+// Anti-enumeration: whether the email or CI already exists, or the mail cap was hit, always answers the same success.
+// Per-target-email cap: a victim's inbox cannot be flooded through this endpoint.
+$limitadoEmail = demasiados_eventos('registro_intento', 'email', $valores['email'], 3, 60);
+registrar_evento('registro_intento', null, $valores['email']);
+$exito = static function (): never {
+    echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);
+    exit;
+};
+if ($limitadoEmail) {
+    $exito();
+}
+
+$stmt = $db->prepare('SELECT 1 FROM cuentas WHERE email = ?');
+$stmt->execute([$valores['email']]);
+if ($stmt->fetchColumn()) {
+    enviar_cuenta_existente($valores['email']);
+    $exito();
+}
+
 // A patient whose account was deleted gets it back by signing up again with the same CI and the email that account
-// had (pacientes.email_anterior): their data, citas and clinical history stay attached. Any other email is refused,
-// so knowing someone's CI is not enough to take over their history.
+// had (pacientes.email_anterior): their data, citas and clinical history stay attached. Any other email is silently
+// ignored (same response), so knowing someone's CI is not enough to take over their history or to probe for it.
 $stmt = $db->prepare(
-    "SELECT p.id, p.email_anterior, c.id AS cuenta_id
+    "SELECT p.id, p.email_anterior, c.id AS cuenta_id, c.email AS cuenta_email
        FROM pacientes p
        LEFT JOIN cuentas c ON c.rol = 'paciente' AND c.ref_id = p.id
       WHERE p.ci = ?"
@@ -41,12 +61,10 @@ if ($existente !== null
     && ($existente['cuenta_id'] !== null
         || $existente['email_anterior'] === null
         || strcasecmp($existente['email_anterior'], $valores['email']) !== 0)) {
-    http_response_code(422);
-    $mensaje = $existente['cuenta_id'] !== null
-        ? 'Ya existe una cuenta registrada con esa cédula.'
-        : 'Ya hay un paciente con esa cédula. Registrate con el correo que usabas o contactá a la clínica.';
-    echo json_encode(['ok' => false, 'errores' => ['ci' => $mensaje]], JSON_UNESCAPED_UNICODE);
-    exit;
+    if ($existente['cuenta_email'] !== null) {
+        enviar_cuenta_existente($existente['cuenta_email']);
+    }
+    $exito();
 }
 
 try {
@@ -83,13 +101,9 @@ try {
     if ($db->inTransaction()) {
         $db->rollBack();
     }
-    if ($e->getCode() === '23000' && str_contains($e->getMessage(), 'uq_pacientes_ci')) {
-        $errores['ci'] = 'Ya existe una cuenta registrada con esa cédula.';
-    } elseif ($e->getCode() === '23000' && str_contains($e->getMessage(), 'uq_cuentas_email')) {
-        $errores['email'] = 'Ya existe una cuenta registrada con ese correo.';
-    } else {
-        $errores['general'] = 'No se pudo completar el registro. Intentá nuevamente.';
+    if ($e->getCode() === '23000') {
+        $exito(); // lost a race on CI/email uniqueness: same response as the pre-checks
     }
     http_response_code(422);
-    echo json_encode(['ok' => false, 'errores' => $errores], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['ok' => false, 'errores' => ['general' => 'No se pudo completar el registro. Intentá nuevamente.']], JSON_UNESCAPED_UNICODE);
 }

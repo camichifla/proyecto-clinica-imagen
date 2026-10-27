@@ -208,7 +208,7 @@
             return;
         }
         mostrarMensaje(seccionCuentas, data.email_pendiente
-            ? `Cuenta actualizada. Se envió un correo a ${data.email_pendiente} para confirmar la nueva dirección; si no se confirma en 24 horas, la cuenta vuelve al correo anterior.`
+            ? `Cuenta actualizada. Se envió un correo a ${data.email_pendiente}; el cambio de correo se aplica cuando se confirme la nueva dirección (vence en 24 horas). Hasta entonces la cuenta sigue con el correo actual.`
             : 'Cuenta actualizada.', false);
         cerrarEdicion();
         cargarDatos();

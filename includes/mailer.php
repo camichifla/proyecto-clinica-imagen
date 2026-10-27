@@ -72,33 +72,45 @@ function enviar_verificacion(string $email, string $link): bool
     );
 }
 
-/** Email change: asks the NEW address to confirm, and tells the old one. Best effort. */
-function enviar_confirmacion_email(string $nuevo, string $anterior, string $link): void
+/** Sent instead of a verification mail when someone tries to register an email/CI that already has an account. */
+function enviar_cuenta_existente(string $email): bool
+{
+    return enviar_correo(
+        $email,
+        'Ya tenés una cuenta - Clínica Imagen',
+        "Alguien intentó registrar una cuenta con este correo o con tu cédula, pero ya tenés una cuenta en Clínica Imagen. Si fuiste vos, iniciá sesión o usá \"Olvidé mi contraseña\". Si no fuiste vos, ignorá este mensaje."
+    );
+}
+
+/** Email change request: asks the NEW address to confirm, and warns the current one. Nothing changes until confirmed. Best effort. */
+function enviar_confirmacion_email(string $nuevo, string $actual, string $link): void
 {
     enviar_correo(
         $nuevo,
         'Confirmá tu nuevo correo - Clínica Imagen',
-        "El correo de tu cuenta fue cambiado a esta dirección. Confirmalo visitando el siguiente enlace:\n\n{$link}\n\nEl enlace vence en 24 horas; si no lo confirmás, la cuenta vuelve a su correo anterior."
+        "Se pidió usar esta dirección como correo de una cuenta. Confirmala visitando el siguiente enlace:\n\n{$link}\n\nEl enlace vence en 24 horas; si no la confirmás, la cuenta sigue con su correo actual."
     );
     enviar_correo(
-        $anterior,
-        'El correo de tu cuenta fue cambiado - Clínica Imagen',
-        "El correo de tu cuenta fue cambiado a {$nuevo}. Si no se confirma en 24 horas, la cuenta vuelve a esta dirección."
+        $actual,
+        'Se pidió cambiar el correo de tu cuenta - Clínica Imagen',
+        "Se pidió cambiar el correo de tu cuenta a {$nuevo}. Hasta que esa dirección se confirme, tu cuenta sigue usando esta. Si no fuiste vos, cambiá tu contraseña."
     );
 }
 
-/**
- * Pending email changes (cuentas.email_anterior set, no live confirmation token) are undone: the account gets its previous
- * email back, unless another account took it meanwhile, in which case the new one stays. Either way nothing stays pending.
- */
-function revertir_emails_vencidos(PDO $db): void
+/** Clears pending email changes (cuentas.email_nuevo) whose confirmation token expired or was used up. Nothing else changes. */
+function limpiar_emails_pendientes(PDO $db): void
 {
-    $vencido = 'c.email_anterior IS NOT NULL AND NOT EXISTS (SELECT 1 FROM tokens_verificacion t
-                 WHERE t.cuenta_id = c.id AND t.usado_en IS NULL AND t.expira_en > NOW())';
-    $db->exec("UPDATE cuentas c LEFT JOIN cuentas o ON o.email = c.email_anterior AND o.id <> c.id
-                  SET c.email = c.email_anterior, c.email_anterior = NULL
-                WHERE o.id IS NULL AND {$vencido}");
-    $db->exec("UPDATE cuentas c SET c.email_anterior = NULL WHERE {$vencido}");
+    $db->exec('UPDATE cuentas c SET c.email_nuevo = NULL
+                WHERE c.email_nuevo IS NOT NULL AND NOT EXISTS (SELECT 1 FROM tokens_verificacion t
+                      WHERE t.cuenta_id = c.id AND t.usado_en IS NULL AND t.expira_en > NOW())');
+}
+
+/** True if another account (not $cuentaId) already uses $email. */
+function email_en_uso(PDO $db, string $email, int $cuentaId): bool
+{
+    $stmt = $db->prepare('SELECT 1 FROM cuentas WHERE email = ? AND id <> ?');
+    $stmt->execute([$email, $cuentaId]);
+    return (bool) $stmt->fetchColumn();
 }
 
 function enviar_reset(string $email, string $link): bool
@@ -267,22 +279,17 @@ function enviar_aviso_resultado(string $email, string $link): bool
 }
 
 /**
- * Applies an email change to an account row (id, email, email_anterior). The new email applies now, but the previous one
- * is kept until the new one is confirmed (see revertir_emails_vencidos). Returns the confirmation token to mail with
+ * Requests an email change on an account row (id, email). The current email stays active; the requested one waits in
+ * cuentas.email_nuevo until its token is confirmed (api/verify.php). Returns the token to mail with
  * enviar_confirmacion_email, or null when nothing needs confirming. Call inside the caller's transaction.
  */
 function aplicar_cambio_email(PDO $db, array $cuenta, string $email): ?string
 {
     if (strcasecmp($cuenta['email'], $email) === 0) {
-        $db->prepare('UPDATE cuentas SET email = ? WHERE id = ?')->execute([$email, $cuenta['id']]);
+        $db->prepare('UPDATE cuentas SET email_nuevo = NULL WHERE id = ?')->execute([$cuenta['id']]);
         return null;
     }
-    if ($cuenta['email_anterior'] !== null && strcasecmp($cuenta['email_anterior'], $email) === 0) {
-        $db->prepare('UPDATE cuentas SET email = ?, email_anterior = NULL WHERE id = ?')->execute([$email, $cuenta['id']]);
-        return null;
-    }
-    $db->prepare('UPDATE cuentas SET email = ?, email_anterior = COALESCE(email_anterior, ?) WHERE id = ?')
-        ->execute([$email, $cuenta['email'], $cuenta['id']]);
+    $db->prepare('UPDATE cuentas SET email_nuevo = ? WHERE id = ?')->execute([$email, $cuenta['id']]);
     return emitir_token_verificacion($db, (int) $cuenta['id']);
 }
 

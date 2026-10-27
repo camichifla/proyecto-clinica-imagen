@@ -276,7 +276,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($accion === 'editar_cuenta') {
         $cuentaId = filter_input(INPUT_POST, 'cuenta_id', FILTER_VALIDATE_INT);
         $db   = db();
-        $stmt = $db->prepare('SELECT id, rol, ref_id, email, email_anterior FROM cuentas WHERE id = ?');
+        $stmt = $db->prepare('SELECT id, rol, ref_id, email FROM cuentas WHERE id = ?');
         $stmt->execute([$cuentaId ?: 0]);
         $cuenta = $stmt->fetch();
         if (!$cuenta) {
@@ -330,6 +330,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errores['horarios'] = $turnos;
                 $turnos = [];
             }
+        }
+
+        if (!$errores && email_en_uso($db, trim((string) $_POST['email']), (int) $cuenta['id'])) {
+            $errores['email'] = 'Ya existe una cuenta registrada con ese correo.';
         }
 
         if ($errores) {

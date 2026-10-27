@@ -7,7 +7,7 @@ const REGLAS_PACIENTE = [
     'nombre'     => ['label' => 'Nombre',     'pattern' => '/^\p{L}[\p{L}\s\'-]{1,59}\z/u',              'hint' => 'Solo letras y espacios, 2 a 60 caracteres.'],
     'apellido'   => ['label' => 'Apellido',   'pattern' => '/^\p{L}[\p{L}\s\'-]{1,59}\z/u',              'hint' => 'Solo letras y espacios, 2 a 60 caracteres.'],
     'ci'         => ['label' => 'Cédula',     'pattern' => '/^\d{7,8}\z/',                               'hint' => '7 u 8 dígitos, sin puntos ni guion.'],
-    'direccion'  => ['label' => 'Dirección',  'pattern' => '/^.{5,160}\z/u',                             'hint' => 'Calle y número, 5 a 160 caracteres.'],
+    'direccion'  => ['label' => 'Dirección',  'pattern' => '/^(?!.*[<>]).{5,160}\z/u',                   'hint' => 'Calle y número, 5 a 160 caracteres, sin < ni >.'],
     'numero'     => ['label' => 'Teléfono',   'pattern' => '/^\+?\d[\d\s-]{7,24}\z/',                    'hint' => '8 a 25 dígitos; se permite + inicial.'],
     'email'      => ['label' => 'Correo',     'filter'  => FILTER_VALIDATE_EMAIL,                       'hint' => 'Formato nombre@dominio.com.'],
     'contrasena' => ['label' => 'Contraseña', 'pattern' => '/^(?=.*\p{L})(?=.*\d)(?=.*[^\p{L}\d\s]).{8,72}\z/u', 'hint' => 'Mínimo 8 caracteres, con al menos una letra, un número y un carácter especial.', 'maxbytes' => 72],
@@ -22,6 +22,18 @@ const REGLAS_STAFF = [
     'contrasena' => REGLAS_PACIENTE['contrasena'],
 ];
 
+/** Free-text POST field as a trimmed string; arrays/objects count as empty (so required checks reject them). */
+function texto_post(string $campo): string
+{
+    return isset($_POST[$campo]) && is_scalar($_POST[$campo]) ? trim((string) $_POST[$campo]) : '';
+}
+
+/** Defense in depth for free text that is rendered with textContent anyway: no angle brackets. */
+function contiene_html(string $valor): bool
+{
+    return str_contains($valor, '<') || str_contains($valor, '>');
+}
+
 /**
  * Returns field => error message for every failed field; empty array = all passed.
  *
@@ -33,6 +45,11 @@ function validar(array $reglas, array $datos): array
 {
     $errores = [];
     foreach ($reglas as $campo => $regla) {
+        // Arrays/objects (e.g. campo[]=x) are never valid input: casting them would yield "Array" and pass loose patterns.
+        if (isset($datos[$campo]) && !is_scalar($datos[$campo])) {
+            $errores[$campo] = 'Formato de ' . $regla['label'] . ' inválido. ' . $regla['hint'];
+            continue;
+        }
         $valor = isset($datos[$campo]) ? trim((string) $datos[$campo]) : '';
 
         if ($valor === '') {

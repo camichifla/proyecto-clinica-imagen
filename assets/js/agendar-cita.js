@@ -29,6 +29,8 @@
         }
         if (data.redirect) {
             window.location.href = data.redirect;
+        } else {
+            window.alert(textoErrores(data));
         }
     }
 

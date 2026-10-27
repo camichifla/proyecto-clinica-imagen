@@ -22,8 +22,6 @@ if (demasiados_eventos('login_fallo', 'email', $email, MAX_FALLOS_EMAIL, VENTANA
     exit;
 }
 
-revertir_emails_vencidos(db());
-
 $stmt = db()->prepare('SELECT id, password_hash, rol, ref_id, verificado, activo FROM cuentas WHERE email = ?');
 $stmt->execute([$email]);
 $cuenta = $stmt->fetch();

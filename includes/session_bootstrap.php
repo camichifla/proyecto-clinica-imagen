@@ -66,7 +66,7 @@ function csrf_token(): string
 }
 
 /** Responds 403 and exits on mismatch or missing token; never returns false. */
-function csrf_check(?string $token): void
+function csrf_check(mixed $token): void
 {
     if (!is_string($token) || $token === '' || !hash_equals(csrf_token(), $token)) {
         // PHP drops $_POST entirely when the body exceeds post_max_size.

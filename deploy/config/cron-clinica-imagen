@@ -15,7 +15,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 0 4 * * * root /usr/local/sbin/clinica-respaldo remoto
 
 # Limpieza: borra eventos de throttle de más de 90 días (los de auditoría se conservan), todos los días a las 05:00.
-0 5 * * * root mariadb clinica_imagen -e "DELETE FROM eventos WHERE tipo IN ('login_fallo','reset_solicitud','contacto','verif_reenvio') AND creado_en < NOW() - INTERVAL 90 DAY"
+0 5 * * * root mariadb clinica_imagen -e "DELETE FROM eventos WHERE tipo IN ('login_fallo','reset_solicitud','contacto','verif_reenvio','registro_intento') AND creado_en < NOW() - INTERVAL 90 DAY"
 
-# Cambios de correo sin confirmar: si venció el token, la cuenta vuelve a su correo anterior (cada hora; el login también lo hace).
-0 * * * * root cd /var/www/clinica-imagen && php -r 'require "includes/mailer.php"; revertir_emails_vencidos(db());'
+# Cambios de correo sin confirmar: si venció el token, se descarta el correo solicitado (cada hora; verify y el perfil también lo hacen).
+0 * * * * root cd /var/www/clinica-imagen && php -r 'require "includes/mailer.php"; limpiar_emails_pendientes(db());'

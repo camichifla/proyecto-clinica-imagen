@@ -2,6 +2,7 @@
 // Only the patient-scoping/cita-ownership logic differs between the two roles; the upload mechanics below are identical, so they live here once.
 
 require_once __DIR__ . '/estudios.php';
+require_once __DIR__ . '/validation.php';
 require_once __DIR__ . '/mailer.php';
 
 const MAX_TAMANIO_IMAGEN = 10 * 1024 * 1024;
@@ -172,9 +173,9 @@ function procesar_post_resultado(array $usuario, callable $pacienteValido, ?int 
 
     $pacienteIdPost = (string) ($_POST['paciente_id'] ?? '');
     $citaIdPost     = (string) ($_POST['cita_id'] ?? '');
-    $nombreEstudio  = trim((string) ($_POST['nombre_estudio'] ?? ''));
+    $nombreEstudio  = texto_post('nombre_estudio');
     $fechaEstudio   = (string) ($_POST['fecha_estudio'] ?? '');
-    $observaciones  = mb_substr(trim((string) ($_POST['observaciones'] ?? '')), 0, 2000);
+    $observaciones  = mb_substr(texto_post('observaciones'), 0, 2000);
 
     $errores = [];
 
@@ -214,6 +215,12 @@ function procesar_post_resultado(array $usuario, callable $pacienteValido, ?int 
         $errores['nombre_estudio'] = 'El nombre del estudio es obligatorio.';
     } elseif (mb_strlen($nombreEstudio) > 120) {
         $errores['nombre_estudio'] = 'El nombre del estudio no puede superar 120 caracteres.';
+    } elseif (contiene_html($nombreEstudio)) {
+        $errores['nombre_estudio'] = 'El nombre del estudio no puede incluir < ni >.';
+    }
+
+    if (contiene_html($observaciones)) {
+        $errores['observaciones'] = 'Las observaciones no pueden incluir < ni >.';
     }
 
     if ($fechaEstudio === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fechaEstudio)) {

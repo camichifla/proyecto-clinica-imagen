@@ -31,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'reenv
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['token'])) {
+    limpiar_emails_pendientes($db);
     $tokenHash = hash('sha256', (string) $_GET['token']);
 
     $stmt = $db->prepare(
@@ -41,10 +42,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['token'])) {
     $fila = $stmt->fetch();
 
     if ($fila) {
-        $db->beginTransaction();
-        $db->prepare('UPDATE cuentas SET verificado = 1, email_anterior = NULL WHERE id = ?')->execute([$fila['cuenta_id']]);
-        $db->prepare('UPDATE tokens_verificacion SET usado_en = NOW() WHERE id = ?')->execute([$fila['id']]);
-        $db->commit();
+        // A pending email change takes effect only now; uniqueness is re-checked by uq_cuentas_email at this moment.
+        try {
+            $db->beginTransaction();
+            $db->prepare('UPDATE cuentas SET verificado = 1, email = COALESCE(email_nuevo, email), email_nuevo = NULL WHERE id = ?')->execute([$fila['cuenta_id']]);
+            $db->prepare('UPDATE tokens_verificacion SET usado_en = NOW() WHERE id = ?')->execute([$fila['id']]);
+            $db->commit();
+        } catch (PDOException $e) {
+            if ($db->inTransaction()) {
+                $db->rollBack();
+            }
+            if ($e->getCode() !== '23000') {
+                throw $e;
+            }
+            http_response_code(409);
+            echo json_encode(['ok' => false, 'error' => 'Ese correo ya lo usa otra cuenta. Pedí el cambio con otra dirección.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
 
         registrar_evento('verificacion', 'cuenta=' . $fila['cuenta_id']);
 

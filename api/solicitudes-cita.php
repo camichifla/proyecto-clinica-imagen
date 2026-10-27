@@ -29,6 +29,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($cita && $sucRecep !== null && (int) $cita['sucursal_id'] !== $sucRecep) {
             $cita = false; // not this receptionist's branch
         }
+        if (!$cita) {
+            // Checked before any UPDATE: another branch's (or a missing) cita is never touched.
+            http_response_code(404);
+            echo json_encode(['ok' => false, 'error' => MENSAJE_SOLICITUD_NO_PROCESADA], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
 
         if ($confirmar) {
             $stmt = db()->prepare(
@@ -46,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$notas !== '' ? $notas : null, $citaId]);
         }
 
-        if ($stmt->rowCount() > 0 && $cita) {
+        if ($stmt->rowCount() > 0) {
             registrar_evento($confirmar ? 'cita_confirmar' : 'cita_rechazar', 'cita=' . $citaId);
             $email = email_notificacion_cita($cita['paciente_id'], $cita['email_pendiente']);
             if ($email !== null) {

@@ -47,7 +47,7 @@
             return;
         }
         mostrarAviso('email', evento.detail.email_pendiente
-            ? `Te enviamos un correo a ${evento.detail.email_pendiente} para confirmar la nueva dirección. Si no la confirmás en 24 horas, la cuenta vuelve al correo anterior.`
+            ? `Te enviamos un correo a ${evento.detail.email_pendiente}. El cambio se aplica cuando confirmes la nueva dirección (vence en 24 horas); hasta entonces seguís usando el correo actual.`
             : 'Correo actualizado correctamente.');
         formEmail.elements.contrasena_actual.value = '';
     });

@@ -16,6 +16,12 @@ const ROLES_ETIQUETA = { paciente: 'Paciente', medico: 'Médico', profesional: '
         { href: 'contacto.html', label: 'Contacto' },
     ];
 
+    // Guarded pages show no content until the session is confirmed (no flash of the empty shell before a redirect).
+    const principal = document.querySelector('main');
+    if (!publico && principal) {
+        principal.style.visibility = 'hidden';
+    }
+
     const promesa = (async () => {
         const url = publico ? 'api/sesion.php?opcional=1' : 'api/sesion.php';
         let respuesta;
@@ -48,6 +54,10 @@ const ROLES_ETIQUETA = { paciente: 'Paciente', medico: 'Médico', profesional: '
                 window.location.replace('index.html');
                 return null;
             }
+        }
+
+        if (principal) {
+            principal.style.visibility = '';
         }
 
         if (sesion.sinSede) {

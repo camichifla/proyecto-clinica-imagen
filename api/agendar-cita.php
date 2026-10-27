@@ -18,19 +18,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($accion === 'cancelar') {
         $citaId = filter_input(INPUT_POST, 'cita_id', FILTER_VALIDATE_INT);
 
-        if ($citaId) {
-            // Pending or confirmed upcoming citas; patients are not asked for a reason, the note
-            // only tells staff who cancelled.
-            $stmt = db()->prepare(
-                "UPDATE citas SET estado = 'cancelada', notas_admin = 'Cancelado por el paciente.'
-                 WHERE id = ? AND paciente_id = ? AND estado IN ('pendiente', 'confirmada')
-                   AND fecha_hora_solicitada >= NOW()"
-            );
-            $stmt->execute([$citaId, $usuario['ref_id']]);
-            if ($stmt->rowCount() > 0) {
-                registrar_evento('cita_cancelar', 'cita=' . $citaId);
-            }
+        if (!$citaId) {
+            http_response_code(400);
+            echo json_encode(['ok' => false, 'error' => 'Cita inválida.'], JSON_UNESCAPED_UNICODE);
+            exit;
         }
+        // Pending or confirmed upcoming citas; patients are not asked for a reason, the note
+        // only tells staff who cancelled.
+        $stmt = db()->prepare(
+            "UPDATE citas SET estado = 'cancelada', notas_admin = 'Cancelado por el paciente.'
+             WHERE id = ? AND paciente_id = ? AND estado IN ('pendiente', 'confirmada')
+               AND fecha_hora_solicitada >= NOW()"
+        );
+        $stmt->execute([$citaId, $usuario['ref_id']]);
+        if ($stmt->rowCount() === 0) {
+            http_response_code(404);
+            echo json_encode(['ok' => false, 'error' => 'No se pudo cancelar la cita: no existe, no es tuya o ya no se puede cancelar.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+        registrar_evento('cita_cancelar', 'cita=' . $citaId);
         echo json_encode(['ok' => true, 'redirect' => 'agendar-cita.html?cancelado=1'], JSON_UNESCAPED_UNICODE);
         exit;
     }

@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $accion = (string) ($_POST['accion'] ?? '');
     if ($accion === 'email' || $accion === 'contrasena') {
         $db   = db();
-        $stmt = $db->prepare('SELECT id, email, email_anterior, password_hash FROM cuentas WHERE id = ?');
+        $stmt = $db->prepare('SELECT id, email, password_hash FROM cuentas WHERE id = ?');
         $stmt->execute([$usuario['cuenta_id']]);
         $cuenta = $stmt->fetch();
 
@@ -68,6 +68,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($errores) {
             http_response_code(422);
             echo json_encode(['ok' => false, 'errores' => $errores], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+        if (email_en_uso($db, $email, (int) $cuenta['id'])) {
+            http_response_code(422);
+            echo json_encode(['ok' => false, 'errores' => ['email' => 'Ya existe una cuenta registrada con ese correo.']], JSON_UNESCAPED_UNICODE);
             exit;
         }
         try {
@@ -129,11 +134,14 @@ $stmt = db()->prepare("SELECT {$columnas} FROM {$tabla} WHERE id = ?");
 $stmt->execute([$usuario['ref_id']]);
 $fila = $stmt->fetch() ?: [];
 
-$stmt = db()->prepare('SELECT email FROM cuentas WHERE id = ?');
+limpiar_emails_pendientes(db());
+$stmt = db()->prepare('SELECT email, email_nuevo FROM cuentas WHERE id = ?');
 $stmt->execute([$usuario['cuenta_id']]);
+$cuentaFila = $stmt->fetch();
 
 echo json_encode([
-    'email'  => (string) $stmt->fetchColumn(),
+    'email'  => (string) $cuentaFila['email'],
+    'email_pendiente' => $cuentaFila['email_nuevo'],
     'campos' => array_map(static function (string $campo, string $tipo) use ($fila): array {
         return [
             'campo' => $campo,

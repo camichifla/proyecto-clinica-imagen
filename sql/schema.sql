@@ -8,7 +8,7 @@ CREATE TABLE cuentas (
   rol            ENUM('paciente','medico','profesional','administrador','recepcionista') NOT NULL,
   ref_id         INT UNSIGNED NOT NULL,              -- polymorphic pointer
   verificado     TINYINT(1) NOT NULL DEFAULT 0,
-  email_anterior VARCHAR(254) NULL,                  -- email before an unconfirmed change; restored if the confirmation token expires
+  email_nuevo    VARCHAR(254) NULL,                  -- requested email, active only once its confirmation token is used (api/verify.php)
   activo         TINYINT(1) NOT NULL DEFAULT 1,      -- 0 = desactivada por un administrador; login rejects it
   creado_en      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   actualizado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

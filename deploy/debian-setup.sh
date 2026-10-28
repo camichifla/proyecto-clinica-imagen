@@ -29,7 +29,7 @@ APP_URL=${APP_URL%/}
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y apache2 mariadb-server libapache2-mod-php php-cli php-mysql php-mbstring rsync openssl cron curl
+apt-get install -y apache2 mariadb-server libapache2-mod-php php-cli php-mysql php-mbstring rsync openssl cron curl gnupg
 [ -z "$DOMAIN" ] || apt-get install -y certbot python3-certbot-apache
 
 # The app pins PHP to America/Montevideo and compares against MariaDB's NOW().
@@ -136,6 +136,12 @@ EOF
 install -m 755 deploy/respaldo.sh /usr/local/sbin/clinica-respaldo
 install -m 644 deploy/config/cron-clinica-imagen /etc/cron.d/clinica-imagen
 install -m 644 deploy/config/profile-clinica.sh /etc/profile.d/clinica-imagen.sh
+# Backup encryption key (everything uploaded to the remote is gpg-encrypted with it); created once, root-only.
+if [ ! -s /root/.clinica-respaldo.key ]; then
+  (umask 077; openssl rand -base64 32 > /root/.clinica-respaldo.key)
+  echo "IMPORTANTE: clave de cifrado de respaldos creada en /root/.clinica-respaldo.key." >&2
+  echo "            Guárdela FUERA del servidor (clinica-respaldo clave); sin ella los respaldos remotos no se recuperan." >&2
+fi
 
 a2enmod -q rewrite headers remoteip
 a2dissite -q 000-default || true

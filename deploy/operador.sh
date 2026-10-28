@@ -275,6 +275,8 @@ menu_respaldos() {
       "4) Respaldar carpeta personalizada" \
       "5) Respaldar carpeta a Google Drive (rclone)" \
       "6) Listar respaldos" \
+      "7) Mostrar clave de cifrado de respaldos" \
+      "8) Descifrar un respaldo .gpg" \
       "0) Volver"
     case $op in
       1) "$RESPALDO_BIN" archivos || warn "Falló el respaldo de archivos (¿instaló clinica-respaldo? opción 9.2)" ;;
@@ -290,9 +292,12 @@ menu_respaldos() {
            read -rp "Ruta local a subir [$BACKUP_DIR]: " ruta
            ruta=${ruta:-$BACKUP_DIR}
            read -rp "Carpeta destino en Google Drive: " carpeta
-           if rclone copy "$ruta" "gdrive:$carpeta" --progress; then ok "Subido $ruta a gdrive:$carpeta"; else warn "Falló la subida a Google Drive"; fi
+           # encrypted before upload (clinica-respaldo subir): the plaintext never reaches Google Drive
+           RCLONE_REMOTE=gdrive: "$RESPALDO_BIN" subir "$ruta" "$carpeta" || warn "Falló la subida a Google Drive"
          fi ;;
       6) log ACTION "Listado de respaldos"; ls -lh "$BACKUP_DIR" ;;
+      7) log ACTION "Mostrar clave de cifrado de respaldos"; "$RESPALDO_BIN" clave || warn "No se pudo mostrar la clave" ;;
+      8) read -rp "Archivo .gpg a descifrar: " ruta; "$RESPALDO_BIN" descifrar "$ruta" || warn "No se pudo descifrar $ruta" ;;
       0) return ;;
       *) echo "Opción inválida" ;;
     esac
@@ -429,7 +434,7 @@ menu_log_interno() {
 instalar_dependencias() {
   echo "ℹ Instalando dependencias del sistema..."
   export DEBIAN_FRONTEND=noninteractive
-  apt-get update && apt-get install -y apache2 mariadb-server rclone nftables fail2ban python3-systemd openssh-server \
+  apt-get update && apt-get install -y apache2 mariadb-server rclone gnupg nftables fail2ban python3-systemd openssh-server \
     curl wget git nano rsync iproute2 procps || { warn "Falló la instalación de dependencias"; return 1; }
   systemctl enable --now apache2 mariadb fail2ban ssh
   ok "Dependencias y servicios instalados"

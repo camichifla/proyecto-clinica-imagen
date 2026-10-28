@@ -19,3 +19,6 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 # Cambios de correo sin confirmar: si venció el token, se descarta el correo solicitado (cada hora; verify y el perfil también lo hacen).
 0 * * * * root cd /var/www/clinica-imagen && php -r 'require "includes/mailer.php"; limpiar_emails_pendientes(db());'
+
+# Cuentas de pacientes sin verificar por más de 48 h: se borran (y su ficha si no tiene historia) para liberar la CI (cada hora).
+15 * * * * root cd /var/www/clinica-imagen && php -r 'require "includes/pacientes.php"; limpiar_cuentas_sin_verificar(db());'

@@ -26,6 +26,7 @@ if ($errores) {
 }
 
 $db = db();
+limpiar_cuentas_sin_verificar($db); // frees CIs squatted by accounts never verified within 48h
 
 // Anti-enumeration: whether the email or CI already exists, or the mail cap was hit, always answers the same success.
 // Per-target-email cap: a victim's inbox cannot be flooded through this endpoint.

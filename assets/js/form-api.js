@@ -5,7 +5,7 @@
 // { ok: false } if the response wasn't JSON. On an expired session (401 or
 // redirect to login) it navigates to login.html; on a 403 for reads (role without
 // permission) it navigates to index.html. In both cases it does NOT resolve: the page is
-// leaving and the caller must not continue.
+// leaving and the caller must not continue. Public pages pass { publica: true } to skip both redirects.
 async function apiJson(url, opts = {}) {
     let respuesta;
     try {
@@ -14,11 +14,11 @@ async function apiJson(url, opts = {}) {
         return null;
     }
     const esLectura = !opts.body;
-    if (esLectura && respuesta.status === 403) {
+    if (!opts.publica && esLectura && respuesta.status === 403) {
         window.location.replace('index.html');
         return new Promise(() => {});
     }
-    if (respuesta.status === 401 || respuesta.redirected) {
+    if (!opts.publica && (respuesta.status === 401 || respuesta.redirected)) {
         const expirado = respuesta.status === 401 && (await respuesta.json().catch(() => ({}))).expirado;
         window.location.href = expirado ? 'login.html?expirado=1' : 'login.html';
         return new Promise(() => {});
@@ -73,6 +73,52 @@ async function cargarScripts(...srcs) {
         await cargarScript(src);
     }
 }
+
+// Styled, promise-based confirmation dialog: resolves true on accept, false on cancel/Escape.
+function confirmar(mensaje, { peligro = false } = {}) {
+    return new Promise((resolve) => {
+        const dialogo = document.createElement('dialog');
+        dialogo.className = 'dialogo-confirmar';
+        const acciones = document.createElement('form');
+        acciones.method = 'dialog';
+        acciones.className = 'acciones-form';
+        const boton = (valor, texto, clase) => {
+            const b = document.createElement('button');
+            b.value = valor;
+            b.className = clase;
+            b.textContent = texto;
+            return b;
+        };
+        const cancelar = boton('no', 'Cancelar', 'btn-secundario');
+        cancelar.autofocus = true;
+        acciones.append(cancelar, boton('si', 'Aceptar', peligro ? 'btn-peligro' : 'btn-primario'));
+        dialogo.append(parrafo(mensaje), acciones);
+        dialogo.addEventListener('close', () => {
+            dialogo.remove();
+            resolve(dialogo.returnValue === 'si');
+        });
+        document.body.appendChild(dialogo);
+        dialogo.showModal();
+    });
+}
+
+// Accents and case are ignored: "lopez" finds "López".
+function normalizar(texto) {
+    return String(texto ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase().trim();
+}
+
+// Every word of `busqueda` must appear in the (accent/case-insensitive) joined `campos`.
+function coincidePalabras(busqueda, campos) {
+    const texto = normalizar(campos.join(' '));
+    return normalizar(busqueda).split(/\s+/).filter(Boolean).every((palabra) => texto.includes(palabra));
+}
+
+const pad = (n) => String(n).padStart(2, '0');
+function parseISO(s) {
+    const [anio, mes, dia] = s.split('-').map(Number);
+    return new Date(anio, mes - 1, dia);
+}
+const aISO = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
 
 function parrafo(texto) {
     const p = document.createElement('p');
@@ -183,9 +229,9 @@ document.addEventListener('focusin', (evento) => {
 });
 ['pointerdown', 'input', 'change'].forEach((tipo) => document.addEventListener(tipo, limpiarErrorDe));
 
-function celdaEstado(estado, etiqueta) {
+function celdaEstado(estado, etiqueta, columna = 'Estado') {
     const td = document.createElement('td');
-    td.dataset.label = 'Estado';
+    td.dataset.label = columna;
     const badge = document.createElement('span');
     badge.className = 'estado-badge estado-' + estado;
     badge.textContent = etiqueta;
@@ -299,23 +345,17 @@ function tabla(encabezados, filas, opciones = {}) {
     return contenedor;
 }
 
-function poblarDatalist(datalist, filas, etiquetaFn) {
-    datalist.innerHTML = '';
-    filas.forEach((fila) => {
-        const opcion = document.createElement('option');
-        opcion.dataset.id = fila.id;
-        opcion.value = etiquetaFn(fila);
-        datalist.appendChild(opcion);
-    });
-}
-
-function poblarPacientes(datalist, pacientes, inputBuscar) {
-    poblarDatalist(datalist, pacientes, (p) => `${p.apellido}, ${p.nombre} (${p.ci})`);
-    if (!pacientes.length && inputBuscar) {
+// Fills a <select class="selector-combo" data-buscable> with patients; shows data-mensaje-sin-pacientes if there are none.
+function poblarPacientes(select, pacientes) {
+    select.replaceChildren(
+        new Option('Elegí un paciente', ''),
+        ...pacientes.map((p) => new Option(`${p.apellido}, ${p.nombre} (${p.ci})`, String(p.id)))
+    );
+    if (!pacientes.length && select.dataset.mensajeSinPacientes) {
         const mensaje = document.createElement('p');
         mensaje.className = 'campo-error';
-        mensaje.textContent = inputBuscar.dataset.mensajeSinPacientes || 'No hay pacientes registrados.';
-        inputBuscar.closest('.campo').appendChild(mensaje);
+        mensaje.textContent = select.dataset.mensajeSinPacientes;
+        select.closest('.campo').appendChild(mensaje);
     }
 }
 

@@ -106,7 +106,7 @@
         hora.className = 'selector-combo';
         const confirmar = document.createElement('button');
         confirmar.type = 'submit';
-        confirmar.className = 'btn-primary';
+        confirmar.className = 'btn-primario';
         confirmar.textContent = 'Confirmar reprogramación';
 
         const opcionHora = (valor, texto) => new Option(texto, valor);

@@ -170,8 +170,7 @@
         if (profesionalSelect.value) {
             params.set('profesional_id', profesionalSelect.value);
         }
-        fetch('api/horas-ocupadas.php?' + params.toString())
-            .then(function (respuesta) { return respuesta.ok ? respuesta.json() : null; })
+        apiJson('api/horas-ocupadas.php?' + params.toString())
             .then(function (data) {
                 if (pedido !== pedidoHoras || !data || !Array.isArray(data.ocupadas)) {
                     return;
@@ -185,16 +184,6 @@
             .catch(function () {});
     }
 
-    function pad(n) {
-        return String(n).padStart(2, '0');
-    }
-    function parseISO(s) {
-        var p = s.split('-').map(Number);
-        return new Date(p[0], p[1] - 1, p[2]);
-    }
-    function aISO(d) {
-        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
-    }
     function seleccionada() {
         return fechaInput.value ? parseISO(fechaInput.value) : null;
     }

@@ -39,7 +39,7 @@
 
 .campo select[aria-invalid="true"],
 .selector-combo-boton[aria-invalid="true"] {
-    border-color: var(--color-danger);
+    border-color: var(--color-peligro);
 }
 
 .selector-fecha {
@@ -116,7 +116,7 @@
 }
 
 .selector-fecha-boton[aria-invalid="true"] {
-    border-color: var(--color-danger);
+    border-color: var(--color-peligro);
 }
 
 .selector-fecha-vacio .selector-fecha-texto {
@@ -223,7 +223,7 @@
 
 /* Today: light-blue border and tint, same as the agenda. */
 .calendario-dia-hoy {
-    border-color: var(--accent-color);
+    border-color: var(--color-acento);
     background: rgba(var(--accent-rgb), 0.08);
 }
 

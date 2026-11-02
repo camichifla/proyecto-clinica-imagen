@@ -57,11 +57,8 @@
         </div>
 
         <div id="panel-paciente-existente" class="campo">
-          <label for="paciente_id_buscar">Paciente</label>
-          <input type="text" id="paciente_id_buscar" data-lista="paciente_id_lista" data-buscador-combo="paciente_id"
-                 autocomplete="off" placeholder="Buscar por apellido, nombre o CI">
-          <datalist id="paciente_id_lista"></datalist>
-          <input type="hidden" id="paciente_id" name="paciente_id" value="">
+          <label for="paciente_id">Paciente</label>
+          <select id="paciente_id" name="paciente_id" class="selector-combo" data-buscable></select>
           <p class="campo-hint" data-mensaje-sin-pacientes hidden>No hay pacientes conectados. Usá "Paciente nuevo".</p>
         </div>
 
@@ -412,7 +409,7 @@
           </div>
         </div>
 
-        <button type="submit" class="btn-primary">Solicitar cita</button>
+        <button type="submit" class="btn-primario">Solicitar cita</button>
       </form>
     </section>
 

@@ -152,7 +152,7 @@
         gap: var(--space-3);
     }
 
-    .seccion-panel form:not([class]) .acciones-formulario .btn-primary {
+    .seccion-panel form:not([class]) .acciones-formulario .btn-primario {
         align-self: auto;
     }
 

@@ -6,16 +6,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.querySelector('[data-default]').hidden = true;
 
-    let respuesta;
-    try {
-        respuesta = await fetch(`api/verify.php?token=${encodeURIComponent(token)}`);
-    } catch {
-        document.querySelector('[data-token-invalido]').hidden = false;
-        return;
-    }
-
-    const data = await respuesta.json();
-    if (data.ok && data.redirect) {
+    const data = await apiJson(`api/verify.php?token=${encodeURIComponent(token)}`, { publica: true });
+    if (data && data.ok && data.redirect) {
         window.location.href = data.redirect;
         return;
     }

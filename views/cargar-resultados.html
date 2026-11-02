@@ -48,12 +48,8 @@
         <input type="hidden" name="csrf" value="">
 
         <div class="campo">
-          <label for="paciente_id_buscar">Paciente</label>
-          <input type="text" id="paciente_id_buscar" data-lista="paciente_id_lista" data-buscador-combo="paciente_id"
-                 data-mensaje-sin-pacientes="No hay pacientes registrados."
-                 autocomplete="off" placeholder="Buscar por apellido, nombre o CI">
-          <datalist id="paciente_id_lista"></datalist>
-          <input type="hidden" id="paciente_id" name="paciente_id" value="" required>
+          <label for="paciente_id">Paciente</label>
+          <select id="paciente_id" name="paciente_id" class="selector-combo" data-buscable data-mensaje-sin-pacientes="No hay pacientes registrados." required></select>
         </div>
 
         <div class="campo">
@@ -89,7 +85,7 @@
           <input type="file" id="informe" name="informe" accept="application/pdf">
         </div>
 
-        <button type="submit" class="btn-primary">Enviar resultado</button>
+        <button type="submit" class="btn-primario">Enviar resultado</button>
       </form>
     </section>
   </main>

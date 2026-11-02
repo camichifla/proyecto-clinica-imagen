@@ -10,7 +10,5 @@
 @import url("./variables.css") layer(variables);
 @import url("./base.css") layer(base);
 
-/* Loaded on every view and cascading after base.css, so they share its layer. */
-@import url("./index.css") layer(base);
+/* Calendar and selector widgets used by many views (cascades after base.css, same layer). */
 @import url("./agendar-cita.css") layer(base);
-@import url("./ver-resultados.css") layer(base);

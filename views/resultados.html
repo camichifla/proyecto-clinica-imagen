@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./assets/css/styles.css">
+  <link rel="stylesheet" href="./assets/css/ver-resultados.css">
   <script src="./assets/js/tema.js"></script>
 </head>
 
@@ -40,14 +41,10 @@
     <section class="seccion-panel">
       <h1 id="titulo-vista">Resultados</h1>
 
-      <form method="get" action="resultados.html" class="form-buscar-paciente">
+      <form method="get" action="resultados.html" class="filtros">
         <div class="campo">
-          <label for="paciente_id_buscar">Paciente</label>
-          <input type="text" id="paciente_id_buscar" data-lista="paciente_id_lista" data-buscador-combo="paciente_id"
-                 data-mensaje-sin-pacientes="No hay pacientes registrados."
-                 autocomplete="off" placeholder="Buscar por apellido, nombre o CI">
-          <datalist id="paciente_id_lista"></datalist>
-          <input type="hidden" id="paciente_id" name="paciente_id" value="">
+          <label for="paciente_id">Paciente</label>
+          <select id="paciente_id" name="paciente_id" class="selector-combo" data-buscable data-mensaje-sin-pacientes="No hay pacientes registrados."></select>
         </div>
       </form>
 

@@ -18,15 +18,7 @@
     let medicoId = ''; // médico picked in the assignments section
     const cambiosPacientes = new Map(); // pacienteId => wanted linked state, applied by "Guardar cambios"
 
-    // Accents and case are ignored: "lopez" finds "López".
-    const normalizar = (texto) => String(texto ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase();
-
-    function badge(si) {
-        const span = document.createElement('span');
-        span.className = 'estado-badge ' + (si ? 'estado-si' : 'estado-no');
-        span.textContent = si ? 'Sí' : 'No';
-        return span;
-    }
+    const celdaSiNo = (si, columna) => celdaEstado(si ? 'si' : 'no', si ? 'Sí' : 'No', columna);
 
     function mostrarMensaje(seccion, texto, esError) {
         mostrarMensajeEn(seccion.querySelector('[data-mensaje]'), seccion.querySelector('[data-mensaje-error]'), texto, esError);
@@ -39,12 +31,9 @@
 
     // The list is fully loaded, so the Buscar / Rol filters apply on the client: every word must appear in name, email or CI.
     function cuentasFiltradas(data) {
-        const palabras = normalizar(formFiltros.elements.q.value).split(/\s+/).filter(Boolean);
         const rol = formFiltros.elements.rol.value;
-        return data.cuentas.filter((c) => {
-            const texto = normalizar(`${c.apellido} ${c.nombre} ${c.email} ${c.ci}`);
-            return (!rol || c.rol === rol) && palabras.every((p) => texto.includes(p));
-        });
+        return data.cuentas.filter((c) => (!rol || c.rol === rol)
+            && coincidePalabras(formFiltros.elements.q.value, [c.apellido, c.nombre, c.email, c.ci]));
     }
 
     function renderCuentas(data) {
@@ -69,15 +58,8 @@
             tr.appendChild(celda('Email', cuenta.email));
             tr.appendChild(celda('Rol', ROLES_ETIQUETA[cuenta.rol] || cuenta.rol));
 
-            const tdVerificado = document.createElement('td');
-            tdVerificado.dataset.label = 'Verificado';
-            tdVerificado.appendChild(badge(cuenta.verificado));
-            tr.appendChild(tdVerificado);
-
-            const tdActivo = document.createElement('td');
-            tdActivo.dataset.label = 'Activo';
-            tdActivo.appendChild(badge(cuenta.activo));
-            tr.appendChild(tdActivo);
+            tr.appendChild(celdaSiNo(cuenta.verificado, 'Verificado'));
+            tr.appendChild(celdaSiNo(cuenta.activo, 'Activo'));
 
             const tdAcciones = document.createElement('td');
             tdAcciones.dataset.label = '';
@@ -104,7 +86,7 @@
                 }
                 boton.addEventListener('click', async () => {
                     const nombre = `${cuenta.apellido} ${cuenta.nombre}`.trim() || cuenta.email;
-                    if (cuenta.activo && !window.confirm(`¿Desactivar la cuenta de ${nombre}? No va a poder iniciar sesión.`)) {
+                    if (cuenta.activo && !(await confirmar(`¿Desactivar la cuenta de ${nombre}? No va a poder iniciar sesión.`, { peligro: true }))) {
                         return;
                     }
                     const resultado = await accionFila({ accion: 'toggle_activo', cuenta_id: String(cuenta.cuenta_id) });
@@ -220,11 +202,7 @@
 
     // Same word matching as the accounts search: every word must appear in name, email or CI.
     function filtrarPersonas(personas, form) {
-        const palabras = normalizar(form.elements.q.value).split(/\s+/).filter(Boolean);
-        return personas.filter((p) => {
-            const texto = normalizar(`${p.apellido} ${p.nombre} ${p.email} ${p.ci}`);
-            return palabras.every((w) => texto.includes(w));
-        });
+        return personas.filter((p) => coincidePalabras(form.elements.q.value, [p.apellido, p.nombre, p.email, p.ci]));
     }
 
     const nombreCompleto = (p) => `${p.apellido} ${p.nombre}`.trim();

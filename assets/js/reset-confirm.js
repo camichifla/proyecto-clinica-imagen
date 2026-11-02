@@ -8,15 +8,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    let respuesta;
-    try {
-        respuesta = await fetch(`api/reset-confirm.php?token=${encodeURIComponent(token)}`);
-    } catch {
-        panelInvalido.hidden = false;
-        return;
-    }
-
-    if (!respuesta.ok) {
+    const data = await apiJson(`api/reset-confirm.php?token=${encodeURIComponent(token)}`, { publica: true });
+    if (!data || !data.ok) {
         panelInvalido.hidden = false;
         return;
     }

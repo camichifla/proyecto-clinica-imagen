@@ -1,10 +1,8 @@
 (() => {
     const contenedor = document.getElementById('resultados-busqueda');
-    const form = document.querySelector('.form-buscar-paciente');
-    const inputBuscar = document.getElementById('paciente_id_buscar');
-    const inputHidden = document.getElementById('paciente_id');
-    const datalist = document.getElementById('paciente_id_lista');
-    if (!contenedor || !form) {
+    const form = document.querySelector('.filtros');
+    const selectPaciente = document.getElementById('paciente_id');
+    if (!contenedor || !form || !selectPaciente) {
         return;
     }
 
@@ -26,13 +24,7 @@
             tr.appendChild(celda('Sede', cita.sucursal_nombre || '-'));
             tr.appendChild(celda('Estudio', cita.estudio_label));
 
-            const tdEstado = document.createElement('td');
-            tdEstado.dataset.label = 'Estado';
-            const span = document.createElement('span');
-            span.className = 'estado-badge estado-' + cita.estado;
-            span.textContent = cita.estado_label;
-            tdEstado.appendChild(span);
-            tr.appendChild(tdEstado);
+            tr.appendChild(celdaEstado(cita.estado, cita.estado_label));
 
             tr.appendChild(celda('Confirmación', fechaHora(cita.fecha_hora_confirmada) || '-'));
             tr.appendChild(celda('Notas', cita.notas_admin || '-'));
@@ -64,7 +56,7 @@
         error.hidden = true;
         const boton = document.createElement('button');
         boton.type = 'submit';
-        boton.className = 'btn-primary';
+        boton.className = 'btn-primario';
         boton.textContent = 'Agregar nota';
         form.append(campo, error, boton);
         form.addEventListener('submit', async (evento) => {
@@ -105,7 +97,7 @@
                 borrar.className = 'btn-peligro-suave nota-clinica-borrar';
                 borrar.textContent = 'Borrar';
                 borrar.addEventListener('click', async () => {
-                    if (!window.confirm('¿Borrar esta nota? No se puede deshacer.')) {
+                    if (!(await confirmar('¿Borrar esta nota? No se puede deshacer.', { peligro: true }))) {
                         return;
                     }
                     borrar.disabled = true;
@@ -114,7 +106,8 @@
                         buscarResultados(pacienteId);
                     } else {
                         borrar.disabled = false;
-                        window.alert((data && data.error) || 'No se pudo borrar la nota.');
+                        error.textContent = (data && data.error) || 'No se pudo borrar la nota.';
+                        error.hidden = false;
                     }
                 });
                 item.append(borrar);
@@ -178,7 +171,7 @@
 
     form.addEventListener('submit', (evento) => {
         evento.preventDefault();
-        const pacienteId = inputHidden.value;
+        const pacienteId = selectPaciente.value;
         if (!pacienteId) {
             return;
         }
@@ -205,31 +198,26 @@
         const sesion = await window.sesionLista;
         const textos = (sesion && TEXTOS_ROL[sesion.rol]) || null;
         if (textos) {
-            inputBuscar.dataset.mensajeSinPacientes = textos.sinPacientes;
+            selectPaciente.dataset.mensajeSinPacientes = textos.sinPacientes;
         }
 
         const data = await apiJson('api/pacientes.php');
         if (!data) {
-            cargarScript('assets/js/buscador-combo.js');
+            cargarScript('assets/js/selector-combo.js');
             return;
         }
 
-        poblarPacientes(datalist, data.pacientes, inputBuscar);
+        poblarPacientes(selectPaciente, data.pacientes);
 
         const pacienteIdUrl = new URL(window.location.href).searchParams.get('paciente_id');
         if (pacienteIdUrl) {
-            const opcionElegida = Array.from(datalist.querySelectorAll('option'))
-                .find((opcion) => opcion.dataset.id === pacienteIdUrl);
-            if (opcionElegida) {
-                inputBuscar.value = opcionElegida.value;
-                inputHidden.value = pacienteIdUrl;
-            }
+            selectPaciente.value = pacienteIdUrl; // stays '' if it isn't one of the options
         }
 
-        cargarScript('assets/js/buscador-combo.js');
+        cargarScript('assets/js/selector-combo.js');
 
-        if (inputHidden.value) {
-            buscarResultados(inputHidden.value);
+        if (selectPaciente.value) {
+            buscarResultados(selectPaciente.value);
         }
     }
 

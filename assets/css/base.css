@@ -230,8 +230,8 @@ input:not([type="checkbox"], [type="radio"], [type="submit"], [type="button"], [
 
 /* A box with an error stays red while selected too. */
 :is(input, textarea, select, button)[aria-invalid="true"]:is(:focus, [aria-expanded="true"]) {
-    border-color: var(--color-danger);
-    box-shadow: 0 0 0 1px var(--color-danger);
+    border-color: var(--color-peligro);
+    box-shadow: 0 0 0 1px var(--color-peligro);
 }
 
 header :focus-visible {
@@ -290,7 +290,7 @@ main {
     width: 1.15rem;
     height: 1.15rem;
     border-radius: var(--radius-xs);
-    accent-color: var(--accent-color);
+    accent-color: var(--color-acento);
     flex-shrink: 0;
 }
 
@@ -310,13 +310,13 @@ footer {
     gap: var(--space-3);
 }
 
-.btn-primary {
+.btn-primario {
     display: inline-block;
     border: none;
     border-radius: var(--radius-pill);
     color: var(--on-brand);
     font-weight: var(--font-weight-semibold);
-    background: var(--accent-color);
+    background: var(--color-acento);
     padding: 0.95rem 1.45rem;
     font-family: inherit;
     font-size: var(--font-size-base);
@@ -328,7 +328,7 @@ footer {
         opacity   var(--transition-fast);
 }
 
-.btn-primary:hover {
+.btn-primario:hover {
     filter: brightness(1.05);
     transform: translateY(-1px);
 }
@@ -369,7 +369,7 @@ footer {
 .btn-peligro[aria-expanded="true"] {
     background: rgba(var(--danger-rgb), 0.12);
     border-color: rgba(var(--danger-rgb), 0.35);
-    color: var(--color-danger);
+    color: var(--color-peligro);
     filter: none;
 }
 
@@ -392,19 +392,19 @@ footer {
 
 .seccion-auth form,
 .seccion-panel form:not([class]),
-.form-buscar-paciente {
+.filtros {
     display: flex;
     flex-direction: column;
     gap: 1.1rem;
 }
 
-.form-buscar-paciente input[type="text"] {
+.filtros input[type="text"] {
     width: 100%;
     box-sizing: border-box;
 }
 
-.seccion-panel form:not([class]) .btn-primary,
-.form-buscar-paciente .btn-primary {
+.seccion-panel form:not([class]) .btn-primario,
+.filtros .btn-primario {
     align-self: flex-start;
     border: none;
     cursor: pointer;
@@ -705,7 +705,7 @@ input[type="file"].arrastrando {
 
 .campo input[aria-invalid="true"],
 .campo textarea[aria-invalid="true"] {
-    border-color: var(--color-danger);
+    border-color: var(--color-peligro);
 }
 
 .buscador-combo {
@@ -812,7 +812,7 @@ select.selector-combo {
 }
 
 .requisitos li.cumplido {
-    color: var(--color-success);
+    color: var(--color-exito);
 }
 
 .requisitos li.cumplido::before {
@@ -820,7 +820,7 @@ select.selector-combo {
 }
 
 .campo-error {
-    color: var(--color-danger);
+    color: var(--color-peligro);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
     margin: 0.1rem 0 0;
@@ -829,20 +829,20 @@ select.selector-combo {
 .aviso-exito {
     color: var(--dark-neutral);
     background: var(--light-neutral);
-    border: 1px solid var(--accent-color);
+    border: 1px solid var(--color-acento);
     padding: 0.85rem var(--space-5);
     border-radius: var(--radius-pill);
 }
 
 .aviso-error {
-    color: var(--color-danger);
+    color: var(--color-peligro);
     background: var(--light-neutral);
     border: 1px solid var(--accent-secondary);
     padding: 0.85rem var(--space-5);
     border-radius: var(--radius-pill);
 }
 
-.seccion-auth .btn-primary {
+.seccion-auth .btn-primario {
     align-self: flex-start;
     border: none;
     cursor: pointer;
@@ -1014,7 +1014,7 @@ body.menu-abierto {
 /* Current page: solid light-blue pill. */
 .menu-usuario-lista a[aria-current="page"],
 .menu-usuario-lista a[aria-current="page"]:hover {
-    background: var(--accent-color);
+    background: var(--color-acento);
     color: var(--on-brand);
     font-weight: var(--font-weight-semibold);
 }
@@ -1085,7 +1085,7 @@ body.menu-abierto {
 }
 
 .menu-tema input:checked {
-    background: var(--accent-color);
+    background: var(--color-acento);
 }
 
 .menu-tema input:checked::before {
@@ -1164,7 +1164,7 @@ body.menu-abierto {
     font-weight: var(--font-weight-semibold);
 }
 
-.card-estudio .btn-primary {
+.card-estudio .btn-primario {
     align-self: flex-start;
     margin-top: auto;
 }
@@ -1174,7 +1174,7 @@ body.menu-abierto {
     margin-bottom: var(--space-3);
     background: var(--surface-alt);
     border: 1px solid var(--border-subtle);
-    border-left: 4px solid var(--accent-color);
+    border-left: 4px solid var(--color-acento);
     border-radius: var(--radius-md);
     overflow-wrap: anywhere;
 }
@@ -1252,7 +1252,7 @@ body.menu-abierto {
 }
 
 /* Buttons inside tables are a size smaller than form buttons. */
-.tabla-datos td :is(.btn-primary, .btn-secundario, .btn-peligro, .btn-peligro-suave, .btn-exito) {
+.tabla-datos td :is(.btn-primario, .btn-secundario, .btn-peligro, .btn-peligro-suave, .btn-exito) {
     padding: 0.35rem 0.9rem;
     font-size: var(--font-size-sm);
 }
@@ -1426,7 +1426,7 @@ body.menu-abierto {
 }
 
 .paginacion-flecha:hover {
-    color: var(--accent-color);
+    color: var(--color-acento);
 }
 
 .paginacion-flecha.oculto {
@@ -1455,7 +1455,7 @@ body.menu-abierto {
 
 :is(.estado-badge, .agenda-cita-pill, .agenda-cita-card).estado-confirmada {
     background: rgba(var(--success-rgb), 0.15);
-    color: var(--color-success);
+    color: var(--color-exito);
 }
 
 :is(.estado-badge, .agenda-cita-pill, .agenda-cita-card).estado-realizada {
@@ -1466,7 +1466,7 @@ body.menu-abierto {
 :is(.estado-badge, .agenda-cita-pill, .agenda-cita-card).estado-rechazada,
 :is(.estado-badge, .agenda-cita-pill, .agenda-cita-card).estado-cancelada {
     background: rgba(var(--danger-rgb), 0.12);
-    color: var(--color-danger);
+    color: var(--color-peligro);
 }
 
 /* Off-page rows are hidden on screen only (important beats card-mode rules); printing shows every row. */
@@ -1480,4 +1480,21 @@ body.menu-abierto {
     .paginacion {
         display: none !important;
     }
+}
+
+.dialogo-confirmar {
+    max-width: min(90vw, 26rem);
+    padding: var(--space-6);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--dark-neutral);
+}
+
+.dialogo-confirmar::backdrop {
+    background: rgba(var(--overlay-rgb), 0.6);
+}
+
+.dialogo-confirmar p {
+    margin: 0 0 var(--space-5);
 }

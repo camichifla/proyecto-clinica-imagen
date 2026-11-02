@@ -27,10 +27,8 @@
     let contador = 0;
 
     // Searchable variant (<select class="selector-combo" data-buscable>, for people: profesionales, cuentas): a text
-    // field instead of the button; nothing is listed until something is typed, then only matching visible options.
+    // field instead of the button; focusing lists every visible option, typing narrows it to the matching ones.
     // The <select> stays the source of truth, so cascades that hide options keep working. Empty text = the '' option.
-    const normalizar = (texto) => texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLocaleLowerCase().trim();
-
     function mejorarBuscable(select) {
         const wrapper = document.createElement('div');
         wrapper.className = 'buscador-combo';
@@ -106,13 +104,9 @@
         };
 
         const mostrar = () => {
-            const texto = normalizar(input.value);
-            if (texto === '') {
-                cerrar();
-                return;
-            }
+            const sinTexto = input.value.trim() === '';
             coincidencias = Array.from(select.options)
-                .filter((o) => o.value !== '' && !o.hidden && normalizar(o.textContent).includes(texto));
+                .filter((o) => o.value !== '' && !o.hidden && (sinTexto || coincidePalabras(input.value, [o.textContent])));
             lista.innerHTML = '';
             if (!coincidencias.length) {
                 const vacio = document.createElement('li');
@@ -145,6 +139,13 @@
                 fijarValor('');
             }
             mostrar();
+        });
+        // Opening shows the whole list, like the plain combos; typing narrows it.
+        input.addEventListener('focus', mostrar);
+        input.addEventListener('click', () => {
+            if (lista.hidden) {
+                mostrar();
+            }
         });
 
         input.addEventListener('keydown', (evento) => {

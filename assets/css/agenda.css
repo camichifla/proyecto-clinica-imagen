@@ -26,7 +26,7 @@
     }
 
     .agenda-toggle-activa {
-        background: var(--accent-color);
+        background: var(--color-acento);
         color: var(--on-brand);
     }
 
@@ -97,7 +97,7 @@
 
     /* Today: same 1px border as any day, in light blue, with a light-blue tint. */
     .agenda-dia-hoy {
-        border-color: var(--accent-color);
+        border-color: var(--color-acento);
         background: rgba(var(--accent-rgb), 0.08);
     }
 

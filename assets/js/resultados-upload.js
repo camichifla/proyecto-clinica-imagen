@@ -1,10 +1,9 @@
 (() => {
     const form = document.querySelector('form[data-api]');
-    const datalist = document.getElementById('paciente_id_lista');
-    const inputBuscar = document.getElementById('paciente_id_buscar');
+    const selectPaciente = document.getElementById('paciente_id');
     const selectCita = document.getElementById('cita_id');
     const inputFecha = document.getElementById('fecha_estudio');
-    if (!form || !datalist || !selectCita) {
+    if (!form || !selectPaciente || !selectCita) {
         return;
     }
 
@@ -26,7 +25,7 @@
 
         const sesion = await window.sesionLista;
         if (sesion && sesion.rol === 'profesional') {
-            inputBuscar.dataset.mensajeSinPacientes = TEXTOS_PROFESIONAL.sinPacientes;
+            selectPaciente.dataset.mensajeSinPacientes = TEXTOS_PROFESIONAL.sinPacientes;
             selectCita.dataset.mensajeSinCitas = TEXTOS_PROFESIONAL.sinCitas;
         }
 
@@ -39,14 +38,13 @@
             return;
         }
 
-        poblarPacientes(datalist, data.pacientes, inputBuscar);
+        poblarPacientes(selectPaciente, data.pacientes);
 
         window.CITAS_POR_PACIENTE = data.citas_por_paciente;
         window.CITA_ELEGIDA = '';
         window.MENSAJE_SIN_CITAS = selectCita.dataset.mensajeSinCitas || 'Este paciente no tiene citas confirmadas.';
 
-        await cargarScripts('assets/js/buscador-combo.js', 'assets/js/citas-por-paciente.js');
-        cargarScript('assets/js/selector-combo.js');
+        await cargarScripts('assets/js/citas-por-paciente.js', 'assets/js/selector-combo.js');
     }
 
     init();

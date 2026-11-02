@@ -1,4 +1,5 @@
-
+/* Linked only by its views; joins the base layer so precedence is unchanged. */
+@layer base {
 .lista-resultados {
     display: flex;
     flex-direction: column;
@@ -140,7 +141,7 @@
 
 .visor-imagen-cerrar:focus-visible,
 .comparar-check:focus-visible {
-    outline: 3px solid var(--accent-color);
+    outline: 3px solid var(--color-acento);
     outline-offset: 2px;
 }
 
@@ -229,4 +230,5 @@
     .tarjeta-resultado-imagenes img {
         max-width: 100%;
     }
+}
 }

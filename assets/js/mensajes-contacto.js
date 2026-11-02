@@ -48,7 +48,7 @@
         textarea.rows = 4;
         const enviar = document.createElement('button');
         enviar.type = 'submit';
-        enviar.className = 'btn-primary';
+        enviar.className = 'btn-primario';
         enviar.textContent = 'Enviar respuesta';
         // .campo gives it the same box and floating label as every other form.
         const campo = document.createElement('div');
@@ -73,8 +73,8 @@
             }
             atender(m, textarea.value, [enviar, atendido], 'Respuesta enviada. El mensaje se borró.');
         });
-        atendido.addEventListener('click', () => {
-            if (window.confirm('El mensaje se va a borrar sin enviar respuesta. ¿Continuar?')) {
+        atendido.addEventListener('click', async () => {
+            if (await confirmar('El mensaje se va a borrar sin enviar respuesta. ¿Continuar?', { peligro: true })) {
                 atender(m, '', [enviar, atendido], 'Mensaje atendido y borrado.');
             }
         });

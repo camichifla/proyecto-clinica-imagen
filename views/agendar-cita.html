@@ -43,6 +43,7 @@
 
         <p class="aviso-exito" data-aviso="ok" hidden role="status">Solicitud enviada. <span data-codigo hidden>Código de seguimiento: <span data-codigo-valor></span>. </span>La clínica la va a confirmar y te avisamos por correo.</p>
         <p class="aviso-exito" data-aviso="cancelado" hidden role="status">La cita fue cancelada.</p>
+        <p class="aviso-error" data-aviso="error" hidden role="alert"></p>
         <p class="campo-error" data-general hidden></p>
 
         <form method="post" action="api/agendar-cita.php" data-api="api/agendar-cita.php" novalidate>
@@ -84,7 +85,7 @@
             </select>
           </div>
 
-          <button type="submit" class="btn-primary">Solicitar cita</button>
+          <button type="submit" class="btn-primario">Solicitar cita</button>
         </form>
       </section>
 

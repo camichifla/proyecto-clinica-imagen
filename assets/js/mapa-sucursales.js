@@ -102,9 +102,9 @@
     }
 
     function clinicCardElement(clinic) {
-        const card = el("div", "clinic-card");
+        const card = el("div", "tarjeta-sede");
         card.dataset.id = clinic.id;
-        const header = el("div", "clinic-card-header");
+        const header = el("div", "tarjeta-sede-header");
         header.append(el("span", "clinic-name", clinic.nombre));
         const address = el("div", "clinic-address");
         address.append(
@@ -122,7 +122,7 @@
     }
 
     function emptyStateElement() {
-        const vacio = el("div", "clinics-empty");
+        const vacio = el("div", "sedes-vacio");
         vacio.append(
             icono(32, [["circle", { cx: 11, cy: 11, r: 8 }], ["path", { d: "m21 21-4.3-4.3" }]]),
             el("h4", "", "No se encontraron sedes"),
@@ -143,7 +143,7 @@
             ? ""
             : `${items.length} resultado${items.length === 1 ? "" : "s"}`;
 
-        listEl.querySelectorAll(".clinic-card").forEach((card) => {
+        listEl.querySelectorAll(".tarjeta-sede").forEach((card) => {
             card.addEventListener("click", () => {
                 const id = Number(card.dataset.id);
                 setActiveClinic(id);
@@ -157,7 +157,7 @@
     }
 
     function setActiveClinic(id) {
-        listEl.querySelectorAll(".clinic-card").forEach((card) => {
+        listEl.querySelectorAll(".tarjeta-sede").forEach((card) => {
             card.classList.toggle("active", Number(card.dataset.id) === id);
         });
     }
@@ -171,15 +171,14 @@
         renderList(filtered);
     });
 
-    fetch("api/sucursales-publicas.php")
-        .then((respuesta) => respuesta.json())
-        .then((data) => {
-            clinics = data.sucursales;
-            document.getElementById("mapCount").textContent = clinics.length;
-            addMarkers();
-            renderList(clinics);
-        })
-        .catch(() => {
-            listEl.textContent = "No se pudieron cargar las sedes.";
-        });
+    apiJson("api/sucursales-publicas.php", { publica: true }).then((data) => {
+        if (!data || !data.sucursales) {
+            listEl.textContent = ERROR_CONEXION;
+            return;
+        }
+        clinics = data.sucursales;
+        document.getElementById("mapCount").textContent = clinics.length;
+        addMarkers();
+        renderList(clinics);
+    });
 })();

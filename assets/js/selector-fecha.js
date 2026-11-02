@@ -9,12 +9,6 @@
     const DIAS = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'];
     const valorNativo = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
 
-    const pad = (n) => String(n).padStart(2, '0');
-    const parseISO = (s) => {
-        const [anio, mes, dia] = s.split('-').map(Number);
-        return new Date(anio, mes - 1, dia);
-    };
-    const aISO = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
     const aVisible = (d) => pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
     const mismoDia = (a, b) => a && b && aISO(a) === aISO(b);
     const mesDe = (d) => new Date(d.getFullYear(), d.getMonth(), 1);

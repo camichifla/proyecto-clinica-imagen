@@ -24,7 +24,7 @@
 
     .orden-card.orden-aviso {
         background: rgba(var(--accent-rgb), 0.08);
-        border-color: var(--accent-color);
+        border-color: var(--color-acento);
     }
 
     .orden-card h3 {
@@ -132,7 +132,7 @@
     .orden-fieldset input[type="checkbox"] {
         width: 1.15rem;
         height: 1.15rem;
-        accent-color: var(--accent-color);
+        accent-color: var(--color-acento);
         flex-shrink: 0;
     }
 
@@ -176,7 +176,7 @@
     }
 
     .teeth-grid input {
-        accent-color: var(--accent-color);
+        accent-color: var(--color-acento);
     }
 
     /* Cards are --surface-alt, so their fields are white to stand out. */

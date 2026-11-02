@@ -42,7 +42,7 @@
     }
 
     function poblarPacientesConectados(pacientes) {
-        poblarPacientes(document.getElementById('paciente_id_lista'), pacientes);
+        poblarPacientes(document.getElementById('paciente_id'), pacientes);
         if (!pacientes.length) {
             document.querySelector('[data-mensaje-sin-pacientes]').hidden = false;
         }
@@ -167,7 +167,7 @@
         window.SUCURSALES = data.sucursales;
         window.HORA_ELEGIDA = '';
 
-        await cargarScripts('assets/js/agendado-cascada.js', 'assets/js/selector-combo.js', 'assets/js/buscador-combo.js');
+        await cargarScripts('assets/js/agendado-cascada.js', 'assets/js/selector-combo.js');
     }
 
     init();

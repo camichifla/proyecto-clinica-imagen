@@ -4,7 +4,7 @@
         return;
     }
 
-    const formFiltro = document.querySelector('.form-buscar-paciente');
+    const formFiltro = document.querySelector('.filtros');
     const selectSucursal = formFiltro ? document.getElementById('sucursal_id') : null;
 
     const NOMBRES_DIA_SEMANA_COMPLETO = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];

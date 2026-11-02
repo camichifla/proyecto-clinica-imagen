@@ -30,7 +30,7 @@
         if (data.redirect) {
             window.location.href = data.redirect;
         } else {
-            window.alert(textoErrores(data));
+            mostrarAviso('error', textoErrores(data));
         }
     }
 
@@ -41,13 +41,7 @@
         tr.appendChild(celda('Sede', cita.sucursalNombre || '-'));
         tr.appendChild(celda('Estudio', cita.estudioLabel));
 
-        const tdEstado = document.createElement('td');
-        tdEstado.dataset.label = 'Estado';
-        const badge = document.createElement('span');
-        badge.className = 'estado-badge estado-' + cita.estado;
-        badge.textContent = cita.estadoLabel;
-        tdEstado.appendChild(badge);
-        tr.appendChild(tdEstado);
+        tr.appendChild(celdaEstado(cita.estado, cita.estadoLabel));
         tr.appendChild(celda('Motivo', cita.motivo || '-'));
 
         const tdAcciones = document.createElement('td');
@@ -62,8 +56,8 @@
         btnCancelar.type = 'button';
         btnCancelar.className = 'btn-peligro';
         btnCancelar.textContent = 'Cancelar';
-        btnCancelar.addEventListener('click', () => {
-            if (window.confirm('¿Cancelar la cita ' + cita.codigo + ' del ' + fechaHora(cita.fechaHoraSolicitada) + '?')) {
+        btnCancelar.addEventListener('click', async () => {
+            if (await confirmar('¿Cancelar la cita ' + cita.codigo + ' del ' + fechaHora(cita.fechaHoraSolicitada) + '?', { peligro: true })) {
                 cancelarCita(cita);
             }
         });

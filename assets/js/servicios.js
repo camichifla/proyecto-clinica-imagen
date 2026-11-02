@@ -22,7 +22,7 @@
         const modo = document.createElement('p');
         modo.className = 'card-estudio-modo';
         const enlace = document.createElement('a');
-        enlace.className = 'btn-primary';
+        enlace.className = 'btn-primario';
         if (estudio.autoagendable) {
             modo.textContent = 'Podés agendarlo en línea.';
             if (sesion && sesion.logueado) {
@@ -47,10 +47,10 @@
 
     (async () => {
         const [respuesta, sesion] = await Promise.all([
-            fetch('api/estudios-publicos.php').then((r) => (r.ok ? r.json() : null)).catch(() => null),
+            apiJson('api/estudios-publicos.php', { publica: true }),
             window.sesionPublica,
         ]);
-        if (!respuesta) {
+        if (!respuesta || !respuesta.estudios) {
             document.querySelector('[data-error]').hidden = false;
             return;
         }

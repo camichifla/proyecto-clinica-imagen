@@ -1,4 +1,3 @@
-/* Page styles: the paginas layer (declared in styles.css) wins over base. */
 @layer paginas {
 
     .tarjetas-resumen {
@@ -81,7 +80,6 @@
         box-sizing: border-box;
     }
 
-    /* Fixed width: the cancel/reschedule boxes only grow taller, never wider. */
     .acciones-turno {
         display: flex;
         flex-direction: column;
@@ -89,7 +87,6 @@
         width: 20rem;
     }
 
-    /* Nueva cita: a narrow panel, one field per row, unlocked top to bottom (nueva-cita.js). */
     .seccion-cita {
         max-width: 34rem;
     }
@@ -136,7 +133,6 @@
     }
 
     .tabla-scroll.tabla-tarjetas {
-        /* Card mode: actions take the full width of the card. */
         .acciones-turno {
             width: auto;
         }
@@ -164,7 +160,6 @@
         margin-bottom: var(--space-2);
     }
 
-    /* Day, opening and closing are selector-combo dropdowns (same widget as the booking hour). */
     .fila-horario .buscador-combo {
         min-width: 0;
     }

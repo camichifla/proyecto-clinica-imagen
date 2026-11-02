@@ -42,7 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['token'])) {
     $fila = $stmt->fetch();
 
     if ($fila) {
-        // A pending email change takes effect only now; uniqueness is re-checked by uq_cuentas_email at this moment.
         try {
             $db->beginTransaction();
             $db->prepare('UPDATE cuentas SET verificado = 1, email = COALESCE(email_nuevo, email), email_nuevo = NULL WHERE id = ?')->execute([$fila['cuenta_id']]);

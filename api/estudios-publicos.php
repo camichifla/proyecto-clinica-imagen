@@ -1,5 +1,4 @@
 <?php
-// Public, read-only; no login, no session. Only non-sensitive fields.
 require_once __DIR__ . '/../includes/estudios.php';
 
 header('Content-Type: application/json; charset=utf-8');

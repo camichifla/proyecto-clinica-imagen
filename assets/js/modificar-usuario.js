@@ -42,7 +42,6 @@
     const formEmail = document.getElementById('form-email');
     const formContrasena = document.getElementById('form-contrasena');
 
-    // Persistent note while a change waits for confirmation (the current email stays active until then).
     function mostrarPendiente(email) {
         const p = document.getElementById('email-pendiente');
         p.hidden = !email;

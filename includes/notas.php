@@ -1,19 +1,9 @@
 <?php
-// includes/notas.php — clinical record for a patient, visible to medico/profesional
-// accounts that already have access. Notes are inserted and read; only the author
-// may delete their own note (see api/notas-clinicas.php).
 
 require_once __DIR__ . '/cifrado.php';
 
 const NOTA_MAX = 2000;
 
-/**
- * Newest first. The caller has already checked that the session may see this patient.
- *
- * $cuentaIdActual marks each note as the viewer's own (so only those get a delete option).
- *
- * @return array<int,array{id:int,texto:string,creado_en:string,autor:string,rol:string,propia:bool}>
- */
 function notas_de_paciente(PDO $db, int $pacienteId, ?int $cuentaIdActual = null): array
 {
     $stmt = $db->prepare(

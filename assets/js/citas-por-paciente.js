@@ -1,6 +1,3 @@
-// UX-only filtering of the citas <select> by the chosen patient.
-// Consumes CITAS_POR_PACIENTE / CITA_ELEGIDA / MENSAJE_SIN_CITAS, declared by each page before this script.
-// The server always re-validates patient/professional/state.
 (function () {
     var pacienteSelect = document.getElementById('paciente_id');
     var citaSelect      = document.getElementById('cita_id');

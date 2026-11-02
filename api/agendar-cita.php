@@ -23,8 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(['ok' => false, 'error' => 'Cita inválida.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
-        // Pending or confirmed upcoming citas; patients are not asked for a reason, the note
-        // only tells staff who cancelled.
         $stmt = db()->prepare(
             "UPDATE citas SET estado = 'cancelada', notas_admin = 'Cancelado por el paciente.'
              WHERE id = ? AND paciente_id = ? AND estado IN ('pendiente', 'confirmada')

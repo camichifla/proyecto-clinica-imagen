@@ -16,8 +16,6 @@ function respuesta_mensajes(int $codigo, array $cuerpo): never
     exit;
 }
 
-// POST: an attended message is deleted. With a non-empty 'respuesta' it is first
-// emailed to the visitor; without one it was answered elsewhere (e.g. by phone).
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check($_POST['csrf'] ?? null);
     $id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT);
@@ -31,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $db = db();
     $db->beginTransaction();
-    // Row lock: two staff answering the same message can't both send the email.
+    // Bloqueo de fila: dos usuarios no pueden responder el mismo mensaje y enviar el correo dos veces.
     $stmt = $db->prepare('SELECT nombre, email, mensaje FROM mensajes_contacto WHERE id = ? FOR UPDATE');
     $stmt->execute([$id]);
     $m = $stmt->fetch();

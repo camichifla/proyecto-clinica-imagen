@@ -1,4 +1,3 @@
-/* Linked only by its views; joins the base layer so precedence is unchanged. */
 @layer base {
 .lista-resultados {
     display: flex;
@@ -166,7 +165,6 @@
     box-sizing: border-box;
 }
 
-/* Space between the note field and the "Agregar nota" button. */
 .form-nota button[type="submit"] {
     margin-top: var(--space-3);
 }

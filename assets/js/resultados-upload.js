@@ -14,7 +14,6 @@
         }
     }
 
-    // The role changes the empty-list messages; permissions are decided by the API.
     const TEXTOS_PROFESIONAL = {
         sinPacientes: 'No hay pacientes con citas asignadas.',
         sinCitas: 'Este paciente no tiene citas confirmadas con vos',

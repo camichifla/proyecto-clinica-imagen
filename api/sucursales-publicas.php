@@ -1,5 +1,4 @@
 <?php
-// Public, read-only: no login, no session; only non-sensitive fields.
 require_once __DIR__ . '/../includes/db.php';
 
 header('Content-Type: application/json; charset=utf-8');

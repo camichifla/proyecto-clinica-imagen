@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-# deploy/operador.sh — interactive operator menu for the Clinica Imagen server (Debian).
-# Install once with option 9.2 (or: sudo install -m 755 deploy/operador.sh /usr/local/bin/operador.sh
-#   && sudo ln -sf /usr/local/bin/operador.sh /usr/local/bin/operador), then run: sudo operador
 
 REPO_URL=https://github.com/camichifla/proyecto-clinica-imagen.git
 INSTALL_PATH=/usr/local/bin/operador.sh
@@ -12,7 +9,6 @@ APACHE_ACCESS=/var/log/apache2/clinica-imagen-access.log
 APACHE_ERROR=/var/log/apache2/clinica-imagen-error.log
 RESPALDO_BIN=/usr/local/sbin/clinica-respaldo
 SHARE_DIR=/usr/local/share/clinica-imagen
-# Config templates (nftables, sshd, fail2ban): next to this script when run from the repo, else the installed copy.
 DEPLOY_DIR=$(dirname "$(readlink -f "$0")")/config
 [ -f "$DEPLOY_DIR/nftables.conf" ] || DEPLOY_DIR=$SHARE_DIR
 
@@ -22,13 +18,12 @@ mkdir -p "$BACKUP_DIR"
 chmod 700 "$BACKUP_DIR"
 touch "$LOG_FILE"
 
-log() {  # log LEVEL message
+log() {
   printf '%s [%s] [%s@%s] %s\n' "$(date '+%F %T')" "$1" "${SUDO_USER:-root}" "$(tty 2>/dev/null || echo notty)" "$2" >> "$LOG_FILE"
 }
 
 pausa() { echo; read -rp "Presione Enter para continuar..." _; }
 
-# Clinic logo, drawn to the left of every menu (50 columns wide).
 mapfile -t LOGO <<'EOF'
                  ...::.....:.::..
 
@@ -59,22 +54,20 @@ mapfile -t LOGO <<'EOF'
                   .             ..
 EOF
 
-# Arrow-key menu: menu TITLE "N) label"...; sets $op to the chosen N. Typing a digit still selects directly.
 menu() {
   local title=$1; shift
   local items=("$@") sel=0 i key n=$#
   while true; do
     clear
     local lineas
-    mapfile -t lineas <<< "$title" # a multi-line title (main menu) takes one row per line
+    mapfile -t lineas <<< "$title"
     for i in "${!items[@]}"; do
       if [ "$i" -eq "$sel" ]; then lineas+=("$(printf '\e[7m> %s\e[0m' "${items[i]}")"); else lineas+=("  ${items[i]}"); fi
     done
     lineas+=("" "↑/↓ para moverse, Enter para elegir")
-    # Logo on the left when the terminal is wide enough; menu alone otherwise.
-    if [ "$(tput cols 2>/dev/null || echo 80)" -ge 110 ]; then # 50 logo + 3 gap + the widest menu line
+    if [ "$(tput cols 2>/dev/null || echo 80)" -ge 110 ]; then
       local filas=$(( ${#LOGO[@]} > ${#lineas[@]} ? ${#LOGO[@]} : ${#lineas[@]} ))
-      local desde=$(( (${#LOGO[@]} - ${#lineas[@]}) / 2 )) # menu vertically centered on the logo
+      local desde=$(( (${#LOGO[@]} - ${#lineas[@]}) / 2 ))
       (( desde < 0 )) && desde=0
       for (( i = 0; i < filas; i++ )); do
         local linea=''
@@ -100,14 +93,11 @@ menu() {
 ok()   { echo "✔ $1"; log OK "$1"; }
 warn() { echo "✘ $1"; log WARN "$1"; }
 
-# Prints a log file, falling back to a journalctl command when the file does not exist
-# (Debian 12+ uses journald and ships without /var/log/syslog and auth.log).
-ver_log() {  # ver_log FILE LINES FALLBACK...
+ver_log() {
   local file=$1 lines=$2; shift 2
   if [ -f "$file" ]; then tail -n "$lines" "$file"; else "$@" -n "$lines" --no-pager; fi
 }
 
-# ---------- 1) Services ----------
 menu_servicios() {
   while true; do
     menu "--- Gestión de Servicios ---" \
@@ -133,17 +123,16 @@ menu_servicios() {
   done
 }
 
-# ---------- 2) Network ----------
 TUNEL_SERVICE=/etc/systemd/system/clinica-tunel.service
 
-# Points the app's links and cookie flags at the given public URL.
-configurar_url() {  # configurar_url URL true|false
+# Apunta los enlaces y las banderas de cookie de la app a la URL pública indicada.
+configurar_url() {
   sed -i -e "s|define('APP_URL', '[^']*')|define('APP_URL', '$1')|" \
          -e "s|define('APP_HTTPS', [a-z]*)|define('APP_HTTPS', $2)|" "$APP_DIR/includes/config.php"
 }
 
-# Publishes the site through a Cloudflare quick tunnel: no open ports, HTTPS by Cloudflare.
-# ponytail: quick tunnel URL changes on every restart/reboot; re-run this option, or use a named tunnel with a domain for a fixed URL.
+# Publica el sitio con un túnel rápido de Cloudflare: sin puertos abiertos y con HTTPS de Cloudflare.
+# La URL del túnel rápido cambia en cada reinicio; repetir esta opción o usar un túnel con nombre y dominio para una URL fija.
 publicar_tunel() {
   if ! command -v cloudflared >/dev/null; then
     local deb; deb=$(mktemp --suffix=.deb)
@@ -233,7 +222,6 @@ menu_red() {
   done
 }
 
-# ---------- 3) Processes ----------
 menu_procesos() {
   log INFO "Entrando al menú de procesos"
   while true; do
@@ -258,8 +246,7 @@ menu_procesos() {
   done
 }
 
-# ---------- 4) Backups ----------
-respaldar() {  # respaldar PATH NAME
+respaldar() {
   local dest
   dest="$BACKUP_DIR/$2_$(date +%Y%m%d_%H%M%S).tar.gz"
   if tar -czf "$dest" "$1" 2>/dev/null; then ok "Respaldo de $1 creado en $dest"; else warn "Falló el respaldo de $1"; fi
@@ -292,7 +279,7 @@ menu_respaldos() {
            read -rp "Ruta local a subir [$BACKUP_DIR]: " ruta
            ruta=${ruta:-$BACKUP_DIR}
            read -rp "Carpeta destino en Google Drive: " carpeta
-           # encrypted before upload (clinica-respaldo subir): the plaintext never reaches Google Drive
+           # Se cifra antes de subir (clinica-respaldo subir): el texto plano nunca llega a Google Drive.
            RCLONE_REMOTE=gdrive: "$RESPALDO_BIN" subir "$ruta" "$carpeta" || warn "Falló la subida a Google Drive"
          fi ;;
       6) log ACTION "Listado de respaldos"; ls -lh "$BACKUP_DIR" ;;
@@ -305,7 +292,6 @@ menu_respaldos() {
   done
 }
 
-# ---------- 5) Users and groups ----------
 menu_usuarios() {
   log INFO "Entrando al menú de usuarios"
   while true; do
@@ -350,7 +336,6 @@ menu_usuarios() {
   done
 }
 
-# ---------- 6) Databases ----------
 menu_bases() {
   log INFO "Entrando al menú de bases de datos"
   while true; do
@@ -383,7 +368,6 @@ menu_bases() {
   done
 }
 
-# ---------- 7) System logs ----------
 menu_registros() {
   log INFO "Entrando al menú de logs del sistema"
   while true; do
@@ -411,7 +395,6 @@ menu_registros() {
   done
 }
 
-# ---------- 8) Script log ----------
 menu_log_interno() {
   log INFO "Acceso al menú de log interno"
   while true; do
@@ -430,7 +413,6 @@ menu_log_interno() {
   done
 }
 
-# ---------- 9) Setup ----------
 instalar_dependencias() {
   echo "ℹ Instalando dependencias del sistema..."
   export DEBIAN_FRONTEND=noninteractive
@@ -440,15 +422,14 @@ instalar_dependencias() {
   ok "Dependencias y servicios instalados"
 }
 
-# Installs a config template from $DEPLOY_DIR; fails if it is missing.
-plantilla() {  # plantilla SRC DEST MODE
+plantilla() {
   [ -f "$DEPLOY_DIR/$1" ] || { warn "No se encontró $DEPLOY_DIR/$1"; return 1; }
   install -D -m "$3" "$DEPLOY_DIR/$1" "$2"
 }
 
 configurar_firewall() {
   plantilla nftables.conf /etc/nftables.conf 644 || return 1
-  # nftables replaces ufw: two firewalls managing rules would conflict
+  # nftables reemplaza a ufw: dos firewalls gestionando reglas entrarían en conflicto.
   if dpkg -s ufw &>/dev/null; then
     ufw --force disable &>/dev/null; apt-get purge -y ufw &>/dev/null
   fi
@@ -469,7 +450,7 @@ configurar_ssh() {
 
 configurar_fail2ban() {
   plantilla fail2ban-clinica.local /etc/fail2ban/jail.d/clinica.local 644 || return 1
-  # the apache-auth jail needs its log file to exist before fail2ban starts
+  # La jaula apache-auth de fail2ban necesita que su archivo de log exista antes de arrancar.
   [ -f "$APACHE_ERROR" ] || touch "$APACHE_ERROR"
   systemctl restart fail2ban && ok "fail2ban configurado (jails sshd y apache-auth)" || warn "fail2ban no pudo arrancar"
 }
@@ -481,13 +462,12 @@ instalar_script() {
     install -m 755 "$src" "$INSTALL_PATH"
   fi
   ln -sf "$INSTALL_PATH" /usr/local/bin/operador
-  # keep the config templates so options 9.1 / 9.3 work without the repo
   mkdir -p "$SHARE_DIR"
   cp -f "$(dirname "$src")"/config/{nftables.conf,sshd-clinica.conf,fail2ban-clinica.local} "$SHARE_DIR/" 2>/dev/null
   ok "Script instalado en $INSTALL_PATH (comando: sudo operador)"
 }
 
-# Uruguayan CI: 7 digits + check digit (weights 2987634), so the generated accounts pass the app's validation.
+# CI uruguaya: 7 dígitos + dígito verificador (pesos 2987634), para que las cuentas generadas pasen la validación de la app.
 ci_valida() {
   local base i suma=0 pesos=(2 9 8 7 6 3 4)
   base=$(printf '%07d' "$1")
@@ -495,7 +475,6 @@ ci_valida() {
   echo "$base$(( (10 - suma % 10) % 10 ))"
 }
 
-# 20 test accounts per role (rol01..rol20@clinica-imagen.local), all with one random password shown at the end.
 generar_cuentas() {
   local db=clinica_imagen dominio=clinica-imagen.local
   if [ -n "$(mariadb -N "$db" -e "SELECT 1 FROM cuentas WHERE email = 'paciente01@$dominio'" 2>/dev/null)" ]; then
@@ -524,7 +503,6 @@ generar_cuentas() {
       sql+="SET @ref = LAST_INSERT_ID();"
       sql+="INSERT INTO cuentas (email, password_hash, rol, ref_id, verificado) VALUES ('$rol$(printf '%02d' "$i")@$dominio', @hash, '$rol', @ref, 1);"
       if [ "$rol" = profesional ]; then
-        # 1-3 random active studies and sedes; one shift on 3-5 random weekdays (start 8-12 h, 4-6 h long).
         sql+="INSERT INTO profesional_especializacion (profesional_id, especializacion) SELECT @ref, clave FROM estudios WHERE activo = 1 ORDER BY RAND() LIMIT $(( 1 + RANDOM % 3 ));"
         sql+="INSERT INTO profesional_sucursal (profesional_id, sucursal_id) SELECT @ref, id FROM sucursales WHERE activo = 1 ORDER BY RAND() LIMIT $(( 1 + RANDOM % 3 ));"
         for d in $(shuf -i 1-6 -n $(( 3 + RANDOM % 3 ))); do
@@ -535,7 +513,7 @@ generar_cuentas() {
     done
   done
   sql+="COMMIT;"
-  # One session: any error aborts and the open transaction is rolled back, so it is all or nothing.
+  # Una sola sesión: cualquier error aborta y revierte la transacción abierta, todo o nada.
   if mariadb --default-character-set=utf8mb4 "$db" -e "$sql"; then
     ok "100 cuentas generadas (20 por rol)"
     echo "Correos: paciente01..20, medico01..20, profesional01..20, administrador01..20, recepcionista01..20 @$dominio"
@@ -563,12 +541,10 @@ menu_configuracion() {
          if [ -n "$DOMAIN" ]; then read -rp "Email de contacto para Let's Encrypt: " CERTBOT_EMAIL; fi
          read -rp "¿Borrar la base de datos y empezar de cero? Se pierden TODOS los pacientes, citas y resultados (s/N): " c
          if [[ $c =~ ^[sS]$ ]]; then RESET_DB=1; log ACTION "Reinstalación con reseteo de base"; else RESET_DB=0; fi
-         CRED_FILE=$(mktemp) # debian-setup.sh writes the new admin's credentials here (only when the DB is created)
+         CRED_FILE=$(mktemp)
          export DOMAIN CERTBOT_EMAIL RESET_DB CRED_FILE
          instdir=$(mktemp -d)
-         # the operator runs with umask 077; the clone becomes Apache's document root
          if instalar_dependencias && (umask 022; git clone --depth 1 "$REPO_URL" "$instdir"); then
-           # debian-setup.sh expects to run from the project root
            (umask 022; cd "$instdir" && bash deploy/debian-setup.sh) && ok "Aplicación desplegada en $APP_DIR"
            DEPLOY_DIR=$instdir/deploy/config
            configurar_firewall; configurar_ssh; configurar_fail2ban
@@ -597,7 +573,6 @@ menu_configuracion() {
   done
 }
 
-# ---------- Main menu ----------
 log INFO "Inicio del operador"
 while true; do
   menu $'==============================================\n   OPERADOR DE CENTRO DE CÓMPUTOS - CLÍNICA IMAGEN\n==============================================' \

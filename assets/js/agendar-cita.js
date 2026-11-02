@@ -46,8 +46,6 @@
 
         const tdAcciones = document.createElement('td');
         tdAcciones.dataset.label = '';
-        // Pending or confirmed citas can be cancelled (rejected/cancelled ones only show their reason): confirmation only, no reason asked.
-        // To change the date the patient cancels and books a new cita.
         if (cita.estado === 'rechazada' || cita.estado === 'cancelada') {
             tr.appendChild(tdAcciones);
             return tr;

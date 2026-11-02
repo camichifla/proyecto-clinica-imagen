@@ -1,9 +1,5 @@
-// Generic form-control behavior shared by every page: textarea auto-grow fallback, invisible placeholders for
-// floating labels, clear/reset buttons (.campo-limpiar) and file-field lists with drag and drop.
-// Loads right after sesion.js; it needs nothing from it or from form-api.js.
 (() => {
-    // Text boxes grow with their text via CSS field-sizing (base.css); where the browser lacks it,
-    // grow them by hand on typing and on focus (covers values filled in by scripts).
+    // Los textareas crecen con field-sizing (base.css); donde el navegador no lo soporta se ajusta la altura a mano.
     if (!CSS.supports('field-sizing', 'content')) {
         const ajustar = (evento) => {
             const caja = evento.target;
@@ -16,8 +12,7 @@
         document.addEventListener('focusin', ajustar);
     }
 
-    // Floating labels (base.css) tell an empty box by :placeholder-shown, so text fields in a .campo without a
-    // placeholder get an invisible one; fields added later by scripts too.
+    // Las etiquetas flotantes (base.css) detectan el campo vacío con :placeholder-shown, por eso se pone un placeholder invisible.
     const ponerPlaceholder = (raiz) => {
         if (raiz.querySelectorAll) {
             raiz.querySelectorAll('.campo input:not([placeholder]), .campo textarea:not([placeholder])').forEach((campo) => {
@@ -27,11 +22,7 @@
     };
     ponerPlaceholder(document);
 
-    // Clear/reset button next to a filled field (base.css shows it only when there is something to clear):
-    //   ↺ on dropdowns: back to the default '' option ("Todas", "Elegí ...").
-    //   ✕ on text fields, search boxes and date pickers: empties it to type or pick again.
-    // It fires the same events a manual change would, so filters, cascades and search boxes react as usual.
-    const TEXTO = 'input:is([type="text"], [type="search"], [type="email"], [type="tel"]):not([hidden])'; // [hidden]: value holders (search boxes' ids)
+    const TEXTO = 'input:is([type="text"], [type="search"], [type="email"], [type="tel"]):not([hidden])';
     const agregarLimpiar = (contenedor, simbolo, etiqueta, limpiar) => {
         if (contenedor.querySelector(':scope > .campo-limpiar') || contenedor.closest('[data-sin-limpiar]')) {
             return;
@@ -43,7 +34,6 @@
         boton.title = etiqueta;
         boton.setAttribute('aria-label', etiqueta);
         boton.addEventListener('mousedown', (evento) => evento.preventDefault());
-        // ↺ resets right away and spins once to the left before hiding (base.css keeps it visible while .girando).
         boton.addEventListener('click', () => {
             const girar = boton.textContent === '↺' && !matchMedia('(prefers-reduced-motion: reduce)').matches;
             limpiar();
@@ -59,7 +49,6 @@
         if (!raiz.querySelectorAll) {
             return;
         }
-        // Dropdowns with a default option.
         raiz.querySelectorAll('.buscador-combo > select.selector-combo').forEach((select) => {
             if (select.dataset.buscable === undefined && Array.from(select.options).some((o) => o.value === '')) {
                 agregarLimpiar(select.parentElement, '↺', 'Volver a la opción por defecto', () => {
@@ -68,9 +57,7 @@
                 });
             }
         });
-        // Search boxes (patients, professionals, accounts) and plain text fields.
         raiz.querySelectorAll(`.buscador-combo > ${TEXTO}, .campo > ${TEXTO}`).forEach((input) => {
-            // base.css shows ✕ with :not(:placeholder-shown), which is always true without a placeholder.
             if (!input.placeholder) {
                 input.placeholder = ' ';
             }
@@ -80,7 +67,6 @@
                 input.focus();
             });
         });
-        // Date pickers.
         raiz.querySelectorAll('.selector-fecha > input[type="hidden"]').forEach((input) => {
             agregarLimpiar(input.parentElement, '✕', 'Borrar fecha', () => {
                 input.value = '';
@@ -90,7 +76,6 @@
         programarUbicacion();
     };
 
-    // The button sits right after the box's text (capped before the dropdown arrow), level with the value line.
     const lienzo = document.createElement('canvas').getContext('2d');
     const anchoTexto = (caja) => {
         if (caja.tagName === 'INPUT') {
@@ -127,15 +112,10 @@
     }
     ['input', 'change', 'focusout', 'click'].forEach((tipo) => document.addEventListener(tipo, programarUbicacion));
     window.addEventListener('resize', programarUbicacion);
-    // Box texts changed by scripts (dropdown labels, date texts) move the button too.
-    // Also class changes (a box gets a value without new text nodes) and late web fonts (text width/height change).
     new MutationObserver(programarUbicacion).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['class'] });
     document.fonts.ready.then(programarUbicacion);
     prepararLimpiar(document);
 
-    // File fields: the chosen files are listed under the field, each with a ✕ that removes only that file, and
-    // on a multiple field choosing again adds to the list instead of replacing it. The field's FileList is
-    // rebuilt with DataTransfer, so the form submits exactly what is listed.
     document.querySelectorAll('input[type="file"]').forEach((input) => {
         const lista = document.createElement('ul');
         lista.className = 'archivos-lista';
@@ -184,7 +164,6 @@
             }));
         }
 
-        // Drag and drop onto the box: only the types in accept, added like a normal pick (the change handler merges).
         const aceptado = (archivo) => !input.accept || input.accept.split(',').some((tipo) => {
             tipo = tipo.trim().toLowerCase();
             return tipo.startsWith('.') ? archivo.name.toLowerCase().endsWith(tipo)
@@ -213,10 +192,9 @@
     new MutationObserver((cambios) => cambios.forEach((cambio) => cambio.addedNodes.forEach(ponerPlaceholder)))
         .observe(document.body, { childList: true, subtree: true });
 
-    // data-permitidos="<regex character class body>": characters outside it are dropped while typing or pasting
-    // (e.g. letters only in names, digits only in the cédula). The field's pattern still validates the format.
     document.addEventListener('input', (evento) => {
         const campo = evento.target;
+        // data-permitidos="<cuerpo de clase de caracteres regex>": lo que quede fuera se descarta al tipear o pegar; el pattern del campo sigue validando el formato.
         if (!campo.dataset || campo.dataset.permitidos === undefined) {
             return;
         }
@@ -228,8 +206,7 @@
         }
     });
 
-    // Requirement checklists (<ul class="requisitos" data-para="<input id>"> with <li data-regla="<regex>">):
-    // each item is ticked (.cumplido) live while the value matches its rule.
+    // Listas de requisitos: <ul class="requisitos" data-para="<id del input>"> con <li data-regla="<regex>">; cada ítem se marca (.cumplido) mientras el valor cumple su regla.
     document.querySelectorAll('.requisitos[data-para]').forEach((lista) => {
         const campo = document.getElementById(lista.dataset.para);
         const items = Array.from(lista.querySelectorAll('li[data-regla]'));
@@ -238,7 +215,6 @@
         revisar();
     });
 
-    // Eye toggle on every password field: shows/hides the characters. Keeps the field type="password" by default.
     const OJO = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
     const OJO_TACHADO = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7c2 0 3.8.65 5.3 1.6M22 12s-3.5 7-10 7c-2 0-3.8-.65-5.3-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m3 3 18 18"/></svg>';
     document.querySelectorAll('input[type="password"]').forEach((input) => {
@@ -249,7 +225,7 @@
         boton.title = 'Mostrar contraseña';
         boton.setAttribute('aria-label', 'Mostrar contraseña');
         boton.setAttribute('aria-pressed', 'false');
-        boton.addEventListener('mousedown', (evento) => evento.preventDefault()); // keep the caret in the field
+        boton.addEventListener('mousedown', (evento) => evento.preventDefault());
         boton.addEventListener('click', () => {
             const ver = input.type === 'password';
             input.type = ver ? 'text' : 'password';

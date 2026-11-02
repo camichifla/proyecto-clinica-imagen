@@ -27,10 +27,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $datosCita->execute([$citaId]);
         $cita = $datosCita->fetch();
         if ($cita && $sucRecep !== null && (int) $cita['sucursal_id'] !== $sucRecep) {
-            $cita = false; // not this receptionist's branch
+            $cita = false;
         }
         if (!$cita) {
-            // Checked before any UPDATE: another branch's (or a missing) cita is never touched.
             http_response_code(404);
             echo json_encode(['ok' => false, 'error' => MENSAJE_SOLICITUD_NO_PROCESADA], JSON_UNESCAPED_UNICODE);
             exit;

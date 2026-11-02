@@ -1,7 +1,4 @@
 <?php
-// POST only: appends one clinical note for a patient the medico/profesional can
-// already see, or (accion=borrar) deletes one, but only the note's own author.
-// Reads go through resultados-paciente.php.
 require_once __DIR__ . '/../includes/session_bootstrap.php';
 require_once __DIR__ . '/../includes/auth_guard.php';
 require_once __DIR__ . '/../includes/db.php';
@@ -18,7 +15,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 csrf_check($_POST['csrf'] ?? null);
 
-// Delete: only the author of the note may remove it (hard delete).
 if (($_POST['accion'] ?? '') === 'borrar') {
     $notaId = filter_var($_POST['nota_id'] ?? '', FILTER_VALIDATE_INT);
     if (!$notaId) {

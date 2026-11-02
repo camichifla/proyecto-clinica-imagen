@@ -1,5 +1,4 @@
 <?php
-/** @return array{0: array<int,array<string,mixed>>, 1: array<int,array<int,array<string,mixed>>>} resultados and their images, batched in two queries. */
 function obtener_resultados_de_paciente(PDO $db, int $pacienteId): array
 {
     $stmt = $db->prepare('SELECT * FROM resultados WHERE paciente_id = ? ORDER BY fecha_estudio DESC');

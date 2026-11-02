@@ -7,7 +7,7 @@ require_once __DIR__ . '/../includes/pacientes.php';
 
 require_post_json();
 
-// Throttles attempts, not just successes, so probing with existing emails/CIs is capped too.
+// Se limitan los intentos y no solo los éxitos, para frenar el sondeo de emails y cédulas existentes.
 if (demasiados_eventos('registro_intento', 'ip', (string) ($_SERVER['REMOTE_ADDR'] ?? ''), 10, 60)) {
     http_response_code(429);
     echo json_encode(['ok' => false, 'errores' => ['general' => 'Demasiados registros desde esta conexión. Probá de nuevo más tarde.']], JSON_UNESCAPED_UNICODE);
@@ -26,10 +26,10 @@ if ($errores) {
 }
 
 $db = db();
-limpiar_cuentas_sin_verificar($db); // frees CIs squatted by accounts never verified within 48h
+limpiar_cuentas_sin_verificar($db);
 
-// Anti-enumeration: whether the email or CI already exists, or the mail cap was hit, always answers the same success.
-// Per-target-email cap: a victim's inbox cannot be flooded through this endpoint.
+// Anti-enumeración: email o cédula existentes, o tope de correos alcanzado, responden siempre el mismo éxito.
+// El tope por email evita inundar la casilla de una víctima a través de este endpoint.
 $limitadoEmail = demasiados_eventos('registro_intento', 'email', $valores['email'], 3, 60);
 registrar_evento('registro_intento', null, $valores['email']);
 $exito = static function (): never {
@@ -47,9 +47,6 @@ if ($stmt->fetchColumn()) {
     $exito();
 }
 
-// A patient whose account was deleted gets it back by signing up again with the same CI and the email that account
-// had (pacientes.email_anterior): their data, citas and clinical history stay attached. Any other email is silently
-// ignored (same response), so knowing someone's CI is not enough to take over their history or to probe for it.
 $stmt = $db->prepare(
     "SELECT p.id, p.email_anterior, c.id AS cuenta_id, c.email AS cuenta_email
        FROM pacientes p
@@ -103,7 +100,7 @@ try {
         $db->rollBack();
     }
     if ($e->getCode() === '23000') {
-        $exito(); // lost a race on CI/email uniqueness: same response as the pre-checks
+        $exito();
     }
     http_response_code(422);
     echo json_encode(['ok' => false, 'errores' => ['general' => 'No se pudo completar el registro. Intentá nuevamente.']], JSON_UNESCAPED_UNICODE);

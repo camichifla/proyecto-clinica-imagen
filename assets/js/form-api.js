@@ -1,11 +1,4 @@
-// Helpers shared by the authenticated pages (classic-script globals).
-// Pages using them load this file before their own script.
-
-// fetch + JSON. Returns the parsed JSON, null if there was no connection, or
-// { ok: false } if the response wasn't JSON. On an expired session (401 or
-// redirect to login) it navigates to login.html; on a 403 for reads (role without
-// permission) it navigates to index.html. In both cases it does NOT resolve: the page is
-// leaving and the caller must not continue. Public pages pass { publica: true } to skip both redirects.
+// Devuelve el JSON, null sin conexión o { ok: false } si la respuesta no era JSON. Con sesión vencida (401 o redirección a login) navega a login.html.
 async function apiJson(url, opts = {}) {
     let respuesta;
     try {
@@ -32,13 +25,12 @@ async function apiJson(url, opts = {}) {
 
 const ERROR_CONEXION = 'No se pudo conectar. Intentá nuevamente.';
 
-// POST with the session's CSRF token added. Same return contract as apiJson.
+// POST con el token CSRF de la sesión; mismo contrato de retorno que apiJson.
 async function enviarPost(url, campos) {
     const sesion = await window.sesionLista;
     return apiJson(url, { method: 'POST', body: new URLSearchParams({ csrf: sesion.csrf, ...campos }) });
 }
 
-// Shows `texto` in the success ([data-mensaje]) or error ([data-mensaje-error]) element and hides the other.
 function mostrarMensajeEn(ok, error, texto, esError) {
     const el = esError ? error : ok;
     const otro = esError ? ok : error;
@@ -51,7 +43,6 @@ function crearMostrarMensaje(ok, error) {
     return (texto, esError) => mostrarMensajeEn(ok, error, texto, esError);
 }
 
-// Error text of an API response: validation errors joined, its error message, or the connection fallback.
 function textoErrores(data) {
     if (data && data.errores) {
         return Object.values(data.errores).join(' ');
@@ -74,7 +65,6 @@ async function cargarScripts(...srcs) {
     }
 }
 
-// Styled, promise-based confirmation dialog: resolves true on accept, false on cancel/Escape.
 function confirmar(mensaje, { peligro = false } = {}) {
     return new Promise((resolve) => {
         const dialogo = document.createElement('dialog');
@@ -102,12 +92,10 @@ function confirmar(mensaje, { peligro = false } = {}) {
     });
 }
 
-// Accents and case are ignored: "lopez" finds "López".
 function normalizar(texto) {
     return String(texto ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase().trim();
 }
 
-// Every word of `busqueda` must appear in the (accent/case-insensitive) joined `campos`.
 function coincidePalabras(busqueda, campos) {
     const texto = normalizar(campos.join(' '));
     return normalizar(busqueda).split(/\s+/).filter(Boolean).every((palabra) => texto.includes(palabra));
@@ -126,13 +114,11 @@ function parrafo(texto) {
     return p;
 }
 
-// "YYYY-MM-DD HH:MM[:SS]" -> "DD/MM/YYYY HH:MM"; "YYYY-MM-DD" -> "DD/MM/YYYY". Anything else is returned unchanged.
 function fechaHora(texto) {
     const m = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}:\d{2})(?::\d{2})?)?$/.exec(String(texto ?? ''));
     return m ? `${m[3]}/${m[2]}/${m[1]}` + (m[4] ? ' ' + m[4] : '') : texto;
 }
 
-// Reveals the [data-aviso="<clave>"] notice (optionally with new text).
 function mostrarAviso(clave, texto) {
     const aviso = document.querySelector(`[data-aviso="${clave}"]`);
     if (!aviso) {
@@ -151,16 +137,11 @@ function celda(etiqueta, texto) {
     return td;
 }
 
-// Validation errors { field: message } under the .campo of the input with that
-// name (or under #campo-<field>). Returns the messages that found nowhere to show,
-// so the caller can display them as a general notice.
 function limpiarErroresCampos(form) {
     form.querySelectorAll('.campo-error[data-dinamico]').forEach((p) => p.remove());
     form.querySelectorAll('[data-error-id]').forEach(desvincularError);
 }
 
-// Ties the error message to the control for screen readers, without overwriting
-// the format hint the control may already have in aria-describedby.
 let contadorErrores = 0;
 function vincularError(p, control) {
     if (!control) {
@@ -205,9 +186,6 @@ function mostrarErroresCampos(form, errores) {
     return sueltos;
 }
 
-// A field's error ("Este campo es obligatorio.", format errors) goes away as soon as the user selects the field:
-// clicking/tapping it, tabbing into it, or editing it. The focus validation itself moves to the first invalid
-// field is not the user's, so it keeps its error.
 function limpiarErrorDe(evento) {
     const contenedor = evento.target.closest && evento.target.closest('.campo');
     if (!contenedor || !contenedor.querySelector('.campo-error[data-dinamico], [aria-invalid]')) {
@@ -239,8 +217,7 @@ function celdaEstado(estado, etiqueta, columna = 'Estado') {
     return td;
 }
 
-// Tables switch to cards (.tabla-tarjetas, see base.css) whenever they don't fit their container, whatever the
-// screen size or column count. Only width changes are re-checked: turning into cards changes the height.
+// Las tablas pasan a tarjetas (.tabla-tarjetas, ver base.css) cuando no caben en su contenedor; solo se revisan los cambios de ancho porque pasar a tarjetas cambia la altura.
 const observadorTablas = new ResizeObserver((entradas) => {
     entradas.forEach(({ target: scroll }) => {
         const ancho = scroll.clientWidth;
@@ -253,11 +230,9 @@ const observadorTablas = new ResizeObserver((entradas) => {
     });
 });
 
-// Filter/search forms run on their own (no "Filtrar"/"Buscar" button): right away when a dropdown or date changes,
-// and after a short pause while typing. Goes through requestSubmit(), so each page's submit handler is unchanged.
+// Usa requestSubmit() para que el manejador de submit de cada página no cambie.
 function filtrarAlCambiar(form, demora = 400) {
     const esTexto = (el) => el.matches('input[type="text"], input[type="search"]');
-    // Search-as-you-type comboboxes don't filter while typing: only once an option is picked (their field's 'change').
     const esBuscador = (el) => el.matches('[role="combobox"]');
     let espera;
     form.addEventListener('input', (evento) => {
@@ -274,12 +249,9 @@ function filtrarAlCambiar(form, demora = 400) {
     });
 }
 
-// Returns the .tabla-scroll container with a <table class="tabla-datos">:
-// `encabezados` are the <th> texts, `filas` are already <tr> elements.
 const CHEVRON_DER = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>';
 const CHEVRON_IZQ = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>';
 
-// opciones.porPagina (e.g. 5): splits the rows into pages with a prev/next bar below the table.
 function tabla(encabezados, filas, opciones = {}) {
     const scroll = document.createElement('div');
     scroll.className = 'tabla-scroll';
@@ -302,14 +274,13 @@ function tabla(encabezados, filas, opciones = {}) {
     scroll.appendChild(table);
     observadorTablas.observe(scroll);
 
-    // Every row stays in the DOM (hidden off-page) so printing and the card-fit observer see them all.
+    // Todas las filas quedan en el DOM (ocultas fuera de la página actual) para que la impresión y el observador de tarjetas las vean.
     filas.forEach((fila) => tbody.appendChild(fila));
     const porPagina = opciones.porPagina ?? 5;
     if (porPagina <= 0 || filas.length <= porPagina) {
         return scroll;
     }
 
-    // Paginated: show one page of rows at a time with a prev/next bar.
     const paginas = Math.ceil(filas.length / porPagina);
     let actual = 0;
     const contenedor = document.createElement('div');
@@ -335,7 +306,6 @@ function tabla(encabezados, filas, opciones = {}) {
     const mostrar = () => {
         filas.forEach((fila, i) => { fila.classList.toggle('pagina-oculta', i < actual * porPagina || i >= (actual + 1) * porPagina); });
         indicador.textContent = (actual + 1) + '/' + paginas;
-        // Hidden (not just disabled) at the ends; visibility keeps the number centered.
         anterior.classList.toggle('oculto', actual === 0);
         siguiente.classList.toggle('oculto', actual === paginas - 1);
     };
@@ -345,7 +315,6 @@ function tabla(encabezados, filas, opciones = {}) {
     return contenedor;
 }
 
-// Fills a <select class="selector-combo" data-buscable> with patients; shows data-mensaje-sin-pacientes if there are none.
 function poblarPacientes(select, pacientes) {
     select.replaceChildren(
         new Option('Elegí un paciente', ''),
@@ -401,7 +370,6 @@ function poblarProfesionales(select, profesionales, seleccionado = '', etiquetas
 
 const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
-// Opening/closing times offered every 15 minutes; a stored value off that grid is kept as its own option.
 function selectorHora(valor, etiqueta) {
     const select = document.createElement('select');
     select.className = 'selector-combo';
@@ -487,7 +455,6 @@ function turnosDeContenedor(contenedor) {
     }
 
     function limpiarErrores(form) {
-        // Static notices (sin-pacientes, data-aviso...) are left alone.
         const seccion = form.closest('section');
         seccion.querySelectorAll('.campo-error[data-general]').forEach((p) => {
             p.hidden = true;
@@ -498,8 +465,6 @@ function turnosDeContenedor(contenedor) {
         form.querySelectorAll('[data-error-id]').forEach(desvincularError);
     }
 
-    // Required fields left empty are flagged before sending (the server still validates everything):
-    // "Este campo es obligatorio." under each one, and the cursor goes to the first.
     function faltanObligatorios(form) {
         const vacios = Array.from(form.querySelectorAll('[required]'))
             .filter((el) => !el.disabled && el.type !== 'checkbox' && el.type !== 'radio' && !String(el.value).trim());

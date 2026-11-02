@@ -1,13 +1,6 @@
 #!/usr/bin/env bash
-# deploy/debian-setup.sh — installs Clinica Imagen on a fresh Debian VM
-# (Apache + mod_php + MariaDB). Run as root from the project root:
-#   sudo bash deploy/debian-setup.sh [APP_URL]
-# HTTPS (Let's Encrypt): DOMAIN=clinica.example.com CERTBOT_EMAIL=you@example.com sudo -E bash deploy/debian-setup.sh
-# Safe to re-run: it updates the code and leaves the database, config.php and uploads alone.
-# RESET_DB=1 instead drops the database and uploaded results and starts from a fresh schema + new admin.
-# CRED_FILE=<path> also writes the new admin's credentials there (operador.sh prints them at the very end).
 set -euo pipefail
-# Callers may run with a restrictive umask (operador.sh uses 077); everything created here must be readable by Apache.
+# Quien invoca puede usar una umask restrictiva (operador.sh usa 077); todo lo creado aquí debe ser legible por Apache.
 umask 022
 
 [ "$(id -u)" -eq 0 ] || { echo "Run as root (sudo)." >&2; exit 1; }
@@ -32,12 +25,12 @@ apt-get update
 apt-get install -y apache2 mariadb-server libapache2-mod-php php-cli php-mysql php-mbstring rsync openssl cron curl gnupg
 [ -z "$DOMAIN" ] || apt-get install -y certbot python3-certbot-apache
 
-# The app pins PHP to America/Montevideo and compares against MariaDB's NOW().
+# La app fija PHP en America/Montevideo y compara contra NOW() de MariaDB: ambos deben coincidir.
 timedatectl set-timezone America/Montevideo
 systemctl restart mariadb
 
-# --chmod: the clone may come from a 0700 mktemp dir or a restrictive umask; Apache must read every file.
 mkdir -p "$DEST"
+# --chmod: el clon puede venir de un mktemp 0700 o de una umask restrictiva; Apache debe poder leer todos los archivos.
 rsync -a --chmod=D755,F644 \
   --exclude='.git' --exclude='.claude' --exclude='.atl' \
   --exclude='includes/config.php' --exclude='storage/mail.log' \
@@ -70,9 +63,9 @@ TABLES=$(mariadb -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE tab
 if [ "$TABLES" -eq 0 ]; then
   mariadb --default-character-set=utf8mb4 "$DB_NAME" < sql/schema.sql
 
-  # Staff accounts are only created by an administrator, so seed the first one.
   ADMIN_EMAIL=${ADMIN_EMAIL:-admin@clinica-imagen.local}
   ADMIN_PASS=$(openssl rand -hex 8)
+  # Las cuentas de personal solo las crea un administrador, por eso se siembra el primero con contraseña aleatoria mostrada una sola vez.
   ADMIN_HASH=$(php -r 'echo password_hash($argv[1], PASSWORD_BCRYPT);' "$ADMIN_PASS")
   mariadb "$DB_NAME" <<SQL
 INSERT INTO administradores (nombre, apellido, ci) VALUES ('Admin', 'Inicial', '11111111');
@@ -82,7 +75,6 @@ SQL
   ADMIN_CRED="Administrador: $ADMIN_EMAIL / $ADMIN_PASS  (se muestra una sola vez, cambiala al entrar)"
   [ -z "${CRED_FILE:-}" ] || echo "$ADMIN_CRED" > "$CRED_FILE"
 else
-  # Existing databases: columns added after the first install (idempotent).
   mariadb "$DB_NAME" -e "ALTER TABLE pacientes ADD COLUMN IF NOT EXISTS email_anterior VARCHAR(254) NULL AFTER numero"
   mariadb "$DB_NAME" -e "ALTER TABLE cuentas ADD COLUMN IF NOT EXISTS email_nuevo VARCHAR(254) NULL AFTER verificado, DROP COLUMN IF EXISTS email_anterior"
   mariadb "$DB_NAME" -e "ALTER TABLE recepcionistas ADD COLUMN IF NOT EXISTS sucursal_id INT UNSIGNED NULL"
@@ -93,12 +85,11 @@ else
 fi
 
 chown -R root:root "$DEST"
-# rsync -a copies the source root's mode; the operator clones into a 0700 mktemp dir, which locked Apache out.
+# rsync -a copia el modo del directorio origen; el operador clona en un mktemp 0700 y eso dejaba a Apache sin acceso.
 chmod 755 "$DEST"
 chown root:www-data "$DEST/includes/config.php"
 chown -R www-data:www-data "$DEST/storage"
 
-# result uploads are up to 10MB per file (Debian default is 2M / 8M)
 for dir in /etc/php/*/apache2/conf.d; do
   printf 'upload_max_filesize = 10M\npost_max_size = 64M\n' > "$dir/99-clinica.ini"
 done
@@ -132,11 +123,10 @@ cat > /etc/apache2/sites-available/clinica-imagen.conf <<EOF
 </VirtualHost>
 EOF
 
-# Backups: script, cron schedule (daily DB, weekly files, daily remote) and shell environment/aliases.
 install -m 755 deploy/respaldo.sh /usr/local/sbin/clinica-respaldo
 install -m 644 deploy/config/cron-clinica-imagen /etc/cron.d/clinica-imagen
 install -m 644 deploy/config/profile-clinica.sh /etc/profile.d/clinica-imagen.sh
-# Backup encryption key (everything uploaded to the remote is gpg-encrypted with it); created once, root-only.
+# Clave de cifrado de respaldos (todo lo que se sube al remoto va cifrado con gpg); se crea una sola vez, solo root.
 if [ ! -s /root/.clinica-respaldo.key ]; then
   (umask 077; openssl rand -base64 32 > /root/.clinica-respaldo.key)
   echo "IMPORTANTE: clave de cifrado de respaldos creada en /root/.clinica-respaldo.key." >&2
@@ -156,7 +146,6 @@ else
   echo "         Re-run with DOMAIN=<your.domain> CERTBOT_EMAIL=<you@example.com> to enable it." >&2
 fi
 
-# Self-check: Apache must be able to read the app and serve both a page and the API.
 fallo=0
 runuser -u www-data -- test -r "$DEST/.htaccess" || { echo "ERROR: www-data cannot read $DEST/.htaccess:" >&2; namei -l "$DEST/.htaccess" >&2; fallo=1; }
 for ruta in / /api/sesion.php; do

@@ -20,8 +20,7 @@
         dialogo.close();
     });
 
-    // Close when the backdrop (::backdrop) is clicked - a click inside the
-    // image doesn't reach the <dialog> itself, only the ones landing outside.
+    // Cierra al hacer clic en el fondo (::backdrop): un clic dentro de la imagen no llega al <dialog> mismo.
     dialogo.addEventListener('click', function (evento) {
         if (evento.target === dialogo) {
             dialogo.close();
@@ -29,8 +28,6 @@
     });
 })();
 
-// Side-by-side comparison (staff view only: needs #visor-comparar and the
-// "Comparar" checkboxes rendered by resultados-render.js).
 (function () {
     var dialogo = document.getElementById('visor-comparar');
     if (!dialogo) {
@@ -43,7 +40,6 @@
         return document.querySelectorAll('.comparar-check:checked');
     }
 
-    // The button and notice exist whenever checkboxes do (resultados-render.js creates them together).
     function actualizarBarra() {
         var n = marcadas().length;
         document.querySelector('.comparar-abrir').disabled = n !== MAX;

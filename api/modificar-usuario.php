@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$usuario['cuenta_id']]);
         $cuenta = $stmt->fetch();
 
-        // Caps guessing the current password from a hijacked session: 5 misses per account every 15 minutes.
+        // Limita el adivinado de la contraseña actual desde una sesión secuestrada: 5 fallos por cuenta cada 15 minutos.
         if (demasiados_eventos('cuenta_password_fallo', 'email', $cuenta['email'], 5, 15)) {
             http_response_code(429);
             echo json_encode(['ok' => false, 'errores' => ['contrasena_actual' => 'Demasiados intentos fallidos. Probá de nuevo en 15 minutos.']], JSON_UNESCAPED_UNICODE);

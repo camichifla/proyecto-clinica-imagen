@@ -79,7 +79,6 @@
         const grid = document.createElement('div');
         grid.className = 'agenda-mes-grid';
 
-        // Details of the selected day, shown under the month grid.
         const detalle = document.createElement('section');
         detalle.className = 'agenda-mes-detalle';
         detalle.id = 'agenda-mes-detalle';
@@ -101,7 +100,6 @@
             }
 
             if (dia.citas.length) {
-                // The day cell toggles its details; the day number still opens the week view.
                 divDia.classList.add('agenda-dia-con-citas');
                 divDia.tabIndex = 0;
                 divDia.setAttribute('role', 'button');
@@ -149,8 +147,6 @@
         detalle.replaceChildren(titulo, lista);
     }
 
-    // Month details: static card, everything visible. Week view (plegable): a button that
-    // shows only time and study until it is opened.
     function renderTarjetaCita(cita, plegable) {
         const tarjeta = document.createElement(plegable ? 'button' : 'article');
         tarjeta.className = 'agenda-cita-card estado-' + cita.estado;
@@ -234,11 +230,9 @@
         if (data.vista === 'mes') {
             renderMes(data);
         } else {
-            renderSemana(data); // 'semana' and 'dia' share it: the day view is a one-column week
+            renderSemana(data);
         }
         if (selectSucursal) {
-            // Only administrators and receptionists get branches; the professional only sees their own agenda.
-            // A receptionist only gets their own branch: nothing to choose, so no Sede filter.
             formFiltro.hidden = data.sucursales.length <= 1;
             renderOpcionesSucursal(data.sucursales, data.sucursalId);
         }

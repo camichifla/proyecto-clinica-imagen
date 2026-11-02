@@ -17,7 +17,6 @@
         return tr;
     }
 
-    // Read-only card for receptionists: their branch, hours, studies and professionals.
     function renderMiSede(sede) {
         const seccion = document.getElementById('mi-sede');
         seccion.hidden = !sede;

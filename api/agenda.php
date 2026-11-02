@@ -30,7 +30,7 @@ if (in_array($usuario['rol'], ['administrador', 'recepcionista'], true)) {
     if ($sucursalId !== null && !in_array($sucursalId, array_column($sucursales, 'id'), true)) {
         $sucursalId = null;
     }
-    // A receptionist is locked to their own branch (ignores the filter); 0 = none assigned yet, shows nothing.
+    // La recepcionista queda restringida a su sucursal y se ignora el filtro; 0 = sin sede asignada, no muestra nada.
     $sucRecep = filtro_sucursal_recepcion($usuario);
     if ($sucRecep !== null) {
         $sucursalId  = $sucRecep;
@@ -46,7 +46,6 @@ if (in_array($usuario['rol'], ['administrador', 'recepcionista'], true)) {
     $parametros[] = $usuario['ref_id'];
 }
 
-// Confirmed citas only: pending requests are handled in Solicitudes de cita.
 $stmt = db()->prepare(
     SQL_CITAS_CON_ETIQUETAS . "
      WHERE c.estado = 'confirmada' AND {$condicion}DATE(c.fecha_hora_solicitada) BETWEEN ? AND ?

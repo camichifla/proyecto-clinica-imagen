@@ -1,14 +1,7 @@
-// User session. By default it requires login (redirects to login.html and exposes
-// window.sesionLista). With data-modo="publico" on the <script> it doesn't redirect,
-// toggles the [data-sesion] elements and exposes window.sesionPublica.
-// In non-public mode, if the current view isn't in the role's menu,
-// it redirects to index.html (the real check stays in the API).
-// Role labels shared by every page (sesion.js loads first, so this is a global).
 const ROLES_ETIQUETA = { paciente: 'Paciente', medico: 'Médico', profesional: 'Profesional', administrador: 'Administrador', recepcionista: 'Recepcionista' };
 
 (() => {
     const publico = document.currentScript.dataset.modo === 'publico';
-    // Without a session the public nav moves into the hamburger (the header only keeps the logo).
     const MENU_ANONIMO = [
         { href: 'login.html', label: 'Iniciar sesión' },
         { href: 'register.html', label: 'Registrarse' },
@@ -16,7 +9,7 @@ const ROLES_ETIQUETA = { paciente: 'Paciente', medico: 'Médico', profesional: '
         { href: 'contacto.html', label: 'Contacto' },
     ];
 
-    // Guarded pages show no content until the session is confirmed (no flash of the empty shell before a redirect).
+    // Las páginas protegidas no muestran contenido hasta confirmar la sesión (evita el parpadeo antes de una redirección).
     const principal = document.querySelector('main');
     if (!publico && principal) {
         principal.style.visibility = 'hidden';
@@ -26,10 +19,9 @@ const ROLES_ETIQUETA = { paciente: 'Paciente', medico: 'Médico', profesional: '
         const url = publico ? 'api/sesion.php?opcional=1' : 'api/sesion.php';
         let respuesta;
         try {
+            // Una sesión vencida se destruye en esa respuesta; reintentar abre una nueva con su token CSRF.
             respuesta = await fetch(url);
             if (publico && respuesta.status === 401) {
-                // An expired session is destroyed in that response; retrying
-                // opens a new one with its CSRF token.
                 respuesta = await fetch(url);
             }
         } catch {
@@ -81,15 +73,12 @@ const ROLES_ETIQUETA = { paciente: 'Paciente', medico: 'Médico', profesional: '
             });
         }
 
-        // Logged in: role menu, theme switch and logout. Visitors on public pages get the
-        // same hamburger with the public pages, "Iniciar sesión", "Registrarse" and the theme switch.
         const lista = document.querySelector('.menu-usuario-lista');
         if (lista) {
             const logueado = !publico || sesion.logueado;
             const actual = window.location.pathname.split('/').pop();
             const menu = logueado ? sesion.menu : MENU_ANONIMO;
 
-            // Panel header: [account icon] name / role. The icon is the way into the account page.
             const nombre = lista.parentElement.querySelector('.user-nombre');
             const cabecera = document.createElement('div');
             cabecera.className = 'menu-usuario-cabecera';
@@ -127,7 +116,6 @@ const ROLES_ETIQUETA = { paciente: 'Paciente', medico: 'Médico', profesional: '
         return sesion;
     })();
 
-    // Generic user silhouette (no photo) linking to the account page.
     function iconoCuenta(item, actual) {
         const enlace = document.createElement('a');
         enlace.href = item.href;
@@ -153,8 +141,6 @@ const ROLES_ETIQUETA = { paciente: 'Paciente', medico: 'Médico', profesional: '
         return li;
     }
 
-    // Consecutive items sharing a grupo become one collapsible section; the section
-    // holding the current page starts open.
     function renderMenu(lista, menu, actual) {
         let grupo = null;
         let sublista = null;
@@ -194,8 +180,6 @@ const ROLES_ETIQUETA = { paciente: 'Paciente', medico: 'Médico', profesional: '
         };
         sincronizar();
         document.documentElement.addEventListener('cambio-tema', sincronizar);
-        // Let the knob finish sliding (0.2s, --transition-fast) before the page cross-fades;
-        // the view transition would otherwise freeze it mid-way.
         input.addEventListener('change', () => {
             const tema = input.checked ? 'dark' : 'light';
             setTimeout(() => window.tema.cambiar(tema), 200);
@@ -204,8 +188,6 @@ const ROLES_ETIQUETA = { paciente: 'Paciente', medico: 'Médico', profesional: '
         return label;
     }
 
-    // Open menu: full-height panel under the header, the rest of the page dimmed and
-    // locked. Closes with Esc, a click on the backdrop or choosing a link.
     function prepararPanel(details) {
         const header = details.closest('header');
         const toggle = details.querySelector('summary');
@@ -218,8 +200,6 @@ const ROLES_ETIQUETA = { paciente: 'Paciente', medico: 'Médico', profesional: '
             const alto = Math.max(0, header.getBoundingClientRect().bottom);
             document.documentElement.style.setProperty('--alto-header', alto + 'px');
         };
-        // Closing plays the opening animation in reverse (class "cerrando"), then really closes.
-        // Without animations (prefers-reduced-motion) it closes at once.
         const panel = details.querySelector('.menu-usuario-panel');
         const cerrar = () => {
             if (!details.open || details.classList.contains('cerrando')) {

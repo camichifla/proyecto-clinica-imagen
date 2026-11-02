@@ -16,7 +16,6 @@
         }
     }
 
-    // Read-only: the cita belongs to the patient; cancelling goes through reception, with a reason.
     function renderFilaCita(cita) {
         const tr = document.createElement('tr');
         tr.appendChild(celda('Código', cita.codigo));
@@ -99,7 +98,6 @@
         function aplicar() {
             const est = estudioSelect.value;
             panelEstudio.hidden = est === '';
-            // Show only the cards and subsections that serve the chosen study (data-estudios); AVISO has none, so it always shows.
             panelEstudio.querySelectorAll('[data-estudios]').forEach((el) => {
                 el.hidden = est === '' || !el.dataset.estudios.split(/\s+/).filter(Boolean).includes(est);
             });

@@ -1,5 +1,4 @@
 <?php
-// GET only, admin only: last events (audit log) plus brute-force suspects.
 require_once __DIR__ . '/../includes/session_bootstrap.php';
 require_once __DIR__ . '/../includes/auth_guard.php';
 require_once __DIR__ . '/../includes/db.php';

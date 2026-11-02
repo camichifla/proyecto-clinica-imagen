@@ -7,7 +7,6 @@
     const mensajeError = document.querySelector('[data-mensaje-error]');
     const mostrarMensaje = crearMostrarMensaje(mensajeOk, mensajeError);
 
-    // Both actions delete the message server-side; a reply also emails it first.
     async function atender(m, respuesta, botones, textoOk) {
         botones.forEach((b) => { b.disabled = true; });
         const data = await enviarPost('api/mensajes-contacto.php', { id: m.id, respuesta });
@@ -20,7 +19,7 @@
         mostrarMensaje((data && data.error) || 'No se pudo atender el mensaje.', true);
     }
 
-    // Always plain text: the content was written by an anonymous visitor.
+    // Siempre texto plano: el contenido lo escribió un visitante anónimo.
     function renderMensaje(m, maxRespuesta) {
         const card = document.createElement('article');
         card.className = 'mensaje-contacto';
@@ -50,7 +49,6 @@
         enviar.type = 'submit';
         enviar.className = 'btn-primario';
         enviar.textContent = 'Enviar respuesta';
-        // .campo gives it the same box and floating label as every other form.
         const campo = document.createElement('div');
         campo.className = 'campo';
         campo.append(label, textarea);

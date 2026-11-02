@@ -1,6 +1,5 @@
-/* Linked only by its views; joins the base layer so precedence is unchanged. */
+/* Se enlaza solo desde sus vistas; entra en la capa base para no alterar la precedencia. */
 @layer base {
-/* Full-bleed band under the sticky header: clinic photo under the brand gradient as a scrim so the copy stays readable. */
 .hero {
     position: relative;
     display: flex;
@@ -60,7 +59,6 @@
     }
 }
 
-/* Services and values read as one block of cards: same gap between and within rows. */
 .section-servicios {
     margin: 3.5rem 0 var(--space-6);
     text-align: center;
@@ -80,7 +78,6 @@
     text-align: left;
 }
 
-/* Services and values share the same card. */
 .card-servicios,
 .valor {
     background: var(--surface);
@@ -587,7 +584,6 @@
         padding: 40px var(--space-3);
     }
 
-    /* Phones get the list only: the map is hidden and the list grows with its content. */
     .map-container {
         display: none;
     }
@@ -598,7 +594,6 @@
 }
 
 
-/* Dark theme: invert the light map tiles (same data-theme switch as variables.css). */
 @media screen {
     :root[data-theme="dark"] .leaflet-tile-pane {
         filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);

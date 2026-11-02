@@ -1,4 +1,3 @@
-// comparable: staff view adds a "Comparar" checkbox under each image (see visor-imagenes.js).
 function crearTarjetaResultado(resultado, comparable = false) {
     const articulo = document.createElement('article');
     articulo.className = 'tarjeta-resultado';

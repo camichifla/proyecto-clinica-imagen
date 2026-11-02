@@ -7,17 +7,14 @@
     const mensajeError = document.querySelector('[data-mensaje-error]');
     const mostrarMensaje = crearMostrarMensaje(mensajeOk, mensajeError);
 
-    // Staff booking ("Nueva cita"), fed by the booking catalog; Hora only lists free hours.
     const nueva = formNueva.elements;
     let reserva = null;
-    let sincronizando = false; // programmatic updates must not re-trigger the change listener
+    let sincronizando = false;
 
     const opcion = (valor, texto) => new Option(texto, valor);
     const notificar = (select) => select.dispatchEvent(new Event('change', { bubbles: true }));
     const botonCrear = formNueva.querySelector('button[type="submit"]');
 
-    // Fields unlock top to bottom: each one waits for the required ones above it
-    // (Profesional is optional, so it doesn't hold back Fecha).
     function desbloquear() {
         const conPaciente = nueva.paciente_id.value !== '';
         const conSede = conPaciente && nueva.sucursal_id.value !== '';
@@ -31,7 +28,6 @@
         botonCrear.disabled = !conFecha || nueva.hora.value === '';
     }
 
-    // Professionals of the branch (and, if given, doing the study).
     function poblarProfesionalesDe(select, sedeId, estudio, vacio) {
         const sede = reserva.sucursales[sedeId];
         const validos = reserva.profesionales.filter((p) => sede && sede.profesionales.includes(p.id)
@@ -88,7 +84,6 @@
             nueva.sucursal_id.appendChild(opcion('', 'Elegí una sede'));
         }
         poblarSucursales(nueva.sucursal_id, sedes);
-        // A receptionist only has their own branch: nothing to choose.
         nueva.sucursal_id.closest('.campo').hidden = sedes.length <= 1;
         nueva.paciente_id.replaceChildren(opcion('', 'Elegí un paciente'), ...catalogo.pacientes.map((p) => opcion(String(p.id), p.etiqueta)));
         nueva.estudio.appendChild(opcion('', 'Elegí un estudio'));

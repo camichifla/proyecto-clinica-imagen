@@ -1,6 +1,4 @@
-// Light/dark theme. Loaded without defer in the <head> to set data-theme before
-// the first paint (no light flash). With no saved choice it follows the system.
-// The user menu's switch (sesion.js) uses window.tema to change it.
+// Se carga sin defer en el <head> para fijar data-theme antes del primer pintado (sin destello claro). Sin elección guardada sigue al sistema.
 (() => {
     const CLAVE = 'tema';
     const raiz = document.documentElement;
@@ -10,7 +8,7 @@
         try {
             return localStorage.getItem(CLAVE);
         } catch {
-            return null; // storage blocked: follow the system
+            return null;
         }
     }
 
@@ -24,8 +22,6 @@
         raiz.dispatchEvent(new CustomEvent('cambio-tema', { detail: tema }));
     }
 
-    // Cross-fades the whole page into the new theme (View Transitions API); browsers without
-    // it, or with reduced motion requested, switch instantly.
     function aplicarGradual(tema) {
         const reducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (document.startViewTransition && !reducido) {
@@ -48,7 +44,6 @@
             try {
                 localStorage.setItem(CLAVE, tema);
             } catch {
-                // without storage the change lasts until reload
             }
             aplicarGradual(tema);
         },

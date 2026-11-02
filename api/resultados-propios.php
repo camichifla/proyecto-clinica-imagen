@@ -11,7 +11,6 @@ $pacienteId = (int) $usuario['ref_id'];
 
 [$resultados, $imagenesPorResultado] = obtener_resultados_de_paciente(db(), $pacienteId);
 
-// Read-only clinical history, scoped to the session's own patient id (never taken from the request).
 try {
     $notas = array_map(static fn (array $n): array => [
         'fecha' => $n['creado_en'],
@@ -19,7 +18,7 @@ try {
         'texto' => $n['texto'],
     ], notas_de_paciente(db(), $pacienteId));
 } catch (RuntimeException $e) {
-    $notas = null; // decryption failed (e.g. APP_KEY missing): results still load
+    $notas = null;
 }
 
 $stmt = db()->prepare(

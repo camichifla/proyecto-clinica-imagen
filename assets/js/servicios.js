@@ -1,4 +1,3 @@
-// Everything is built with textContent. The booking link depends on whether there is a session (sesionPublica).
 (() => {
     const contenedor = document.getElementById('estudios-publicos');
     if (!contenedor) {

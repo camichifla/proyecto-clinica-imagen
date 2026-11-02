@@ -1,4 +1,3 @@
-// Receptionist: create patient accounts only. The form is handled by form-api.js (data-api); this only reports the result.
 (() => {
     const form = document.getElementById('form-paciente');
     if (!form) {

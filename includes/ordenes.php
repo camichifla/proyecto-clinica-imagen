@@ -1,9 +1,6 @@
 <?php
-// Field keys match ORDEN_CAMPOS_ESTUDIO in api/agendar-cita-medico.php.
 require_once __DIR__ . '/estudios.php';
 
-// campo => readable label, in display order. Applies to the checkbox
-// selections (orden_estudio_selecciones) and to the orden_estudio columns.
 const ORDEN_ETIQUETAS = [
     'radio_intra'                 => 'Radiografías intrabucales (piezas)',
     'radio_intra_tipo'            => 'Tipo de radiografía intrabucal',
@@ -42,11 +39,6 @@ const ORDEN_ETIQUETAS = [
     'protector_bucal_color'       => 'Color del protector bucal',
 ];
 
-/**
- * Newest first. $pacienteId must come from the session.
- *
- * @return array<int,array<string,mixed>>
- */
 function ordenes_de_paciente(PDO $db, int $pacienteId): array
 {
     $stmt = $db->prepare(

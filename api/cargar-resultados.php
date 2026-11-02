@@ -6,8 +6,6 @@ require_once __DIR__ . '/../includes/estudios.php';
 require_once __DIR__ . '/../includes/resultados_upload.php';
 require_once __DIR__ . '/../includes/pacientes_profesional.php';
 
-// administrador: any patient. profesional: only their own patients (citas
-// assigned to them), and the result is tied to that professional.
 $usuario = requerir_rol_json(['administrador', 'profesional']);
 $esAdmin = $usuario['rol'] === 'administrador';
 

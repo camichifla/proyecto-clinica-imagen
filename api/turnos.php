@@ -46,7 +46,6 @@ function avisar_paciente(array $cita, string $estado, string $fechaHora, string 
     avisar_medico_cita((int) $cita['id'], $estado, $fechaHora, $notas);
 }
 
-// A registered patient whose account (if any) isn't deactivated.
 function paciente_reservable(int $pacienteId): bool
 {
     $stmt = db()->prepare(
@@ -57,12 +56,10 @@ function paciente_reservable(int $pacienteId): bool
     return (bool) $stmt->fetchColumn();
 }
 
-// Staff books on a patient's behalf (e.g. by phone): any active study, confirmed right away.
 function crear_cita_staff(?int $sucRecep): never
 {
     $pacienteId = filter_input(INPUT_POST, 'paciente_id', FILTER_VALIDATE_INT);
     $valores = [
-        // A receptionist only books in their own branch.
         'sucursal_id'    => $sucRecep !== null ? (string) $sucRecep : (string) ($_POST['sucursal_id'] ?? ''),
         'estudio'        => (string) ($_POST['estudio'] ?? ''),
         'profesional_id' => (string) ($_POST['profesional_id'] ?? ''),
@@ -105,7 +102,6 @@ function crear_cita_staff(?int $sucRecep): never
     exit;
 }
 
-// Booking catalog plus the patients staff can book for; a receptionist only gets their own branch.
 function catalogo_staff(?int $sucRecep): array
 {
     $catalogo = catalogo_reserva(estudios_activos());
@@ -209,7 +205,6 @@ if (isset($_GET['horas'])) {
     exit;
 }
 
-// Live free hours for a branch/day (optionally narrowed to a professional and/or study).
 if (isset($_GET['disponibles'])) {
     $sucursalId    = $sucRecep ?? filter_input(INPUT_GET, 'sucursal_id', FILTER_VALIDATE_INT);
     $fecha         = (string) ($_GET['fecha'] ?? '');
@@ -231,14 +226,12 @@ if (isset($_GET['disponibles'])) {
     exit;
 }
 
-// Booking catalog only (Nueva cita page), without the list.
 if (isset($_GET['catalogo'])) {
     echo json_encode(['reserva' => catalogo_staff($sucRecep), 'rangoReserva' => ['min' => rango_reserva()[0], 'max' => rango_reserva()[1]]], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
 $hoy   = new DateTimeImmutable('today');
-// Absent (first load): today .. +30 days. Sent empty (cleared with ✕): that end of the range stays open.
 $desde = (string) ($_GET['desde'] ?? $hoy->format('Y-m-d'));
 $hasta = (string) ($_GET['hasta'] ?? $hoy->modify('+30 days')->format('Y-m-d'));
 if (($desde !== '' && !fecha_valida($desde)) || ($hasta !== '' && !fecha_valida($hasta)) || ($desde !== '' && $hasta !== '' && $hasta < $desde)) {
@@ -250,7 +243,7 @@ $profesionales = db()->query('SELECT id, nombre, apellido FROM profesionales ORD
 
 $sucursalId = filter_input(INPUT_GET, 'sucursal_id', FILTER_VALIDATE_INT) ?: null;
 if ($sucRecep !== null) {
-    $sucursalId = $sucRecep; // receptionist: always their own branch
+    $sucursalId = $sucRecep;
     $sucursales = array_values(array_filter($sucursales, static fn (array $s): bool => (int) $s['id'] === $sucRecep));
 }
 $profesionalId = filter_input(INPUT_GET, 'profesional_id', FILTER_VALIDATE_INT) ?: null;
@@ -259,10 +252,8 @@ if ($estado !== '' && (!isset(ESTADOS_CITA[$estado]) || $estado === 'pendiente')
     error_json(422, 'Estado inválido.');
 }
 
-// Base for the listing and the totals (the state filter only applies to the listing).
 $codigo = trim((string) ($_GET['codigo'] ?? ''));
 if ($codigo !== '') {
-    // A code that matches no cita (e.g. "CI-0" while still typing) just lists nothing, no error.
     $where  = 'c.id = ?';
     $params = [id_de_codigo($codigo) ?? 0];
 } else {
@@ -277,7 +268,6 @@ if ($codigo !== '') {
         $params[] = (new DateTimeImmutable($hasta))->modify('+1 day')->format('Y-m-d') . ' 00:00:00';
     }
 }
-// Pending citas are handled in Solicitudes de cita, never listed or counted here.
 $where .= " AND c.estado <> 'pendiente'";
 if ($sucursalId !== null) {
     $where   .= ' AND c.sucursal_id = ?';
@@ -287,7 +277,7 @@ if ($profesionalId !== null) {
     $where   .= ' AND c.profesional_id = ?';
     $params[] = $profesionalId;
 }
-// Patient: every word must match the registered patient's name/surname/CI, or the pending booking's name/surname.
+// Cada palabra debe coincidir con nombre, apellido o CI del paciente registrado, o con los datos de la reserva pendiente.
 $palabras = preg_split('/\s+/', trim((string) ($_GET['paciente'] ?? '')), -1, PREG_SPLIT_NO_EMPTY);
 foreach (array_slice($palabras, 0, 5) as $palabra) {
     $where .= ' AND (c.paciente_id IN (SELECT id FROM pacientes WHERE nombre LIKE ? OR apellido LIKE ? OR ci LIKE ?)
@@ -311,7 +301,7 @@ if ($estado !== '') {
     $whereLista   .= ' AND c.estado = ?';
     $paramsLista[] = $estado;
 }
-// ponytail: row cap without pagination; add pagination if a range exceeds MAX_FILAS_TURNOS
+// Tope de filas sin paginación; paginar si un rango supera MAX_FILAS_TURNOS.
 $stmt = db()->prepare(SQL_CITAS_CON_ETIQUETAS . " WHERE {$whereLista} ORDER BY c.fecha_hora_solicitada ASC LIMIT " . (MAX_FILAS_TURNOS + 1));
 $stmt->execute($paramsLista);
 $filas    = $stmt->fetchAll();

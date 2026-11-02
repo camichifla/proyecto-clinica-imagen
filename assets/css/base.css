@@ -3,14 +3,11 @@ html {
     scroll-behavior: smooth !important;
 }
 
-/* Author rules that set `display` beat the browser's [hidden] { display: none } (same specificity), so toggling
-   `hidden` silently did nothing. This makes `hidden` win everywhere. */
+/* Una regla con display propio vence al [hidden] del navegador (misma especificidad); esto hace que hidden gane siempre. */
 [hidden] {
     display: none !important;
 }
 
-/* Text boxes keep their width and grow taller with their text instead of having a resize handle.
-   The rows attribute sets the minimum height; sesion.js grows them by hand where field-sizing is unsupported. */
 textarea {
     --filas: 3;
     box-sizing: border-box;
@@ -32,7 +29,6 @@ textarea[rows="6"] {
     --filas: 6;
 }
 
-/* Light/dark switch cross-fade (tema.js wraps the change in a view transition). */
 ::view-transition-old(root),
 ::view-transition-new(root) {
     animation-duration: 0.25s;
@@ -41,7 +37,6 @@ textarea[rows="6"] {
 
 body{
     background: var(--background);
-    /* Column layout: main grows so the footer sits at the bottom on short pages. */
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -76,8 +71,6 @@ header {
     margin-left: auto;
 }
 
-/* User menu button: hamburger of three rounded bars that turns into an X while the menu is open.
-   Top/bottom bars are the avatar's pseudo-elements, the middle one is the summary's ::after. */
 .user .avatar {
     display: block;
     width: 2.75rem;
@@ -123,7 +116,6 @@ header {
     opacity: 0;
 }
 
-/* The menu panel slides in from the right when <details> opens. */
 .menu-usuario[open] .menu-usuario-panel {
     animation: menu-usuario-entrada 0.25s ease-out;
 }
@@ -134,7 +126,7 @@ header {
     }
 }
 
-/* Closing (sesion.js adds .cerrando until the animation ends): the opening in reverse. */
+/* sesion.js agrega .cerrando hasta que termina la animación: es la apertura en sentido inverso. */
 .menu-usuario.cerrando .menu-usuario-panel {
     animation: menu-usuario-salida 0.25s ease-in forwards;
 }
@@ -199,22 +191,16 @@ header {
     transform: translateY(0);
 }
 
-/* A single focus indicator for every control; text fields replace it with their border (below). */
 :focus-visible {
     outline: 3px solid var(--dark-neutral);
     outline-offset: 2px;
 }
 
-/* Box hover, same as the agenda days: the border takes the day-number color (--dark-neutral). Not while
-   focused/open (light blue) or disabled. */
 :is(textarea, select, input:not([type="checkbox"], [type="radio"], [type="submit"], [type="button"], [type="file"]),
     .selector-combo-boton, .selector-fecha-boton):hover:not(:disabled, :focus, [aria-expanded="true"]) {
     border-color: var(--dark-neutral);
 }
 
-/* Selected box, same as the selected agenda day: thicker border in the day-number color (box-shadow, so nothing
-   shifts) and a soft gray fill. Fields while focused, dropdowns and date pickers while open or keyboard-focused
-   (:focus-visible), so the box deselects after picking an option with the mouse. */
 textarea:focus,
 select:focus,
 input:not([type="checkbox"], [type="radio"], [type="submit"], [type="button"], [type="file"]):focus,
@@ -228,7 +214,6 @@ input:not([type="checkbox"], [type="radio"], [type="submit"], [type="button"], [
     background-color: var(--light-neutral);
 }
 
-/* A box with an error stays red while selected too. */
 :is(input, textarea, select, button)[aria-invalid="true"]:is(:focus, [aria-expanded="true"]) {
     border-color: var(--color-peligro);
     box-shadow: 0 0 0 1px var(--color-peligro);
@@ -247,7 +232,7 @@ footer p {
     margin: 0;
 }
 
-/* Honeypot field of the contact form: off-screen, not display:none. */
+/* Honeypot del formulario de contacto: fuera de pantalla y no con display:none. */
 .campo-trampa {
     position: absolute;
     left: -10000px;
@@ -303,7 +288,6 @@ footer {
     margin-top: var(--space-7);
 }
 
-/* Row of form actions side by side (e.g. Guardar / Cancelar). */
 .acciones-form {
     display: flex;
     flex-wrap: wrap;
@@ -333,8 +317,6 @@ footer {
     transform: translateY(-1px);
 }
 
-/* Every "Cancelar" is red (and "Confirmar" green, .btn-exito): solid, plus a soft variant for the final confirmation step (also used by a solid
-   toggle while its form is open). Same pill shape as .btn-secundario so they line up next to it. */
 .btn-peligro,
 .btn-peligro-suave,
 .btn-exito {
@@ -436,8 +418,6 @@ footer {
     }
 }
 
-/* A control must never be wider than its column (360px): an <input>'s intrinsic
-   width used to push the form off the screen. */
 .campo,
 .buscador-combo {
     min-width: 0;
@@ -453,10 +433,6 @@ footer {
     color: var(--dark-neutral);
 }
 
-/* Floating labels: in a .campo whose label is followed by its box (text field, textarea, dropdown or date picker),
-   the label sits inside the empty box and, once the box is focused, open or filled, shrinks into its top-left
-   corner with a quick animation. Text fields need a placeholder for :placeholder-shown (sesion.js adds an
-   invisible one); real placeholders only show while focused. */
 .campo:has(> label + :is(input:not([type="checkbox"], [type="radio"], [type="file"], [type="hidden"]), textarea,
     .buscador-combo, .selector-fecha)) {
     position: relative;
@@ -491,7 +467,6 @@ footer {
     font-weight: var(--font-weight-semibold);
 }
 
-/* Room for the small label inside the box. */
 .campo:has(> label + :is(input, textarea, .buscador-combo, .selector-fecha)) :is(input:not([type="checkbox"], [type="radio"], [type="file"], [type="hidden"]), textarea,
     .selector-combo-boton, .selector-fecha-boton) {
     padding-top: 1.45rem;
@@ -499,7 +474,6 @@ footer {
     line-height: 1.5rem;
 }
 
-/* While the label is inside, the box's own hint text (placeholder, "Elegí ...") stays hidden. */
 .campo:has(> label + :is(input, textarea, .buscador-combo)):not(:focus-within) :is(input, textarea)::placeholder {
     color: transparent;
 }
@@ -509,7 +483,6 @@ footer {
     color: transparent;
 }
 
-/* A locked box fades its label too (only the box itself: the calendar's month arrows also get disabled). */
 .campo:has(> label + :is(.buscador-combo, .selector-fecha)):has(:is(.selector-combo-boton, .selector-combo-buscar, .selector-fecha-boton):disabled) > label {
     opacity: 0.6;
 }
@@ -520,8 +493,6 @@ footer {
     }
 }
 
-/* Clear/reset button (sesion.js): ✕ empties a text field or date, ↺ puts a dropdown back on its default.
-   sesion.js places it right after the box's text; it only shows when there is something to clear or reset. */
 .buscador-combo,
 .selector-fecha {
     position: relative;
@@ -548,14 +519,13 @@ footer {
     transition: background var(--transition-fast), color var(--transition-fast);
 }
 
-/* File box while files are dragged over it (sesion.js). */
+/* Clase agregada por sesion.js mientras se arrastran archivos sobre el campo. */
 input[type="file"].arrastrando {
     border-color: var(--dark-neutral);
     border-style: solid;
     background-color: var(--light-neutral);
 }
 
-/* Eye toggle on password fields (campos.js): sits inside the right edge, aligned with the value line. */
 .campo-ojo {
     position: absolute;
     top: calc(1.45rem + 0.75rem - 0.925rem);
@@ -582,7 +552,6 @@ input[type="file"].arrastrando {
     padding-right: 2.6rem;
 }
 
-/* Chosen files under a file field (sesion.js), each with its own ✕. */
 .archivos-lista {
     display: grid;
     gap: var(--space-1);
@@ -628,7 +597,7 @@ input[type="file"].arrastrando {
     color: var(--dark-neutral);
 }
 
-/* !important: stays visible while spinning, although the reset already hid it. */
+/* !important: sigue visible mientras gira, aunque el reinicio ya lo ocultó. */
 .campo-limpiar.girando {
     display: grid !important;
     animation: campo-limpiar-girar 0.2s ease-in-out;
@@ -645,13 +614,11 @@ input[type="file"].arrastrando {
     color: var(--dark-neutral);
 }
 
-/* Left of the chevron on dropdowns and date pickers. */
 .buscador-combo:has(> .selector-combo-boton) > .campo-limpiar,
 .selector-fecha > .campo-limpiar {
     right: 2.3rem;
 }
 
-/* Shown only with a value, never on locked boxes. */
 .campo:has(> input:not([type="hidden"], [hidden], :placeholder-shown)) > .campo-limpiar,
 .buscador-combo:has(> input:not(:placeholder-shown)) > .campo-limpiar,
 .buscador-combo:has(> .selector-combo-boton:not(.selector-combo-en-default)) > .campo-limpiar,
@@ -663,7 +630,6 @@ input[type="file"].arrastrando {
     display: none;
 }
 
-/* Room so the text never runs under the button (only while it shows). */
 .campo:has(> .campo-limpiar) > input:not(:placeholder-shown),
 .buscador-combo:has(> .campo-limpiar) > input:not(:placeholder-shown) {
     padding-right: 2.6rem;
@@ -674,7 +640,6 @@ input[type="file"].arrastrando {
     padding-right: 4.2rem;
 }
 
-/* Box texts stay on one line. */
 .selector-combo-boton,
 .selector-fecha-texto {
     overflow: hidden;
@@ -776,7 +741,6 @@ select.selector-combo {
     font-size: var(--font-size-sm);
 }
 
-/* Requirement checklist (campos.js) floating under its field while focused; met items turn green with a ✓. */
 .campo:has(> .requisitos) {
     position: relative;
 }
@@ -798,7 +762,7 @@ select.selector-combo {
     box-shadow: 0 4px 12px rgba(var(--overlay-rgb), 0.12);
     color: var(--text-secondary);
     font-size: var(--font-size-sm);
-    pointer-events: none; /* clicks reach what it covers (e.g. the submit button) */
+    pointer-events: none;
 }
 
 .campo:not(:focus-within) > .requisitos {
@@ -891,7 +855,7 @@ select.selector-combo {
     content: "";
 }
 
-/* Open user menu: full-height panel on the right, under the header (--alto-header is set by sesion.js). */
+/* --alto-header lo define sesion.js. */
 .menu-usuario-panel {
     position: fixed;
     top: var(--alto-header, 0);
@@ -905,13 +869,11 @@ select.selector-combo {
     padding: var(--space-6);
     background: var(--surface);
     box-shadow: -8px 0 24px rgba(var(--overlay-rgb), 0.18);
-    /* Keep the shadow on the page side only; its blur used to spill onto the header. */
     clip-path: inset(0 0 0 -40px);
     overflow-y: auto;
     overscroll-behavior: contain;
 }
 
-/* Dims everything below the header while the menu is open; a click on it closes the menu. */
 .menu-fondo {
     position: fixed;
     top: var(--alto-header, 0);
@@ -933,7 +895,6 @@ body.menu-abierto {
     overflow: hidden;
 }
 
-/* Panel header: account icon next to the name and role. */
 .menu-usuario-cabecera {
     display: flex;
     align-items: center;
@@ -956,7 +917,6 @@ body.menu-abierto {
     font-size: var(--font-size-sm);
 }
 
-/* Generic user icon (no photo) that opens the account page. */
 .menu-cuenta {
     display: grid;
     place-items: center;
@@ -1011,7 +971,6 @@ body.menu-abierto {
     background: var(--light-neutral);
 }
 
-/* Current page: solid light-blue pill. */
 .menu-usuario-lista a[aria-current="page"],
 .menu-usuario-lista a[aria-current="page"]:hover {
     background: var(--color-acento);
@@ -1019,7 +978,6 @@ body.menu-abierto {
     font-weight: var(--font-weight-semibold);
 }
 
-/* Collapsible section: summary with a chevron that turns when open, links indented. */
 .menu-grupo summary {
     display: flex;
     align-items: center;
@@ -1049,7 +1007,6 @@ body.menu-abierto {
     border-top: 1px solid var(--border-subtle);
 }
 
-/* Theme switch: native checkbox (role="switch") drawn as a pill. */
 .menu-tema {
     display: flex;
     align-items: center;
@@ -1109,7 +1066,6 @@ body.menu-abierto {
     border-radius: var(--radius-sm);
 }
 
-/* Details that open inside a box under a divider: agenda day, search results. */
 .detalle-expandido {
     margin-top: var(--space-5);
     padding-top: var(--space-4);
@@ -1183,7 +1139,6 @@ body.menu-abierto {
     margin-bottom: var(--space-3);
 }
 
-/* Same summary + chevron as the menu sections. */
 .mensaje-contacto summary {
     display: inline-flex;
     align-items: center;
@@ -1251,14 +1206,11 @@ body.menu-abierto {
     letter-spacing: 0.03em;
 }
 
-/* Buttons inside tables are a size smaller than form buttons. */
 .tabla-datos td :is(.btn-primario, .btn-secundario, .btn-peligro, .btn-peligro-suave, .btn-exito) {
     padding: 0.35rem 0.9rem;
     font-size: var(--font-size-sm);
 }
 
-/* Action cells with two or more options stack them vertically, all the same (short) width; in card mode they
-   stretch to the card width instead, easier to tap. */
 .tabla-datos td[data-label="Acciones"]:has(> :nth-child(2)) > :is(button, a),
 .tabla-scroll:not(.tabla-tarjetas) :is(.botones-solicitud, .acciones-turno) > button {
     display: block;
@@ -1271,7 +1223,6 @@ body.menu-abierto {
     width: 100%;
 }
 
-/* The final "Confirmar ..." button of an action form is only as wide as its text. */
 .tabla-scroll:not(.tabla-tarjetas) :is(.form-rechazar-cita, .accion-turno) button[type="submit"] {
     align-self: flex-start;
 }
@@ -1280,8 +1231,7 @@ body.menu-abierto {
     margin-top: var(--space-2);
 }
 
-/* Card layout, applied by form-api.js (.tabla-tarjetas) when a table doesn't fit its container. Sin esto
-   <table>/<tbody> siguen en layout de tabla y la celda toma el ancho del contenido. */
+/* Diseño de tarjetas aplicado por form-api.js (.tabla-tarjetas) cuando la tabla no cabe en su contenedor. */
 .tabla-scroll.tabla-tarjetas {
     .tabla-datos,
     .tabla-datos tbody {
@@ -1313,11 +1263,9 @@ body.menu-abierto {
         font-weight: var(--font-weight-semibold);
         color: var(--text-secondary);
         margin-right: var(--space-3);
-        /* The label inherited `anywhere` and was split mid-word ("Direc / cion"). */
         overflow-wrap: normal;
     }
 
-    /* Action cells (buttons, cancel form) stack full width instead of squeezing side by side. */
     .tabla-datos td:has(form, button) {
         flex-direction: column;
         align-items: stretch;
@@ -1329,7 +1277,6 @@ body.menu-abierto {
     }
 }
 
-/* Phones: compact header that scrolls away instead of staying stuck on top. */
 @media (width <= 640px) {
     header {
         position: static;
@@ -1354,7 +1301,6 @@ body.menu-abierto {
     }
 }
 
-/* Locked until the previous step is chosen: faded and without the arrow. */
 .campo select:disabled,
 .selector-combo-boton:disabled,
 .selector-combo-buscar:disabled,
@@ -1405,7 +1351,7 @@ body.menu-abierto {
 .paginacion-info {
     display: grid;
     place-items: center;
-    height: 2.4rem; /* same box height as the arrows, so the number sits on their midline */
+    height: 2.4rem;
     color: var(--text-secondary);
     font-size: var(--font-size-sm);
     font-variant-numeric: tabular-nums;
@@ -1469,7 +1415,6 @@ body.menu-abierto {
     color: var(--color-peligro);
 }
 
-/* Off-page rows are hidden on screen only (important beats card-mode rules); printing shows every row. */
 @media screen {
     .tabla-datos tbody tr.pagina-oculta {
         display: none !important;

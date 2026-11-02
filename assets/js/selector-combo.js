@@ -1,16 +1,10 @@
-// Own button-triggered listbox over a real <select class="selector-combo">, which stays hidden as the source of
-// truth (the cascade scripts manipulate it as before; this one only mirrors it). It resyncs on every
-// 'change' -its own or fired by the cascade- and with a MutationObserver for full rewrites
-// (hora/cita_id, rebuilt with innerHTML). <select class="selector-combo"> elements the scripts add later
-// (schedule rows, reschedule in turnos) are picked up automatically. The list floats in a fixed position next to the button, so
-// no scrolling table clips it.
 (() => {
     if (window.selectorComboActivo) {
-        return; // the script may be loaded both statically and by cargarScripts()
+        return;
     }
     window.selectorComboActivo = true;
 
-    // Fixed position under (or above, if there is no room) the anchor.
+    // Posición fija debajo del ancla (o encima si no hay lugar).
     function ubicarLista(lista, ancla) {
         const r = ancla.getBoundingClientRect();
         const alto = lista.offsetHeight;
@@ -26,9 +20,6 @@
     const resincronizarTodos = () => widgets.forEach((w) => w.actualizar());
     let contador = 0;
 
-    // Searchable variant (<select class="selector-combo" data-buscable>, for people: profesionales, cuentas): a text
-    // field instead of the button; focusing lists every visible option, typing narrows it to the matching ones.
-    // The <select> stays the source of truth, so cascades that hide options keep working. Empty text = the '' option.
     function mejorarBuscable(select) {
         const wrapper = document.createElement('div');
         wrapper.className = 'buscador-combo';
@@ -122,7 +113,7 @@
                 li.addEventListener('mousedown', (evento) => {
                     evento.preventDefault();
                     elegir(opcion);
-                    input.blur(); // picked with the mouse: the box deselects (keyboard picks keep focus)
+                    input.blur();
                 });
                 lista.appendChild(li);
             });
@@ -140,7 +131,6 @@
             }
             mostrar();
         });
-        // Opening shows the whole list, like the plain combos; typing narrows it.
         input.addEventListener('focus', mostrar);
         input.addEventListener('click', () => {
             if (lista.hidden) {
@@ -168,7 +158,6 @@
             }
         });
 
-        // Leaving with half-typed text goes back to the current choice.
         input.addEventListener('blur', () => {
             cerrar();
             input.value = textoElegido();
@@ -224,7 +213,6 @@
         lista.hidden = true;
         wrapper.appendChild(lista);
 
-        // The native <select> is hidden, so the button and the list need the label's (or aria-label's) name.
         const etiqueta = select.id ? document.querySelector('label[for="' + select.id + '"]') : null;
         if (etiqueta) {
             etiqueta.id = etiqueta.id || select.id + '_etiqueta';
@@ -260,7 +248,6 @@
             const elegida = select.options[select.selectedIndex];
             boton.textContent = elegida ? elegida.textContent.trim() : '';
             boton.disabled = select.disabled;
-            // Defaults like "Todos/Todas" or "Cualquier ..." are shown as a real choice; other '' options ("Elegí ...") are hints.
             const enDefault = select.value === '';
             boton.classList.toggle('selector-combo-en-default', enDefault);
             boton.classList.toggle('selector-combo-placeholder', enDefault && !/^(tod[ao]s|cualquier)/i.test(boton.textContent));

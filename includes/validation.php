@@ -1,7 +1,4 @@
 <?php
-// includes/validation.php — single source of truth for field rules AND
-// their UI hints, so a hint can never drift from the rule it describes.
-// Client-side `pattern` is a convenience only; this file is authoritative.
 
 const REGLAS_PACIENTE = [
     'nombre'     => ['label' => 'Nombre',     'pattern' => '/^\p{L}[\p{L}\s\'-]{1,59}\z/u',              'hint' => 'Solo letras y espacios, 2 a 60 caracteres.'],
@@ -13,7 +10,6 @@ const REGLAS_PACIENTE = [
     'contrasena' => ['label' => 'Contraseña', 'pattern' => '/^(?=.*\p{L})(?=.*\d)(?=.*[^\p{L}\d\s]).{8,72}\z/u', 'hint' => 'Mínimo 8 caracteres, con al menos una letra, un número y un carácter especial.', 'maxbytes' => 72],
 ];
 
-// Reuses REGLAS_PACIENTE's nombre/apellido/ci/email/contrasena rules for staff accounts (manejar-usuarios.php).
 const REGLAS_STAFF = [
     'nombre'     => REGLAS_PACIENTE['nombre'],
     'apellido'   => REGLAS_PACIENTE['apellido'],
@@ -22,30 +18,22 @@ const REGLAS_STAFF = [
     'contrasena' => REGLAS_PACIENTE['contrasena'],
 ];
 
-/** Free-text POST field as a trimmed string; arrays/objects count as empty (so required checks reject them). */
 function texto_post(string $campo): string
 {
     return isset($_POST[$campo]) && is_scalar($_POST[$campo]) ? trim((string) $_POST[$campo]) : '';
 }
 
-/** Defense in depth for free text that is rendered with textContent anyway: no angle brackets. */
+// Defensa en profundidad: el texto libre ya se muestra con textContent, además se rechazan los signos < y >.
 function contiene_html(string $valor): bool
 {
     return str_contains($valor, '<') || str_contains($valor, '>');
 }
 
-/**
- * Returns field => error message for every failed field; empty array = all passed.
- *
- * @param array<string,array{label:string,pattern?:string,filter?:int,hint:string}> $reglas
- * @param array<string,mixed> $datos
- * @return array<string,string>
- */
 function validar(array $reglas, array $datos): array
 {
     $errores = [];
     foreach ($reglas as $campo => $regla) {
-        // Arrays/objects (e.g. campo[]=x) are never valid input: casting them would yield "Array" and pass loose patterns.
+        // Arrays u objetos (campo[]=x) nunca son válidos: al convertirlos a cadena darían "Array" y pasarían patrones laxos.
         if (isset($datos[$campo]) && !is_scalar($datos[$campo])) {
             $errores[$campo] = 'Formato de ' . $regla['label'] . ' inválido. ' . $regla['hint'];
             continue;

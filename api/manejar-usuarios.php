@@ -16,7 +16,6 @@ const ROLES_STAFF = [
     'recepcionista' => 'Recepcionista',
 ];
 
-// Roles "Crear cuenta" offers: the staff ones plus paciente.
 const ROLES_CREABLES = ROLES_STAFF + ['paciente' => 'Paciente'];
 
 function columna_de(string $sql, int $id): array
@@ -65,7 +64,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $estabaActiva = (int) $cuentaObjetivo['activo'] === 1;
 
-        // Locking read inside the transaction so two simultaneous toggles cannot leave zero active admins.
         $db->beginTransaction();
         if ($estabaActiva && $cuentaObjetivo['rol'] === 'administrador') {
             $activos = (int) $db->query("SELECT COUNT(*) FROM cuentas WHERE rol = 'administrador' AND activo = 1 FOR UPDATE")->fetchColumn();
@@ -161,7 +159,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(['ok' => false, 'error' => 'Cuenta no encontrada.'], JSON_UNESCAPED_UNICODE);
             exit;
         }
-        // Patient accounts are excluded in both directions.
         if (!isset(ROLES_STAFF[$cuenta['rol']])) {
             echo json_encode(['ok' => false, 'error' => 'Las cuentas de pacientes no cambian de rol.'], JSON_UNESCAPED_UNICODE);
             exit;
@@ -177,7 +174,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($nuevoRol === $cuenta['rol']) {
             $errores['rol'] = 'La cuenta ya tiene ese rol.';
         }
-        // The only thing the professionals table requires that the others don't: at least one specialization.
         if ($nuevoRol === 'profesional') {
             if (!$especializaciones) {
                 $errores['especializacion'] = 'Elegí al menos una especialización.';
@@ -196,7 +192,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $tablaVieja = TABLA_POR_ROL[$rolViejo];
         $tablaNueva = TABLA_POR_ROL[$nuevoRol];
 
-        // Without a professional profile nobody would attend those citas: reassign or cancel them first.
         if ($rolViejo === 'profesional') {
             $stmt = $db->prepare('SELECT COUNT(*) FROM citas WHERE profesional_id = ? AND slot_activo = 1 AND fecha_hora_solicitada > NOW()');
             $stmt->execute([$refViejo]);
@@ -211,7 +206,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $db->beginTransaction();
 
-            // Only one active administrator: read with a lock so two simultaneous changes can't leave zero.
+            // Debe quedar al menos un administrador activo: se lee con bloqueo para que dos cambios simultáneos no dejen cero.
             if ($rolViejo === 'administrador' && (int) $cuenta['activo'] === 1) {
                 $activos = (int) $db->query("SELECT COUNT(*) FROM cuentas WHERE rol = 'administrador' AND activo = 1 FOR UPDATE")->fetchColumn();
                 if ($activos <= 1) {
@@ -240,8 +235,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $db->prepare('UPDATE cuentas SET rol = ?, ref_id = ? WHERE id = ?')->execute([$nuevoRol, $refNuevo, $cuenta['id']]);
 
-            // The previous profile is deleted unless it has citas (history). The medico_paciente assignments
-            // are deleted in cascade: without a medico account behind them they would grant access to nobody.
             $referenciado = false;
             if ($rolViejo === 'profesional') {
                 $stmt = $db->prepare('SELECT 1 FROM citas WHERE profesional_id = ? LIMIT 1');
@@ -249,7 +242,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $referenciado = (bool) $stmt->fetchColumn();
             }
             if ($referenciado) {
-                // Kept as history; a professional without branches is no longer offered for booking.
                 if ($rolViejo === 'profesional') {
                     $db->prepare('DELETE FROM profesional_sucursal WHERE profesional_id = ?')->execute([$refViejo]);
                 }
@@ -286,7 +278,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $rol   = $cuenta['rol'];
         $refId = (int) $cuenta['ref_id'];
 
-        // The same rules as creating the account, minus the password (not editable here).
         $reglas = $rol === 'paciente' ? REGLAS_PACIENTE : REGLAS_STAFF;
         unset($reglas['contrasena']);
         $errores = validar($reglas, $_POST);
@@ -312,7 +303,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errores['sucursales'] = 'Elegí sedes válidas.';
             }
 
-            // Active studies; inactive ones the professional already had may be kept but not added.
             $enviados   = $_POST['especializacion'] ?? [];
             $claves     = is_array($enviados) ? array_values(array_unique(array_map('strval', $enviados))) : [];
             $permitidos = array_merge(
@@ -433,7 +423,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errores['rol'] = 'Elegí un rol válido.';
         }
 
-        // Same rules as the public sign-up for a paciente (adds dirección and teléfono); staff need nombre, apellido, CI, email, password.
         $errores = array_merge($errores, validar($valores['rol'] === 'paciente' ? REGLAS_PACIENTE : REGLAS_STAFF, $_POST));
 
         if ($valores['rol'] === 'profesional') {

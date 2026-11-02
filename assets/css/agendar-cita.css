@@ -7,9 +7,7 @@
     margin-top: var(--space-7);
 }
 
-/* Grid items default to min-width:auto, and base.css gives .seccion-auth/.seccion-panel "margin: Xrem auto", which sizes
-   them fit-content and centers them (overflow on mobile). Resetting the margin makes them fill the column;
-   .layout-agendar-citas sets the top space once for both. */
+/* Los hijos de grid tienen min-width:auto y base.css les pone margin auto: se ajustan al contenido y desbordan en móvil. Al anular el margen llenan la columna. */
 .layout-agendar-citas > section {
     min-width: 0;
     max-width: 100%;
@@ -64,8 +62,6 @@
     transition: border-color var(--transition-fast);
 }
 
-/* One dropdown arrow everywhere (dropdowns, date pickers, menu sections): a chevron pointing up that turns
-   down, animated, while the options are open. */
 .selector-combo-boton {
     position: relative;
 }
@@ -85,7 +81,6 @@
     transition: transform var(--transition-fast);
 }
 
-/* The arrow is pinned to the right edge (the clear button sits to its left). */
 .selector-fecha-boton {
     position: relative;
 }
@@ -141,7 +136,7 @@
     background: var(--light-neutral);
 }
 
-/* Fixed and placed by selector-fecha.js next to its button, so table scroll areas never clip it. */
+/* Posición fija, ubicada por selector-fecha.js junto a su botón, para que las áreas con scroll de las tablas no lo recorten. */
 .calendario {
     position: fixed;
     z-index: 70;
@@ -221,13 +216,11 @@
     cursor: not-allowed;
 }
 
-/* Today: light-blue border and tint, same as the agenda. */
 .calendario-dia-hoy {
     border-color: var(--color-acento);
     background: rgba(var(--accent-rgb), 0.08);
 }
 
-/* Chosen day: same as the selected agenda day. */
 .calendario-dia-seleccionado,
 .calendario-dia-seleccionado:hover:not(:disabled) {
     border-color: var(--dark-neutral);

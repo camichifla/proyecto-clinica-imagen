@@ -227,7 +227,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $pacientesConectados = pacientes_de_medico($usuario['cuenta_id'], $usuario['ref_id']);
 
-// Citas this medico booked (an orden of theirs points at the cita): upcoming plus the last 30 days.
 $stmt = db()->prepare(
     SQL_CITAS_CON_ETIQUETAS . "
      WHERE EXISTS (SELECT 1 FROM ordenes o WHERE o.cita_id = c.id AND o.creado_por = ?)

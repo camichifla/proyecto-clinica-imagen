@@ -50,7 +50,6 @@
         btnConfirmar.textContent = 'Confirmar';
         btnConfirmar.addEventListener('click', () => procesar(cita, 'confirmar', tr));
 
-        // "Rechazar" only reveals the reason box; the request is sent by "Confirmar rechazo".
         const btnRechazar = document.createElement('button');
         btnRechazar.type = 'button';
         btnRechazar.className = 'btn-peligro';

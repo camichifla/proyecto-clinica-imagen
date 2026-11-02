@@ -7,7 +7,7 @@ require_once __DIR__ . '/../includes/mailer.php';
 require_once __DIR__ . '/../includes/pacientes.php';
 
 $usuario = requerir_rol_json(['administrador', 'recepcionista']);
-// A receptionist may only create patient accounts (same fields as the public sign-up): no listing, no edits.
+// La recepcionista solo puede crear cuentas de paciente: no lista ni edita.
 $soloAlta = $usuario['rol'] === 'recepcionista';
 
 const MAX_FILAS_PACIENTES = 50;
@@ -44,7 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         respuesta_pacientes(400, ['ok' => false, 'error' => 'Acción inválida.']);
     }
 
-    // Baja/alta of the patient's login account; the patient record and history are kept.
     if ($accion === 'toggle_activo') {
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
         $stmt = db()->prepare("SELECT id, activo FROM cuentas WHERE rol = 'paciente' AND ref_id = ?");
@@ -60,9 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Deletes only the login account, and only once it was deactivated ("dada de baja"). The patient record, citas,
-    // results and clinical notes stay; the email is kept so signing up again with the same CI and email brings the
-    // patient back (register.php). Nothing else references a patient's account except its tokens, which cascade.
+    // Borra solo la cuenta de acceso y únicamente si estaba dada de baja; paciente, citas, resultados y notas se conservan.
     if ($accion === 'borrar_cuenta') {
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
         $stmt = db()->prepare("SELECT id, email, activo FROM cuentas WHERE rol = 'paciente' AND ref_id = ?");
@@ -128,7 +125,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Walk-in registration: verified account with an unusable password; the patient picks theirs via the reset link.
     try {
         $db->beginTransaction();
 
@@ -158,7 +154,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     registrar_evento('paciente_alta', 'paciente=' . $pacienteId . ' cuenta=' . $cuentaId);
 
-    // The receptionist set the password at the desk; the admin flow lets the patient pick it from an emailed link.
     if (!$soloAlta) {
         $tokenRaw = emitir_token_reset($db, $cuentaId, 24);
         enviar_bienvenida_paciente($valores['email'], APP_URL . '/reset-confirm.html?token=' . $tokenRaw);

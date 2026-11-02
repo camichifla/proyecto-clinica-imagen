@@ -1,14 +1,5 @@
-// Booking cascade (study -> branch -> professional -> date -> time), shared by patient and doctor.
-// Client filtering is UX only: the server re-validates every constraint.
-//
-// The including HTML must already have declared, before this
-// <script src>:
-//   var SUCURSALES = {...};   // see $datosSucursales in each .php
-//   var HORA_ELEGIDA = '...'; // previously chosen time, to re-render after an error
-// and the following ids in the DOM: #sucursal, #estudio, #profesional_id
-// (with data-especializaciones on each <option>), #hora and #fecha (an
-// <input type="date"> with min/max, turned into a calendar by selector-fecha.js;
-// here it is only told which days the branch is open).
+// Cascada de reserva (estudio -> sede -> profesional -> fecha -> hora), compartida por paciente y médico.
+// El filtrado en el cliente es solo UX: el servidor revalida cada restricción.
 (function () {
     var sucursalSelect    = document.getElementById('sucursal');
     var estudioSelect     = document.getElementById('estudio');
@@ -24,10 +15,7 @@
         return SUCURSALES[sucursalSelect.value] || null;
     }
 
-    // A branch "serves" a study if it has it enabled (or doesn't restrict
-    // studies) AND has at least one assigned professional who performs that
-    // study - covers the case of an allowed branch+study with nobody
-    // actually doing it there.
+    // Una sede cubre un estudio si lo tiene habilitado (o no restringe estudios) Y tiene al menos un profesional asignado que lo realice.
     function sedeCubreEstudio(s, estudio) {
         if (!s) {
             return false;
@@ -58,8 +46,6 @@
         var seleccionActual = sucursalSelect.options[sucursalSelect.selectedIndex];
         if (seleccionActual && seleccionActual.hidden) {
             sucursalSelect.value = '';
-            // Fires the branch 'change' so the professional is re-filtered
-            // and date/time are reset if needed.
             sucursalSelect.dispatchEvent(new Event('change'));
         }
     }
@@ -69,7 +55,6 @@
         var estudio = estudioSelect.value;
         var seleccionValida = false;
         opcionesProfesional.forEach(function (opcion) {
-            // The placeholder ('') and "Cualquier profesional" are always offered.
             if (opcion.value === '' || opcion.value === 'cualquiera') {
                 opcion.hidden = false;
                 if (opcion.value === profesionalSelect.value) {
@@ -99,9 +84,6 @@
         var m = minutos % 60;
         return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
     }
-    // turnos = [['08:30','12:30'], ['15:00','19:00']]. Shifts are
-    // generated independently, so the gap between split shifts never
-    // appears as an option.
     function generarHoras(turnos) {
         var horas = [];
         turnos.forEach(function (t) {
@@ -153,9 +135,7 @@
         quitarOcupadas(fechaSeleccionada);
     }
 
-    // Removes the already taken times. If the fetch fails they are all kept (the
-    // server constraint still protects); the time being edited
-    // (HORA_ELEGIDA) is never removed. The counter discards stale responses.
+    // Si la consulta falla se conservan todas las horas (el servidor igual protege); la hora en edición nunca se quita. El contador descarta respuestas viejas.
     var pedidoHoras = 0;
     function quitarOcupadas(fecha) {
         var pedido = ++pedidoHoras;
@@ -188,7 +168,7 @@
         return fechaInput.value ? parseISO(fechaInput.value) : null;
     }
 
-    // The shared calendar (selector-fecha.js) only offers days the chosen sede is open.
+    // El calendario compartido (selector-fecha.js) solo ofrece los días en que la sede abre.
     fechaInput.diaHabilitado = function (fecha) {
         return diaAbierto(sucursalActual(), fecha);
     };
@@ -198,9 +178,6 @@
         }
     }
 
-    // Steps go top to bottom: each control stays locked (faded, no arrow) until the previous one is chosen.
-    // Study -> Branch -> Professional (optional) and Date -> Time (aplicarHoras locks it without a date).
-    // A locked step is also emptied, so clearing an earlier choice resets everything below it.
     function aplicarBloqueos() {
         if (!estudioSelect.value) {
             sucursalSelect.value = '';
@@ -232,7 +209,6 @@
     sucursalSelect.addEventListener('change', function () {
         aplicarFiltroProfesional();
 
-        // A previously chosen date may now be closed at the new sucursal.
         if (seleccionada() && !diaAbierto(sucursalActual(), seleccionada())) {
             fechaInput.value = '';
         }

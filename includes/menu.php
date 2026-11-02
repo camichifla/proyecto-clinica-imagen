@@ -1,7 +1,4 @@
 <?php
-// Menu per role. The list stays flat (sesion.js also uses it as the page allowlist);
-// consecutive items sharing a 'grupo' are rendered as one collapsible section, and the
-// 'cuenta' item opens from the user icon next to the name instead of the list.
 const MENU_POR_ROL = [
     'paciente' => [
         ['href' => 'agendar-cita.html',            'label' => 'Agendar cita'],

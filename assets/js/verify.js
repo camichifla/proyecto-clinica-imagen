@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const token = new URL(window.location.href).searchParams.get('token');
     if (!token) {
-        return; // default state: the [data-default] message is already visible
+        return;
     }
 
     document.querySelector('[data-default]').hidden = true;

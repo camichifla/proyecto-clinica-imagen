@@ -1,14 +1,8 @@
-/*
- * Cascade precedence, lowest to highest: variables < base < paginas.
- * A later layer wins regardless of selector specificity or <link> order.
- * Files linked per view (agenda.css, backoffice.css, ...) wrap their rules in
- * @layer paginas, so they override the shared files below.
- * Leaflet (index.html) is unlayered, so it beats all of these.
- */
+/* Precedencia de capas, de menor a mayor: variables < base < paginas. Una capa posterior gana sin importar la especificidad ni el orden de los <link>. */
+/* Leaflet (index.html) no usa capas y vence a todas. */
 @layer variables, base, paginas;
 
 @import url("./variables.css") layer(variables);
 @import url("./base.css") layer(base);
 
-/* Calendar and selector widgets used by many views (cascades after base.css, same layer). */
 @import url("./agendar-cita.css") layer(base);

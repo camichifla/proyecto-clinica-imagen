@@ -13,7 +13,6 @@
 
     let primeraCarga = true;
 
-    // Pending citas are confirmed/rejected through the solicitudes API, the rest through turnos.
     async function enviarAccion(cuerpo, textoOk, api = 'api/turnos.php') {
         const data = await enviarPost(api, cuerpo);
         if (!data || !data.ok) {
@@ -110,7 +109,6 @@
         confirmar.textContent = 'Confirmar reprogramación';
 
         const opcionHora = (valor, texto) => new Option(texto, valor);
-        // The hour stays locked until a date with free hours is chosen.
         hora.replaceChildren(opcionHora('', 'Elegí una fecha primero'));
         hora.disabled = true;
 
@@ -186,7 +184,6 @@
         }
         primeraCarga = false;
         poblarSucursales(selectSucursal, data.sucursales.map((s) => ({ id: s.id, nombre: s.nombre })));
-        // A receptionist only gets their own branch: nothing to choose, so no Sede filter.
         if (data.sucursales.length <= 1) {
             selectSucursal.closest('.campo').hidden = true;
         }
@@ -207,7 +204,6 @@
                 params.set(clave, String(valor).trim());
             }
         });
-        // After the first load Desde/Hasta always go, empty included (cleared = that end of the range open).
         if (!primeraCarga) {
             params.set('desde', formFiltros.elements.desde.value);
             params.set('hasta', formFiltros.elements.hasta.value);
@@ -218,7 +214,6 @@
             return;
         }
         poblarFiltros(data);
-        // Basic report: totals per state for the current filters (the Estado filter doesn't narrow them).
         const t = data.totales;
         document.getElementById('turnos-totales').replaceChildren(...[
             ['total', 'Total', t.total], ['confirmada', 'Confirmadas', t.confirmada], ['realizada', 'Realizadas', t.realizada],
@@ -247,7 +242,7 @@
     });
     filtrarAlCambiar(formFiltros);
 
-    // Código: only digits can be typed; the "CI-" prefix is added automatically (pasting "CI-000123" works too).
+    // Código: solo se tipean dígitos y el prefijo "CI-" se agrega solo (pegar "CI-000123" también funciona).
     const inputCodigo = document.getElementById('filtro-codigo');
     inputCodigo.inputMode = 'numeric';
     inputCodigo.addEventListener('input', () => {

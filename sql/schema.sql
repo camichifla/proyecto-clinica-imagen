@@ -1,15 +1,13 @@
--- Schema: Clinica Imagen (25 tables, InnoDB / utf8mb4). Seed data is at the end of this file.
--- Apply with phpMyAdmin or `/opt/lampp/bin/mysql`, never the system MySQL client.
-
 CREATE TABLE cuentas (
   id             INT UNSIGNED NOT NULL AUTO_INCREMENT,
   email          VARCHAR(254) NOT NULL,
-  password_hash  CHAR(60) CHARACTER SET ascii COLLATE ascii_bin NOT NULL, -- bcrypt: app pins PASSWORD_BCRYPT, always 60 chars
+  -- bcrypt: la app fija PASSWORD_BCRYPT, siempre 60 caracteres.
+  password_hash  CHAR(60) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   rol            ENUM('paciente','medico','profesional','administrador','recepcionista') NOT NULL,
-  ref_id         INT UNSIGNED NOT NULL,              -- polymorphic pointer
+  ref_id         INT UNSIGNED NOT NULL,
   verificado     TINYINT(1) NOT NULL DEFAULT 0,
-  email_nuevo    VARCHAR(254) NULL,                  -- requested email, active only once its confirmation token is used (api/verify.php)
-  activo         TINYINT(1) NOT NULL DEFAULT 1,      -- 0 = desactivada por un administrador; login rejects it
+  email_nuevo    VARCHAR(254) NULL,
+  activo         TINYINT(1) NOT NULL DEFAULT 1,
   creado_en      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   actualizado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
@@ -24,27 +22,25 @@ CREATE TABLE pacientes (
   apellido  VARCHAR(60)  NOT NULL,
   ci        VARCHAR(15)  NOT NULL,
   direccion VARCHAR(160) NOT NULL,
-  numero    VARCHAR(25)  NOT NULL,                    -- phone; VARCHAR, never numeric
-  email_anterior VARCHAR(254) NULL,                    -- email of a deleted account; signing up again with this CI
-                                                       -- and this same email gets the patient (and history) back
+  numero    VARCHAR(25)  NOT NULL,
+  email_anterior VARCHAR(254) NULL,
   creado_en DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_pacientes_ci (ci)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
--- No email / password column here: both live on `cuentas`, never duplicated.
 
 CREATE TABLE medicos (
   id        INT UNSIGNED NOT NULL AUTO_INCREMENT,
   nombre    VARCHAR(60) NOT NULL,
   apellido  VARCHAR(60) NOT NULL,
-  ci VARCHAR(15) NULL,  -- required by the app for every new account; NULL only for rows created before this column existed
+  ci VARCHAR(15) NULL,
   creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_medicos_ci (ci)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE medico_paciente (                        -- admin-assigned link, on top of the organic "medico already
-  medico_id   INT UNSIGNED NOT NULL,                  -- created an order for this paciente" connection (via ordenes.creado_por)
+CREATE TABLE medico_paciente (
+  medico_id   INT UNSIGNED NOT NULL,
   paciente_id INT UNSIGNED NOT NULL,
   creado_en   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (medico_id, paciente_id),
@@ -52,28 +48,27 @@ CREATE TABLE medico_paciente (                        -- admin-assigned link, on
   CONSTRAINT fk_mp_paciente  FOREIGN KEY (paciente_id)  REFERENCES pacientes(id)  ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE profesionales (                          -- distinct role: imaging specialist, booked by patients
+CREATE TABLE profesionales (
   id              INT UNSIGNED NOT NULL AUTO_INCREMENT,
   nombre          VARCHAR(60) NOT NULL,
   apellido        VARCHAR(60) NOT NULL,
-  ci VARCHAR(15) NULL,  -- required by the app for every new account; NULL only for rows created before this column existed
+  ci VARCHAR(15) NULL,
   creado_en       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_profesionales_ci (ci)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE estudios (                               -- catalogue of imaging studies
-  clave         VARCHAR(30) NOT NULL,              -- stable key stored by citas / sucursal_estudio / profesional_especializacion; never renamed
+CREATE TABLE estudios (
+  clave         VARCHAR(30) NOT NULL,
   etiqueta      VARCHAR(60) NOT NULL,
-  descripcion   VARCHAR(255) NULL,                 -- short public text shown on servicios.html
-  autoagendable TINYINT(1)  NOT NULL DEFAULT 0,    -- 1 = a paciente can self-book it; 0 = only a medico can order it
-  activo        TINYINT(1)  NOT NULL DEFAULT 1,    -- 0 = not offered for new bookings; existing citas keep the label
+  descripcion   VARCHAR(255) NULL,
+  autoagendable TINYINT(1)  NOT NULL DEFAULT 0,
+  activo        TINYINT(1)  NOT NULL DEFAULT 1,
   creado_en     DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (clave)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
--- Never deleted (RESTRICT foreign keys below): deactivate instead.
 
-CREATE TABLE profesional_especializacion (            -- M2M: a profesional can have several (matches citas.estudio)
+CREATE TABLE profesional_especializacion (
   profesional_id  INT UNSIGNED NOT NULL,
   especializacion VARCHAR(30) NOT NULL,
   creado_en       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -86,7 +81,7 @@ CREATE TABLE administradores (
   id        INT UNSIGNED NOT NULL AUTO_INCREMENT,
   nombre    VARCHAR(60) NOT NULL,
   apellido  VARCHAR(60) NOT NULL,
-  ci VARCHAR(15) NULL,  -- required by the app for every new account; NULL only for rows created before this column existed
+  ci VARCHAR(15) NULL,
   creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_administradores_ci (ci)
@@ -95,22 +90,22 @@ CREATE TABLE administradores (
 CREATE TABLE sucursales (
   id        INT UNSIGNED NOT NULL AUTO_INCREMENT,
   nombre    VARCHAR(80)  NOT NULL,
-  direccion VARCHAR(160) NULL,                    -- NULL allowed (branch added without an address)
-  activo       TINYINT(1)   NOT NULL DEFAULT 1,   -- 0 = not offered for booking and hidden from the public map; existing citas keep the name
-  equipamiento VARCHAR(1000) NULL,                -- one item per line
-  latitud      DECIMAL(9,6) NULL,                 -- map pin; NULL (either one) = listed but not pinned
+  direccion VARCHAR(160) NULL,
+  activo       TINYINT(1)   NOT NULL DEFAULT 1,
+  equipamiento VARCHAR(1000) NULL,
+  latitud      DECIMAL(9,6) NULL,
   longitud     DECIMAL(9,6) NULL,
   creado_en DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY uq_sucursales_nombre (nombre)        -- seeds are name-matched; duplicates must be impossible
+  UNIQUE KEY uq_sucursales_nombre (nombre)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE recepcionistas (
   id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
   nombre      VARCHAR(60) NOT NULL,
   apellido    VARCHAR(60) NOT NULL,
-  ci VARCHAR(15) NULL,  -- required by the app for every new account; NULL only for rows created before this column existed
-  sucursal_id INT UNSIGNED NULL,                  -- the branch this receptionist is in charge of
+  ci VARCHAR(15) NULL,
+  sucursal_id INT UNSIGNED NULL,
   creado_en   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_recepcionistas_ci (ci),
@@ -121,9 +116,9 @@ CREATE TABLE recepcionistas (
 CREATE TABLE tokens_verificacion (
   id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
   cuenta_id  INT UNSIGNED NOT NULL,
-  token_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,  -- sha256 hex, never the raw token
-  expira_en  DATETIME NOT NULL,                       -- issued_at + 24h
-  usado_en   DATETIME NULL,                           -- non-null = consumed, single use
+  token_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  expira_en  DATETIME NOT NULL,
+  usado_en   DATETIME NULL,
   creado_en  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_tv_hash   (token_hash),
@@ -131,11 +126,11 @@ CREATE TABLE tokens_verificacion (
   CONSTRAINT fk_tv_cuenta FOREIGN KEY (cuenta_id) REFERENCES cuentas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE tokens_reset (                           -- identical shape, separate lifetime + scope
+CREATE TABLE tokens_reset (
   id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
   cuenta_id  INT UNSIGNED NOT NULL,
   token_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  expira_en  DATETIME NOT NULL,                       -- issued_at + 1h
+  expira_en  DATETIME NOT NULL,
   usado_en   DATETIME NULL,
   creado_en  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
@@ -144,36 +139,36 @@ CREATE TABLE tokens_reset (                           -- identical shape, separa
   CONSTRAINT fk_tr_cuenta FOREIGN KEY (cuenta_id) REFERENCES cuentas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE sucursal_horarios (                  -- one row per contiguous shift
+-- Un día cerrado es la AUSENCIA de filas. Los turnos solapados no se pueden restringir en SQL.
+CREATE TABLE sucursal_horarios (
   id            INT UNSIGNED     NOT NULL AUTO_INCREMENT,
   sucursal_id   INT UNSIGNED     NOT NULL,
-  dia_semana    TINYINT UNSIGNED NOT NULL,        -- ISO-8601: 1=lunes .. 7=domingo, == PHP format('N')
+  dia_semana    TINYINT UNSIGNED NOT NULL,
   hora_apertura TIME             NOT NULL,
   hora_cierre   TIME             NOT NULL,
   creado_en     DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  -- leftmost prefix (sucursal_id, dia_semana) serves the lookup; no extra KEY needed
+  -- El prefijo izquierdo (sucursal_id, dia_semana) atiende la búsqueda; no hace falta otro KEY.
   UNIQUE KEY uq_sh_turno (sucursal_id, dia_semana, hora_apertura),
   CONSTRAINT fk_sh_sucursal FOREIGN KEY (sucursal_id) REFERENCES sucursales(id) ON DELETE CASCADE,
   CONSTRAINT ck_sh_dia   CHECK (dia_semana BETWEEN 1 AND 7),
-  CONSTRAINT ck_sh_rango CHECK (hora_apertura < hora_cierre)   -- MariaDB 10.4.32 enforces this
+  CONSTRAINT ck_sh_rango CHECK (hora_apertura < hora_cierre)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
--- A closed day is the ABSENCE of rows. Overlapping shifts are not constrainable in SQL.
 
-CREATE TABLE profesional_sucursal (               -- M2M; composite PK
+CREATE TABLE profesional_sucursal (
   profesional_id INT UNSIGNED NOT NULL,
   sucursal_id    INT UNSIGNED NOT NULL,
   creado_en      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (profesional_id, sucursal_id),
-  KEY ix_ps_sucursal (sucursal_id),               -- reverse lookup: who works at this sede
+  KEY ix_ps_sucursal (sucursal_id),
   CONSTRAINT fk_ps_profesional FOREIGN KEY (profesional_id) REFERENCES profesionales(id) ON DELETE CASCADE,
   CONSTRAINT fk_ps_sucursal    FOREIGN KEY (sucursal_id)    REFERENCES sucursales(id)    ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE profesional_horarios (               -- same shape as sucursal_horarios; per profesional, not per sede
+CREATE TABLE profesional_horarios (
   id             INT UNSIGNED     NOT NULL AUTO_INCREMENT,
   profesional_id INT UNSIGNED     NOT NULL,
-  dia_semana     TINYINT UNSIGNED NOT NULL,        -- ISO-8601: 1=lunes .. 7=domingo
+  dia_semana     TINYINT UNSIGNED NOT NULL,
   hora_apertura  TIME             NOT NULL,
   hora_cierre    TIME             NOT NULL,
   creado_en      DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -183,9 +178,9 @@ CREATE TABLE profesional_horarios (               -- same shape as sucursal_hora
   CONSTRAINT ck_phor_dia   CHECK (dia_semana BETWEEN 1 AND 7),
   CONSTRAINT ck_phor_rango CHECK (hora_apertura < hora_cierre)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
--- No rows at all = unrestricted. Rows but none for a given day = does not work that day.
 
-CREATE TABLE sucursal_estudio (                   -- ALLOWLIST. No rows for a sucursal = unrestricted.
+-- Lista blanca: sin filas para una sucursal = sin restricción.
+CREATE TABLE sucursal_estudio (
   sucursal_id INT UNSIGNED NOT NULL,
   estudio     VARCHAR(30)  NOT NULL,
   creado_en   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -194,24 +189,25 @@ CREATE TABLE sucursal_estudio (                   -- ALLOWLIST. No rows for a su
   CONSTRAINT fk_se_estudio  FOREIGN KEY (estudio)     REFERENCES estudios(clave)  ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE citas (                                  -- patient requests a slot; admin confirms/rejects
+CREATE TABLE citas (
   id                    INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  paciente_id           INT UNSIGNED NULL,               -- NULL = booked by a medico for someone not yet registered; see email_pendiente
-  email_pendiente       VARCHAR(254) NULL,               -- set iff paciente_id IS NULL; cleared and linked when that email later registers
-  nombre_pendiente      VARCHAR(60)  NULL,                -- set alongside email_pendiente so staff can identify who a pending cita is for by name
+  paciente_id           INT UNSIGNED NULL,
+  email_pendiente       VARCHAR(254) NULL,
+  nombre_pendiente      VARCHAR(60)  NULL,
   apellido_pendiente    VARCHAR(60)  NULL,
-  profesional_id        INT UNSIGNED NOT NULL,          -- chosen by the patient up front, filtered by especializacion
-  sucursal_id           INT UNSIGNED NULL,              -- NULL = sede no registrada (dato historico)
+  profesional_id        INT UNSIGNED NOT NULL,
+  sucursal_id           INT UNSIGNED NULL,
   fecha_hora_solicitada DATETIME NOT NULL,
-  estudio               VARCHAR(30) NOT NULL,            -- estudios.clave
+  estudio               VARCHAR(30) NOT NULL,
   estado                ENUM('pendiente','confirmada','rechazada','cancelada','realizada') NOT NULL DEFAULT 'pendiente',
-  fecha_hora_confirmada DATETIME NULL,                 -- set by admin on confirm; may differ from solicitada
+  fecha_hora_confirmada DATETIME NULL,
   notas_admin           VARCHAR(255) NULL,
   creado_en             DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   actualizado_en        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  slot_activo           TINYINT AS (IF(estado IN ('pendiente','confirmada'), 1, NULL)) STORED,  -- NULL when rejected/cancelled so the slot is freed (NULLs never collide in a UNIQUE)
+  slot_activo           TINYINT AS (IF(estado IN ('pendiente','confirmada'), 1, NULL)) STORED,
   PRIMARY KEY (id),
-  UNIQUE KEY  uq_citas_slot            (profesional_id, fecha_hora_solicitada, slot_activo),  -- no double booking of a profesional at the same time
+  -- slot_activo es NULL cuando la cita se rechaza o cancela, y libera el turno (los NULL no chocan en un UNIQUE).
+  UNIQUE KEY  uq_citas_slot            (profesional_id, fecha_hora_solicitada, slot_activo),
   KEY         ix_citas_paciente        (paciente_id),
   KEY         ix_citas_email_pendiente (email_pendiente),
   KEY         ix_citas_profesional     (profesional_id),
@@ -223,16 +219,16 @@ CREATE TABLE citas (                                  -- patient requests a slot
   CONSTRAINT fk_citas_estudio     FOREIGN KEY (estudio)        REFERENCES estudios(clave)   ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE resultados (                             -- one imaging study result per row; admin-authored
+CREATE TABLE resultados (
   id              INT UNSIGNED NOT NULL AUTO_INCREMENT,
   paciente_id     INT UNSIGNED NOT NULL,
-  cita_id         INT UNSIGNED NULL,                   -- optional link back to the originating cita
+  cita_id         INT UNSIGNED NULL,
   nombre_estudio  VARCHAR(120) NOT NULL,
   fecha_estudio   DATE NOT NULL,
   observaciones   TEXT NULL,
-  informe_archivo         VARCHAR(120) NULL,           -- optional PDF report: generated filename under storage/resultados/
-  informe_nombre_original VARCHAR(255) NULL,           -- original filename, display only
-  creado_por      INT UNSIGNED NOT NULL,               -- cuentas.id of the admin who uploaded it
+  informe_archivo         VARCHAR(120) NULL,
+  informe_nombre_original VARCHAR(255) NULL,
+  creado_por      INT UNSIGNED NOT NULL,
   creado_en       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY         ix_resultados_paciente (paciente_id),
@@ -242,21 +238,21 @@ CREATE TABLE resultados (                             -- one imaging study resul
   CONSTRAINT fk_resultados_creador  FOREIGN KEY (creado_por)  REFERENCES cuentas(id)   ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE resultado_imagenes (                     -- 1..N images per resultado; files live under storage/
+CREATE TABLE resultado_imagenes (
   id               INT UNSIGNED NOT NULL AUTO_INCREMENT,
   resultado_id     INT UNSIGNED NOT NULL,
-  nombre_archivo   VARCHAR(120) NOT NULL,              -- generated filename on disk, never the client's raw name
-  nombre_original  VARCHAR(255) NOT NULL,               -- original filename, for display only, HTML-escaped
+  nombre_archivo   VARCHAR(120) NOT NULL,
+  nombre_original  VARCHAR(255) NOT NULL,
   creado_en        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY         ix_resultado_imagenes_resultado (resultado_id),
   CONSTRAINT fk_resultado_imagenes_resultado FOREIGN KEY (resultado_id) REFERENCES resultados(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE notas_clinicas (                         -- clinical record: never updated; only the note's author can delete it
+CREATE TABLE notas_clinicas (
   id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
   paciente_id INT UNSIGNED NOT NULL,
-  cuenta_id   INT UNSIGNED NOT NULL,                  -- author (medico or profesional account)
+  cuenta_id   INT UNSIGNED NOT NULL,
   texto       TEXT NOT NULL,
   creado_en   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
@@ -265,12 +261,12 @@ CREATE TABLE notas_clinicas (                         -- clinical record: never 
   CONSTRAINT fk_notas_cuenta   FOREIGN KEY (cuenta_id)   REFERENCES cuentas(id)   ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE ordenes (                              -- optional clinical order attached to a cita booked by a medico
+CREATE TABLE ordenes (
   id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  paciente_id INT UNSIGNED NULL,      -- NULL until the cita's own paciente_id resolves; see citas.email_pendiente
-  cita_id     INT UNSIGNED NULL,      -- the cita created alongside it, if any
-  creado_por  INT UNSIGNED NOT NULL,  -- cuentas.id of the medico who filled it
-  tipo        ENUM('estudio','alineadores') NOT NULL, -- 'estudio' details live in orden_estudio / orden_estudio_selecciones
+  paciente_id INT UNSIGNED NULL,
+  cita_id     INT UNSIGNED NULL,
+  creado_por  INT UNSIGNED NOT NULL,
+  tipo        ENUM('estudio','alineadores') NOT NULL,
   creado_en   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY ix_ordenes_paciente (paciente_id),
@@ -280,7 +276,7 @@ CREATE TABLE ordenes (                              -- optional clinical order a
   CONSTRAINT fk_ordenes_creador  FOREIGN KEY (creado_por)  REFERENCES cuentas(id)   ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE orden_estudio (                          -- 1:1 with an ordenes row of tipo 'estudio': its single-valued fields
+CREATE TABLE orden_estudio (
   orden_id                    INT UNSIGNED NOT NULL,
   opt_indicacion              VARCHAR(200) NULL,
   telerradio_frontal_analisis BOOLEAN NOT NULL DEFAULT FALSE,
@@ -300,21 +296,21 @@ CREATE TABLE orden_estudio (                          -- 1:1 with an ordenes row
   CONSTRAINT fk_orden_estudio_orden FOREIGN KEY (orden_id) REFERENCES ordenes(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE orden_estudio_selecciones (              -- multi-valued checkbox fields: one row per checked option
+CREATE TABLE orden_estudio_selecciones (
   orden_id INT UNSIGNED NOT NULL,
-  campo    VARCHAR(40)  NOT NULL,                     -- key of ORDEN_CAMPOS_ESTUDIO (e.g. 'radio_intra')
-  opcion   VARCHAR(100) NOT NULL,                     -- one of that field's whitelisted options
+  campo    VARCHAR(40)  NOT NULL,
+  opcion   VARCHAR(100) NOT NULL,
   PRIMARY KEY (orden_id, campo, opcion),
   CONSTRAINT fk_orden_estudio_selecciones_orden FOREIGN KEY (orden_id) REFERENCES ordenes(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE eventos (                                -- audit log + attempt throttling (login, reset, registro)
+CREATE TABLE eventos (
   id        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   tipo      VARCHAR(40)  NOT NULL,
-  cuenta_id INT UNSIGNED NULL,                        -- no FK: the record outlives the cuenta
+  cuenta_id INT UNSIGNED NULL,
   email     VARCHAR(254) NULL,
   ip        VARCHAR(45)  NOT NULL,
-  detalle   VARCHAR(255) NULL,                        -- ids only, never clinical data or passwords
+  detalle   VARCHAR(255) NULL,
   creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY ix_eventos_tipo_email (tipo, email, creado_en),
@@ -327,14 +323,13 @@ CREATE TABLE mensajes_contacto (
   nombre       VARCHAR(80)   NOT NULL,
   email        VARCHAR(254)  NOT NULL,
   telefono     VARCHAR(25)   NULL,
-  mensaje      VARCHAR(2000) NOT NULL,                -- plain text; always rendered as text, never HTML
-  creado_en    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,   -- pending only: attended rows are deleted
+  mensaje      VARCHAR(2000) NOT NULL,
+  creado_en    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY ix_mensajes_contacto_creado (creado_en)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- The 5 estudios (catalogue). Must come
--- first: sucursal_estudio rows below reference estudios.clave.
+-- Va primero: las filas de sucursal_estudio posteriores referencian estudios.clave.
 INSERT INTO estudios (clave, etiqueta, descripcion, autoagendable) VALUES
   ('placa',       'Placa',       'Diagnostico basico de la estructura dental con una toma rapida y de muy baja radiacion.', 1),
   ('radiografia', 'Radiografia', 'Imagen detallada de dientes y huesos para planificar o controlar un tratamiento.', 1),
@@ -342,10 +337,7 @@ INSERT INTO estudios (clave, etiqueta, descripcion, autoagendable) VALUES
   ('tomografia',  'Tomografia',  'Imagen tridimensional de la boca y los maxilares para casos que requieren mayor precision.', 0),
   ('modelo_3d',   'Modelo 3D',   'Escaneo digital de la boca que genera un modelo tridimensional de la dentadura.', 0);
 
--- Insertion order fixes ids 1..11:
--- 1 Montevideo Shopping, 2 Nuevo Centro, 3 Caudillos, 4 Atlantida,
--- 5 Carrasco, 6 Lagomar, 7 Punta del Este, 8 Las Piedras, 9 Colonia,
--- 10 Libertad, 11 Durazno.
+-- El orden de inserción fija los ids 1..11: los datos de horarios y profesionales se enlazan por nombre.
 INSERT INTO sucursales (nombre, direccion, latitud, longitud) VALUES
   ('Montevideo Shopping', 'Luis A. de Herrera 1248, oficina 321, Montevideo', -34.903500, -56.136200),
   ('Nuevo Centro',        'Bv. Artigas 3126, piso 11 apto. 1103, Montevideo', -34.889000, -56.167000),
@@ -358,9 +350,6 @@ INSERT INTO sucursales (nombre, direccion, latitud, longitud) VALUES
   ('Colonia',             '18 de Julio esq. Lavalleja, Paseo Imagen (entrada por 18 de Julio), Colonia del Sacramento', -34.471000, -57.844000),
   ('Libertad',            'Gral. Jose Artigas 815, Libertad, San Jose', -34.633000, -56.615000),
   ('Durazno',             'Manuel Oribe 680, entre Arrospide y Dr. Luis Morquio, Durazno', -33.381000, -56.523000);
-
--- 72 shift rows. dia_semana is ISO-8601 (1=lunes .. 6=sabado); no branch has
--- a dia_semana=7 row, so Sunday is closed everywhere by the absence rule.
 
 INSERT INTO sucursal_horarios (sucursal_id, dia_semana, hora_apertura, hora_cierre) VALUES
   (1, 1, '08:00:00', '20:00:00'),
@@ -456,13 +445,9 @@ INSERT INTO sucursal_horarios (sucursal_id, dia_semana, hora_apertura, hora_cier
   (11, 5, '14:00:00', '18:00:00'),
   (11, 6, '09:00:00', '13:00:00');
 
--- Restriction row: Atlantida performs
--- only radiografia. Zero rows for any other sucursal means unrestricted.
 INSERT INTO sucursal_estudio (sucursal_id, estudio)
 SELECT id, 'radiografia' FROM sucursales WHERE nombre = 'Atlantida';
 
--- The 4 profesionales, with the estudios each can perform. Every estudio is
--- covered by at least one profesional so all of them can be booked.
 INSERT INTO profesionales (nombre, apellido) VALUES
   ('Laura',       'Fernandez'),
   ('Martin',      'Gomez'),
@@ -476,7 +461,6 @@ WHERE (p.nombre = 'Laura'       AND e.clave IN ('placa','radiografia'))
    OR (p.nombre = 'Ana'         AND e.clave IN ('placa','alineadores','modelo_3d'))
    OR (p.nombre = 'Profesional' AND p.apellido = 'Default');
 
--- Profesional assignments — 3 sucursales each, matched by name.
 INSERT INTO profesional_sucursal (profesional_id, sucursal_id)
 SELECT p.id, s.id FROM profesionales p JOIN sucursales s
 WHERE (p.nombre = 'Laura'  AND p.apellido = 'Fernandez' AND s.nombre IN ('Montevideo Shopping','Carrasco','Las Piedras'))

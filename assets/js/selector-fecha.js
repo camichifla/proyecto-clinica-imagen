@@ -1,9 +1,3 @@
-// Calendar date picker for every <input type="date"> on the page (the one first built for "Agendar cita").
-// The real input stays as the source of truth: it becomes type=hidden with the same id, name and YYYY-MM-DD value,
-// so forms and scripts keep working; picking a day fires 'input' and 'change' on it. Inputs added later by
-// scripts are picked up by a MutationObserver. Optional per-input hook (set by the page script):
-//   input.diaHabilitado = (fecha) => boolean   // extra disabled days, e.g. days the branch is closed
-//   input.refrescarCalendario()                 // re-render after the hook's inputs change
 (() => {
     const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
     const DIAS = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'];
@@ -38,7 +32,6 @@
         texto.className = 'selector-fecha-texto';
         boton.appendChild(texto);
 
-        // Labels pointing at the input now point at the button (a hidden input can't be focused).
         if (input.id) {
             document.querySelectorAll(`label[for="${CSS.escape(input.id)}"]`).forEach((label) => {
                 label.htmlFor = boton.id;
@@ -102,7 +95,7 @@
             boton.classList.toggle('selector-fecha-vacio', !fecha);
         }
 
-        // Scripts that set input.value directly (default filters, reset forms) also update the button text.
+        // Los scripts que asignan input.value directamente (filtros por defecto, reseteos) también actualizan el texto del botón.
         Object.defineProperty(input, 'value', {
             configurable: true,
             get: () => valorNativo.get.call(input),
@@ -112,12 +105,10 @@
             },
         });
 
-        // form.reset() restores the value without going through the setter above.
         if (input.form) {
             input.form.addEventListener('reset', () => setTimeout(sincronizar));
         }
 
-        // Validation marks (form-api.js) and the disabled state (step-by-step forms) show on the button.
         const espejar = () => {
             const invalido = input.getAttribute('aria-invalid');
             if (invalido === null) {
@@ -173,7 +164,7 @@
             }
         }
 
-        // Fixed position next to the button, so scrolling tables or cards never clip it; opens upward if needed.
+        // Posición fija junto al botón para que tablas o tarjetas con scroll no lo recorten; abre hacia arriba si hace falta.
         function ubicar() {
             const r = boton.getBoundingClientRect();
             const alto = panel.offsetHeight;

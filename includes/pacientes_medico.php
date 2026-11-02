@@ -1,7 +1,4 @@
 <?php
-// includes/pacientes_medico.php — "patients connected to this doctor": those
-// already appearing in any of their orders (ordenes.creado_por) or those an
-// administrator explicitly linked via medico_paciente.
 
 function pacientes_de_medico(int $cuentaId, int $medicoId): array
 {

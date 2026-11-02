@@ -16,7 +16,6 @@
 
     const SVG_NS = "http://www.w3.org/2000/svg";
 
-    // Line icon: <svg> with the given child shapes, e.g. ["path", { d: "..." }].
     function icono(size, formas) {
         const svg = document.createElementNS(SVG_NS, "svg");
         const atributos = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", "stroke-width": 2, "stroke-linecap": "round", "stroke-linejoin": "round" };
@@ -29,7 +28,6 @@
         return svg;
     }
 
-    // [[dia, apertura, cierre], ...] -> "Lun a Vie 08:00-20:00 · Sáb 08:00-13:00"
     function horariosTexto(horarios) {
         const porDia = {};
         horarios.forEach(([dia, apertura, cierre]) => {
@@ -54,7 +52,6 @@
 
     const map = L.map("map", { zoomControl: false }).setView([-34.9011, -56.1645], 12);
     L.control.zoom({ position: "topright" }).addTo(map);
-    // The map is hidden on phones (CSS); recompute its size when it becomes visible again.
     window.addEventListener("resize", () => map.invalidateSize());
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -74,7 +71,7 @@
     function addMarkers() {
         clinics.forEach((clinic) => {
             if (clinic.latitud === null || clinic.longitud === null) {
-                return; // listed, not pinned
+                return;
             }
             const marker = L.marker([clinic.latitud, clinic.longitud], { icon: markerIcon }).addTo(map);
             marker.bindPopup(popupElement(clinic));
@@ -83,7 +80,6 @@
         });
     }
 
-    // Equipamiento is free text, one item per line.
     function equipamientoLista(texto) {
         const ul = el("ul", "equipamiento-lista");
         texto.split("\n").map((l) => l.trim()).filter(Boolean).forEach((item) => ul.append(el("li", "", item)));
@@ -138,7 +134,6 @@
     function renderList(items) {
         listEl.replaceChildren(...(items.length ? items.map(clinicCardElement) : [emptyStateElement()]));
 
-        // Count only while a search filters the list.
         resultsCountEl.textContent = items.length === clinics.length
             ? ""
             : `${items.length} resultado${items.length === 1 ? "" : "s"}`;

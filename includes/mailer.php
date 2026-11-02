@@ -1,8 +1,4 @@
 <?php
-// includes/mailer.php — the only file in the project that knows how mail
-// is delivered. Sends via PHPMailer/SMTP when
-// config.php has complete SMTP settings; otherwise appends the link to
-// storage/mail.log so the flow completes end-to-end without a mail server.
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/estudios.php';
@@ -15,7 +11,7 @@ function smtp_configurado(): bool
     return SMTP_HOST !== '' && SMTP_USER !== '' && SMTP_PASS !== '';
 }
 
-/** Returns true in both modes: the dev fallback always "succeeds" so registration/reset complete without a mail server. */
+// Devuelve true en ambos modos: el respaldo de desarrollo (storage/mail.log) siempre "tiene éxito" para completar registro y reseteo sin servidor de correo.
 function enviar_correo(string $destinatario, string $asunto, string $cuerpo): bool
 {
     if (!smtp_configurado()) {
@@ -72,7 +68,6 @@ function enviar_verificacion(string $email, string $link): bool
     );
 }
 
-/** Sent instead of a verification mail when someone tries to register an email/CI that already has an account. */
 function enviar_cuenta_existente(string $email): bool
 {
     return enviar_correo(
@@ -82,7 +77,6 @@ function enviar_cuenta_existente(string $email): bool
     );
 }
 
-/** Email change request: asks the NEW address to confirm, and warns the current one. Nothing changes until confirmed. Best effort. */
 function enviar_confirmacion_email(string $nuevo, string $actual, string $link): void
 {
     enviar_correo(
@@ -97,7 +91,6 @@ function enviar_confirmacion_email(string $nuevo, string $actual, string $link):
     );
 }
 
-/** Clears pending email changes (cuentas.email_nuevo) whose confirmation token expired or was used up. Nothing else changes. */
 function limpiar_emails_pendientes(PDO $db): void
 {
     $db->exec('UPDATE cuentas c SET c.email_nuevo = NULL
@@ -105,7 +98,6 @@ function limpiar_emails_pendientes(PDO $db): void
                       WHERE t.cuenta_id = c.id AND t.usado_en IS NULL AND t.expira_en > NOW())');
 }
 
-/** True if another account (not $cuentaId) already uses $email. */
 function email_en_uso(PDO $db, string $email, int $cuentaId): bool
 {
     $stmt = $db->prepare('SELECT 1 FROM cuentas WHERE email = ? AND id <> ?');
@@ -122,7 +114,6 @@ function enviar_reset(string $email, string $link): bool
     );
 }
 
-/** Patient registered by staff: the reset link sets their first password. */
 function enviar_bienvenida_paciente(string $email, string $link): bool
 {
     return enviar_correo(
@@ -132,10 +123,6 @@ function enviar_bienvenida_paciente(string $email, string $link): bool
     );
 }
 
-/**
- * Email of the recipient of a cita's notifications: the patient's account,
- * or email_pendiente if they don't have an account yet. Null if there is none.
- */
 function email_notificacion_cita(?int $pacienteId, ?string $emailPendiente): ?string
 {
     if ($pacienteId !== null) {
@@ -148,7 +135,6 @@ function email_notificacion_cita(?int $pacienteId, ?string $emailPendiente): ?st
     return $emailPendiente !== null && $emailPendiente !== '' ? $emailPendiente : null;
 }
 
-/** Email of the medico account that booked the cita (ordenes.creado_por), or null if no medico did. */
 function email_medico_cita(int $citaId): ?string
 {
     $stmt = db()->prepare(
@@ -160,7 +146,6 @@ function email_medico_cita(int $citaId): ?string
     return $email !== false ? $email : null;
 }
 
-/** "2026-03-09 14:30:00" -> "09/03/2026 14:30"; anything else is returned as is. */
 function fecha_hora_legible(string $fechaHora): string
 {
     $f = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $fechaHora);
@@ -202,9 +187,6 @@ function enviar_notificacion_cita(string $email, string $estado, string $fechaHo
     return enviar_correo($email, 'Tu cita fue rechazada - Clínica Imagen', $cuerpo);
 }
 
-/**
- * Acknowledges a just-booked (pending) cita to the patient. Best effort: a mail failure never fails the booking.
- */
 function avisar_solicitud_recibida(int $citaId): void
 {
     try {
@@ -229,10 +211,6 @@ function avisar_solicitud_recibida(int $citaId): void
     }
 }
 
-/**
- * Tells the medico who booked a cita how it ended up (for a reprogramada, $fechaHora is the new date).
- * Does nothing if no medico booked it or the medico's address is the patient's own (they get the patient email).
- */
 function avisar_medico_cita(int $citaId, string $estado, string $fechaHora, string $notas = ''): void
 {
     $emailMedico = email_medico_cita($citaId);
@@ -268,7 +246,6 @@ function avisar_medico_cita(int $citaId, string $estado, string $fechaHora, stri
     enviar_correo($emailMedico, "La cita de {$paciente} fue {$estado} - Clínica Imagen", $cuerpo);
 }
 
-/** No clinical content, just the link. */
 function enviar_aviso_resultado(string $email, string $link): bool
 {
     return enviar_correo(
@@ -278,11 +255,6 @@ function enviar_aviso_resultado(string $email, string $link): bool
     );
 }
 
-/**
- * Requests an email change on an account row (id, email). The current email stays active; the requested one waits in
- * cuentas.email_nuevo until its token is confirmed (api/verify.php). Returns the token to mail with
- * enviar_confirmacion_email, or null when nothing needs confirming. Call inside the caller's transaction.
- */
 function aplicar_cambio_email(PDO $db, array $cuenta, string $email): ?string
 {
     if (strcasecmp($cuenta['email'], $email) === 0) {
@@ -293,7 +265,7 @@ function aplicar_cambio_email(PDO $db, array $cuenta, string $email): ?string
     return emitir_token_verificacion($db, (int) $cuenta['id']);
 }
 
-/** Issues a fresh verification token: stores only its sha256 hash and invalidates any prior outstanding one. Shared by registration and verify-resend. */
+// Solo se guarda el hash sha256 del token (nunca el token) y se invalida cualquier token pendiente anterior.
 function emitir_token_verificacion(PDO $db, int $cuentaId): string
 {
     $raw  = bin2hex(random_bytes(32));
@@ -308,7 +280,6 @@ function emitir_token_verificacion(PDO $db, int $cuentaId): string
     return $raw;
 }
 
-/** Same as emitir_token_verificacion, but separate table/lifetime/scope; invalidates prior reset tokens. */
 function emitir_token_reset(PDO $db, int $cuentaId, int $horas = 1): string
 {
     $raw  = bin2hex(random_bytes(32));

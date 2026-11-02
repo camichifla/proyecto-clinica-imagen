@@ -1,7 +1,4 @@
 <?php
-// includes/session_bootstrap.php — overrides XAMPP's insecure session.ini
-// defaults at the application layer only. /opt/lampp/etc/php.ini is never
-// edited; this file makes the app correct regardless of it.
 require_once __DIR__ . '/config.php';
 
 define('ES_API', str_contains($_SERVER['SCRIPT_NAME'] ?? '', '/api/'));
@@ -21,16 +18,18 @@ set_exception_handler(function (Throwable $e): void {
     }
 });
 
-const SESION_TIMEOUT_SEGUNDOS = 1500; // 25 minutes
+const SESION_TIMEOUT_SEGUNDOS = 1500;
 
 if (session_status() === PHP_SESSION_NONE) {
-    ini_set('session.use_strict_mode', '1'); // XAMPP php.ini ships 0
+    ini_set('session.use_strict_mode', '1');
+    // Fija a nivel de aplicación los valores inseguros del php.ini de XAMPP (httponly, samesite); php.ini no se edita.
     session_set_cookie_params([
         'lifetime' => 0,
         'path'     => '/',
         'domain'   => '',
-        'secure'   => APP_HTTPS, // config-driven: forcing true over HTTP silently drops the cookie
-        'httponly' => true,      // XAMPP php.ini ships this empty
+        // Depende de la configuración: forzar true sobre HTTP haría que el navegador descarte la cookie.
+        'secure'   => APP_HTTPS,
+        'httponly' => true,
         'samesite' => 'Lax',
     ]);
     session_start();
@@ -65,11 +64,10 @@ function csrf_token(): string
     return $_SESSION['csrf'];
 }
 
-/** Responds 403 and exits on mismatch or missing token; never returns false. */
 function csrf_check(mixed $token): void
 {
     if (!is_string($token) || $token === '' || !hash_equals(csrf_token(), $token)) {
-        // PHP drops $_POST entirely when the body exceeds post_max_size.
+        // PHP vacía $_POST por completo cuando el cuerpo supera post_max_size.
         $excedido = empty($_POST) && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0;
         http_response_code($excedido ? 413 : 403);
         header('Content-Type: application/json; charset=utf-8');
@@ -80,7 +78,6 @@ function csrf_check(mixed $token): void
     }
 }
 
-/** Prologue for JSON POST-only endpoints: JSON content type, 405 on other methods, CSRF check. */
 function require_post_json(): void
 {
     header('Content-Type: application/json; charset=utf-8');
@@ -94,12 +91,7 @@ function require_post_json(): void
     csrf_check($_POST['csrf'] ?? null);
 }
 
-/**
- * Role and profile id are re-read from `cuentas` on every request, so a role change or deactivation applies to
- * already-open sessions. A missing or deactivated account ends the session.
- *
- * @return array{cuenta_id:int,rol:string,ref_id:int,nombre:string}|null
- */
+// Rol e id de perfil se releen de cuentas en cada solicitud: un cambio de rol o una baja aplica a sesiones ya abiertas.
 function usuario_actual(): ?array
 {
     if (empty($_SESSION['cuenta_id'])) {

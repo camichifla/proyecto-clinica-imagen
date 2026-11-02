@@ -1,6 +1,6 @@
 <?php
 
-// An audit failure never breaks the request.
+// Un fallo de auditoría nunca debe romper la solicitud.
 function registrar_evento(string $tipo, ?string $detalle = null, ?string $email = null): void
 {
     try {
@@ -16,7 +16,7 @@ function registrar_evento(string $tipo, ?string $detalle = null, ?string $email 
     }
 }
 
-// $ip opcional acota el conteo a ese origen (ej. fallos de un email desde una IP).
+// Con $ip se acota el conteo a ese origen (por ejemplo, los fallos de un email desde una IP).
 function demasiados_eventos(string $tipo, string $columna, string $valor, int $max, int $minutos, ?string $ip = null): bool
 {
     if (!in_array($columna, ['email', 'ip'], true)) {

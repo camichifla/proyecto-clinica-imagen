@@ -1,8 +1,5 @@
-/* Page styles: the paginas layer (declared in styles.css) wins over base. */
 @layer paginas {
 
-    /* The form's flex gap only reaches direct children: the role-dependent
-       wrappers need their own so the fields inside keep the same spacing. */
     .filtros-turnos,
     #campos-cuenta:not([hidden]),
     #campos-paciente:not([hidden]) {
@@ -11,12 +8,11 @@
         gap: 1.1rem;
     }
 
-    /* backoffice.css (where .filtros-turnos normally lives) isn't loaded on this page. */
+    /* backoffice.css (donde vive .filtros-turnos) no se carga en esta página. */
     .filtros-turnos {
         margin: var(--space-4) 0;
     }
 
-    /* Editar, then Desactivar / "Tu cuenta": margin instead of flex so the cell stays a table cell. */
     .acciones-cuenta > * + * {
         margin-left: var(--space-2);
     }
@@ -60,7 +56,7 @@
         font-style: italic;
     }
 
-    /* :not(:has()) keeps action cells on base.css's stretch, which a layered rule would otherwise override. */
+    /* :not(:has()) mantiene las celdas de acciones con el stretch de base.css, que una regla en capa anularía. */
     .tabla-scroll.tabla-tarjetas .tabla-datos td:not(:has(form, button)) {
         align-items: center;
     }
@@ -73,7 +69,6 @@
         margin-bottom: var(--space-2);
     }
 
-    /* Day, opening and closing are selector-combo dropdowns (same widget as the booking hour). */
     .fila-horario .buscador-combo {
         min-width: 0;
     }

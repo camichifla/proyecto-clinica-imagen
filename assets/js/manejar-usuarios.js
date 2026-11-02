@@ -14,9 +14,9 @@
         return;
     }
 
-    let datos = null; // last response of the API: filters and the médico picker re-render from it without another request
-    let medicoId = ''; // médico picked in the assignments section
-    const cambiosPacientes = new Map(); // pacienteId => wanted linked state, applied by "Guardar cambios"
+    let datos = null;
+    let medicoId = '';
+    const cambiosPacientes = new Map();
 
     const celdaSiNo = (si, columna) => celdaEstado(si ? 'si' : 'no', si ? 'Sí' : 'No', columna);
 
@@ -29,7 +29,6 @@
             || { ok: false, error: ERROR_CONEXION };
     }
 
-    // The list is fully loaded, so the Buscar / Rol filters apply on the client: every word must appear in name, email or CI.
     function cuentasFiltradas(data) {
         const rol = formFiltros.elements.rol.value;
         return data.cuentas.filter((c) => (!rol || c.rol === rol)
@@ -38,7 +37,6 @@
 
     function renderCuentas(data) {
         tablaCuentasContenedor.innerHTML = '';
-        // The search only makes sense inside one role: nothing is listed until it is picked.
         const sinRol = !formFiltros.elements.rol.value;
         formFiltros.elements.q.disabled = sinRol;
         if (sinRol) {
@@ -109,7 +107,6 @@
     const formEditar = document.getElementById('form-editar-cuenta');
     const contenedorHorarios = document.getElementById('editar-horarios');
 
-    // Hidden blocks are disabled too, so they are neither submitted nor flagged as required.
     function mostrarBloque(bloque, visible) {
         bloque.hidden = !visible;
         bloque.querySelectorAll('input, select').forEach((el) => {
@@ -154,7 +151,6 @@
             const sedes = cuenta.sedes.map(String);
             document.getElementById('editar-sedes').replaceChildren(...datos.sucursales.map((s) =>
                 casilla('sucursales[]', String(s.id), s.nombre + (Number(s.activo) ? '' : ' (inactiva)'), sedes.includes(String(s.id)))));
-            // Active studies, plus the inactive ones the professional already had (so they aren't lost on save).
             document.getElementById('editar-estudios').replaceChildren(...datos.estudios_catalogo
                 .filter((e) => e.activo || cuenta.especializacion.includes(e.clave))
                 .map((e) => casilla('especializacion[]', e.clave, e.etiqueta + (e.activo ? '' : ' (inactivo)'), cuenta.especializacion.includes(e.clave))));
@@ -200,7 +196,6 @@
     });
     document.getElementById('editar-cancelar').addEventListener('click', cerrarEdicion);
 
-    // Same word matching as the accounts search: every word must appear in name, email or CI.
     function filtrarPersonas(personas, form) {
         return personas.filter((p) => coincidePalabras(form.elements.q.value, [p.apellido, p.nombre, p.email, p.ci]));
     }
@@ -238,13 +233,11 @@
         medicosContenedor.appendChild(tabla(['Nombre', 'Cédula', 'Email', ''], filas));
     }
 
-    // Checks only mark the wanted state (kept across searches); "Guardar cambios" applies them.
     function renderPacientes(data) {
         botonGuardarPacientes.disabled = !cambiosPacientes.size;
         pacientesContenedor.innerHTML = '';
         const vinculados = new Set(data.asignaciones.filter((a) => String(a.medico_id) === medicoId).map((a) => a.paciente_id));
         const marcado = (p) => (cambiosPacientes.has(p.id) ? cambiosPacientes.get(p.id) : vinculados.has(p.id));
-        // Checked patients first (saved or not yet); the list is already sorted by name.
         const pacientes = filtrarPersonas(data.pacientes, formPacientes)
             .sort((a, b) => marcado(b) - marcado(a));
         if (!pacientes.length) {
@@ -262,11 +255,11 @@
             check.setAttribute('aria-label', `Asignar a ${nombreCompleto(paciente)}`);
             check.addEventListener('change', () => {
                 if (check.checked === vinculados.has(paciente.id)) {
-                    cambiosPacientes.delete(paciente.id); // back to how it is saved
+                    cambiosPacientes.delete(paciente.id);
                 } else {
                     cambiosPacientes.set(paciente.id, check.checked);
                 }
-                renderPacientes(data); // re-sorts: the row moves up (or down) right away
+                renderPacientes(data);
             });
             td.appendChild(check);
             tr.appendChild(td);
@@ -310,7 +303,6 @@
         });
     }
 
-    // Staff accounts whose role can be changed (not your own, not patients).
     function poblarCuentasCambioRol(data) {
         const select = document.getElementById('cambio-cuenta');
         const elegida = select.value;
@@ -351,7 +343,6 @@
                 fallos.push(resultado.error || ERROR_CONEXION);
             }
         }
-        // Back to step 1 (médico search), like "Cambiar".
         cambiosPacientes.clear();
         formPacientes.reset();
         formMedicos.reset();

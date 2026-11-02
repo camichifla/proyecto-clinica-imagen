@@ -34,7 +34,6 @@ $proximos7 = (int) $stmt->fetchColumn();
 $stmt = db()->prepare(SQL_CITAS_CON_ETIQUETAS . " WHERE c.fecha_hora_solicitada >= ? AND c.fecha_hora_solicitada < ?{$condSucC} ORDER BY c.fecha_hora_solicitada ASC");
 $stmt->execute([$hoyTxt, $manana, ...$pSuc]);
 
-// Read-only "Mi sede" card for a receptionist with a branch.
 $miSede = null;
 if ($sucRecep) {
     $stmt = db()->prepare('SELECT nombre, direccion FROM sucursales WHERE id = ?');
@@ -49,7 +48,6 @@ if ($miSede) {
     $stmt->execute([$sucRecep]);
     $miSede['horarios'] = array_map(static fn (array $t): array => ['dia' => (int) $t['dia_semana'], 'apertura' => $t['apertura'], 'cierre' => $t['cierre']], $stmt->fetchAll());
 
-    // No sucursal_estudio rows = unrestricted, so every active study is offered.
     $stmt = db()->prepare('SELECT estudio FROM sucursal_estudio WHERE sucursal_id = ?');
     $stmt->execute([$sucRecep]);
     $claves = $stmt->fetchAll(PDO::FETCH_COLUMN);

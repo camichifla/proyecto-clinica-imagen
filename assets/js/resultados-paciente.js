@@ -90,7 +90,6 @@
             texto.className = 'nota-clinica-texto';
             texto.textContent = nota.texto;
             item.append(meta, texto);
-            // Only the author can delete their own note (hard delete, with confirmation).
             if (nota.propia) {
                 const borrar = document.createElement('button');
                 borrar.type = 'button';
@@ -120,7 +119,6 @@
     function renderResultadosBusqueda(data, encontrado) {
         contenedor.innerHTML = '';
 
-        // Details open inside the search box, under a divider (same as the agenda's day details).
         if (!encontrado) {
             const section = document.createElement('div');
             section.className = 'detalle-expandido';
@@ -189,7 +187,6 @@
         }
     });
 
-    // The role changes the empty-list message; the patient list and the visible data are decided by the API.
     const TEXTOS_ROL = {
         profesional: { sinPacientes: 'No hay pacientes con citas asignadas.' },
     };
@@ -211,7 +208,7 @@
 
         const pacienteIdUrl = new URL(window.location.href).searchParams.get('paciente_id');
         if (pacienteIdUrl) {
-            selectPaciente.value = pacienteIdUrl; // stays '' if it isn't one of the options
+            selectPaciente.value = pacienteIdUrl;
         }
 
         cargarScript('assets/js/selector-combo.js');

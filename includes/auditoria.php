@@ -1,10 +1,23 @@
 <?php
 
+function ip_cliente(): string
+{
+    $ip  = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+    $bin = @inet_pton($ip);
+    if ($bin === false || strlen($bin) !== 16) {
+        return $ip;
+    }
+    if (str_starts_with($bin, str_repeat("\0", 10) . "\xff\xff")) {
+        return inet_ntop(substr($bin, 12));
+    }
+    return inet_ntop(substr($bin, 0, 8) . str_repeat("\0", 8));
+}
+
 function registrar_evento(string $tipo, ?string $detalle = null, ?string $email = null): void
 {
     try {
         $cuentaId = isset($_SESSION['cuenta_id']) ? (int) $_SESSION['cuenta_id'] : null;
-        $ip       = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+        $ip       = ip_cliente();
         if ($detalle !== null) {
             $detalle = mb_substr($detalle, 0, 255);
         }

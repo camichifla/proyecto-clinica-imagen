@@ -64,7 +64,7 @@ if (!$fila) {
 $hash = password_hash($nueva, PASSWORD_BCRYPT);
 
 $db->beginTransaction();
-$db->prepare('UPDATE cuentas SET password_hash = ? WHERE id = ?')->execute([$hash, $fila['cuenta_id']]);
+$db->prepare('UPDATE cuentas SET password_hash = ?, sesion_version = sesion_version + 1 WHERE id = ?')->execute([$hash, $fila['cuenta_id']]);
 $db->prepare('UPDATE tokens_reset SET usado_en = NOW() WHERE id = ?')->execute([$fila['id']]);
 $db->prepare('UPDATE tokens_reset SET usado_en = NOW() WHERE cuenta_id = ? AND usado_en IS NULL')
     ->execute([$fila['cuenta_id']]);

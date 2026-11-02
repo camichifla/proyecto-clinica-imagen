@@ -56,6 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $db->prepare('UPDATE cuentas SET password_hash = ? WHERE id = ?')
                 ->execute([password_hash((string) $_POST['contrasena'], PASSWORD_BCRYPT), $cuenta['id']]);
+            revocar_otras_sesiones($db, (int) $cuenta['id']);
             session_regenerate_id(true);
             registrar_evento('cuenta_password_cambio', 'cuenta=' . $cuenta['id']);
             echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);

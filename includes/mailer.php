@@ -291,3 +291,19 @@ function emitir_token_reset(PDO $db, int $cuentaId, int $horas = 1): string
 
     return $raw;
 }
+
+function responder_y_seguir(array $datos): void
+{
+    $cuerpo = json_encode($datos, JSON_UNESCAPED_UNICODE);
+    ignore_user_abort(true);
+    header('Connection: close');
+    header('Content-Length: ' . strlen($cuerpo));
+    echo $cuerpo;
+    while (ob_get_level() > 0) {
+        ob_end_flush();
+    }
+    flush();
+    if (function_exists('fastcgi_finish_request')) {
+        fastcgi_finish_request();
+    }
+}

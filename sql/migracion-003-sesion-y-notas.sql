@@ -1,0 +1,2 @@
+ALTER TABLE cuentas ADD COLUMN IF NOT EXISTS sesion_version INT UNSIGNED NOT NULL DEFAULT 0 AFTER email_nuevo;
+ALTER TABLE notas_clinicas ADD COLUMN IF NOT EXISTS eliminada_en DATETIME NULL AFTER creado_en;

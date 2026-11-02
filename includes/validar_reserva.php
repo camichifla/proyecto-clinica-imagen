@@ -16,6 +16,17 @@ function hora_ocupada_json(PDOException $e): never
     exit;
 }
 
+const MAX_CITAS_PENDIENTES = 5;
+
+function limite_pendientes_error(?int $pacienteId, ?string $emailPendiente = null): ?string
+{
+    $stmt = db()->prepare("SELECT COUNT(*) FROM citas WHERE estado = 'pendiente' AND (paciente_id = ? OR email_pendiente = ?)");
+    $stmt->execute([$pacienteId, $emailPendiente]);
+    return (int) $stmt->fetchColumn() >= MAX_CITAS_PENDIENTES
+        ? 'Hay ' . MAX_CITAS_PENDIENTES . ' citas pendientes de confirmación. Esperá a que se resuelvan antes de pedir otra.'
+        : null;
+}
+
 function validar_reserva(array $datos, array $estudiosPermitidos, string $fechaMin, string $fechaMax, int $rangoMeses, int $ignorarCitaId = 0): array
 {
     $errores = [];

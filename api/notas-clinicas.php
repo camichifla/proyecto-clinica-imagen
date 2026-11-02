@@ -22,7 +22,7 @@ if (($_POST['accion'] ?? '') === 'borrar') {
         echo json_encode(['ok' => false, 'error' => 'Nota inválida.'], JSON_UNESCAPED_UNICODE);
         exit;
     }
-    $stmt = db()->prepare('DELETE FROM notas_clinicas WHERE id = ? AND cuenta_id = ?');
+    $stmt = db()->prepare('UPDATE notas_clinicas SET eliminada_en = NOW() WHERE id = ? AND cuenta_id = ? AND eliminada_en IS NULL');
     $stmt->execute([$notaId, $usuario['cuenta_id']]);
     if ($stmt->rowCount() === 0) {
         http_response_code(404);

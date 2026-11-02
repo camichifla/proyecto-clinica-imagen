@@ -10,7 +10,7 @@ if (trim((string) ($_POST['sitio_web'] ?? '')) !== '') {
     exit;
 }
 
-if (demasiados_eventos('contacto', 'ip', (string) ($_SERVER['REMOTE_ADDR'] ?? ''), 5, 60)) {
+if (demasiados_eventos('contacto', 'ip', ip_cliente(), 5, 60)) {
     http_response_code(429);
     echo json_encode(['ok' => false, 'errores' => ['general' => 'Enviaste varios mensajes seguidos. Probá de nuevo más tarde.']], JSON_UNESCAPED_UNICODE);
     exit;

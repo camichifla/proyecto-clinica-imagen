@@ -129,23 +129,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!filter_var($emailNuevo, FILTER_VALIDATE_EMAIL)) {
             $errores['paciente_email_nuevo'] = 'Ingresá un email válido.';
         } else {
-            $stmt = db()->prepare("SELECT ref_id FROM cuentas WHERE rol = 'paciente' AND email = ?");
-            $stmt->execute([$emailNuevo]);
-            $refId = $stmt->fetchColumn();
-            if ($refId !== false) {
-
-                $errores['paciente_email_nuevo'] = 'Ya existe una cuenta con ese email. Elegí el paciente desde "Paciente existente".';
-            } else {
-                $emailPendiente    = $emailNuevo;
-                $nombrePendiente   = trim((string) ($_POST['paciente_nombre_nuevo'] ?? ''));
-                $apellidoPendiente = trim((string) ($_POST['paciente_apellido_nuevo'] ?? ''));
-            }
+            $emailPendiente    = $emailNuevo;
+            $nombrePendiente   = trim((string) ($_POST['paciente_nombre_nuevo'] ?? ''));
+            $apellidoPendiente = trim((string) ($_POST['paciente_apellido_nuevo'] ?? ''));
         }
     }
 
     [$erroresReserva, $sucursalId, $profesionalId, $marcaTiempo, $estudio] =
         validar_reserva($valores, estudios_activos(), $fechaMin, $fechaMax, RANGO_MESES);
     $errores = array_merge($errores, $erroresReserva);
+
+    if (!$errores && ($limite = limite_pendientes_error($pacienteId, $emailPendiente))) {
+        $errores['general'] = $limite;
+    }
 
     if ($errores) {
         echo json_encode(['ok' => false, 'errores' => $errores], JSON_UNESCAPED_UNICODE);

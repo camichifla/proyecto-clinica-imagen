@@ -13,7 +13,7 @@ const DUMMY_HASH = '$2y$10$frrN.cZWEHqFbIH6xRp4R.WkE5mQDxy4sE35jd6QagOhrVYweahrS
 $email    = trim((string) ($_POST['email'] ?? ''));
 $password = (string) ($_POST['password'] ?? '');
 
-$ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+$ip = ip_cliente();
 if (demasiados_eventos('login_fallo', 'email', $email, MAX_FALLOS_EMAIL, VENTANA_MINUTOS, $ip)
     || demasiados_eventos('login_fallo', 'ip', $ip, MAX_FALLOS_IP, VENTANA_MINUTOS)) {
     http_response_code(429);
@@ -21,7 +21,7 @@ if (demasiados_eventos('login_fallo', 'email', $email, MAX_FALLOS_EMAIL, VENTANA
     exit;
 }
 
-$stmt = db()->prepare('SELECT id, password_hash, rol, ref_id, verificado, activo FROM cuentas WHERE email = ?');
+$stmt = db()->prepare('SELECT id, password_hash, rol, ref_id, verificado, activo, sesion_version FROM cuentas WHERE email = ?');
 $stmt->execute([$email]);
 $cuenta = $stmt->fetch();
 
@@ -67,6 +67,8 @@ $_SESSION['rol']           = (string) $cuenta['rol'];
 $_SESSION['ref_id']        = (int) $cuenta['ref_id'];
 $_SESSION['nombre']        = $nombre;
 $_SESSION['ultimo_acceso'] = time();
+$_SESSION['inicio']        = time();
+$_SESSION['sesion_version'] = (int) $cuenta['sesion_version'];
 $_SESSION['csrf']          = bin2hex(random_bytes(32));
 
 registrar_evento('login_ok', 'cuenta=' . $cuenta['id'], $email);

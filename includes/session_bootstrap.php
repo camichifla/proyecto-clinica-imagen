@@ -19,6 +19,7 @@ set_exception_handler(function (Throwable $e): void {
 });
 
 const SESION_TIMEOUT_SEGUNDOS = 1500;
+const SESION_MAX_SEGUNDOS = 43200;
 
 if (session_status() === PHP_SESSION_NONE) {
     ini_set('session.use_strict_mode', '1');
@@ -34,7 +35,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 if (isset($_SESSION['cuenta_id']) && isset($_SESSION['ultimo_acceso'])
-    && (time() - $_SESSION['ultimo_acceso']) > SESION_TIMEOUT_SEGUNDOS
+    && ((time() - $_SESSION['ultimo_acceso']) > SESION_TIMEOUT_SEGUNDOS
+        || (time() - ($_SESSION['inicio'] ?? time())) > SESION_MAX_SEGUNDOS)
 ) {
     $_SESSION = [];
     if (ini_get('session.use_cookies')) {
@@ -95,10 +97,10 @@ function usuario_actual(): ?array
     }
 
     require_once __DIR__ . '/db.php';
-    $stmt = db()->prepare('SELECT rol, ref_id, activo FROM cuentas WHERE id = ?');
+    $stmt = db()->prepare('SELECT rol, ref_id, activo, sesion_version FROM cuentas WHERE id = ?');
     $stmt->execute([(int) $_SESSION['cuenta_id']]);
     $fila = $stmt->fetch();
-    if (!$fila || (int) $fila['activo'] !== 1) {
+    if (!$fila || (int) $fila['activo'] !== 1 || (int) $fila['sesion_version'] !== (int) ($_SESSION['sesion_version'] ?? 0)) {
         foreach (['cuenta_id', 'rol', 'ref_id', 'nombre'] as $clave) {
             unset($_SESSION[$clave]);
         }
@@ -113,4 +115,14 @@ function usuario_actual(): ?array
         'ref_id'    => (int) $_SESSION['ref_id'],
         'nombre'    => (string) $_SESSION['nombre'],
     ];
+}
+
+function revocar_otras_sesiones(PDO $db, int $cuentaId): void
+{
+    $db->prepare('UPDATE cuentas SET sesion_version = sesion_version + 1 WHERE id = ?')->execute([$cuentaId]);
+    if (isset($_SESSION['cuenta_id']) && (int) $_SESSION['cuenta_id'] === $cuentaId) {
+        $stmt = $db->prepare('SELECT sesion_version FROM cuentas WHERE id = ?');
+        $stmt->execute([$cuentaId]);
+        $_SESSION['sesion_version'] = (int) $stmt->fetchColumn();
+    }
 }

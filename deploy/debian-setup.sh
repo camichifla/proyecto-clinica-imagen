@@ -127,7 +127,9 @@ if [ ! -s /root/.clinica-respaldo.key ]; then
   echo "            Guárdela FUERA del servidor (clinica-respaldo clave); sin ella los respaldos remotos no se recuperan." >&2
 fi
 
+printf 'ServerTokens Prod\nServerSignature Off\n' > /etc/apache2/conf-available/clinica-seguridad.conf
 a2enmod -q rewrite headers remoteip
+a2enconf -q clinica-seguridad
 a2dissite -q 000-default || true
 a2ensite -q clinica-imagen
 apache2ctl configtest

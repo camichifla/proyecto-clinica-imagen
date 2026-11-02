@@ -7,7 +7,7 @@ require_once __DIR__ . '/../includes/pacientes.php';
 
 require_post_json();
 
-if (demasiados_eventos('registro_intento', 'ip', (string) ($_SERVER['REMOTE_ADDR'] ?? ''), 10, 60)) {
+if (demasiados_eventos('registro_intento', 'ip', ip_cliente(), 10, 60)) {
     http_response_code(429);
     echo json_encode(['ok' => false, 'errores' => ['general' => 'Demasiados registros desde esta conexión. Probá de nuevo más tarde.']], JSON_UNESCAPED_UNICODE);
     exit;
@@ -81,8 +81,6 @@ try {
     $cuentaId = (int) $db->lastInsertId();
 
     $tokenRaw = emitir_token_verificacion($db, $cuentaId);
-
-    vincular_citas_pendientes($db, $pacienteId, $valores['email']);
 
     $db->commit();
 

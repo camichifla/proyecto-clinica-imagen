@@ -50,6 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         [$errores, $sucursalId, $profesionalId, $marcaTiempo, $estudio] = validar_reserva($valores, estudios_autoagendables(), $fechaMin, $fechaMax, RANGO_MESES, 0);
 
+        if (!$errores && ($limite = limite_pendientes_error((int) $usuario['ref_id']))) {
+            $errores['general'] = $limite;
+        }
+
         if ($errores) {
             echo json_encode(['ok' => false, 'errores' => $errores], JSON_UNESCAPED_UNICODE);
             exit;

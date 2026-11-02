@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../includes/session_bootstrap.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/mailer.php';
+require_once __DIR__ . '/../includes/pacientes.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -11,9 +12,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'reenv
     csrf_check($_POST['csrf'] ?? null);
 
     $email = trim((string) ($_POST['email'] ?? ''));
-    $ip    = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+    $ip    = ip_cliente();
     $limitado = demasiados_eventos('verif_reenvio', 'ip', $ip, 5, 15);
     registrar_evento('verif_reenvio');
+    responder_y_seguir(['ok' => true]);
     if ($email !== '' && !$limitado) {
         $stmt = $db->prepare('SELECT id FROM cuentas WHERE email = ? AND verificado = 0');
         $stmt->execute([$email]);
@@ -24,15 +26,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'reenv
             $link     = APP_URL . '/verify.html?token=' . $tokenRaw;
             enviar_verificacion($email, $link);
         }
-
     }
-    echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['token'])) {
+$esConfirmar = $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'confirmar';
+if ($esConfirmar || ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['token']))) {
+    if ($esConfirmar) {
+        csrf_check($_POST['csrf'] ?? null);
+    }
     limpiar_emails_pendientes($db);
-    $tokenHash = hash('sha256', (string) $_GET['token']);
+    $tokenHash = hash('sha256', (string) ($_POST['token'] ?? $_GET['token']));
 
     $stmt = $db->prepare(
         'SELECT id, cuenta_id FROM tokens_verificacion
@@ -41,11 +45,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['token'])) {
     $stmt->execute([$tokenHash]);
     $fila = $stmt->fetch();
 
+    if ($fila && !$esConfirmar) {
+        echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     if ($fila) {
         try {
             $db->beginTransaction();
             $db->prepare('UPDATE cuentas SET verificado = 1, email = COALESCE(email_nuevo, email), email_nuevo = NULL WHERE id = ?')->execute([$fila['cuenta_id']]);
             $db->prepare('UPDATE tokens_verificacion SET usado_en = NOW() WHERE id = ?')->execute([$fila['id']]);
+            $cuenta = $db->prepare("SELECT email, ref_id FROM cuentas WHERE id = ? AND rol = 'paciente'");
+            $cuenta->execute([$fila['cuenta_id']]);
+            if ($datos = $cuenta->fetch()) {
+                vincular_citas_pendientes($db, (int) $datos['ref_id'], $datos['email']);
+            }
             $db->commit();
         } catch (PDOException $e) {
             if ($db->inTransaction()) {

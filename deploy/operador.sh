@@ -469,6 +469,9 @@ ci_valida() {
 }
 
 generar_cuentas() {
+  if [ "${OPERADOR_CUENTAS_PRUEBA:-0}" != 1 ]; then
+    warn "Deshabilitado: crea cuentas con contraseña conocida. Solo en pruebas: OPERADOR_CUENTAS_PRUEBA=1 sudo -E operador"; return 1
+  fi
   local db=clinica_imagen dominio=clinica-imagen.local
   if [ -n "$(mariadb -N "$db" -e "SELECT 1 FROM cuentas WHERE email = 'paciente01@$dominio'" 2>/dev/null)" ]; then
     warn "Las cuentas de prueba ya existen (paciente01@$dominio)"; return 1

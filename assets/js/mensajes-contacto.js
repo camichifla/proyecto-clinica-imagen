@@ -19,7 +19,6 @@
         mostrarMensaje((data && data.error) || 'No se pudo atender el mensaje.', true);
     }
 
-    // Siempre texto plano: el contenido lo escribió un visitante anónimo.
     function renderMensaje(m, maxRespuesta) {
         const card = document.createElement('article');
         card.className = 'mensaje-contacto';

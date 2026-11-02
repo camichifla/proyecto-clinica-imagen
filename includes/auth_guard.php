@@ -1,6 +1,5 @@
 <?php
 
-// Requiere usuario_actual() de session_bootstrap.php: incluirlo antes.
 function requerir_rol_json(array $roles): array
 {
     header('Content-Type: application/json; charset=utf-8');

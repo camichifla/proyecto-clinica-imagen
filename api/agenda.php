@@ -30,7 +30,6 @@ if (in_array($usuario['rol'], ['administrador', 'recepcionista'], true)) {
     if ($sucursalId !== null && !in_array($sucursalId, array_column($sucursales, 'id'), true)) {
         $sucursalId = null;
     }
-    // La recepcionista queda restringida a su sucursal y se ignora el filtro; 0 = sin sede asignada, no muestra nada.
     $sucRecep = filtro_sucursal_recepcion($usuario);
     if ($sucRecep !== null) {
         $sucursalId  = $sucRecep;

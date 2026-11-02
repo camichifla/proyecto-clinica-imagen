@@ -21,7 +21,6 @@ log() {
 fail() { echo "✘ $1" >&2; log WARN "$1"; exit 1; }
 done_ok() { echo "✔ $1"; log OK "$1"; }
 
-# Crea la clave de cifrado una sola vez y avisa al operador que guarde una copia fuera del servidor.
 asegurar_clave() {
   command -v gpg >/dev/null || fail "gpg no está instalado (apt install gnupg)"
   [ -s "$KEY_FILE" ] && return 0
@@ -39,7 +38,6 @@ gpg_cifrar() {
   gpg --batch --yes --pinentry-mode loopback --passphrase-file "$KEY_FILE" --symmetric --cipher-algo AES256 -o "$1"
 }
 
-# Sube $ENC_DIR al remoto; quien la llama solo deja archivos .gpg.
 subir_cifrados() {
   command -v rclone >/dev/null || { log INFO "rclone no instalado; se omite el respaldo remoto"; echo "rclone no instalado: omitido"; exit 0; }
   if ! rclone listremotes | grep -qx "$RCLONE_REMOTE"; then
@@ -61,8 +59,6 @@ case ${1:-} in
     fi ;;
   archivos)
     dest="$BACKUP_DIR/archivos_$stamp.tar.gz"
-    # GNU tar sale con 1 ante avisos de "archivo cambió" (el archivo sigue siendo válido) y con 2 ante errores fatales.
-    # shadow/gshadow (y sus copias) se excluyen: contienen hashes de contraseñas.
     tar -czf "$dest" --exclude=/etc/shadow --exclude=/etc/shadow- --exclude=/etc/gshadow --exclude=/etc/gshadow- /etc "$APP_DIR" 2>/dev/null
     if [ $? -le 1 ]; then done_ok "Respaldo de /etc y $APP_DIR creado en $dest"; else rm -f "$dest"; fail "Falló el respaldo de archivos"; fi ;;
   remoto)

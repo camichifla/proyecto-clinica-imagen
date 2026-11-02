@@ -1,5 +1,4 @@
 (() => {
-    // Los textareas crecen con field-sizing (base.css); donde el navegador no lo soporta se ajusta la altura a mano.
     if (!CSS.supports('field-sizing', 'content')) {
         const ajustar = (evento) => {
             const caja = evento.target;
@@ -12,7 +11,6 @@
         document.addEventListener('focusin', ajustar);
     }
 
-    // Las etiquetas flotantes (base.css) detectan el campo vacío con :placeholder-shown, por eso se pone un placeholder invisible.
     const ponerPlaceholder = (raiz) => {
         if (raiz.querySelectorAll) {
             raiz.querySelectorAll('.campo input:not([placeholder]), .campo textarea:not([placeholder])').forEach((campo) => {
@@ -194,7 +192,6 @@
 
     document.addEventListener('input', (evento) => {
         const campo = evento.target;
-        // data-permitidos="<cuerpo de clase de caracteres regex>": lo que quede fuera se descarta al tipear o pegar; el pattern del campo sigue validando el formato.
         if (!campo.dataset || campo.dataset.permitidos === undefined) {
             return;
         }
@@ -206,7 +203,6 @@
         }
     });
 
-    // Listas de requisitos: <ul class="requisitos" data-para="<id del input>"> con <li data-regla="<regex>">; cada ítem se marca (.cumplido) mientras el valor cumple su regla.
     document.querySelectorAll('.requisitos[data-para]').forEach((lista) => {
         const campo = document.getElementById(lista.dataset.para);
         const items = Array.from(lista.querySelectorAll('li[data-regla]'));

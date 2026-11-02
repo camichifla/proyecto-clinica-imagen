@@ -1,4 +1,3 @@
-/* Se enlaza solo desde sus vistas; entra en la capa base para no alterar la precedencia. */
 @layer base {
 .hero {
     position: relative;

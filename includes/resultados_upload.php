@@ -7,7 +7,6 @@ require_once __DIR__ . '/mailer.php';
 const MAX_TAMANIO_IMAGEN = 10 * 1024 * 1024;
 const MAX_TAMANIO_INFORME = 10 * 1024 * 1024;
 
-// La extensión sale del tipo MIME detectado en el contenido, nunca del Content-Type ni del nombre que informa el cliente.
 const MIME_A_EXTENSION = [
     'image/jpeg' => 'jpg',
     'image/png'  => 'png',
@@ -114,7 +113,6 @@ function guardar_resultado_con_imagenes(
              VALUES (?, ?, ?)'
         );
         foreach ($archivosValidados as $archivo) {
-            // Nombre aleatorio e impredecible en disco: el nombre original del cliente nunca se usa para almacenar.
             $nombreGenerado = bin2hex(random_bytes(16)) . '.' . $archivo['extension'];
             $destino        = STORAGE_RESULTADOS_DIR . '/' . $nombreGenerado;
 

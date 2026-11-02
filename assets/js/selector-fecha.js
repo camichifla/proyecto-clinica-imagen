@@ -95,7 +95,6 @@
             boton.classList.toggle('selector-fecha-vacio', !fecha);
         }
 
-        // Los scripts que asignan input.value directamente (filtros por defecto, reseteos) también actualizan el texto del botón.
         Object.defineProperty(input, 'value', {
             configurable: true,
             get: () => valorNativo.get.call(input),
@@ -164,7 +163,6 @@
             }
         }
 
-        // Posición fija junto al botón para que tablas o tarjetas con scroll no lo recorten; abre hacia arriba si hace falta.
         function ubicar() {
             const r = boton.getBoundingClientRect();
             const alto = panel.offsetHeight;

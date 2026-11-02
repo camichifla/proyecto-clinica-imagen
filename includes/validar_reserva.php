@@ -6,7 +6,6 @@ function es_hora_ocupada(Throwable $e): bool
     return $e instanceof PDOException && $e->getCode() === '23000' && str_contains($e->getMessage(), 'uq_citas_slot');
 }
 
-// Responde 422 solo si la excepción es el choque de uq_citas_slot; en otro caso la relanza.
 function hora_ocupada_json(PDOException $e): never
 {
     if (!es_hora_ocupada($e)) {
@@ -38,7 +37,6 @@ function validar_reserva(array $datos, array $estudiosPermitidos, string $fechaM
         }
     }
 
-    // Vacío = "cualquiera disponible": se asigna al final, una vez validado todo lo demás.
     $autoAsignar   = $datos['profesional_id'] === '' || $datos['profesional_id'] === 'cualquiera';
     $profesionalId = $autoAsignar ? null : filter_var($datos['profesional_id'], FILTER_VALIDATE_INT);
     if (!$autoAsignar && !$profesionalId) {
@@ -105,7 +103,6 @@ function validar_reserva(array $datos, array $estudiosPermitidos, string $fechaM
     }
 
     if (!$errores && $autoAsignar && $sucursalId && $marcaTiempo) {
-        // Sin balanceo de carga: gana el id más bajo; pasar al menos reservado si hiciera falta.
         $stmt = db()->prepare(
             'SELECT p.id
                FROM profesionales p

@@ -1,4 +1,3 @@
-// Solo comodidad de UX: el servidor revalida todo según el rol. Los bloques ocultos también se deshabilitan para que no se envíen ni se marquen como obligatorios.
 (function () {
     var rolSelect = document.getElementById('rol');
     var campos = document.getElementById('campos-cuenta');

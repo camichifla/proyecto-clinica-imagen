@@ -1,12 +1,10 @@
 <?php
-// Formulario público sin login: el token CSRF se obtiene de api/sesion.php?opcional=1.
 require_once __DIR__ . '/../includes/session_bootstrap.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/validation.php';
 
 require_post_json();
 
-// Honeypot: campo oculto que una persona real nunca completa; se simula éxito sin guardar nada.
 if (trim((string) ($_POST['sitio_web'] ?? '')) !== '') {
     echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);
     exit;

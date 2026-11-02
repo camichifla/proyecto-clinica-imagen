@@ -11,7 +11,6 @@ function smtp_configurado(): bool
     return SMTP_HOST !== '' && SMTP_USER !== '' && SMTP_PASS !== '';
 }
 
-// Devuelve true en ambos modos: el respaldo de desarrollo (storage/mail.log) siempre "tiene éxito" para completar registro y reseteo sin servidor de correo.
 function enviar_correo(string $destinatario, string $asunto, string $cuerpo): bool
 {
     if (!smtp_configurado()) {
@@ -265,7 +264,6 @@ function aplicar_cambio_email(PDO $db, array $cuenta, string $email): ?string
     return emitir_token_verificacion($db, (int) $cuenta['id']);
 }
 
-// Solo se guarda el hash sha256 del token (nunca el token) y se invalida cualquier token pendiente anterior.
 function emitir_token_verificacion(PDO $db, int $cuentaId): string
 {
     $raw  = bin2hex(random_bytes(32));

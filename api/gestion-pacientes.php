@@ -7,7 +7,6 @@ require_once __DIR__ . '/../includes/mailer.php';
 require_once __DIR__ . '/../includes/pacientes.php';
 
 $usuario = requerir_rol_json(['administrador', 'recepcionista']);
-// La recepcionista solo puede crear cuentas de paciente: no lista ni edita.
 $soloAlta = $usuario['rol'] === 'recepcionista';
 
 const MAX_FILAS_PACIENTES = 50;
@@ -59,7 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Borra solo la cuenta de acceso y únicamente si estaba dada de baja; paciente, citas, resultados y notas se conservan.
     if ($accion === 'borrar_cuenta') {
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
         $stmt = db()->prepare("SELECT id, email, activo FROM cuentas WHERE rol = 'paciente' AND ref_id = ?");

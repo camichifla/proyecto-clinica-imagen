@@ -1,5 +1,3 @@
-/* Precedencia de capas, de menor a mayor: variables < base < paginas. Una capa posterior gana sin importar la especificidad ni el orden de los <link>. */
-/* Leaflet (index.html) no usa capas y vence a todas. */
 @layer variables, base, paginas;
 
 @import url("./variables.css") layer(variables);

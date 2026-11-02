@@ -1,5 +1,3 @@
-// Cascada de reserva (estudio -> sede -> profesional -> fecha -> hora), compartida por paciente y médico.
-// El filtrado en el cliente es solo UX: el servidor revalida cada restricción.
 (function () {
     var sucursalSelect    = document.getElementById('sucursal');
     var estudioSelect     = document.getElementById('estudio');
@@ -15,7 +13,6 @@
         return SUCURSALES[sucursalSelect.value] || null;
     }
 
-    // Una sede cubre un estudio si lo tiene habilitado (o no restringe estudios) Y tiene al menos un profesional asignado que lo realice.
     function sedeCubreEstudio(s, estudio) {
         if (!s) {
             return false;
@@ -135,7 +132,6 @@
         quitarOcupadas(fechaSeleccionada);
     }
 
-    // Si la consulta falla se conservan todas las horas (el servidor igual protege); la hora en edición nunca se quita. El contador descarta respuestas viejas.
     var pedidoHoras = 0;
     function quitarOcupadas(fecha) {
         var pedido = ++pedidoHoras;
@@ -168,7 +164,6 @@
         return fechaInput.value ? parseISO(fechaInput.value) : null;
     }
 
-    // El calendario compartido (selector-fecha.js) solo ofrece los días en que la sede abre.
     fechaInput.diaHabilitado = function (fecha) {
         return diaAbierto(sucursalActual(), fecha);
     };

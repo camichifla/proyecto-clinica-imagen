@@ -7,7 +7,6 @@ require_once __DIR__ . '/../includes/pacientes.php';
 
 require_post_json();
 
-// Se limitan los intentos y no solo los éxitos, para frenar el sondeo de emails y cédulas existentes.
 if (demasiados_eventos('registro_intento', 'ip', (string) ($_SERVER['REMOTE_ADDR'] ?? ''), 10, 60)) {
     http_response_code(429);
     echo json_encode(['ok' => false, 'errores' => ['general' => 'Demasiados registros desde esta conexión. Probá de nuevo más tarde.']], JSON_UNESCAPED_UNICODE);
@@ -28,8 +27,6 @@ if ($errores) {
 $db = db();
 limpiar_cuentas_sin_verificar($db);
 
-// Anti-enumeración: email o cédula existentes, o tope de correos alcanzado, responden siempre el mismo éxito.
-// El tope por email evita inundar la casilla de una víctima a través de este endpoint.
 $limitadoEmail = demasiados_eventos('registro_intento', 'email', $valores['email'], 3, 60);
 registrar_evento('registro_intento', null, $valores['email']);
 $exito = static function (): never {

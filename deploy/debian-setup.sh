@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Quien invoca puede usar una umask restrictiva (operador.sh usa 077); todo lo creado aquí debe ser legible por Apache.
 umask 022
 
 [ "$(id -u)" -eq 0 ] || { echo "Run as root (sudo)." >&2; exit 1; }
@@ -25,12 +24,10 @@ apt-get update
 apt-get install -y apache2 mariadb-server libapache2-mod-php php-cli php-mysql php-mbstring rsync openssl cron curl gnupg
 [ -z "$DOMAIN" ] || apt-get install -y certbot python3-certbot-apache
 
-# La app fija PHP en America/Montevideo y compara contra NOW() de MariaDB: ambos deben coincidir.
 timedatectl set-timezone America/Montevideo
 systemctl restart mariadb
 
 mkdir -p "$DEST"
-# --chmod: el clon puede venir de un mktemp 0700 o de una umask restrictiva; Apache debe poder leer todos los archivos.
 rsync -a --chmod=D755,F644 \
   --exclude='.git' --exclude='.claude' --exclude='.atl' \
   --exclude='includes/config.php' --exclude='storage/mail.log' \
@@ -65,7 +62,6 @@ if [ "$TABLES" -eq 0 ]; then
 
   ADMIN_EMAIL=${ADMIN_EMAIL:-admin@clinica-imagen.local}
   ADMIN_PASS=$(openssl rand -hex 8)
-  # Las cuentas de personal solo las crea un administrador, por eso se siembra el primero con contraseña aleatoria mostrada una sola vez.
   ADMIN_HASH=$(php -r 'echo password_hash($argv[1], PASSWORD_BCRYPT);' "$ADMIN_PASS")
   mariadb "$DB_NAME" <<SQL
 INSERT INTO administradores (nombre, apellido, ci) VALUES ('Admin', 'Inicial', '11111111');
@@ -85,7 +81,6 @@ else
 fi
 
 chown -R root:root "$DEST"
-# rsync -a copia el modo del directorio origen; el operador clona en un mktemp 0700 y eso dejaba a Apache sin acceso.
 chmod 755 "$DEST"
 chown root:www-data "$DEST/includes/config.php"
 chown -R www-data:www-data "$DEST/storage"
@@ -126,7 +121,6 @@ EOF
 install -m 755 deploy/respaldo.sh /usr/local/sbin/clinica-respaldo
 install -m 644 deploy/config/cron-clinica-imagen /etc/cron.d/clinica-imagen
 install -m 644 deploy/config/profile-clinica.sh /etc/profile.d/clinica-imagen.sh
-# Clave de cifrado de respaldos (todo lo que se sube al remoto va cifrado con gpg); se crea una sola vez, solo root.
 if [ ! -s /root/.clinica-respaldo.key ]; then
   (umask 077; openssl rand -base64 32 > /root/.clinica-respaldo.key)
   echo "IMPORTANTE: clave de cifrado de respaldos creada en /root/.clinica-respaldo.key." >&2

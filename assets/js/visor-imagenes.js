@@ -20,7 +20,6 @@
         dialogo.close();
     });
 
-    // Cierra al hacer clic en el fondo (::backdrop): un clic dentro de la imagen no llega al <dialog> mismo.
     dialogo.addEventListener('click', function (evento) {
         if (evento.target === dialogo) {
             dialogo.close();

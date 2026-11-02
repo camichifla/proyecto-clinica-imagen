@@ -22,12 +22,10 @@ const SESION_TIMEOUT_SEGUNDOS = 1500;
 
 if (session_status() === PHP_SESSION_NONE) {
     ini_set('session.use_strict_mode', '1');
-    // Fija a nivel de aplicación los valores inseguros del php.ini de XAMPP (httponly, samesite); php.ini no se edita.
     session_set_cookie_params([
         'lifetime' => 0,
         'path'     => '/',
         'domain'   => '',
-        // Depende de la configuración: forzar true sobre HTTP haría que el navegador descarte la cookie.
         'secure'   => APP_HTTPS,
         'httponly' => true,
         'samesite' => 'Lax',
@@ -67,7 +65,6 @@ function csrf_token(): string
 function csrf_check(mixed $token): void
 {
     if (!is_string($token) || $token === '' || !hash_equals(csrf_token(), $token)) {
-        // PHP vacía $_POST por completo cuando el cuerpo supera post_max_size.
         $excedido = empty($_POST) && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0;
         http_response_code($excedido ? 413 : 403);
         header('Content-Type: application/json; charset=utf-8');
@@ -91,7 +88,6 @@ function require_post_json(): void
     csrf_check($_POST['csrf'] ?? null);
 }
 
-// Rol e id de perfil se releen de cuentas en cada solicitud: un cambio de rol o una baja aplica a sesiones ya abiertas.
 function usuario_actual(): ?array
 {
     if (empty($_SESSION['cuenta_id'])) {

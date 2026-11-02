@@ -11,7 +11,6 @@ function cifrado_clave(): string
     return $clave;
 }
 
-// AES-256-GCM en reposo para notas clínicas. Formato: "v1:" . base64(iv(12) . tag(16) . texto cifrado). APP_KEY = base64 de 32 bytes aleatorios.
 function cifrar(string $texto): string
 {
     $clave = cifrado_clave();
@@ -24,7 +23,6 @@ function cifrar(string $texto): string
     return CIFRADO_PREFIJO . base64_encode($iv . $tag . $cifrado);
 }
 
-// Entrada alterada, truncada, sin prefijo o con otra clave lanza RuntimeException; nunca devuelve basura.
 function descifrar(string $valor): string
 {
     $clave = cifrado_clave();

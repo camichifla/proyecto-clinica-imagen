@@ -1,7 +1,6 @@
 CREATE TABLE cuentas (
   id             INT UNSIGNED NOT NULL AUTO_INCREMENT,
   email          VARCHAR(254) NOT NULL,
-  -- bcrypt: la app fija PASSWORD_BCRYPT, siempre 60 caracteres.
   password_hash  CHAR(60) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   rol            ENUM('paciente','medico','profesional','administrador','recepcionista') NOT NULL,
   ref_id         INT UNSIGNED NOT NULL,
@@ -139,7 +138,6 @@ CREATE TABLE tokens_reset (
   CONSTRAINT fk_tr_cuenta FOREIGN KEY (cuenta_id) REFERENCES cuentas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Un día cerrado es la AUSENCIA de filas. Los turnos solapados no se pueden restringir en SQL.
 CREATE TABLE sucursal_horarios (
   id            INT UNSIGNED     NOT NULL AUTO_INCREMENT,
   sucursal_id   INT UNSIGNED     NOT NULL,
@@ -148,7 +146,6 @@ CREATE TABLE sucursal_horarios (
   hora_cierre   TIME             NOT NULL,
   creado_en     DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  -- El prefijo izquierdo (sucursal_id, dia_semana) atiende la búsqueda; no hace falta otro KEY.
   UNIQUE KEY uq_sh_turno (sucursal_id, dia_semana, hora_apertura),
   CONSTRAINT fk_sh_sucursal FOREIGN KEY (sucursal_id) REFERENCES sucursales(id) ON DELETE CASCADE,
   CONSTRAINT ck_sh_dia   CHECK (dia_semana BETWEEN 1 AND 7),
@@ -179,7 +176,6 @@ CREATE TABLE profesional_horarios (
   CONSTRAINT ck_phor_rango CHECK (hora_apertura < hora_cierre)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Lista blanca: sin filas para una sucursal = sin restricción.
 CREATE TABLE sucursal_estudio (
   sucursal_id INT UNSIGNED NOT NULL,
   estudio     VARCHAR(30)  NOT NULL,
@@ -206,7 +202,6 @@ CREATE TABLE citas (
   actualizado_en        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   slot_activo           TINYINT AS (IF(estado IN ('pendiente','confirmada'), 1, NULL)) STORED,
   PRIMARY KEY (id),
-  -- slot_activo es NULL cuando la cita se rechaza o cancela, y libera el turno (los NULL no chocan en un UNIQUE).
   UNIQUE KEY  uq_citas_slot            (profesional_id, fecha_hora_solicitada, slot_activo),
   KEY         ix_citas_paciente        (paciente_id),
   KEY         ix_citas_email_pendiente (email_pendiente),
@@ -329,7 +324,6 @@ CREATE TABLE mensajes_contacto (
   KEY ix_mensajes_contacto_creado (creado_en)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Va primero: las filas de sucursal_estudio posteriores referencian estudios.clave.
 INSERT INTO estudios (clave, etiqueta, descripcion, autoagendable) VALUES
   ('placa',       'Placa',       'Diagnostico basico de la estructura dental con una toma rapida y de muy baja radiacion.', 1),
   ('radiografia', 'Radiografia', 'Imagen detallada de dientes y huesos para planificar o controlar un tratamiento.', 1),
@@ -337,7 +331,6 @@ INSERT INTO estudios (clave, etiqueta, descripcion, autoagendable) VALUES
   ('tomografia',  'Tomografia',  'Imagen tridimensional de la boca y los maxilares para casos que requieren mayor precision.', 0),
   ('modelo_3d',   'Modelo 3D',   'Escaneo digital de la boca que genera un modelo tridimensional de la dentadura.', 0);
 
--- El orden de inserción fija los ids 1..11: los datos de horarios y profesionales se enlazan por nombre.
 INSERT INTO sucursales (nombre, direccion, latitud, longitud) VALUES
   ('Montevideo Shopping', 'Luis A. de Herrera 1248, oficina 321, Montevideo', -34.903500, -56.136200),
   ('Nuevo Centro',        'Bv. Artigas 3126, piso 11 apto. 1103, Montevideo', -34.889000, -56.167000),

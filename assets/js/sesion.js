@@ -9,7 +9,6 @@ const ROLES_ETIQUETA = { paciente: 'Paciente', medico: 'Médico', profesional: '
         { href: 'contacto.html', label: 'Contacto' },
     ];
 
-    // Las páginas protegidas no muestran contenido hasta confirmar la sesión (evita el parpadeo antes de una redirección).
     const principal = document.querySelector('main');
     if (!publico && principal) {
         principal.style.visibility = 'hidden';
@@ -19,7 +18,6 @@ const ROLES_ETIQUETA = { paciente: 'Paciente', medico: 'Médico', profesional: '
         const url = publico ? 'api/sesion.php?opcional=1' : 'api/sesion.php';
         let respuesta;
         try {
-            // Una sesión vencida se destruye en esa respuesta; reintentar abre una nueva con su token CSRF.
             respuesta = await fetch(url);
             if (publico && respuesta.status === 401) {
                 respuesta = await fetch(url);

@@ -125,14 +125,11 @@ menu_servicios() {
 
 TUNEL_SERVICE=/etc/systemd/system/clinica-tunel.service
 
-# Apunta los enlaces y las banderas de cookie de la app a la URL pública indicada.
 configurar_url() {
   sed -i -e "s|define('APP_URL', '[^']*')|define('APP_URL', '$1')|" \
          -e "s|define('APP_HTTPS', [a-z]*)|define('APP_HTTPS', $2)|" "$APP_DIR/includes/config.php"
 }
 
-# Publica el sitio con un túnel rápido de Cloudflare: sin puertos abiertos y con HTTPS de Cloudflare.
-# La URL del túnel rápido cambia en cada reinicio; repetir esta opción o usar un túnel con nombre y dominio para una URL fija.
 publicar_tunel() {
   if ! command -v cloudflared >/dev/null; then
     local deb; deb=$(mktemp --suffix=.deb)
@@ -279,7 +276,6 @@ menu_respaldos() {
            read -rp "Ruta local a subir [$BACKUP_DIR]: " ruta
            ruta=${ruta:-$BACKUP_DIR}
            read -rp "Carpeta destino en Google Drive: " carpeta
-           # Se cifra antes de subir (clinica-respaldo subir): el texto plano nunca llega a Google Drive.
            RCLONE_REMOTE=gdrive: "$RESPALDO_BIN" subir "$ruta" "$carpeta" || warn "Falló la subida a Google Drive"
          fi ;;
       6) log ACTION "Listado de respaldos"; ls -lh "$BACKUP_DIR" ;;
@@ -429,7 +425,6 @@ plantilla() {
 
 configurar_firewall() {
   plantilla nftables.conf /etc/nftables.conf 644 || return 1
-  # nftables reemplaza a ufw: dos firewalls gestionando reglas entrarían en conflicto.
   if dpkg -s ufw &>/dev/null; then
     ufw --force disable &>/dev/null; apt-get purge -y ufw &>/dev/null
   fi
@@ -450,7 +445,6 @@ configurar_ssh() {
 
 configurar_fail2ban() {
   plantilla fail2ban-clinica.local /etc/fail2ban/jail.d/clinica.local 644 || return 1
-  # La jaula apache-auth de fail2ban necesita que su archivo de log exista antes de arrancar.
   [ -f "$APACHE_ERROR" ] || touch "$APACHE_ERROR"
   systemctl restart fail2ban && ok "fail2ban configurado (jails sshd y apache-auth)" || warn "fail2ban no pudo arrancar"
 }
@@ -467,7 +461,6 @@ instalar_script() {
   ok "Script instalado en $INSTALL_PATH (comando: sudo operador)"
 }
 
-# CI uruguaya: 7 dígitos + dígito verificador (pesos 2987634), para que las cuentas generadas pasen la validación de la app.
 ci_valida() {
   local base i suma=0 pesos=(2 9 8 7 6 3 4)
   base=$(printf '%07d' "$1")
@@ -513,7 +506,6 @@ generar_cuentas() {
     done
   done
   sql+="COMMIT;"
-  # Una sola sesión: cualquier error aborta y revierte la transacción abierta, todo o nada.
   if mariadb --default-character-set=utf8mb4 "$db" -e "$sql"; then
     ok "100 cuentas generadas (20 por rol)"
     echo "Correos: paciente01..20, medico01..20, profesional01..20, administrador01..20, recepcionista01..20 @$dominio"

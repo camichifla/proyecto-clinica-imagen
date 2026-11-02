@@ -29,7 +29,6 @@ function limpiar_cuentas_sin_verificar(PDO $db): int
     foreach ($filas as $fila) {
         try {
             $db->beginTransaction();
-            // Se revalida verificado dentro de la transacción: el usuario pudo verificar desde el SELECT.
             $del = $db->prepare("DELETE FROM cuentas WHERE id = ? AND verificado = 0 AND rol = 'paciente'");
             $del->execute([$fila['id']]);
             if ($del->rowCount() === 1) {

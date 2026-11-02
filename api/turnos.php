@@ -277,7 +277,6 @@ if ($profesionalId !== null) {
     $where   .= ' AND c.profesional_id = ?';
     $params[] = $profesionalId;
 }
-// Cada palabra debe coincidir con nombre, apellido o CI del paciente registrado, o con los datos de la reserva pendiente.
 $palabras = preg_split('/\s+/', trim((string) ($_GET['paciente'] ?? '')), -1, PREG_SPLIT_NO_EMPTY);
 foreach (array_slice($palabras, 0, 5) as $palabra) {
     $where .= ' AND (c.paciente_id IN (SELECT id FROM pacientes WHERE nombre LIKE ? OR apellido LIKE ? OR ci LIKE ?)
@@ -301,7 +300,6 @@ if ($estado !== '') {
     $whereLista   .= ' AND c.estado = ?';
     $paramsLista[] = $estado;
 }
-// Tope de filas sin paginación; paginar si un rango supera MAX_FILAS_TURNOS.
 $stmt = db()->prepare(SQL_CITAS_CON_ETIQUETAS . " WHERE {$whereLista} ORDER BY c.fecha_hora_solicitada ASC LIMIT " . (MAX_FILAS_TURNOS + 1));
 $stmt->execute($paramsLista);
 $filas    = $stmt->fetchAll();

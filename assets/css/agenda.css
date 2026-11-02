@@ -265,7 +265,6 @@
             padding: 0.3rem;
         }
 
-        /* En móviles las pastillas son muy angostas para texto: se muestra una barra de color por cita y el texto queda para lectores de pantalla. */
         .agenda-mes-grid .agenda-cita-pill {
             height: 0.35rem;
             padding: 0;

@@ -7,7 +7,6 @@
     margin-top: var(--space-7);
 }
 
-/* Los hijos de grid tienen min-width:auto y base.css les pone margin auto: se ajustan al contenido y desbordan en móvil. Al anular el margen llenan la columna. */
 .layout-agendar-citas > section {
     min-width: 0;
     max-width: 100%;
@@ -136,7 +135,6 @@
     background: var(--light-neutral);
 }
 
-/* Posición fija, ubicada por selector-fecha.js junto a su botón, para que las áreas con scroll de las tablas no lo recorten. */
 .calendario {
     position: fixed;
     z-index: 70;

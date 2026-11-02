@@ -1,4 +1,3 @@
-// Devuelve el JSON, null sin conexión o { ok: false } si la respuesta no era JSON. Con sesión vencida (401 o redirección a login) navega a login.html.
 async function apiJson(url, opts = {}) {
     let respuesta;
     try {
@@ -25,7 +24,6 @@ async function apiJson(url, opts = {}) {
 
 const ERROR_CONEXION = 'No se pudo conectar. Intentá nuevamente.';
 
-// POST con el token CSRF de la sesión; mismo contrato de retorno que apiJson.
 async function enviarPost(url, campos) {
     const sesion = await window.sesionLista;
     return apiJson(url, { method: 'POST', body: new URLSearchParams({ csrf: sesion.csrf, ...campos }) });
@@ -217,7 +215,6 @@ function celdaEstado(estado, etiqueta, columna = 'Estado') {
     return td;
 }
 
-// Las tablas pasan a tarjetas (.tabla-tarjetas, ver base.css) cuando no caben en su contenedor; solo se revisan los cambios de ancho porque pasar a tarjetas cambia la altura.
 const observadorTablas = new ResizeObserver((entradas) => {
     entradas.forEach(({ target: scroll }) => {
         const ancho = scroll.clientWidth;
@@ -230,7 +227,6 @@ const observadorTablas = new ResizeObserver((entradas) => {
     });
 });
 
-// Usa requestSubmit() para que el manejador de submit de cada página no cambie.
 function filtrarAlCambiar(form, demora = 400) {
     const esTexto = (el) => el.matches('input[type="text"], input[type="search"]');
     const esBuscador = (el) => el.matches('[role="combobox"]');
@@ -274,7 +270,6 @@ function tabla(encabezados, filas, opciones = {}) {
     scroll.appendChild(table);
     observadorTablas.observe(scroll);
 
-    // Todas las filas quedan en el DOM (ocultas fuera de la página actual) para que la impresión y el observador de tarjetas las vean.
     filas.forEach((fila) => tbody.appendChild(fila));
     const porPagina = opciones.porPagina ?? 5;
     if (porPagina <= 0 || filas.length <= porPagina) {

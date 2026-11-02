@@ -23,7 +23,6 @@ function texto_post(string $campo): string
     return isset($_POST[$campo]) && is_scalar($_POST[$campo]) ? trim((string) $_POST[$campo]) : '';
 }
 
-// Defensa en profundidad: el texto libre ya se muestra con textContent, además se rechazan los signos < y >.
 function contiene_html(string $valor): bool
 {
     return str_contains($valor, '<') || str_contains($valor, '>');
@@ -33,7 +32,6 @@ function validar(array $reglas, array $datos): array
 {
     $errores = [];
     foreach ($reglas as $campo => $regla) {
-        // Arrays u objetos (campo[]=x) nunca son válidos: al convertirlos a cadena darían "Array" y pasarían patrones laxos.
         if (isset($datos[$campo]) && !is_scalar($datos[$campo])) {
             $errores[$campo] = 'Formato de ' . $regla['label'] . ' inválido. ' . $regla['hint'];
             continue;

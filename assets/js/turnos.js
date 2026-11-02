@@ -242,7 +242,6 @@
     });
     filtrarAlCambiar(formFiltros);
 
-    // Código: solo se tipean dígitos y el prefijo "CI-" se agrega solo (pegar "CI-000123" también funciona).
     const inputCodigo = document.getElementById('filtro-codigo');
     inputCodigo.inputMode = 'numeric';
     inputCodigo.addEventListener('input', () => {

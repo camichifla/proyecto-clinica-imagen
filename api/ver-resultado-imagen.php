@@ -1,5 +1,4 @@
 <?php
-// Único acceso a storage/resultados/ (denegado por .htaccess): entrega imagen (?id=) o PDF (?informe=) tras verificar la pertenencia.
 require_once __DIR__ . '/../includes/session_bootstrap.php';
 $usuario = usuario_actual();
 if ($usuario === null || !in_array($usuario['rol'], ['paciente', 'medico', 'profesional', 'administrador'], true)) {
@@ -17,7 +16,6 @@ const MIMES_PERMITIDOS = [
     'pdf'  => 'application/pdf',
 ];
 
-// Misma respuesta 404 para «no existe» y «no es tuyo»: no revela cuál de los dos casos es.
 function no_encontrado(): void
 {
     http_response_code(404);
@@ -85,7 +83,6 @@ if (!is_file($ruta)) {
     no_encontrado();
 }
 
-// El informe solo se sirve si el archivo guardado es PDF y las imágenes nunca como PDF; el tipo sale de la extensión generada por el servidor.
 if (($extension === 'pdf') !== $esInforme) {
     no_encontrado();
 }
@@ -96,7 +93,6 @@ header('Content-Type: ' . MIMES_PERMITIDOS[$extension]);
 if ($esInforme) {
     header('Content-Disposition: inline; filename="informe.pdf"');
 } else {
-    // El sandbox de la CSP se reserva para imágenes: rompe el visor de PDF de Chrome.
     header("Content-Security-Policy: default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; sandbox");
 }
 header('Content-Length: ' . (string) filesize($ruta));

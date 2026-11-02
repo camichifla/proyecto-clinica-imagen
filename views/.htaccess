@@ -1,6 +1,5 @@
 Options -Indexes
 
-# Block direct requests to views/; allow internal rewrites from the root .htaccess.
 RewriteEngine On
 RewriteCond %{ENV:REDIRECT_STATUS} ^$
 RewriteRule ^ - [F]

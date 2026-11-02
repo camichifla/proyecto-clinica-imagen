@@ -8,7 +8,6 @@
         gap: 1.1rem;
     }
 
-    /* backoffice.css (donde vive .filtros-turnos) no se carga en esta página. */
     .filtros-turnos {
         margin: var(--space-4) 0;
     }
@@ -56,7 +55,6 @@
         font-style: italic;
     }
 
-    /* :not(:has()) mantiene las celdas de acciones con el stretch de base.css, que una regla en capa anularía. */
     .tabla-scroll.tabla-tarjetas .tabla-datos td:not(:has(form, button)) {
         align-items: center;
     }

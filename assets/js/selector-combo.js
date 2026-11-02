@@ -4,7 +4,6 @@
     }
     window.selectorComboActivo = true;
 
-    // Posición fija debajo del ancla (o encima si no hay lugar).
     function ubicarLista(lista, ancla) {
         const r = ancla.getBoundingClientRect();
         const alto = lista.offsetHeight;

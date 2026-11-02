@@ -4,7 +4,6 @@ require_once __DIR__ . '/estudios.php';
 
 const PASO_MINUTOS = 45;
 
-// Condición SQL: el profesional de $columna no tiene la cuenta desactivada (toggle_activo solo toca cuentas.activo).
 function sql_profesional_habilitado(string $columna): string
 {
     return "NOT EXISTS (SELECT 1 FROM cuentas cu WHERE cu.rol = 'profesional' AND cu.ref_id = {$columna} AND cu.activo = 0)";
@@ -25,7 +24,6 @@ function slots_de_turnos(array $turnos): array
 
 const MAX_TURNOS_HORARIO = 28;
 
-// Cada turno genera sus horas desde la apertura en pasos de PASO_MINUTOS, así que cualquier HH:MM sirve; lo que no puede pasar es que dos turnos del mismo día se solapen.
 function validar_turnos(mixed $crudo): array|string
 {
     $lista = is_string($crudo) ? json_decode($crudo, true) : null;
@@ -93,7 +91,6 @@ const RANGO_MESES = 3;
 
 function rango_reserva(): array
 {
-    // El primer día reservable es mañana: nunca se agenda una cita para el día en curso.
     $desde = new DateTimeImmutable('tomorrow');
     return [$desde->format('Y-m-d'), $desde->modify('+' . RANGO_MESES . ' months')->format('Y-m-d')];
 }
@@ -163,7 +160,6 @@ function horas_ocupadas(int $sucursalId, string $fecha, ?int $profesionalId, str
         }
         return false;
     };
-    // Incluye horas con cita aunque no estén en la grilla de la sede (datos históricos), además de la grilla.
     $ocupadas = [];
     foreach (array_unique([...array_keys($ocupadoPor), ...$slotsSede]) as $hora) {
         if (!$libreEn((string) $hora)) {

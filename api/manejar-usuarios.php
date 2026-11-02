@@ -206,7 +206,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $db->beginTransaction();
 
-            // Debe quedar al menos un administrador activo: se lee con bloqueo para que dos cambios simultáneos no dejen cero.
             if ($rolViejo === 'administrador' && (int) $cuenta['activo'] === 1) {
                 $activos = (int) $db->query("SELECT COUNT(*) FROM cuentas WHERE rol = 'administrador' AND activo = 1 FOR UPDATE")->fetchColumn();
                 if ($activos <= 1) {

@@ -69,7 +69,6 @@
     --transition-base: 0.3s ease;
 }
 
-/* tema.js fija data-theme desde la elección guardada o la preferencia del sistema. Solo en pantalla: los informes impresos usan siempre la paleta clara. */
 @media screen {
     :root[data-theme="dark"] {
         color-scheme: dark;

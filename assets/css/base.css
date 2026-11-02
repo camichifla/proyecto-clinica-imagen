@@ -3,7 +3,6 @@ html {
     scroll-behavior: smooth !important;
 }
 
-/* Una regla con display propio vence al [hidden] del navegador (misma especificidad); esto hace que hidden gane siempre. */
 [hidden] {
     display: none !important;
 }
@@ -126,7 +125,6 @@ header {
     }
 }
 
-/* sesion.js agrega .cerrando hasta que termina la animación: es la apertura en sentido inverso. */
 .menu-usuario.cerrando .menu-usuario-panel {
     animation: menu-usuario-salida 0.25s ease-in forwards;
 }
@@ -232,7 +230,6 @@ footer p {
     margin: 0;
 }
 
-/* Honeypot del formulario de contacto: fuera de pantalla y no con display:none. */
 .campo-trampa {
     position: absolute;
     left: -10000px;
@@ -519,7 +516,6 @@ footer {
     transition: background var(--transition-fast), color var(--transition-fast);
 }
 
-/* Clase agregada por sesion.js mientras se arrastran archivos sobre el campo. */
 input[type="file"].arrastrando {
     border-color: var(--dark-neutral);
     border-style: solid;
@@ -597,7 +593,6 @@ input[type="file"].arrastrando {
     color: var(--dark-neutral);
 }
 
-/* !important: sigue visible mientras gira, aunque el reinicio ya lo ocultó. */
 .campo-limpiar.girando {
     display: grid !important;
     animation: campo-limpiar-girar 0.2s ease-in-out;
@@ -855,7 +850,6 @@ select.selector-combo {
     content: "";
 }
 
-/* --alto-header lo define sesion.js. */
 .menu-usuario-panel {
     position: fixed;
     top: var(--alto-header, 0);
@@ -1231,7 +1225,6 @@ body.menu-abierto {
     margin-top: var(--space-2);
 }
 
-/* Diseño de tarjetas aplicado por form-api.js (.tabla-tarjetas) cuando la tabla no cabe en su contenedor. */
 .tabla-scroll.tabla-tarjetas {
     .tabla-datos,
     .tabla-datos tbody {

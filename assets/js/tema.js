@@ -1,4 +1,3 @@
-// Se carga sin defer en el <head> para fijar data-theme antes del primer pintado (sin destello claro). Sin elección guardada sigue al sistema.
 (() => {
     const CLAVE = 'tema';
     const raiz = document.documentElement;

@@ -29,7 +29,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $db = db();
     $db->beginTransaction();
-    // Bloqueo de fila: dos usuarios no pueden responder el mismo mensaje y enviar el correo dos veces.
     $stmt = $db->prepare('SELECT nombre, email, mensaje FROM mensajes_contacto WHERE id = ? FOR UPDATE');
     $stmt->execute([$id]);
     $m = $stmt->fetch();

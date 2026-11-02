@@ -35,7 +35,7 @@
                 li.textContent = texto;
                 ul.appendChild(li);
             });
-            nodos.push(h, items.length ? ul : parrafo('No hay datos.'));
+            nodos.push(h, items.length ? ul : vacio('No hay datos.'));
         };
         bloque('Horarios', DIAS_SEMANA.map((dia, i) => {
             const turnos = sede.horarios.filter((t) => t.dia === i + 1).map((t) => t.apertura + ' - ' + t.cierre);
@@ -54,7 +54,7 @@
         document.getElementById('panel-proximos').textContent = String(data.proximos7Confirmadas);
 
         if (!data.citasHoy.length) {
-            listaHoy.replaceChildren(parrafo('No hay citas para hoy.'));
+            listaHoy.replaceChildren(vacio('No hay citas para hoy.'));
             return;
         }
         listaHoy.replaceChildren(tabla(

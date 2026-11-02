@@ -112,6 +112,12 @@ function parrafo(texto) {
     return p;
 }
 
+function vacio(texto) {
+    const p = parrafo(texto);
+    p.className = 'estado-vacio';
+    return p;
+}
+
 function fechaHora(texto) {
     const m = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}:\d{2})(?::\d{2})?)?$/.exec(String(texto ?? ''));
     return m ? `${m[3]}/${m[2]}/${m[1]}` + (m[4] ? ' ' + m[4] : '') : texto;

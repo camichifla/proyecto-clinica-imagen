@@ -41,7 +41,7 @@
             return;
         }
         if (!data.ordenes || !data.ordenes.length) {
-            contenedor.appendChild(parrafo('No hay órdenes de estudio.'));
+            contenedor.appendChild(vacio('No hay órdenes de estudio.'));
             return;
         }
         data.ordenes.forEach((orden) => contenedor.appendChild(crearOrden(orden)));

@@ -72,7 +72,7 @@ function crearTarjetaResultado(resultado, comparable = false) {
 
 function renderListaResultados(destino, resultados, mensajeVacio, comparable = false) {
     if (!resultados.length) {
-        destino.appendChild(parrafo(mensajeVacio));
+        destino.appendChild(vacio(mensajeVacio));
         return;
     }
     const lista = document.createElement('div');

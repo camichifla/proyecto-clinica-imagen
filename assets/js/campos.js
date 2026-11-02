@@ -94,7 +94,7 @@
         const conFlecha = caja.tagName !== 'INPUT';
         const izquierda = caja.offsetLeft + parseFloat(estilo.paddingLeft) + anchoTexto(caja) + 6;
         const maximo = caja.offsetLeft + caja.offsetWidth - boton.offsetWidth - (conFlecha ? 40 : 8);
-        boton.style.left = Math.min(izquierda, maximo) + 'px';
+        boton.style.left = (boton.parentElement.classList.contains('buscador-combo') && !conFlecha ? maximo : Math.min(izquierda, maximo)) + 'px';
         boton.style.right = 'auto';
         boton.style.top = caja.offsetTop + parseFloat(estilo.paddingTop) + linea / 2 - boton.offsetHeight / 2 + 'px';
     };

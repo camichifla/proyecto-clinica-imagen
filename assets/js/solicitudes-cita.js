@@ -97,7 +97,7 @@
 
     function renderVacio() {
         lista.innerHTML = '';
-        lista.appendChild(parrafo('No hay solicitudes de cita pendientes.'));
+        lista.appendChild(vacio('No hay solicitudes de cita pendientes.'));
     }
 
     function renderTabla(data) {

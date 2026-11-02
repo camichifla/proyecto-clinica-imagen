@@ -785,6 +785,11 @@ select.selector-combo {
     margin: 0.1rem 0 0;
 }
 
+.estado-vacio {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
 .aviso-exito {
     color: var(--dark-neutral);
     background: var(--light-neutral);

@@ -173,6 +173,12 @@
     text-align: center;
 }
 
+:root[data-theme="dark"] .section-caracteristicas {
+    margin: 3.5rem calc(50% - 50vw) 0;
+    padding: 3.5rem var(--space-6);
+    background: var(--surface);
+}
+
 .section-caracteristicas h2 {
     max-width: 40rem;
     margin: 0 auto 2.5rem;

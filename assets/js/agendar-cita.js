@@ -66,7 +66,7 @@
 
     function renderMisCitas(citas) {
         if (!citas.length) {
-            misCitas.appendChild(parrafo('No hay citas próximas ni recientes.'));
+            misCitas.appendChild(vacio('No hay citas próximas ni recientes.'));
             return;
         }
         misCitas.appendChild(tabla(

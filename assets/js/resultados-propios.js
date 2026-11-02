@@ -11,7 +11,7 @@
             return;
         }
         if (!notas.length) {
-            destino.replaceChildren(parrafo('No hay notas en tu historial.'));
+            destino.replaceChildren(vacio('No hay notas en tu historial.'));
             return;
         }
         destino.replaceChildren(...notas.map((nota) => {
@@ -29,7 +29,7 @@
     function renderCitas(citas) {
         const destino = document.getElementById('historial-citas');
         if (!citas.length) {
-            destino.replaceChildren(parrafo('No hay citas.'));
+            destino.replaceChildren(vacio('No hay citas.'));
             return;
         }
         const filas = citas.map((cita) => {

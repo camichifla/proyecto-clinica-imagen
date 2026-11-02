@@ -226,7 +226,7 @@
         }));
         avisoTruncado.hidden = !data.truncado;
         if (!data.citas.length) {
-            lista.replaceChildren(parrafo('No hay citas para esos filtros.'));
+            lista.replaceChildren(vacio('No hay citas para esos filtros.'));
             return;
         }
         lista.replaceChildren(tabla(

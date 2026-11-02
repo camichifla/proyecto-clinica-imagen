@@ -38,7 +38,7 @@
                     .forEach(([etiqueta, valor]) => tr.appendChild(celda(etiqueta, String(valor))));
                 return tr;
             }))
-            : parrafo('No hay eventos para ese filtro.'));
+            : vacio('No hay eventos para ese filtro.'));
         susp.replaceChildren(data.sospechosos.length
             ? tabla(['Origen', 'Valor', 'Fallos (24 h)'], data.sospechosos.map((s) => {
                 const tr = document.createElement('tr');
@@ -46,7 +46,7 @@
                     .forEach(([etiqueta, valor]) => tr.appendChild(celda(etiqueta, valor)));
                 return tr;
             }))
-            : parrafo('Sin actividad sospechosa en las últimas 24 horas.'));
+            : vacio('Sin actividad sospechosa en las últimas 24 horas.'));
     }
 
     form.addEventListener('submit', (evento) => {

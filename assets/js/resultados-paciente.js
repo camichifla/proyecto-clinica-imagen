@@ -14,7 +14,7 @@
         destino.appendChild(h3);
 
         if (!citas.length) {
-            destino.appendChild(parrafo('No hay citas con este paciente.'));
+            destino.appendChild(vacio('No hay citas con este paciente.'));
             return;
         }
 
@@ -75,7 +75,7 @@
         destino.appendChild(form);
 
         if (!notas.length) {
-            destino.appendChild(parrafo('No hay notas para este paciente.'));
+            destino.appendChild(vacio('No hay notas para este paciente.'));
             return;
         }
         const lista = document.createElement('div');

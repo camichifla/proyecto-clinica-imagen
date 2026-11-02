@@ -91,7 +91,7 @@
             return;
         }
         if (!data.mensajes.length) {
-            lista.replaceChildren(parrafo('No hay mensajes pendientes.'));
+            lista.replaceChildren(vacio('No hay mensajes pendientes.'));
             return;
         }
         lista.replaceChildren(...data.mensajes.map((m) => renderMensaje(m, data.maxRespuesta)));

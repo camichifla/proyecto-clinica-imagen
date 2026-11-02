@@ -54,7 +54,7 @@
             return;
         }
         if (!respuesta.estudios.length) {
-            contenedor.textContent = 'No hay estudios publicados.';
+            contenedor.replaceChildren(vacio('No hay estudios publicados.'));
             return;
         }
         contenedor.replaceChildren(...respuesta.estudios.map((e) => tarjeta(e, sesion)));

@@ -31,7 +31,7 @@
     function renderMisCitas(citas) {
         const contenedor = document.getElementById('mis-citas');
         if (!citas.length) {
-            contenedor.appendChild(parrafo('No hay citas agendadas.'));
+            contenedor.appendChild(vacio('No hay citas agendadas.'));
             return;
         }
         contenedor.appendChild(tabla(

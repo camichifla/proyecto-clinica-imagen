@@ -45,7 +45,7 @@
         }
         const cuentas = cuentasFiltradas(data);
         if (!cuentas.length) {
-            tablaCuentasContenedor.appendChild(parrafo(data.cuentas.length ? 'No hay cuentas para esos filtros.' : 'No hay cuentas.'));
+            tablaCuentasContenedor.appendChild(vacio(data.cuentas.length ? 'No hay cuentas para esos filtros.' : 'No hay cuentas.'));
             return;
         }
 
@@ -206,7 +206,7 @@
         medicosContenedor.innerHTML = '';
         const medicos = filtrarPersonas(data.medicos, formMedicos);
         if (!medicos.length) {
-            medicosContenedor.appendChild(parrafo(data.medicos.length ? 'No hay médicos para esa búsqueda.' : 'No hay médicos.'));
+            medicosContenedor.appendChild(vacio(data.medicos.length ? 'No hay médicos para esa búsqueda.' : 'No hay médicos.'));
             return;
         }
         const filas = medicos.map((medico) => {
@@ -241,7 +241,7 @@
         const pacientes = filtrarPersonas(data.pacientes, formPacientes)
             .sort((a, b) => marcado(b) - marcado(a));
         if (!pacientes.length) {
-            pacientesContenedor.appendChild(parrafo(data.pacientes.length ? 'No hay pacientes para esa búsqueda.' : 'No hay pacientes.'));
+            pacientesContenedor.appendChild(vacio(data.pacientes.length ? 'No hay pacientes para esa búsqueda.' : 'No hay pacientes.'));
             return;
         }
         const filas = pacientes.map((paciente) => {

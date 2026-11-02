@@ -92,6 +92,12 @@ Menú `2) Gestión de redes`, opción 8. Sin cuenta, dominio ni puertos abiertos
 2. `cp includes/config.sample.php includes/config.php` y ajustar `DB_USER`, `DB_PASS`, `APP_URL`.
 3. Crear la base `clinica_imagen` e importar `sql/schema.sql`.
 
+## Pruebas
+
+`tests/run.sh` corre `php -l` sobre todo el PHP, `node --check` sobre todo el JS, los tests de `node:test` y las comprobaciones PHP.
+Requiere `node`, `fd` y `rg`; usa `/opt/lampp/bin/php` si existe (o `PHP=...`).
+Las migraciones `sql/migracion-*.sql` son idempotentes y se aplican a mano sobre bases ya creadas.
+
 ## Estructura
 
 ```
